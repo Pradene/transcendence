@@ -1,26 +1,6 @@
-{% load static %}
+{% extends "index.html" %}
+{% block title %}Home{% endblock %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Transcendence</title>
-	<link rel="stylesheet" type="text/css" href="{% static 'app/css/style.css' %}">
-</head>
-<body>
-	<header>
-		<nav>
-			<ul>
-				<li><a href="/">Home</a></li>
-				<li><a href="/game">Game</a></li>
-				<li><a href="/profile">Profile</a></li>
-				<li><a href="/settings">Settings</a></li>
-			</ul>
-		</nav>
-	</header>
-	
-	{% block content %}{% endblock content %}
-	{% block script %}{% endblock script %}
-</body>
-</html>
+{% block content %}
+{% include "app/app.html" %}
+{% endblock %}

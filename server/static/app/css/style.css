@@ -55,11 +55,28 @@ table {
 	STYLES
 */
 
+body {
+	background-color: #130a0e;
+}
+
+nav {
+	display: flex;
+	justify-content: space-around;
+	width: 100%;
+}
+
 nav ul {
 	display: flex;
+	justify-content: space-between;
+	width: 800px;
+	padding: 20px 0px;
 }
 
 nav ul li a {
-	color: #333333;
+	color: #ffffff;
 	text-decoration: none;
+}
+
+p {
+	color: #ffffff;
 }
