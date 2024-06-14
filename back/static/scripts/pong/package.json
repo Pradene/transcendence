@@ -95,7 +95,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc && webpack"
+    "build": "tsc && webpack --mode production",
+    "build-dev": "tsc && webpack --mode development"
   },
   "author": "",
   "license": "ISC"
