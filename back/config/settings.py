@@ -14,6 +14,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
 INSTALLED_APPS = [
     'chat',
+    'registration',
     'daphne',
     'channels',
     'django.contrib.admin',
@@ -99,3 +100,5 @@ USE_L10N = True
 USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_REDIRECT_URL = '/account/profile'
