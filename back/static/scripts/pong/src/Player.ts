@@ -25,13 +25,17 @@ class Player {
 }
 
 class CurrentPlayer extends Player {
-    private _intervalid: any;
-
     constructor(name: string, position: Position, color: string = default_color) {
         super(name, position, color);
         this._intervalid = setInterval(() => {
         }, 1000);
     }
+
+    stop(): void {
+        clearInterval(this._intervalid);
+    }
+
+    private _intervalid: any;
 }
 
 export default {Player, CurrentPlayer};
