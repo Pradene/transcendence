@@ -20,6 +20,9 @@ class Pong {
         document.querySelector("body")!.appendChild(this._canvas);
     }
 
+    /**
+     * Display the game
+     */
     display(): void {
         this._currentPlayer.display(this._context);
         this._opponent.display(this._context);
