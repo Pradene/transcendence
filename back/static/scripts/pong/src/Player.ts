@@ -12,7 +12,6 @@ class Player {
         this._name     = name;
         this._color    = color;
         this._position = position;
-        this._websocket = new WebSocket("ws://localhost/ws/game:8080");
     }
 
     /**
@@ -28,13 +27,11 @@ class Player {
     }
 
     stop(): void {
-        this._websocket.close();
     }
 
     private _name: string;
     private _color: string;
     private _position: Position;
-    private _websocket: WebSocket;
 }
 
 /**

@@ -12,7 +12,6 @@ class Player {
         this._name = name;
         this._color = color;
         this._position = position;
-        this._websocket = new WebSocket("ws://localhost/ws/game:8080");
     }
     /**
      * Display the player on the canvas.
@@ -23,12 +22,10 @@ class Player {
         canvas.fillRect(this._position.x, this._position.y, default_width, default_height);
     }
     stop() {
-        this._websocket.close();
     }
     _name;
     _color;
     _position;
-    _websocket;
 }
 exports.Player = Player;
 /**

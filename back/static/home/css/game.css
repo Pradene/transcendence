@@ -1,0 +1,39 @@
+div.game-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 100%;
+}
+div.game-container .game-container-header {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  width: 100%;
+  min-width: 100%;
+}
+div.game-container .game-container-header button {
+  padding: 1.5rem;
+  margin: 1rem;
+  border: 1px solid #ffffff;
+  border-radius: 3px;
+  background-color: grey;
+}
+div.game-container .game-container-header button.active {
+  background-color: green;
+}
+div.game-container .game {
+  display: flex;
+  width: 100%;
+  min-width: 100%;
+  border: 1px solid white;
+}
+div.game-container .game canvas {
+  align-self: center;
+}
+div.game-container .rooms {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid white;
+}
+
+/*# sourceMappingURL=game.css.map */

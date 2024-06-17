@@ -1,0 +1,43 @@
+div.game-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 100%;
+
+  .game-container-header {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    width: 100%;
+    min-width: 100%;
+
+    button {
+      padding: 1.5rem;
+      margin: 1rem;
+      border: 1px solid #ffffff;
+      border-radius: 3px;
+      background-color: grey;
+
+      &.active {
+        background-color: green;
+      }
+    }
+  }
+
+  .game {
+    display: flex;
+    width: 100%;
+    min-width: 100%;
+    border: 1px solid white;
+
+    canvas {
+      align-self: center;
+    }
+  }
+
+  .rooms {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid white;
+  }
+}
