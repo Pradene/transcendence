@@ -1,0 +1,147 @@
+body {
+	background-color: var(--main-bg-color);
+}
+
+h1, h2 h3, h4, h5, h6,
+p, a, li, span, button {
+	font-family: var(--main-font-family);
+	color: var(--main-color);
+}
+
+p, a, li, span, button {
+	font-size: var(--default-font-size);
+}
+
+#app {
+	width: 100%;
+	max-width: 800px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.link {
+	text-decoration: none;
+	border: none;
+	color: var(--main-color);
+	cursor: pointer;
+}
+
+nav {
+	display: flex;
+	justify-content: space-between;
+	width: calc(var(--content-width) + var(--nav-link-padding));
+	margin-left: auto;
+	margin-right: auto;
+}
+
+nav ul {
+	display: flex;
+}
+
+.nav--link {
+	text-decoration: none;
+    border: none;
+    padding: var(--nav-link-padding) calc(var(--nav-link-padding) / 2);
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.nav--link--svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* FORM */
+
+.center--box {
+	text-align: center;
+}
+
+.border--box {
+	border: 2px solid white;
+	border-radius: 12px;
+	width: var(--content-width);
+	max-width: 350px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 32px;
+}
+
+.form {
+	display: block;
+	width: 80%;
+	max-width: 350px;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 36px 0px;
+}
+
+.form--field--wrapper {
+	overflow: hidden;
+	display: block;
+	position: relative;
+	box-sizing: border-box;
+	margin-bottom: 12px;
+}
+
+.form--field--label {
+	position: relative;
+	display: block;
+	height: 36px;
+	background-color: #fff;
+	font-size: 12px;
+	color: #000;
+	font-family: var(--main-font-family);
+}
+
+.form--field--label input {
+	position: absolute;
+	bottom: 0px;
+	border: none;
+	outline: none;
+	height: 36px;
+	width: 100%;
+	padding: 0px 0px 0px 6px;
+	box-sizing: border-box;
+	color: #000;
+	font-family: var(--main-font-family);
+	transform-origin: left;
+	transform: translateY(0%);
+	transition: transform ease-in-out .1s;
+}
+
+.form--field--label span {
+	position: absolute;
+	top: 0px;
+	left: 6px;
+	z-index: 1;
+	color: #737373;
+	transform-origin: left;
+	transform: translateY(120%);
+	transition: transform ease-in-out .1s;
+}
+
+.form button {
+	border: none;
+	outline: none;
+	width: 100%;
+	padding: 12px 0px;
+	background-color: #fff;
+	color: #000;
+	font-size: 12px;
+	font-family: var(--main-font-family);
+}
+
+.form a {
+	display: block;
+	margin-top: 36px;
+}
+
+.login--wrapper {
+	display: block;
+	padding: 36px 12px;
+	max-width: 350px;
+	text-align: center;
+}

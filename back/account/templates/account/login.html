@@ -1,0 +1,46 @@
+{% extends 'index.html' %}
+{% load static %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div data-title="Login">
+	{% include 'navbar.html' %}
+	
+	<div class="border--box">
+		<form class="form" method="POST">
+			{% csrf_token %}
+			<div class="form--field--wrapper">
+				<label class="form--field--label">
+					{{ form.username }}
+					<span>Username</span>
+				</label>
+			</div>
+			
+			<div class="form--field--wrapper">
+				<label class="form--field--label">
+					{{ form.password }}
+					<span>Password</span>
+				</label>
+			</div>
+			
+			<button type="submit">Login</button>
+			
+			<div class="center--box">
+				<a class="link" href="{% url 'password_reset' %}">Forgot password?</a>
+			</div>
+			
+		</form>
+	</div>
+
+	<div class="border--box">
+		<div class="login--wrapper">
+			<p>Vous n'avez pas de compte?
+				<a class="link" href="{% url 'signup' %}">
+					Inscrivez vous
+				</a>
+			</p>
+		</div>
+	</div>
+
+</div>
+{% endblock %}
