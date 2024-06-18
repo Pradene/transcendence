@@ -9,7 +9,7 @@ const screenHeight = 600;
 const default_color = "#ffffff";
 const container = document.querySelector("div.game-container div.game");
 class Pong {
-    constructor(websocket) {
+    constructor(sock) {
         this._canvas = document.createElement("canvas");
         this._canvas.style.backgroundColor = default_color;
         this._canvas.width = screenWidth;
@@ -18,7 +18,7 @@ class Pong {
         this._currentPlayer = new Player_1.CurrentPlayer("Player 1", new Utils_1.Position(8, 0));
         this._opponent = new Player_1.Player("Player 2", new Utils_1.Position(screenWidth - 16, 0));
         this._ball = new Ball_1.Ball(new Utils_1.Position(0, 0));
-        this._websocket = websocket;
+        this._websocket = sock;
         container.appendChild(this._canvas);
     }
     /**
