@@ -6,7 +6,7 @@ const screenHeight = 600;
 const default_color = "#ffffff";
 const container = document.querySelector("div.game-container div.game");
 class Pong {
-    constructor(sock) {
+    constructor() {
         this._canvas = document.createElement("canvas");
         this._canvas.style.backgroundColor = default_color;
         this._canvas.width = screenWidth;
@@ -15,7 +15,6 @@ class Pong {
         this._currentPlayer = new CurrentPlayer("Player 1", new Position(8, 0));
         this._opponent = new Player("Player 2", new Position(screenWidth - 16, 0));
         this._ball = new Ball(new Position(0, 0));
-        this._websocket = sock;
         container.appendChild(this._canvas);
     }
     /**
@@ -33,11 +32,27 @@ class Pong {
         this._currentPlayer.stop();
         container.removeChild(this._canvas);
     }
+    /**
+     * Update the game state.
+     * @param response
+     * @private
+     */
+    update(response) {
+        this._currentPlayer.position = new Position(response.data.p1.position[0], response.data.p1.position[1]);
+        this._opponent.position = new Position(response.data.p2.position[0], response.data.p2.position[1]);
+        this._ball.position = new Position(response.data.ball.position[0], response.data.ball.position[1]);
+        this.display();
+    }
+    parseMessage(response) {
+        console.log(response["method"]);
+        if (response.method === "update_game") {
+            this.update(response);
+        }
+    }
     _canvas;
     _context;
     _currentPlayer;
     _opponent;
     _ball;
-    _websocket;
 }
 export { Pong };

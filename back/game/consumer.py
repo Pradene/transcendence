@@ -13,7 +13,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         super().__init__(args, kwargs)
         self.__updateCallback = None
         self.__p1: PlayerInterface = PlayerInterface('p1', lambda a: None)
-        self.__username: str = ""
+        self.__username: str = "test" #TODO remove this
 
     async def connect(self):
         await self.accept()
@@ -22,11 +22,11 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         logging.log(logging.INFO, "New websocket connection")
 
     async def receive(self, text_data=None, bytes_data=None, **kwargs):
+        logging.log(logging.INFO, text_data)
         try:
             data = json.loads(text_data)
-            logging.log(logging.INFO, data)
         except json.JSONDecodeError:
-            print("Invalid JSON")
+            logging.log(logging.ERROR, "Invalid JSON: {text_data}")
             return
         method = data["method"]
         if not method:

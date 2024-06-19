@@ -7,7 +7,7 @@ import logging
 class PlayerInterface:
     def __init__(self, name: str, callback: typing.Callable):
         self.__name: str = name
-        self.__callback: typing.Callable = callback
+        self.__callback  = callback
         self.__position: list[int] = [0, 0]
 
     def getName(self) -> str:
@@ -35,7 +35,7 @@ class PlayerInterface:
 class Game:
     def __init__(self, p1: PlayerInterface):
         self.__p1: PlayerInterface = p1
-        self.__p2: PlayerInterface = PlayerInterface('p2', lambda gameData: None)
+        self.__p2: PlayerInterface = PlayerInterface('p2', None)
         self.__ball: list[int] = [400, 300]
         self.__ready: bool = False
 
@@ -54,15 +54,20 @@ class Game:
         # Send game datas to client
         data = self.toJSON()
 
-        await self.__p1.getCallback()(data)
-        await self.__p2.getCallback()(data)
+        if self.__p1.getCallback() is not None:
+            await self.__p1.getCallback()(data)
+        if self.__p2.getCallback() is not None:
+            await self.__p2.getCallback()(data)
 
     def toJSON(self) -> dict:
         dic = {
+            "method": "update_game",
             "status": self.__ready,
-            "p1": self.__p1.getPosition(),
-            "p2": self.__p2.getPosition(),
-            "ball": self.__ball
+            "data": {
+                "p1": self.__p1.getPosition(),
+                "p2": self.__p2.getPosition(),
+                "ball": self.__ball
+            }
         }
         return dic
 

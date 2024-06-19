@@ -5,6 +5,12 @@ const default_width = 8;
  * Represents a player in the game.
  */
 class Player {
+    get position() {
+        return this._position;
+    }
+    set position(value) {
+        this._position = value;
+    }
     constructor(name, position, color = default_color) {
         this._name = name;
         this._color = color;
@@ -19,6 +25,8 @@ class Player {
         canvas.fillRect(this._position.x, this._position.y, default_width, default_height);
     }
     stop() {
+    }
+    update() {
     }
     _name;
     _color;

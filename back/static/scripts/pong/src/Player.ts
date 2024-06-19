@@ -1,16 +1,23 @@
 import {Position} from "./Utils";
 
-const default_color: string  = "#515151";
+const default_color: string = "#515151";
 const default_height: number = 32;
-const default_width: number  = 8;
+const default_width: number = 8;
 
 /**
  * Represents a player in the game.
  */
 class Player {
+    get position(): Position {
+        return this._position;
+    }
+
+    set position(value: Position) {
+        this._position = value;
+    }
     constructor(name: string, position: Position, color: string = default_color) {
-        this._name     = name;
-        this._color    = color;
+        this._name = name;
+        this._color = color;
         this._position = position;
     }
 
@@ -27,6 +34,10 @@ class Player {
     }
 
     stop(): void {
+    }
+
+    update(): void {
+
     }
 
     private _name: string;
