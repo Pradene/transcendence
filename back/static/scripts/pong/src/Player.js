@@ -1,6 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.CurrentPlayer = exports.Player = void 0;
 const default_color = "#515151";
 const default_height = 32;
 const default_width = 8;
@@ -27,7 +24,6 @@ class Player {
     _color;
     _position;
 }
-exports.Player = Player;
 /**
  * Represents the current player in the game.
  */
@@ -43,5 +39,5 @@ class CurrentPlayer extends Player {
     }
     _intervalid;
 }
-exports.CurrentPlayer = CurrentPlayer;
-exports.default = { Player, CurrentPlayer };
+export default { Player, CurrentPlayer };
+export { Player, CurrentPlayer };

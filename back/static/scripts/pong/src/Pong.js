@@ -1,9 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Pong = void 0;
-const Player_1 = require("./Player");
-const Ball_1 = require("./Ball");
-const Utils_1 = require("./Utils");
+import { CurrentPlayer, Player } from "./Player";
+import { Ball } from "./Ball";
+import { Position } from "./Utils";
 const screenWidth = 800;
 const screenHeight = 600;
 const default_color = "#ffffff";
@@ -15,9 +12,9 @@ class Pong {
         this._canvas.width = screenWidth;
         this._canvas.height = screenHeight;
         this._context = this._canvas.getContext("2d");
-        this._currentPlayer = new Player_1.CurrentPlayer("Player 1", new Utils_1.Position(8, 0));
-        this._opponent = new Player_1.Player("Player 2", new Utils_1.Position(screenWidth - 16, 0));
-        this._ball = new Ball_1.Ball(new Utils_1.Position(0, 0));
+        this._currentPlayer = new CurrentPlayer("Player 1", new Position(8, 0));
+        this._opponent = new Player("Player 2", new Position(screenWidth - 16, 0));
+        this._ball = new Ball(new Position(0, 0));
         this._websocket = sock;
         container.appendChild(this._canvas);
     }
@@ -43,4 +40,4 @@ class Pong {
     _ball;
     _websocket;
 }
-exports.Pong = Pong;
+export { Pong };

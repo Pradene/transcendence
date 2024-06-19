@@ -1,38 +1,39 @@
-import {
-    STARTBUTTON,
-    REFRESHBUTTON,
-    activateButton,
-    deactivateButton,
-    startButtonCallback,
-    refreshButtonCallback
-}             from "./DomElements";
-import {Pong} from "./Pong";
+import {Pong}                               from "./Pong";
+import {activateButtons, deactivateButtons} from "./DomElements";
 
 const hosturl: string = "ws://" + location.hostname + ":" + location.port + "/ws/game";
 
 class GameSocket {
     private constructor() {
-        this._websocket = new WebSocket(hosturl);
+        this._websocket = null;
 
-        this._websocket.onopen = () => {
-            console.log("Connected to server");
-            STARTBUTTON.addEventListener("click", startButtonCallback);
-            REFRESHBUTTON.addEventListener("click", refreshButtonCallback);
-            activateButton(STARTBUTTON);
-            activateButton(REFRESHBUTTON);
-        };
-        this._websocket.onerror = (error) => {
-            console.error("Error: " + error);
-            STARTBUTTON.removeEventListener("click", startButtonCallback);
-            REFRESHBUTTON.removeEventListener("click", refreshButtonCallback);
-            deactivateButton(STARTBUTTON);
-            deactivateButton(REFRESHBUTTON);
-        }
-        this._websocket.onmessage = (event) => {
-            console.log("Message: " + event.data);
-        }
+        console.log("Connecting to " + hosturl + "...");
+        new Promise<WebSocket>((resolve, reject) => {
+            let ws: WebSocket = new WebSocket(hosturl);
 
-        this._websocket.send("Hello from client");
+            ws.onopen    = () => {
+                resolve(ws);
+            };
+            ws.onerror   = (err: any) => {
+                console.error("Connection failed");
+                deactivateButtons();
+                reject(err);
+            };
+            ws.onclose   = (event: any) => {
+                console.log("Connection closed");
+                deactivateButtons();
+            };
+            ws.onmessage = (event: any) => {
+                console.log("Received message: " + event.data);
+            };
+        }).then((ws: WebSocket) => {
+            this._websocket = ws;
+            console.log("Connection established");
+            activateButtons();
+        }).catch((err: Event) => {
+            console.error(err);
+            deactivateButtons();
+        });
     }
 
     public static get(): GameSocket {
@@ -40,10 +41,15 @@ class GameSocket {
     }
 
     public createGame(): Pong {
+        if (this._websocket === null) {
+            throw new Error("No connection");
+        }
+
+        this._websocket.send("create");
         return new Pong(this);
     }
 
-    private _websocket: WebSocket;
+    private _websocket: WebSocket | null;
     static #GameSocket: GameSocket = new GameSocket();
 }
 

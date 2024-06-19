@@ -1,6 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Position = void 0;
 class Position {
     x;
     y;
@@ -9,4 +6,4 @@ class Position {
         this.y = y;
     }
 }
-exports.Position = Position;
+export { Position };

@@ -1,6 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Ball = void 0;
 const default_color = "#515151";
 const ball_size = 4;
 class Ball {
@@ -19,4 +16,4 @@ class Ball {
     }
     _position;
 }
-exports.Ball = Ball;
+export { Ball };
