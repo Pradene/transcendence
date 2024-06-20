@@ -101,7 +101,7 @@ interface join_game_response extends apicallresponse {
 interface update_game_response extends apicallresponse {
     method: "update_game";
     data: {
-        status: "running" | "waiting";
+        status: "running" | "waiting" | "finished";
         players: [{
             name: string;
             position: Array<number>
