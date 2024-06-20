@@ -8,24 +8,20 @@ const default_width: number = 8;
  * Represents a player in the game.
  */
 class Player {
-    get position(): Position {
+    public get position(): Position {
         return this._position;
     }
 
-    set position(value: Position) {
+    public set position(value: Position) {
         this._position = value;
     }
 
-    public setPositionFromArray(arr: Array<number>) {
-        let npos = new Position(arr[0], arr[1]);
-        this.position = npos;
-    }
 
-    get name(): string {
+    public get name(): string {
         return this._name;
     }
 
-    set name(nname: string) {
+    public set name(nname: string) {
         this._name = nname;
     }
 
@@ -35,11 +31,16 @@ class Player {
         this._position = position;
     }
 
+    public setPositionFromArray(arr: Array<number>) {
+        let npos = new Position(arr[0], arr[1]);
+        this.position = npos;
+    }
+
     /**
      * Display the player on the canvas.
      * @param canvas
      */
-    display(canvas: CanvasRenderingContext2D): void {
+    public display(canvas: CanvasRenderingContext2D): void {
         canvas.fillStyle = this._color;
         canvas.fillRect(this._position.x,
                         this._position.y,
@@ -47,10 +48,10 @@ class Player {
                         default_height);
     }
 
-    stop(): void {
+    public stop(): void {
     }
 
-    update(): void {
+    public update(): void {
 
     }
 
