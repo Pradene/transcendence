@@ -2,13 +2,16 @@ import { GameSocket } from "./GameSocket";
 const STARTBUTTON = document.querySelector("div.game-container button.create-game");
 const REFRESHBUTTON = document.querySelector("div.game-container button.refresh-room");
 const USERNAMEINPUT = document.querySelector("div.game-container #username");
+const ROOMCONTAINER = document.querySelector("div.game-container div.rooms");
 /**
  * Request a new game to be created //TODO check for race condition
  */
 function startButtonCallback() {
     GameSocket.get().requestNewGame();
 }
-function refreshButtonCallback() { }
+function refreshButtonCallback() {
+    GameSocket.get().requestGames();
+}
 function joinButtonCallback() { }
 /**
  * Activate a button
@@ -42,4 +45,4 @@ function deactivateButtons() {
     deactivateButton(STARTBUTTON);
     deactivateButton(REFRESHBUTTON);
 }
-export { activateButtons, deactivateButtons, USERNAMEINPUT };
+export { activateButtons, deactivateButtons, USERNAMEINPUT, ROOMCONTAINER };

@@ -3,6 +3,7 @@ import {GameSocket} from "./GameSocket";
 const STARTBUTTON: HTMLButtonElement   = document.querySelector("div.game-container button.create-game")!;
 const REFRESHBUTTON: HTMLButtonElement = document.querySelector("div.game-container button.refresh-room")!;
 const USERNAMEINPUT: HTMLInputElement   = document.querySelector("div.game-container #username")!;
+const ROOMCONTAINER: HTMLDivElement     = document.querySelector("div.game-container div.rooms")!;
 
 /**
  * Request a new game to be created //TODO check for race condition
@@ -11,7 +12,9 @@ function startButtonCallback(): void {
     GameSocket.get().requestNewGame();
 }
 
-function refreshButtonCallback(): void {}
+function refreshButtonCallback(): void {
+    GameSocket.get().requestGames();
+}
 
 function joinButtonCallback(): void {}
 
@@ -51,4 +54,4 @@ function deactivateButtons(): void {
     deactivateButton(REFRESHBUTTON);
 }
 
-export {activateButtons, deactivateButtons, USERNAMEINPUT};
+export {activateButtons, deactivateButtons, USERNAMEINPUT, ROOMCONTAINER};

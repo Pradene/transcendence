@@ -9,6 +9,7 @@ class PlayerInterface:
         self.__name: str = name
         self.__callback  = callback
         self.__position: list[int] = [0, 0]
+        self.__joined: bool = False
 
     def getName(self) -> str:
         return self.__name
@@ -28,6 +29,12 @@ class PlayerInterface:
     def setPosition(self, position: list[int]):
         self.__position = position
 
+    def haveJoined(self) -> bool:
+        return self.__joined
+
+    def setJoined(self, joined: bool) -> None:
+        self.__joined = joined
+
     def setY(self, y: int):
         self.__position[1] = y
 
@@ -40,7 +47,9 @@ class Game:
         self.__ready: bool = False
 
         self.__p1.setPosition([8, 270])
+        self.__p1.setJoined(True)
         self.__p2.setPosition([800 - 16, 270])
+        self.__p2.setJoined(False)
 
     async def join(self, p2: PlayerInterface) -> PlayerInterface:
         self.__p2.setName(p2.getName())
@@ -72,4 +81,10 @@ class Game:
         return dic
 
     def gameInfo(self) -> dict:
-        return dict({"status": self.__ready, "creator": self.__p1.getName()})
+        dic: dict = {
+            "creator": self.__p1.getName(),
+            "player_count": 2 if self.__p2.haveJoined() else 1,
+            "is_full": self.__p2.haveJoined()
+        }
+
+        return dic

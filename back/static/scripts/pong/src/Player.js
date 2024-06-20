@@ -12,10 +12,6 @@ class Player {
     set position(value) {
         this._position = value;
     }
-    setPositionFromArray(arr) {
-        let npos = new Position(arr[0], arr[1]);
-        this.position = npos;
-    }
     get name() {
         return this._name;
     }
@@ -26,6 +22,10 @@ class Player {
         this._name = name;
         this._color = color;
         this._position = position;
+    }
+    setPositionFromArray(arr) {
+        let npos = new Position(arr[0], arr[1]);
+        this.position = npos;
     }
     /**
      * Display the player on the canvas.

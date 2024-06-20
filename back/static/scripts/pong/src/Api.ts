@@ -38,7 +38,7 @@ interface create_game_request extends apicallrequest {
  */
 interface create_game_response extends apicallresponse {
     method: "create_game",
-    reason?: "Already in a game"
+    reason?: "Already in a game" | "Invalid username"
 }
 
 /**
@@ -60,7 +60,7 @@ interface get_games_response extends apicallresponse {
     method: "get_games",
     data: [{
         creator: string, //TODO remove this field when auth if functionnal, may be missused
-        nplayers: number,
+        player_count: number,
         is_full: boolean
     }]
 }
@@ -83,7 +83,7 @@ interface join_game_request extends apicallrequest {
  */
 interface join_game_response extends apicallresponse {
     method: "join_game",
-    reason?: "Game is full" | "You created this game"
+    reason?: "Invalid username" | "Already in a game" | "Game is full" | "Game not found" | "Already in this game"
 }
 
 /**
