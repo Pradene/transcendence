@@ -5,7 +5,7 @@ const REFRESHBUTTON: HTMLButtonElement = document.querySelector("div.game-contai
 const USERNAMEINPUT: HTMLInputElement   = document.querySelector("div.game-container #username")!;
 
 function startButtonCallback(): void {
-    GameSocket.get().createGame();
+    GameSocket.get().requestNewGame();
 }
 
 function refreshButtonCallback(): void {}

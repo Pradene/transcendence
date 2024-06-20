@@ -55,8 +55,11 @@ class Pong {
 
     parseMessage(response: apicallresponse): void {
         console.log(response["method"]);
-        if (response.method === "update_game") {
-            this.update(response as update_game_response);
+        
+        switch (response.method) {
+            case "update_game":
+                this.update(response as update_game_response);
+                break;
         }
     }
 

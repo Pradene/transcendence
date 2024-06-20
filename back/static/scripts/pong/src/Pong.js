@@ -45,8 +45,10 @@ class Pong {
     }
     parseMessage(response) {
         console.log(response["method"]);
-        if (response.method === "update_game") {
-            this.update(response);
+        switch (response.method) {
+            case "update_game":
+                this.update(response);
+                break;
         }
     }
     _canvas;

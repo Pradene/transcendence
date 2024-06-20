@@ -11,11 +11,19 @@ interface apicallrequest {
 interface apicallresponse {
     method: string;
     status: boolean;
+    reason?: string;
     data?: any;
 }
 
-interface create_game extends apicallrequest {
+interface create_game_request extends apicallrequest {
     method: "create_game";
+    data: {
+        username: string;
+    }
+}
+
+interface create_game_response extends apicallresponse {
+    method: "create_game",
 }
 
 
@@ -25,8 +33,8 @@ interface get_games extends apicallrequest {
 
 interface update_game_response extends apicallresponse {
     method: "update_game";
-    status: boolean;
     data: {
+        status: "running" | "waiting";
         p1: {
             name: string;
             position: Array<number>;
@@ -41,4 +49,4 @@ interface update_game_response extends apicallresponse {
     }
 }
 
-export {apicall, apicallrequest, apicallresponse, create_game, get_games, update_game_response};
+export {apicall, apicallrequest, apicallresponse, create_game_request, create_game_response, get_games, update_game_response};

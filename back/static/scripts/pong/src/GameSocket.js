@@ -33,26 +33,47 @@ class GameSocket {
     /**
      * Request the server to create a new game instance.
      */
-    createGame() {
+    requestNewGame() {
         if (this._currentGame) {
-            return this._currentGame;
+            return;
         }
-        this._websocket.send(JSON.stringify({ method: "create_game" }));
-        this._currentGame = new Pong();
-        return this._currentGame;
+        let request = {
+            method: "create_game",
+            data: {
+                username: "username"
+            }
+        };
+        this.send(request);
+    }
+    createNewGame(response) {
+        if (response.status !== true) {
+            this._currentGame = new Pong();
+        }
+        else {
+            console.error("Could not create new game: ", response.reason);
+        }
+    }
+    /**
+     * Send a request to the server
+     * @param request The request to be send
+     */
+    send(request) {
+        this._websocket.send(JSON.stringify(request));
     }
     /**
      * Parse messages from the server.
      * @param event
      */
     redirectMessages(event) {
-        console.log(event.data);
         let gs = GameSocket.get();
         let response = JSON.parse(event.data);
         console.log(response);
         //here global events
         switch (response.method) {
             case "get_games":
+                break;
+            case "create_game":
+                this.createNewGame(response);
                 break;
         }
         //here game events

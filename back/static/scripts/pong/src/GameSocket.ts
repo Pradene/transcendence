@@ -1,6 +1,6 @@
 import {Pong}                               from "./Pong";
 import {activateButtons, deactivateButtons} from "./DomElements";
-import {apicallresponse}                    from "./Api";
+import {apicallrequest, apicallresponse, create_game_request, create_game_response}                    from "./Api";
 
 const hosturl: string = "ws://" + location.hostname + ":" + location.port + "/ws/game";
 
@@ -39,14 +39,34 @@ class GameSocket {
     /**
      * Request the server to create a new game instance.
      */
-    public createGame(): Pong {
+    public requestNewGame(): void {
         if (this._currentGame) {
-            return this._currentGame;
+            return ;
         }
 
-        this._websocket.send(JSON.stringify({method: "create_game"}));
-        this._currentGame = new Pong();
-        return this._currentGame;
+        let request: create_game_request = {
+            method: "create_game",
+            data: {
+                username: "username"
+            }
+        }
+        this.send(request);
+    }
+
+    private createNewGame(response: create_game_response): void {
+        if (response.status !== true) {
+            this._currentGame = new Pong();
+        } else {
+            console.error("Could not create new game: ", response.reason);
+        }
+    }
+
+    /**
+     * Send a request to the server
+     * @param request The request to be send
+     */
+    public send(request: apicallrequest): void {
+        this._websocket.send(JSON.stringify(request));
     }
 
     /**
@@ -54,13 +74,16 @@ class GameSocket {
      * @param event
      */
     public redirectMessages(event: MessageEvent): void {
-        console.log(event.data);
         let gs = GameSocket.get();
         let response = JSON.parse(event.data) as apicallresponse;
         console.log(response);
+
         //here global events
         switch (response.method) {
             case "get_games":
+                break;
+            case "create_game":
+                this.createNewGame(response as create_game_response);
                 break;
         }
 

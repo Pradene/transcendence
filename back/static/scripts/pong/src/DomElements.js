@@ -3,7 +3,7 @@ const STARTBUTTON = document.querySelector("div.game-container button.create-gam
 const REFRESHBUTTON = document.querySelector("div.game-container button.refresh-room");
 const USERNAMEINPUT = document.querySelector("div.game-container #username");
 function startButtonCallback() {
-    GameSocket.get().createGame();
+    GameSocket.get().requestNewGame();
 }
 function refreshButtonCallback() { }
 function joinButtonCallback() { }
