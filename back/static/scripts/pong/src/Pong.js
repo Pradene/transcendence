@@ -26,9 +26,6 @@ class Pong {
         this._opponent.display(this._context);
         this._ball.display(this._context);
     }
-    get canvas() {
-        return this._canvas;
-    }
     /**
      * Stop the game
      */
@@ -70,6 +67,9 @@ class Pong {
             default:
                 throw new Error("Unexpected server response, killing script now");
         }
+    }
+    get canvas() {
+        return this._canvas;
     }
     get running() {
         return this._running;

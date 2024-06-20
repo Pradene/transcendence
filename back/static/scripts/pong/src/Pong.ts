@@ -27,20 +27,16 @@ class Pong {
     /**
      * Display the game
      */
-    display(): void {
+    public display(): void {
         this._currentPlayer.display(this._context);
         this._opponent.display(this._context);
         this._ball.display(this._context);
     }
 
-    get canvas(): HTMLCanvasElement {
-        return this._canvas;
-    }
-
     /**
      * Stop the game
      */
-    stop(): void {
+    private stop(): void {
         this._currentPlayer.stop();
         container.removeChild(this._canvas);
     }
@@ -73,7 +69,7 @@ class Pong {
      * Parse a response from the server meant for the game
      * @param response 
      */
-    parseMessage(response: apicallresponse): void {
+    public parseMessage(response: apicallresponse): void {
         console.log(response["method"]);
         
         switch (response.method) {
@@ -85,11 +81,15 @@ class Pong {
         }
     }
 
-    get running(): boolean {
+    private get canvas(): HTMLCanvasElement {
+        return this._canvas;
+    }
+
+    public get running(): boolean {
         return this._running
     }
 
-    set running(status: boolean) {
+    private set running(status: boolean) {
         if (!this.running && status) {
             //TODO start game (player key input catch)
             this._running = true;
