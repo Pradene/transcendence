@@ -15,6 +15,20 @@ class Player {
     set position(value: Position) {
         this._position = value;
     }
+
+    public setPositionFromArray(arr: Array<number>) {
+        let npos = new Position(arr[0], arr[1]);
+        this.position = npos;
+    }
+
+    get name(): string {
+        return this._name;
+    }
+
+    set name(nname: string) {
+        this._name = nname;
+    }
+
     constructor(name: string, position: Position, color: string = default_color) {
         this._name = name;
         this._color = color;

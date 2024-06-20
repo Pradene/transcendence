@@ -1,5 +1,5 @@
 import { Pong } from "./Pong";
-import { activateButtons } from "./DomElements";
+import { USERNAMEINPUT, activateButtons } from "./DomElements";
 const hosturl = "ws://" + location.hostname + ":" + location.port + "/ws/game";
 //connect to the server, on failure script will throw an error and die
 const socket = await new Promise((resolve, reject) => {
@@ -37,14 +37,21 @@ class GameSocket {
         if (this._currentGame) {
             return;
         }
+        let username = USERNAMEINPUT.textContent;
+        if (!username)
+            return;
         let request = {
             method: "create_game",
             data: {
-                username: "username"
+                username: username
             }
         };
         this.send(request);
     }
+    /**
+     * Create a new game
+     * @param response
+     */
     createNewGame(response) {
         if (response.status !== true) {
             this._currentGame = new Pong();

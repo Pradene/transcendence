@@ -1,3 +1,4 @@
+import { Position } from "./Utils";
 const default_color = "#515151";
 const default_height = 32;
 const default_width = 8;
@@ -10,6 +11,16 @@ class Player {
     }
     set position(value) {
         this._position = value;
+    }
+    setPositionFromArray(arr) {
+        let npos = new Position(arr[0], arr[1]);
+        this.position = npos;
+    }
+    get name() {
+        return this._name;
+    }
+    set name(nname) {
+        this._name = nname;
     }
     constructor(name, position, color = default_color) {
         this._name = name;

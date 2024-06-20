@@ -35,24 +35,41 @@ class Pong {
         return this._canvas;
     }
 
+    /**
+     * Stop the game
+     */
     stop(): void {
         this._currentPlayer.stop();
         container.removeChild(this._canvas);
     }
 
     /**
-     * Update the game state.
+     * Update the game data and display it.
      * @param response
      * @private
      */
     private update(response: update_game_response): void {
-        this._currentPlayer.position = new Position(response.data.p1.position[0], response.data.p1.position[1]);
-        this._opponent.position      = new Position(response.data.p2.position[0], response.data.p2.position[1]);
+        let players = response.data.players;
+
+        //update players and ball position
+        players.forEach(element => {
+            if (element.name === this._currentPlayer.name)
+                this._currentPlayer.setPositionFromArray(element.position);
+            else if (element.name === this._opponent.name)
+                this._opponent.setPositionFromArray(element.position);
+            else
+                console.error("Invalid username: ", element.name)
+        });
         this._ball.position          = new Position(response.data.ball.position[0], response.data.ball.position[1]);
 
-        this.display();
+        //now redisplay the game
+        this.display(); //TODO change this to be called by an interval instead
     }
 
+    /**
+     * Parse a response from the server meant for the game
+     * @param response 
+     */
     parseMessage(response: apicallresponse): void {
         console.log(response["method"]);
         
@@ -60,6 +77,8 @@ class Pong {
             case "update_game":
                 this.update(response as update_game_response);
                 break;
+            default:
+                throw new Error("Unexpected server response, killing script now");
         }
     }
 

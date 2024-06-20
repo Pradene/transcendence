@@ -4,6 +4,9 @@ const STARTBUTTON: HTMLButtonElement   = document.querySelector("div.game-contai
 const REFRESHBUTTON: HTMLButtonElement = document.querySelector("div.game-container button.refresh-room")!;
 const USERNAMEINPUT: HTMLInputElement   = document.querySelector("div.game-container #username")!;
 
+/**
+ * Request a new game to be created //TODO check for race condition
+ */
 function startButtonCallback(): void {
     GameSocket.get().requestNewGame();
 }
@@ -12,14 +15,25 @@ function refreshButtonCallback(): void {}
 
 function joinButtonCallback(): void {}
 
+/**
+ * Activate a button
+ * @param button 
+ */
 function activateButton(button: HTMLButtonElement): void {
     button.classList.add("active");
 }
 
+/**
+ * Deactivate a button
+ * @param button 
+ */
 function deactivateButton(button: HTMLButtonElement): void {
     button.classList.remove("active");
 }
 
+/**
+ * Activate the buttons, is called when the websocket finished connecting
+ */
 function activateButtons(): void {
     STARTBUTTON.addEventListener("click", startButtonCallback);
     REFRESHBUTTON.addEventListener("click", refreshButtonCallback);
@@ -27,6 +41,9 @@ function activateButtons(): void {
     activateButton(REFRESHBUTTON);
 }
 
+/**
+ * Disable buttons, should be called on lost connection //TODO call it
+ */
 function deactivateButtons(): void {
     STARTBUTTON.removeEventListener("click", startButtonCallback);
     REFRESHBUTTON.removeEventListener("click", refreshButtonCallback);
@@ -34,4 +51,4 @@ function deactivateButtons(): void {
     deactivateButton(REFRESHBUTTON);
 }
 
-export {activateButtons, deactivateButtons};
+export {activateButtons, deactivateButtons, USERNAMEINPUT};

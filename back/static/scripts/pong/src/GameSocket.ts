@@ -1,5 +1,5 @@
 import {Pong}                               from "./Pong";
-import {activateButtons, deactivateButtons} from "./DomElements";
+import {USERNAMEINPUT, activateButtons, deactivateButtons} from "./DomElements";
 import {apicallrequest, apicallresponse, create_game_request, create_game_response}                    from "./Api";
 
 const hosturl: string = "ws://" + location.hostname + ":" + location.port + "/ws/game";
@@ -44,15 +44,23 @@ class GameSocket {
             return ;
         }
 
+        let username = USERNAMEINPUT.textContent;
+        if (!username)
+            return ;
+
         let request: create_game_request = {
             method: "create_game",
             data: {
-                username: "username"
+                username: username
             }
         }
         this.send(request);
     }
 
+    /**
+     * Create a new game
+     * @param response 
+     */
     private createNewGame(response: create_game_response): void {
         if (response.status !== true) {
             this._currentGame = new Pong();
