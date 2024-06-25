@@ -1,4 +1,4 @@
-from typing import Callable, Union
+from typing import Callable, Union, List, Tuple
 
 
 class PlayerInterface:
@@ -64,10 +64,6 @@ class PlayerInterface:
         self.__position[1] = y
 
 class IntVector:
-    def __init__(self, x: int, y: int):
-        self.x: int = x
-        self.y: int = y
-
     def __init__(self, vector: list[int]):
         self.x: int = vector[0]
         self.y: int = vector[1]
@@ -106,7 +102,7 @@ class IntVector:
 class Ball:
     def __init__(self):
         self.__position: list[int] = [0, 0]
-        self.__direction: IntVector = IntVector(1, 1)
+        self.__direction: IntVector = IntVector([1, 1])
         self.__speed: int = 5
 
     def getPosition(self) -> list[int]:
@@ -128,7 +124,7 @@ class Ball:
         return narr
 
     def computeNext(self, p1: PlayerInterface, p2: PlayerInterface) -> None:
-        //TODO Implement this method
+        #TODO Implement this method
         arr = self.__direction.computeMoves(self.__speed)
 
         while len(arr) > 0:
@@ -137,19 +133,19 @@ class Ball:
 
             #check hit p1 paddle horizontally
             if self.__position[0] == p1.getX() + 8 and x < 0:
-                //TODO hit behavior
+                #TODO hit behavior
                 pass
 
             #check hit p2 paddle horizontally
             elif self.__position[0] == p2.getX() and x > 0:
-                //TODO hit behavior
+                #TODO hit behavior
                 pass
 
             #check hit top wall
             elif self.__position[1] == 0 and y < 0:
-                //TODO hit behavior
+                #TODO hit behavior
                 pass
 
             elif self.__position[1] == 800 and y > 0:
-                //TODO hit behavior
+                #TODO hit behavior
                 pass

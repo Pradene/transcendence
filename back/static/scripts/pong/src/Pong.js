@@ -1,3 +1,4 @@
+import { CurrentPlayer, Player } from "./Player";
 import { Ball } from "./Ball";
 import { Position } from "./Utils";
 const screenWidth = 800;
@@ -39,6 +40,10 @@ class Pong {
      * @private
      */
     update(response) {
+        if (!this._current_player) {
+            this._current_player = new CurrentPlayer("a name", new Position(0, 0));
+            this._opponent = new Player("another name", new Position(0, 0));
+        }
         this._current_player?.setPositionFromArray(response.data.current_player);
         this._opponent?.setPositionFromArray(response.data.opponent);
         this._ball.position = new Position(response.data.ball[0], response.data.ball[1]);

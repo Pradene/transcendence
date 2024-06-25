@@ -3,16 +3,16 @@
 
 {% block content %}
     <div data-title="Home">
-        {% include "navbar.html" %}
+        {% include "navbar.html" %} <!-- Include the navbar -->
         <p>Home test</p>
-        <div class="game-container">
+        <div class="game-container"> <!-- Game Container, contain the game and the list of available rooms -->
             <div class="game-container-header">
-                <input type="text" name="" id="username">
-                <button class="create-game">Create Game</button>
-                <button class="refresh-room">Refresh Room</button>
+                <input type="text" name="" id="username"> <!-- Username input -->
+                <button class="create-game">Create Game</button> <!-- Create Game Button -->
+                <button class="refresh-room">Refresh Room</button> <!-- Refresh Room Button -->
             </div>
-            <div class="game"></div>
-            <div class="rooms"></div>
+            <div class="game"></div> <!-- Game Container, contain the game -->
+            <div class="rooms"></div> <!-- Room Container, contain the list of available rooms -->
         </div>
     </div>
     {% include "footer.html" %}

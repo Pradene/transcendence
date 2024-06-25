@@ -54,6 +54,7 @@ class Game:
 
         while self.__p1 is not None and self.__p2 is not None and not self.isFinished():
             self.__dataLock.acquire()
+            self.__ball.computeNext(self.__p1, self.__p2);
             self.__dataLock.release()
 
             await self.update()
