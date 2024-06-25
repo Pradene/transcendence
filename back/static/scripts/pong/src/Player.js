@@ -30,8 +30,7 @@ class Player {
      * @return void
      * */
     setPositionFromArray(arr) {
-        k - v8this.position;
-        new Position(arr[0], arr[1]);
+        this.position = new Position(arr[0], arr[1]);
     }
     /**
      * Display the player on the canvas.

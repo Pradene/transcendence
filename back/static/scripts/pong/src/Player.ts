@@ -39,7 +39,7 @@ class Player {
      * @return void
      * */
     public setPositionFromArray(arr: Array<number>) {
-        k-v8this.position = new Position(arr[0], arr[1]);
+        this.position = new Position(arr[0], arr[1]);
     }
 
     /**
