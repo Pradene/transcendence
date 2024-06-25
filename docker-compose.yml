@@ -14,7 +14,7 @@ services:
     networks:
       - transcendence
     volumes:
-      - ~/Documents/transcendence/back/static/:/app/static
+      - /home/pierre/Documents/transcendence/back/static/:/app/static
     depends_on:
       db:
         condition: service_healthy

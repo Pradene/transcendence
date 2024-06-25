@@ -102,13 +102,10 @@ interface update_game_response extends apicallresponse {
     method: "update_game";
     data: {
         status: "running" | "waiting" | "finished";
-        players: [{
-            name: string;
-            position: Array<number>
-        }]
-        ball: {
-            position: Array<number>;
-        }
+        gameid: string,
+        current_player: Array<number>,
+        opponent: Array<number>,
+        ball: Array<number>
     }
 }
 
@@ -129,5 +126,6 @@ export {
     get_games_response, 
     join_game_request,
     join_game_response,
-    update_game_response
+    update_game_response,
+    update_player_request
 };

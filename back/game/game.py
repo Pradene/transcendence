@@ -1,90 +1,119 @@
-import asyncio
-from threading import Thread
-import typing
 import logging
+import asyncio
+from typing import Union, List, Callable
+from threading import Thread, Lock
+from game.GameUtils import PlayerInterface, Ball
 
+P1_POSITION: List[int] = [8, 270]
+P2_POSITION: List[int] = [800 - 16, 270]
+BALL_POSITION: List[int] = [400, 300]
+BALL_SPEED: int = 5
 
-class PlayerInterface:
-    def __init__(self, name: str, callback: typing.Callable):
-        self.__name: str = name
-        self.__callback  = callback
-        self.__position: list[int] = [0, 0]
-        self.__joined: bool = False
-
-    def getName(self) -> str:
-        return self.__name
-
-    def setName(self, name: str) -> None:
-        self.__name = name
-
-    def getCallback(self) -> typing.Callable:
-        return self.__callback
-
-    def setCallback(self, callback: typing.Callable) -> None:
-        self.__callback = callback
-
-    def getPosition(self) -> list[int]:
-        return self.__position
-
-    def setPosition(self, position: list[int]):
-        self.__position = position
-
-    def haveJoined(self) -> bool:
-        return self.__joined
-
-    def setJoined(self, joined: bool) -> None:
-        self.__joined = joined
-
-    def setY(self, y: int):
-        self.__position[1] = y
+FPS: int = 24
+TIME_TO_SLEEP: float = (1 / FPS)
 
 
 class Game:
     def __init__(self, p1: PlayerInterface):
-        self.__p1: PlayerInterface = p1
-        self.__p2: PlayerInterface = PlayerInterface('p2', None)
-        self.__ball: list[int] = [400, 300]
-        self.__ready: bool = False
+        self.__p1: Union[PlayerInterface, None] = p1
+        self.__p2: Union[PlayerInterface, None] = None
+        self.__ball: Ball = Ball()
+        self.__dataLock: Lock = Lock()
 
-        self.__p1.setPosition([8, 270])
+        self.__th: Union[Thread, None] = None
+        self.__finished: bool = False
+        self.__finishedLock: Lock = Lock()
+
+        self.__p1.setPosition(P1_POSITION.copy())
         self.__p1.setJoined(True)
-        self.__p2.setPosition([800 - 16, 270])
-        self.__p2.setJoined(False)
 
-    async def join(self, p2: PlayerInterface) -> PlayerInterface:
-        self.__p2.setName(p2.getName())
-        self.__p2.setCallback(p2.getCallback())
+    def __del__(self):
+        self.__finish()
+        self.__th.join()
 
+    def getGameid(self) -> str:
+        return self.__p1.getName()
+
+    async def join(self, p2: PlayerInterface) -> None:
+        """Join a player to the game"""
+
+        self.__p2 = p2
+        self.__p2.setPosition(P2_POSITION.copy())
+        self.__p2.setJoined(True)
+
+        # send game data to clients
         await self.update()
 
-        return self.__p2
+        logging.log(logging.INFO, f"{self.__p2.getName()} joined the game {self.getGameid()}")
+        # start the game
+        self.__th = Thread(target=asyncio.run, args=(self.__gameLoop(),))
+        self.__th.start()
+
+    async def __gameLoop(self) -> None:
+        logging.log(logging.INFO, f"Game {self.getGameid()} started")
+
+        while self.__p1 is not None and self.__p2 is not None and not self.isFinished():
+            self.__dataLock.acquire()
+            self.__dataLock.release()
+
+            await self.update()
+            await asyncio.sleep(TIME_TO_SLEEP)
+
+    def isFinished(self) -> bool:
+        self.__finishedLock.acquire()
+        finished = self.__finished
+        self.__finishedLock.release()
+
+        return finished
+
+    def __finish(self) -> None:
+        self.__finishedLock.acquire()
+        self.__finished = True
+        self.__finishedLock.release()
 
     async def update(self) -> None:
         # Send game datas to client
-        data = self.toJSON()
+        data = self.__toJSON()
 
-        if self.__p1.getCallback() is not None:
-            await self.__p1.getCallback()(data)
-        if self.__p2.getCallback() is not None:
-            await self.__p2.getCallback()(data)
+        if self.__p1 is not None:
+            await self.__p1.getCallback()(data[0])
+        if self.__p2 is not None:
+            await self.__p2.getCallback()(data[1])
 
-    def toJSON(self) -> dict:
-        dic = {
+    def __toJSON(self) -> List[dict]:
+        self.__dataLock.acquire()
+        dic1 = {
             "method": "update_game",
-            "status": self.__ready,
-            "data": {
-                "p1": self.__p1.getPosition(),
-                "p2": self.__p2.getPosition(),
-                "ball": self.__ball
+            "status": True,
+            "data":   {
+                "status": "running",
+                "gameid": self.getGameid(),
+                "current_player":   self.__p1.getPosition().copy(),
+                "opponent":   self.__p2.getPosition().copy() if self.__p2 is not None else P2_POSITION.copy(),
+                "ball": self.__ball.getPosition()
             }
         }
-        return dic
+        dic2 = {
+            "method": "update_game",
+            "status": True,
+            "data":   {
+                "status": "running",
+                "gameid": self.getGameid(),
+                "current_player":   self.__p2.getPosition().copy() if self.__p2 is not None else P2_POSITION.copy(),
+                "opponent":   self.__p1.getPosition().copy(),
+                "ball": self.__ball.getPosition()
+            }
+        }
+        self.__dataLock.release()
+        return [dic1, dic2]
 
     def gameInfo(self) -> dict:
+        self.__dataLock.acquire()
         dic: dict = {
-            "creator": self.__p1.getName(),
-            "player_count": 2 if self.__p2.haveJoined() else 1,
-            "is_full": self.__p2.haveJoined()
+            "creator":      self.__p1.getName(),
+            "player_count": 2 if self.__p2 else 1,
+            "is_full":      True if self.__p2 else False
         }
+        self.__dataLock.release()
 
         return dic

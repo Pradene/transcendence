@@ -7,7 +7,7 @@ import {
     create_game_response,
     get_games_request,
     get_games_response, join_game_request
-} from "./Api";
+}                                                                         from "./Api";
 
 const hosturl: string = "ws://" + location.hostname + ":" + location.port + "/ws/game";
 
@@ -15,7 +15,7 @@ const hosturl: string = "ws://" + location.hostname + ":" + location.port + "/ws
 const socket: WebSocket = await new Promise<WebSocket>((resolve, reject) => {
     let ws = new WebSocket(hosturl);
     console.log("Connecting to server...");
-    ws.onopen = () => {
+    ws.onopen  = () => {
         resolve(ws);
     };
     ws.onerror = (e) => {
@@ -31,8 +31,8 @@ const socket: WebSocket = await new Promise<WebSocket>((resolve, reject) => {
 
 class GameSocket {
     private constructor() {
-        this._websocket = socket;
-        this._currentGame = null;
+        this._websocket           = socket;
+        this._currentGame         = null;
         this._websocket.onmessage = this.redirectMessages
 
         // setInterval(() => {
@@ -62,22 +62,22 @@ class GameSocket {
 
         ROOMCONTAINER.innerHTML = "";
         games.forEach(element => {
-            let room = document.createElement("div");
-            let creator = document.createElement("span");
+            let room         = document.createElement("div");
+            let creator      = document.createElement("span");
             let player_count = document.createElement("span");
-            let join = document.createElement("button");
+            let join         = document.createElement("button");
 
             room.classList.add("room");
             creator.classList.add("gameid");
             player_count.classList.add("player-count");
 
-            creator.textContent = element.creator;
+            creator.textContent      = element.creator;
             player_count.textContent = element.player_count + "/2";
-            join.textContent = "Join";
+            join.textContent         = "Join";
             join.addEventListener("click", () => {
                 let request: join_game_request = {
                     method: "join_game",
-                    data: {
+                    data:   {
                         gameid: element.creator
                     }
                 };
@@ -96,16 +96,16 @@ class GameSocket {
      */
     public requestNewGame(): void {
         if (this._currentGame) {
-            return ;
+            return;
         }
 
         let username = USERNAMEINPUT.value;
         if (!username)
-            return ;
+            return;
 
         let request: create_game_request = {
             method: "create_game",
-            data: {
+            data:   {
                 username: username
             }
         }
@@ -114,13 +114,11 @@ class GameSocket {
 
     /**
      * Create a new game
-     * @param response 
+     * @param response
      */
     private createNewGame(response: create_game_response): void {
         if (!response.status) {
             console.error("Could not create new game: ", response.reason);
-        } else {
-            this._currentGame = new Pong();
         }
     }
 
@@ -138,7 +136,7 @@ class GameSocket {
      * @param event
      */
     public redirectMessages(event: MessageEvent): void {
-        let gs = GameSocket.get();
+        let gs       = GameSocket.get();
         let response = JSON.parse(event.data) as apicallresponse;
         console.log("Received message", response);
 
@@ -149,6 +147,10 @@ class GameSocket {
                 break;
             case "create_game":
                 gs.createNewGame(response as create_game_response);
+                break;
+            case "update_game":
+                if (!gs._currentGame)
+                    gs._currentGame = new Pong();
                 break;
         }
 

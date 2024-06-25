@@ -97,9 +97,6 @@ class GameSocket {
         if (!response.status) {
             console.error("Could not create new game: ", response.reason);
         }
-        else {
-            this._currentGame = new Pong();
-        }
     }
     /**
      * Send a request to the server
@@ -124,6 +121,10 @@ class GameSocket {
                 break;
             case "create_game":
                 gs.createNewGame(response);
+                break;
+            case "update_game":
+                if (!gs._currentGame)
+                    gs._currentGame = new Pong();
                 break;
         }
         //here game events

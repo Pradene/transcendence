@@ -4,6 +4,8 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from typing import Union, List
 import json
 from game.game import PlayerInterface, Game
+from game.response import Response
+
 
 class GameConsumerResponse:
     def __init__(self, method: str, status: bool, data: dict = {}, reason: str = ""):
@@ -17,25 +19,25 @@ class GameConsumerResponse:
             "method": self.method,
             "status": self.status,
             "reason": self.reason,
-            "data": self.data,
+            "data":   self.data,
         }
 
         return response
 
+
 class GameConsumer(AsyncJsonWebsocketConsumer):
-    GAMES: dict[Game] = []
+    GAMES: dict[str, Game] = {}
     USERS = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
-        self.__updateCallback = None
-        self.__p1: PlayerInterface = PlayerInterface('p1', lambda a: None)
+        self.__interface: PlayerInterface = PlayerInterface('p1', self.updateClient)
         self.__currentGame: Union[Game, None] = None
 
         GameConsumer.USERS.append(self)
 
     def __del__(self):
-#         super().__del__()
+        #         super().__del__()
 
         for user in GameConsumer.USERS:
             if user == self:
@@ -43,8 +45,6 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
     async def connect(self):
         await self.accept()
-        self.__updateCallback = self.updateClient
-        self.__p1.setCallback(self.__updateCallback)
         logging.log(logging.INFO, "New websocket connection")
         await self.getGames()
 
@@ -75,12 +75,14 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
     async def getGames(self):
         """Send a list of all games to the client"""
 
-        arr = [x.gameInfo() for x in self.GAMES]
+        arr = [x.gameInfo() for x in self.GAMES.values()]
         response: GameConsumerResponse = GameConsumerResponse(method="get_games", status=True, data=arr)
 
         await self.send_json(response.toJSON())
 
     async def send_json(self, data):
+        """Send JSON data to the client and log it to the console"""
+
         await super().send_json(data)
         logging.log(logging.INFO, data)
 
@@ -93,47 +95,52 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
     async def joinGame(self, data):
         """Add the player to the game"""
 
-        username = self.__p1.getName()
+        username = self.__interface.getName()
         if username == "":
-            response = GameConsumerResponse(method="join_game", status=False, reason="Invalid username")
+            response = GameConsumerResponse(method="join_game", status=False, reason=Response.INVALIDUSERNAME)
             await self.send_json(response.toJSON())
             return
         elif self.__currentGame is not None:
-            response = GameConsumerResponse(method="join_game", status=False, reason="Already in a game")
+            response = GameConsumerResponse(method="join_game", status=False, reason=Response.ALREADYINGAME)
             await self.send_json(response.toJSON())
             return
         elif data["data"]["gameid"] not in GameConsumer.GAMES.keys():
-            response = GameConsumerResponse(method="join_game", status=False, reason="Game not found")
-            await self.send_json(response.toJSON())
-            return
-        elif data["data"]["gameid"] == self.__currentGame:
-            response = GameConsumerResponse(method="join_game", status=False, reason="Already in this game")
+            response = GameConsumerResponse(method="join_game", status=False, reason=Response.NOSUCHGAME)
             await self.send_json(response.toJSON())
             return
 
+        #join the game
         self.__currentGame = GameConsumer.GAMES[data["data"]["gameid"]]
-        self.__currentGame.addPlayer(PlayerInterface(username, self.__updateCallback))
-        await game.update()
+        await self.__currentGame.join(self.__interface)
 
+        #update game list for all users
         for user in GameConsumer.USERS:
             await user.getGames()
 
     async def createGame(self, data):
         """Create a new game and add the player to it"""
 
-        self.__p1.setName(data["data"]["username"])
-        if self.__p1.getName() == "":
-            response = GameConsumerResponse(method="create_game", status=False, reason="Invalid username")
+        if self.__interface.getName() == "":
+            response = GameConsumerResponse(method="create_game", status=False, reason=Response.INVALIDUSERNAME)
             await self.send_json(response.toJSON())
             return
         elif self.__currentGame is not None:
-            response = GameConsumerResponse(method="create_game", status=False, reason="Already in a game")
+            response = GameConsumerResponse(method="create_game", status=False, reason=Response.ALREADYINGAME)
             await self.send_json(response.toJSON())
             return
 
-        self.__currentGame = Game(self.__p1)
-        GameConsumer.GAMES.append(self.__currentGame)
+        # Create a new game
+        try:
+            self.__interface.setName(data["data"]["username"])
+        except KeyError:
+            response = GameConsumerResponse(method="create_game", status=False, reason=Response.INVALIDREQUEST)
+            await self.send_json(response.toJSON())
+            return
+
+        self.__currentGame = Game(self.__interface)
+        GameConsumer.GAMES[self.__currentGame.getGameid()] = self.__currentGame
         await self.__currentGame.update()
 
+        # Send the game list to all clients
         for user in GameConsumer.USERS:
             await user.getGames()

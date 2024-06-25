@@ -1,4 +1,5 @@
 import { Position } from "./Utils";
+import { GameSocket } from "./GameSocket";
 const default_color = "#515151";
 const default_height = 32;
 const default_width = 8;
@@ -23,9 +24,14 @@ class Player {
         this._color = color;
         this._position = position;
     }
+    /**
+     * Set the position of the player from an array.
+     * @param arr Array of two numbers.
+     * @return void
+     * */
     setPositionFromArray(arr) {
-        let npos = new Position(arr[0], arr[1]);
-        this.position = npos;
+        k - v8this.position;
+        new Position(arr[0], arr[1]);
     }
     /**
      * Display the player on the canvas.
@@ -49,14 +55,48 @@ class Player {
 class CurrentPlayer extends Player {
     constructor(name, position, color = default_color) {
         super(name, position, color);
-        this._intervalid = setInterval(() => {
-        }, 1000);
+        this._movement = "NONE";
+        window.addEventListener("keypress", this._keyDownHandler);
+        window.addEventListener("keyup", this._keyUpHandler);
+    }
+    _keyDownHandler(event) {
+        if (event.key === "w")
+            this.movement = "UP";
+        else if (event.key === "s")
+            this.movement = "DOWN";
+    }
+    _keyUpHandler(event) {
+        this.movement = "NONE";
+    }
+    /**
+     * Update the player's movement on the server.
+     * @private
+     */
+    _update() {
+        let gs = GameSocket.get();
+        let request = {
+            method: "update_player",
+            data: {
+                // @ts-ignore
+                movement: this._movement
+            }
+        };
+        gs.send(request);
+    }
+    set movement(value) {
+        if (this._movement === value)
+            return;
+        this._movement = value;
+        this._update();
     }
     stop() {
         super.stop();
         clearInterval(this._intervalid);
+        window.removeEventListener("keypress", this._keyDownHandler);
+        window.removeEventListener("keyup", this._keyUpHandler);
     }
     _intervalid;
+    _movement;
 }
 export default { Player, CurrentPlayer };
 export { Player, CurrentPlayer };
