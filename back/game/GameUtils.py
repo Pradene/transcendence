@@ -64,31 +64,49 @@ class PlayerInterface:
         self.__position[1] = y
 
 class IntVector:
-	def __init__(self, x: int, y: int):
-		self.x: int = x
-		self.y: int = y
+    def __init__(self, x: int, y: int):
+        self.x: int = x
+        self.y: int = y
 
-	def __init__(self, vector: list[int]):
-		self.x: int = vector[0]
-		self.y: int = vector[1]
+    def __init__(self, vector: list[int]):
+        self.x: int = vector[0]
+        self.y: int = vector[1]
 
-	def reverseX() -> None:
-		self.x *= -1
+    def reverseX() -> None:
+        self.x *= -1
 
-	def reverseY() -> None:
-		self.y *= -1
+    def reverseY() -> None:
+        self.y *= -1
 
-	def getVector(self) -> list[int]:
-		return [self.x, self.y]
+    def getVector(self) -> list[int]:
+        return [self.x, self.y]
 
-	def __getitem__(self, idx: int) -> int:
-		return self.getVector()[idx]
+    def __getitem__(self, idx: int) -> int:
+        return self.getVector()[idx]
 
+    def computeMoves(self, moves: int) -> list[Tuple[int, int]]:
+        """Computes the moves to reach the destination"""
+
+        ratio: float = self.x / self.y
+        bratio = ratio
+
+        n = 0
+        moves: List[Tuple[int, int]] = []
+
+        for i in range(0, moves):
+            if n < ratio:
+                moves.append((1, 0))
+                n += 1
+            else:
+                moves.append((0, 1))
+                ratio += bratio
+
+        return moves
 
 class Ball:
     def __init__(self):
         self.__position: list[int] = [0, 0]
-		self.__direction: IntVector = IntVector(1, 1)
+        self.__direction: IntVector = IntVector(1, 1)
         self.__speed: int = 5
 
     def getPosition(self) -> list[int]:
@@ -101,12 +119,37 @@ class Ball:
 
         self.__speed += 1
 
+    def __revX(self, arr: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
+        narr = [(x * -1, y) for x, y in arr]
+        return narr
+
+    def __revY(self, arr: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
+        narr = [(x, y * -1) for x, y in arr]
+        return narr
+
     def computeNext(self, p1: PlayerInterface, p2: PlayerInterface) -> None:
         //TODO Implement this method
-		tomove: IntVector = IntVector([x * self.__speed for x in self.__direction.getVector()])
-		idx: int = 0 if tomove[0] > tomove[1] else 1
+        arr = self.__direction.computeMoves(self.__speed)
 
-		while tomove[0] > 0 and tomove[1] > 0:
-			if tomove[idx] > 0:
-				self.__position[idx] += 1
-				tomove[idx] -= 1
+        while len(arr) > 0:
+            x, y = arr[0]
+            arr = arr[1:] if len(arr) > 1 else []
+
+            #check hit p1 paddle horizontally
+            if self.__position[0] == p1.getX() + 8 and x < 0:
+                //TODO hit behavior
+                pass
+
+            #check hit p2 paddle horizontally
+            elif self.__position[0] == p2.getX() and x > 0:
+                //TODO hit behavior
+                pass
+
+            #check hit top wall
+            elif self.__position[1] == 0 and y < 0:
+                //TODO hit behavior
+                pass
+
+            elif self.__position[1] == 800 and y > 0:
+                //TODO hit behavior
+                pass
