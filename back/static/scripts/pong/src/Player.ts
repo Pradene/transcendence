@@ -73,12 +73,14 @@ class CurrentPlayer extends Player {
     constructor(name: string, position: Position, color: string = default_color) {
         super(name, position, color);
         this._movement = "NONE";
-        window.addEventListener("keypress", this._keyDownHandler);
-        window.addEventListener("keyup", this._keyUpHandler);
+        this._boundHandlerUp = this._keyUpHandler.bind(this);
+        this._boundHandlerDown = this._keyDownHandler.bind(this);
+        window.addEventListener("keypress", this._boundHandlerDown);
+        window.addEventListener("keyup", this._boundHandlerUp);
     }
 
     private _keyDownHandler(event: KeyboardEvent): void {
-        if (event.key === "w")
+ ;       if (event.key === "w")
             this.movement = "UP";
         else if (event.key === "s")
             this.movement = "DOWN";
@@ -121,6 +123,8 @@ class CurrentPlayer extends Player {
 
     private _intervalid: any;
     private _movement: string;
+    private _boundHandlerUp: (arg0: KeyboardEvent) => void;
+    private _boundHandlerDown: (arg0: KeyboardEvent) => void;
 }
 
 export default {Player, CurrentPlayer};

@@ -3,7 +3,8 @@ import logging
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from typing import Union, List
 import json
-from game.game import PlayerInterface, Game
+from game.gameutils.PlayerInterface import PlayerInterface
+from game.game import Game
 from game.response import Response
 
 
@@ -45,17 +46,14 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
     async def connect(self):
         await self.accept()
-        logging.log(logging.INFO, "New websocket connection")
         await self.getGames()
 
     async def receive(self, text_data=None, bytes_data=None, **kwargs):
         """Handle incoming messages from the client"""
 
-        logging.log(logging.INFO, text_data)
         try:
             data = json.loads(text_data)
         except json.JSONDecodeError:
-            logging.log(logging.ERROR, "Invalid JSON: {text_data}")
             return
         method = data["method"]
         if not method:
@@ -68,6 +66,8 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
                 await self.createGame(data)
             case "join_game":
                 await self.joinGame(data)
+            case "update_player":
+                await self.updatePlayer(data)
 
     async def disconnect(self, close_code):
         pass
@@ -84,12 +84,11 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         """Send JSON data to the client and log it to the console"""
 
         await super().send_json(data)
-        logging.log(logging.INFO, data)
+        # logging.log(logging.INFO, data)
 
     async def updateClient(self, gameData: dict):
         """Send updated game data to the client"""
 
-        logging.log(logging.INFO, "Update client")
         await self.send_json(gameData)
 
     async def joinGame(self, data):
@@ -144,3 +143,23 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         # Send the game list to all clients
         for user in GameConsumer.USERS:
             await user.getGames()
+
+    async def updatePlayer(self, data) -> None:
+        """Update player movement"""
+
+        if not self.__currentGame:
+            response = GameConsumerResponse(method="update_player", status=False, reason=Response.NOTINGAME)
+            await self.send_json(response.toJSON())
+            return
+
+        try:
+            movement = data["data"]["movement"]
+            self.__interface.setMovement(movement)
+        except KeyError as error:
+            response = GameConsumerResponse(method="update_player", status=False, reason=f"{Response.INVALIDREQUEST}: {error}")
+            await self.send_json(response.toJSON())
+            return
+        except ValueError as error:
+            response = GameConsumerResponse(method="update_player", status=False, reason=f"{Response.INVALIDMOVEMENT}: {error}")
+            await self.send_json(response.toJSON())
+            return

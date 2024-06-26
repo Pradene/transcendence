@@ -2,12 +2,14 @@ import logging
 import asyncio
 from typing import Union, List, Callable
 from threading import Thread, Lock
-from game.GameUtils import PlayerInterface, Ball
+
+from game.gameutils.PlayerInterface import PlayerInterface
+from game.gameutils.Ball import Ball
 
 P1_POSITION: List[int] = [8, 270]
 P2_POSITION: List[int] = [800 - 16, 270]
-BALL_POSITION: List[int] = [400, 300]
-BALL_SPEED: int = 5
+SCREEN_WIDTH: int = 800
+SCREEN_HEIGHT: int = 600
 
 FPS: int = 24
 TIME_TO_SLEEP: float = (1 / FPS)
@@ -44,15 +46,19 @@ class Game:
         # send game data to clients
         await self.update()
 
-        logging.log(logging.INFO, f"{self.__p2.getName()} joined the game {self.getGameid()}")
+        # logging.log(logging.INFO, f"{self.__p2.getName()} joined the game {self.getGameid()}")
         # start the game
         self.__th = Thread(target=asyncio.run, args=(self.__gameLoop(),))
         self.__th.start()
 
     async def __gameLoop(self) -> None:
-        logging.log(logging.INFO, f"Game {self.getGameid()} started")
+        # logging.log(logging.INFO, f"Game {self.getGameid()} started")
 
         while self.__p1 is not None and self.__p2 is not None and not self.isFinished():
+            if self.__ball.isFinished():
+                logging.log(logging.INFO, f"Game {self.getGameid()} creating new ball")
+                self.__ball = Ball()
+            
             self.__dataLock.acquire()
             self.__ball.computeNext(self.__p1, self.__p2);
             self.__dataLock.release()
