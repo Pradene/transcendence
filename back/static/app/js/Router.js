@@ -1,0 +1,66 @@
+export class Router {
+    constructor(container, routes = []) {
+        if (Router.instance)
+            return Router.instance
+
+        Router.instance = this
+
+        this.routes = routes
+        this.container = container
+    }
+
+    init() {
+        window.addEventListener('popstate', () => this.handleRoute())
+        this.handleRoute()
+    }
+
+    navigate(path) {
+        history.pushState(null, null, path)
+        this.handleRoute()
+    }
+
+    handleRoute() {
+        const location = window.location.pathname
+        console.log(location)
+        const matchedRoute = this.matchRoute(location)
+        if (matchedRoute) {
+            const view = matchedRoute.route.view
+            
+            // Insert content of the view into the page
+            if (view && typeof view.render === 'function') {
+                
+                this.container.innerHTML = ''
+                view.render(this.container)
+            
+                // const event = new Event('hashchange')
+                // document.dispatchEvent(event)
+            }
+        }
+    }
+
+    matchRoute(path) {
+        const potentialMatches = this.routes.map(route => {
+            return {
+                route: route,
+                isMatch: path.match(this.pathToRegex(route.path))
+            }
+        })
+
+        let match = potentialMatches.find(match => match.isMatch)
+
+        return match
+    }
+
+    pathToRegex(path) {
+        return new RegExp('^' + path.replace(/:\w+/g, '([^/]+)') + '$')
+    }
+
+    getParams(path, match) {
+        const values = match.slice(1)
+        const keys = [...path.matchAll(/:(\w+)/g)].map(result => result[1])
+        
+        return Object.fromEntries(keys.map(
+            (key, i) => [key, values[i]]
+        ))
+    }
+}
