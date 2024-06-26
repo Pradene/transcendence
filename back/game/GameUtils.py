@@ -68,10 +68,10 @@ class IntVector:
         self.x: int = vector[0]
         self.y: int = vector[1]
 
-    def reverseX() -> None:
+    def reverseX(self) -> None:
         self.x *= -1
 
-    def reverseY() -> None:
+    def reverseY(self) -> None:
         self.y *= -1
 
     def getVector(self) -> list[int]:
@@ -110,6 +110,12 @@ class Ball:
 
         return self.__position.copy()
 
+    def getX(self) -> int:
+        return self.__position[0]
+
+    def getY(self) -> int:
+        return self.__position[1]
+
     def incrSpeed(self) -> None:
         """Increases the speed of the ball, should be called after hitting a paddle"""
 
@@ -132,20 +138,22 @@ class Ball:
             arr = arr[1:] if len(arr) > 1 else []
 
             #check hit p1 paddle horizontally
-            if self.__position[0] == p1.getX() + 8 and x < 0:
-                #TODO hit behavior
-                pass
-
+            if self.getX() == p1.getX() + 8 and x < 0:
+                self.__revX(arr)
+                x *= -1
             #check hit p2 paddle horizontally
-            elif self.__position[0] == p2.getX() and x > 0:
-                #TODO hit behavior
-                pass
-
+            elif self.getX() + 4 == p2.getX() and x > 0:
+                self.__revX(arr)
+                x *= -1
             #check hit top wall
-            elif self.__position[1] == 0 and y < 0:
-                #TODO hit behavior
-                pass
+            elif self.getY() == 0 and y < 0:
+                self.__revY(arr)
+                y *= -1
+            #check hit bottom wall
+            elif self.getY() == 800 - 4 and y > 0:
+                self.__revY(arr)
+                y *= -1
 
-            elif self.__position[1] == 800 and y > 0:
-                #TODO hit behavior
-                pass
+            self.__position[0] += x
+            self.__position[1] += y
+            #TODO move paddles
