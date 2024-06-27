@@ -1,14 +1,9 @@
 from typing import List, Tuple
 from game.gameutils.PlayerInterface import PlayerInterface, PADDLE_HEIGHT, PADDLE_WIDTH
 from game.gameutils.IntVector import IntVector
+from game.gameutils.defines import *
 import logging
 
-BALL_SIZE: int = 4
-BALL_SPEED: int = 5
-BALL_SPEE_INCREMENT: int = 1
-BALL_BASE_POSITION: List[int] = [400 - 2, 300 - 2]
-SCREEN_HEIGHT: int = 600
-SCREEN_WIDTH: int = 800
 
 class Ball:
     def __init__(self):

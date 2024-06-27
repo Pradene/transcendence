@@ -3,6 +3,7 @@ const STARTBUTTON = document.querySelector("div.game-container button.create-gam
 const REFRESHBUTTON = document.querySelector("div.game-container button.refresh-room");
 const USERNAMEINPUT = document.querySelector("div.game-container #username");
 const ROOMCONTAINER = document.querySelector("div.game-container div.rooms");
+const GAMECONTAINER = document.querySelector("div.game-container div.game");
 /**
  * Request a new game to be created //TODO check for race condition
  */
@@ -45,4 +46,4 @@ function deactivateButtons() {
     deactivateButton(STARTBUTTON);
     deactivateButton(REFRESHBUTTON);
 }
-export { activateButtons, deactivateButtons, USERNAMEINPUT, ROOMCONTAINER };
+export { activateButtons, deactivateButtons, USERNAMEINPUT, ROOMCONTAINER, GAMECONTAINER };

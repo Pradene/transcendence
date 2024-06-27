@@ -1,6 +1,7 @@
 import { CurrentPlayer, Player } from "./Player";
 import { Ball } from "./Ball";
 import { Position } from "./Utils";
+import { GameSocket } from "./GameSocket";
 const screenWidth = 800;
 const screenHeight = 600;
 const default_color = "#ffffff";
@@ -33,6 +34,7 @@ class Pong {
     stop() {
         this._current_player?.stop();
         container.removeChild(this._canvas);
+        GameSocket.get().removeGame();
     }
     /**
      * Update the game data and display it.
@@ -44,8 +46,13 @@ class Pong {
             this._current_player = new CurrentPlayer("a name", new Position(0, 0));
             this._opponent = new Player("another name", new Position(0, 0));
         }
-        this._current_player?.setPositionFromArray(response.data.current_player);
-        this._opponent?.setPositionFromArray(response.data.opponent);
+        if (response.data.status === "finished") {
+            this.stop();
+        }
+        this._current_player?.setPositionFromArray(response.data.current_player.position);
+        this._opponent?.setPositionFromArray(response.data.opponent.position);
+        this._current_player?.setScore(response.data.current_player.score);
+        this._opponent?.setScore(response.data.opponent.score);
         this._ball.position = new Position(response.data.ball[0], response.data.ball[1]);
         this._running = response.data.status === "running";
         //now redisplay the game

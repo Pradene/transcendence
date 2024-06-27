@@ -6,8 +6,8 @@ import {
     create_game_request,
     create_game_response,
     get_games_request,
-    get_games_response, join_game_request
-}                                                                         from "./Api";
+    get_games_response, join_game_request, update_game_response
+} from "./Api";
 
 const hosturl: string = "ws://" + location.hostname + ":" + location.port + "/ws/game";
 
@@ -158,6 +158,10 @@ class GameSocket {
         if (gs._currentGame) {
             gs._currentGame.parseMessage(response);
         }
+    }
+
+    public removeGame(): void {
+        this._currentGame = null;
     }
 
     private _websocket: WebSocket;

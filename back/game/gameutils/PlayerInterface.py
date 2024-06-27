@@ -1,14 +1,13 @@
 from typing import Callable, Union, List
 
-PADDLE_SPEED: int = 5
-PADDLE_WIDTH: int = 8
-PADDLE_HEIGHT: int = 32
+from game.gameutils.defines import *
 
 class PlayerInterface:
-    def __init__(self, name: str, callback: Callable):
+    def __init__(self, name: str, updateCallback: Callable, deleteGameCallback: Callable):
         self.__name: str = name
         self.__movement: str = "NONE"
-        self.__callback: Union[Callable, None] = callback
+        self.__updateCallback: Callable = updateCallback
+        self.__deleteGameCallback: Callable = deleteGameCallback
         self.__position: List[float] = [0, 0]
         self.__joined: bool = False
         self.__ballspeed: int = 5 # the speed of the ball, is used to compute the by how much the paddle should move at each frame
@@ -37,15 +36,15 @@ class PlayerInterface:
         
         self.__movement = movement
 
-    def getCallback(self) -> Union[Callable, None]:
+    def getUpdateCallback(self) -> Callable:
         """Returns the callback of the player"""
 
-        return self.__callback
+        return self.__updateCallback
+    
+    def getDeleteGameCallback(self) -> Callable:
+        """Returns the delete game callback of the player"""
 
-    def setCallback(self, callback: Callable) -> None:
-        """Sets the callback of the player"""
-
-        self.__callback = callback
+        return self.__deleteGameCallback
 
     def getPosition(self) -> List[int]:
         """Returns the position of the player"""
@@ -92,9 +91,17 @@ class PlayerInterface:
 
         return self.__points
     
+    def getScore(self) -> int:
+        """Returns the score of the player"""
+
+        return self.__points
+    
     def incrPoints(self) -> None:
         self.__points += 1
 
+    def won(self) -> bool:
+        return self.__points >= POINTS_TO_WIN
+    
     def move(self):
         """Moves the player"""
     

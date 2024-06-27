@@ -132,6 +132,9 @@ class GameSocket {
             gs._currentGame.parseMessage(response);
         }
     }
+    removeGame() {
+        this._currentGame = null;
+    }
     _websocket;
     _currentGame;
     static #GameSocket = new GameSocket();

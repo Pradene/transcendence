@@ -2,9 +2,9 @@ import {Position}              from "./Utils";
 import {GameSocket}            from "./GameSocket";
 import {update_player_request} from "./Api";
 
-const default_color: string  = "#515151";
+const default_color: string = "#515151";
 const default_height: number = 32;
-const default_width: number  = 8;
+const default_width: number = 8;
 
 /**
  * Represents a player in the game.
@@ -27,10 +27,15 @@ class Player {
         this._name = nname;
     }
 
+    public setScore(value: number): void {
+        this._score = value;
+    }
+
     constructor(name: string, position: Position, color: string = default_color) {
-        this._name     = name;
-        this._color    = color;
+        this._name = name;
+        this._color = color;
         this._position = position;
+        this._score = 0;
     }
 
     /**
@@ -52,6 +57,8 @@ class Player {
                         this._position.y,
                         default_width,
                         default_height);
+        canvas.font = "20px Arial";
+        canvas.fillText(String(this._score), this._position.x, 20);
     }
 
     public stop(): void {
@@ -64,6 +71,7 @@ class Player {
     private _name: string;
     private _color: string;
     private _position: Position;
+    private _score: number;
 }
 
 /**
@@ -80,7 +88,8 @@ class CurrentPlayer extends Player {
     }
 
     private _keyDownHandler(event: KeyboardEvent): void {
- ;       if (event.key === "w")
+        ;
+        if (event.key === "w")
             this.movement = "UP";
         else if (event.key === "s")
             this.movement = "DOWN";
@@ -95,7 +104,7 @@ class CurrentPlayer extends Player {
      * @private
      */
     private _update(): void {
-        let gs: GameSocket                 = GameSocket.get();
+        let gs: GameSocket = GameSocket.get();
         let request: update_player_request = {
             method: "update_player",
             data:   {

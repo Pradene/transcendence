@@ -19,10 +19,14 @@ class Player {
     set name(nname) {
         this._name = nname;
     }
+    setScore(value) {
+        this._score = value;
+    }
     constructor(name, position, color = default_color) {
         this._name = name;
         this._color = color;
         this._position = position;
+        this._score = 0;
     }
     /**
      * Set the position of the player from an array.
@@ -39,6 +43,8 @@ class Player {
     display(canvas) {
         canvas.fillStyle = this._color;
         canvas.fillRect(this._position.x, this._position.y, default_width, default_height);
+        canvas.font = "20px Arial";
+        canvas.fillText(String(this._score), this._position.x, 20);
     }
     stop() {
     }
@@ -47,6 +53,7 @@ class Player {
     _name;
     _color;
     _position;
+    _score;
 }
 /**
  * Represents the current player in the game.

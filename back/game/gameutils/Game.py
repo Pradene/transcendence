@@ -5,18 +5,15 @@ from threading import Thread, Lock
 
 from game.gameutils.PlayerInterface import PlayerInterface
 from game.gameutils.Ball import Ball
+from game.gameutils.defines import *
 
-P1_POSITION: List[int] = [8, 270]
-P2_POSITION: List[int] = [800 - 16, 270]
-SCREEN_WIDTH: int = 800
-SCREEN_HEIGHT: int = 600
 
 FPS: int = 24
 TIME_TO_SLEEP: float = (1 / FPS)
 
 
 class Game:
-    def __init__(self, p1: PlayerInterface):
+    def __init__(self, p1: PlayerInterface, deleteCallback: Callable):
         self.__p1: Union[PlayerInterface, None] = p1
         self.__p2: Union[PlayerInterface, None] = None
         self.__ball: Ball = Ball()
@@ -25,13 +22,16 @@ class Game:
         self.__th: Union[Thread, None] = None
         self.__finished: bool = False
         self.__finishedLock: Lock = Lock()
+        self.__shouldDelete: bool = False
 
         self.__p1.setPosition(P1_POSITION.copy())
         self.__p1.setJoined(True)
 
+        self.__deleteCallback: Callable = deleteCallback
+
     def __del__(self):
-        self.__finish()
         self.__th.join()
+        logging.log(logging.INFO, f"Game {self.getGameid()} deleted")
 
     def getGameid(self) -> str:
         return self.__p1.getName()
@@ -58,7 +58,14 @@ class Game:
             if self.__ball.isFinished():
                 logging.log(logging.INFO, f"Game {self.getGameid()} creating new ball")
                 self.__ball = Ball()
-            
+                self.__p1.setPosition(P1_POSITION.copy())
+                self.__p2.setPosition(P2_POSITION.copy())
+
+                if self.__p1.won() or self.__p2.won():
+                    self.__finish()
+                    await self.update()
+                    break
+
             self.__dataLock.acquire()
             self.__ball.computeNext(self.__p1, self.__p2);
             self.__dataLock.release()
@@ -83,20 +90,32 @@ class Game:
         data = self.__toJSON()
 
         if self.__p1 is not None:
-            await self.__p1.getCallback()(data[0])
+            await self.__p1.getUpdateCallback()(data[0])
         if self.__p2 is not None:
-            await self.__p2.getCallback()(data[1])
+            await self.__p2.getUpdateCallback()(data[1])
+
+        if self.__shouldDelete:
+            self.__deleteCallback(self.getGameid())
 
     def __toJSON(self) -> List[dict]:
+        if self.isFinished():
+            self.__shouldDelete = True
+
         self.__dataLock.acquire()
         dic1 = {
             "method": "update_game",
             "status": True,
             "data":   {
-                "status": "running",
+                "status": "running" if not self.isFinished() else "finished",
                 "gameid": self.getGameid(),
-                "current_player":   self.__p1.getPosition().copy(),
-                "opponent":   self.__p2.getPosition().copy() if self.__p2 is not None else P2_POSITION.copy(),
+                "current_player": {
+                    "position": self.__p1.getPosition().copy(),
+                    "score": self.__p1.getScore()
+                },
+                "opponent": {
+                    "position": self.__p2.getPosition().copy() if self.__p2 is not None else P2_POSITION.copy(),
+                    "score": self.__p2.getScore() if self.__p2 is not None else 0
+                },
                 "ball": self.__ball.getPosition()
             }
         }
@@ -104,10 +123,16 @@ class Game:
             "method": "update_game",
             "status": True,
             "data":   {
-                "status": "running",
+                "status": "running" if not self.isFinished() else "finished",
                 "gameid": self.getGameid(),
-                "current_player":   self.__p2.getPosition().copy() if self.__p2 is not None else P2_POSITION.copy(),
-                "opponent":   self.__p1.getPosition().copy(),
+                "current_player": {
+                    "position": self.__p2.getPosition().copy() if self.__p2 is not None else P2_POSITION.copy(),
+                    "score": self.__p2.getScore() if self.__p2 is not None else 0
+                },
+                "opponent": {
+                    "position": self.__p1.getPosition().copy(),
+                    "score": self.__p1.getScore()
+                },
                 "ball": self.__ball.getPosition()
             }
         }
@@ -124,3 +149,11 @@ class Game:
         self.__dataLock.release()
 
         return dic
+    
+    async def quit(self) -> None:
+        self.__finish()
+        await self.update()
+
+    def removeFromClients(self):
+        self.__p1.getDeleteGameCallback()()
+        self.__p2.getDeleteGameCallback()()

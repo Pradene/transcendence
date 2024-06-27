@@ -103,9 +103,15 @@ interface update_game_response extends apicallresponse {
     data: {
         status: "running" | "waiting" | "finished";
         gameid: string,
-        current_player: Array<number>,
-        opponent: Array<number>,
-        ball: Array<number>
+        current_player: {
+            position: Array<number>,
+            score: number
+        },
+        opponent: {
+            position: Array<number>,
+            score: number
+        },
+        ball: Array<number>,
     }
 }
 

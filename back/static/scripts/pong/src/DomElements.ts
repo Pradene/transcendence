@@ -4,6 +4,7 @@ const STARTBUTTON: HTMLButtonElement   = document.querySelector("div.game-contai
 const REFRESHBUTTON: HTMLButtonElement = document.querySelector("div.game-container button.refresh-room")!;
 const USERNAMEINPUT: HTMLInputElement   = document.querySelector("div.game-container #username")!;
 const ROOMCONTAINER: HTMLDivElement     = document.querySelector("div.game-container div.rooms")!;
+const GAMECONTAINER: HTMLDivElement     = document.querySelector("div.game-container div.game")!;
 
 /**
  * Request a new game to be created //TODO check for race condition
@@ -54,4 +55,4 @@ function deactivateButtons(): void {
     deactivateButton(REFRESHBUTTON);
 }
 
-export {activateButtons, deactivateButtons, USERNAMEINPUT, ROOMCONTAINER};
+export {activateButtons, deactivateButtons, USERNAMEINPUT, ROOMCONTAINER, GAMECONTAINER};

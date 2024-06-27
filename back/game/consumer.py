@@ -4,8 +4,9 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from typing import Union, List
 import json
 from game.gameutils.PlayerInterface import PlayerInterface
-from game.game import Game
 from game.response import Response
+from game.gameutils.Game import Game
+from game.gameutils.GameManager import GameManager
 
 
 class GameConsumerResponse:
@@ -27,12 +28,11 @@ class GameConsumerResponse:
 
 
 class GameConsumer(AsyncJsonWebsocketConsumer):
-    GAMES: dict[str, Game] = {}
-    USERS = []
+    USERS: List = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
-        self.__interface: PlayerInterface = PlayerInterface('p1', self.updateClient)
+        self.__interface: PlayerInterface = PlayerInterface('p1', self.updateClient, self.__deleteCurrentGame)
         self.__currentGame: Union[Game, None] = None
 
         GameConsumer.USERS.append(self)
@@ -75,8 +75,8 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
     async def getGames(self):
         """Send a list of all games to the client"""
 
-        arr = [x.gameInfo() for x in self.GAMES.values()]
-        response: GameConsumerResponse = GameConsumerResponse(method="get_games", status=True, data=arr)
+        manager: GameManager = GameManager()
+        response: GameConsumerResponse = GameConsumerResponse(method="get_games", status=True, data=manager.toJSON())
 
         await self.send_json(response.toJSON())
 
@@ -84,7 +84,6 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         """Send JSON data to the client and log it to the console"""
 
         await super().send_json(data)
-        # logging.log(logging.INFO, data)
 
     async def updateClient(self, gameData: dict):
         """Send updated game data to the client"""
@@ -94,6 +93,17 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
     async def joinGame(self, data):
         """Add the player to the game"""
 
+        #check request format
+        gameid: str = ""
+        try:
+            gameid = data["data"]["gameid"]
+        except KeyError:
+            response = GameConsumerResponse(method="join_game", status=False, reason=Response.INVALIDREQUEST)
+            await self.send_json(response.toJSON())
+            return
+
+        #Check if the user can join a game
+        manager: GameManager = GameManager()
         username = self.__interface.getName()
         if username == "":
             response = GameConsumerResponse(method="join_game", status=False, reason=Response.INVALIDUSERNAME)
@@ -103,13 +113,13 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             response = GameConsumerResponse(method="join_game", status=False, reason=Response.ALREADYINGAME)
             await self.send_json(response.toJSON())
             return
-        elif data["data"]["gameid"] not in GameConsumer.GAMES.keys():
+        elif not manager.gameExists(gameid):
             response = GameConsumerResponse(method="join_game", status=False, reason=Response.NOSUCHGAME)
             await self.send_json(response.toJSON())
             return
 
         #join the game
-        self.__currentGame = GameConsumer.GAMES[data["data"]["gameid"]]
+        self.__currentGame = manager.getGame(gameid)
         await self.__currentGame.join(self.__interface)
 
         #update game list for all users
@@ -128,7 +138,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             await self.send_json(response.toJSON())
             return
 
-        # Create a new game
+        # Check request format
         try:
             self.__interface.setName(data["data"]["username"])
         except KeyError:
@@ -136,13 +146,17 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             await self.send_json(response.toJSON())
             return
 
-        self.__currentGame = Game(self.__interface)
-        GameConsumer.GAMES[self.__currentGame.getGameid()] = self.__currentGame
+        manager: GameManager = GameManager()
+        self.__currentGame = manager.createGame(self.__interface)
         await self.__currentGame.update()
 
         # Send the game list to all clients
         for user in GameConsumer.USERS:
             await user.getGames()
+
+    def __deleteCurrentGame(self):
+        logging.log(logging.INFO, f"User {self.__interface.getName()} left the game {self.__currentGame.getGameid()}")
+        self.__currentGame = None
 
     async def updatePlayer(self, data) -> None:
         """Update player movement"""
