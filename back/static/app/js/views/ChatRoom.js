@@ -3,6 +3,10 @@ import { AbstractView } from "./AbstractView.js"
 export class ChatRoom extends AbstractView {
     constructor() {
         super()
+
+        window.wsManager.addHandler('room_message', this.roomMessage.bind(this))
+        window.wsManager.addHandler('get_room_message', this.getRoomMessage.bind(this))
+
     }
 
     async getHtml() {
@@ -19,28 +23,21 @@ export class ChatRoom extends AbstractView {
         `
     }
 
+    async roomMessage(data) {
+        console.log(data)
+    }
+
+    async getRoomMessage(data) {
+        const messages = data.messages
+        messages.forEach(message => this.displayMessage(message))
+    }
+
     async getInitialMessages() {
         const roomID = this.getRoomID()
 
         await window.wsManager.sendMessage({
             type: 'get_room_message',
             room: roomID
-        })
-    
-        // Create a promise to wait for the message
-        const messagePromise = new Promise((resolve, reject) => {
-            window.wsManager.hs = function(data) {
-                resolve(data)
-            }
-        })
-
-        // Wait for the message
-        const data = await messagePromise
-        
-        const messages = data.messages
-        
-        messages.forEach(message => {
-            this.displayMessage(message)
         })
     }
 
@@ -50,15 +47,18 @@ export class ChatRoom extends AbstractView {
         button.addEventListener('submit', async (event) => {
             event.preventDefault()
 
-            const input = document.getElementById('message-input')
-            const roomID = this.getRoomID()
             
-            if (input.value != '') {
+            const input = document.getElementById('message-input')
+            const value = input.value
+            const roomID = this.getRoomID()
+
+            if (input.value != '') {                
                 await window.wsManager.sendMessage({
                     type: 'send_room_message',
                     room: roomID,
-                    content: input.value
+                    content: value
                 })
+
 
                 input.value = ''
             }

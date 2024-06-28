@@ -1,24 +1,23 @@
 export class WebSocketManager {
-    constructor(url) {
-        this.url = url
-        this.socket = null
-        this.messageHandlers = []
-        
-        this.connect()
+    constructor() {
+        if (WebSocketManager.instance)
+            return WebSocketManager.instance
 
-        this.hs = this.handleMessage.bind(this)
+        WebSocketManager.instance = this
+
+        this.socket = null
+        this.handlers = []
     }
 
-    connect() {
-        this.socket = new WebSocket(this.url)
+    connect(url) {
+        this.socket = new WebSocket(url)
 
         this.socket.onopen = (event) => {
             console.log('WebSocket connection established')
         }
 
         this.socket.onmessage = (event) => {
-            const data = JSON.parse(event.data)
-            this.hs(data)
+            this.handleMessage(event)
         }
 
         this.socket.onclose = (event) => {
@@ -30,9 +29,17 @@ export class WebSocketManager {
         }
     }
 
-    // Override this function in chatroom to handle message in chatroom
-    handleMessage(data) {
-        console.log('received data:', data)
+    handleMessage(event) {
+        const data = JSON.parse(event.data)
+
+        this.handlers.forEach(handler => {
+            if (handler.type == data.type)
+                handler.callback(data)
+        })
+    }
+
+    addHandler(type, callback) {
+        this.handlers.push({type, callback})
     }
 
     sendMessage(message) {

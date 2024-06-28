@@ -61,7 +61,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(
             f'chat_{room.id}',
             {
-                'type': 'chat_message',
+                'type': 'room_message',
                 'room': room.id,
                 'user': user.username,
                 'content': content
@@ -69,7 +69,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
 
-    async def chat_message(self, event):
+    async def room_message(self, event):
         room_id = event['room']
         user = event['user']
         content = event['content']

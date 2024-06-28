@@ -78,8 +78,8 @@ export class Login extends AbstractView {
             if (data.success) {
                 const router = new Router()
                 
-                const ws = new WebSocketManager("ws://localhost:8000/ws/chat/")
-                window.wsManager = ws
+                const ws = window.wsManager
+                ws.connect('ws://localhost:8000/ws/chat/')
 
                 router.navigate('/')
 

@@ -4,11 +4,15 @@ import { Chat } from './views/Chat.js'
 import { ChatRoom } from './views/ChatRoom.js'
 import { Profile } from './views/Profile.js'
 import { Login } from './views/Login.js'
+import { WebSocketManager } from "./ChatWebSocket.js"
 
 
 document.addEventListener('DOMContentLoaded', () => {
 
     const app = document.getElementById('app')
+
+    const wsManager = new WebSocketManager()
+    window.wsManager = wsManager
     
     const router = new Router(app, [
         {path: '/', view: new Home()},
