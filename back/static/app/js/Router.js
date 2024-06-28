@@ -21,7 +21,6 @@ export class Router {
 
     handleRoute() {
         const location = window.location.pathname
-        console.log(location)
         const matchedRoute = this.matchRoute(location)
         if (matchedRoute) {
             const view = matchedRoute.route.view
@@ -31,9 +30,6 @@ export class Router {
                 
                 this.container.innerHTML = ''
                 view.render(this.container)
-            
-                // const event = new Event('hashchange')
-                // document.dispatchEvent(event)
             }
         }
     }

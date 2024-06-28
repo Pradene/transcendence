@@ -13,6 +13,7 @@ urlpatterns = [
 
     path('', views.base),
     path('chat/', views.base),
+    path('chat/<int:id>/', views.baseID),
     path('login/', views.base),
     path('profile/', views.base),
 

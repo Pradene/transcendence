@@ -10,7 +10,7 @@ export class AbstractView {
         return `<p>Default View</p>`
     }
 
-    addEventListeners() {}
+    async addEventListeners() {}
 
     async render(container) {
         container.innerHTML = await this.getHtml()

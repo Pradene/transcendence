@@ -49,20 +49,23 @@ nav a img {
 	pointer-events: none;
 }
 
+
+
 /* FORM */
 
-.center--box {
-	text-align: center;
+.mt-36 {
+	margin-top: 36px;
 }
 
-.border--box {
-	border: 2px solid white;
-	border-radius: 12px;
-	width: var(--content-width);
+.container--xs {
+	width: 100%;
 	max-width: 350px;
 	margin-left: auto;
 	margin-right: auto;
-	margin-bottom: 32px;
+}
+
+.text--center {
+	text-align: center;
 }
 
 .form {
@@ -74,25 +77,25 @@ nav a img {
 	padding: 36px 0px;
 }
 
-.form--field--wrapper {
+.form--field {
 	overflow: hidden;
 	display: block;
 	position: relative;
 	box-sizing: border-box;
+	border-bottom: 2px solid #b4b4b4;
 	margin-bottom: 12px;
 }
 
-.form--field--label {
+.form--label {
 	position: relative;
 	display: block;
 	height: 36px;
 	padding: 6px 0px;
-	border-bottom: 2px solid #737373;
 	background-color: var(--main-bg-color);
 	font-family: var(--main-font-family);
 }
 
-.form--field--label input {
+.form--label input {
 	position: absolute;
 	border: none;
 	outline: none;
@@ -107,7 +110,7 @@ nav a img {
 	transition: transform ease-in-out .1s;
 }
 
-.form--field--label span {
+.form--label span {
 	position: absolute;
 	top: 55%;
 	left: 3px;
@@ -129,14 +132,41 @@ nav a img {
 	font-family: var(--main-font-family);
 }
 
-.form a {
-	display: block;
-	margin-top: 36px;
+
+
+/* CHATROOM */
+
+#chatroom {
+	position: relative;
+	height: 90vh;
+	width: 100%;
+	max-width: 800px;
+	overflow: hidden;
 }
 
-.login--wrapper {
-	display: block;
-	padding: 36px 12px;
-	max-width: 350px;
-	text-align: center;
+#messages {
+	overflow-y: auto;
+}
+
+.message {
+	width: fit-content;
+	margin-bottom: 8px;
+	padding: 8px 12px;
+	border-radius: 10px;
+	background-color: #fff;
+}
+
+.message h5 {
+	color: #000;
+}
+
+.message p {
+	color: #000;
+	margin-top: 6px;
+}
+
+#message-form-container {
+	z-index: 1;
+	position: absolute;
+	bottom: 0%;
 }

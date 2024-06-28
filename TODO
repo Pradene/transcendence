@@ -1,0 +1,3 @@
+- login error
+- login page redirection if not connected
+- nginx configuration to serve static files

@@ -1,5 +1,6 @@
 import { AbstractView } from "./AbstractView.js"
 import { Router } from "../Router.js"
+import { WebSocketManager } from "../ChatWebSocket.js"
 
 export class Login extends AbstractView {
     constructor() {
@@ -8,27 +9,49 @@ export class Login extends AbstractView {
 
     async getHtml() {
         return `
-        <div>
-            <form method="POST" id="login-form">
-                <label>
-                    <input type="text" id="username" required></input>
-                    <span>Username</span>
-                </label>
-                <label>
-                    <input type="password" id="password" required></input>
-                    <span>Password</span>
-                </label>
+        <div class="container--xs">
+            <form method="POST" id="login-form" class="form">
+                <div class="form--field">
+                    <label class="form--label">
+                        <input class="form--input" type="text" id="username" required autocomplete="off"></input>
+                        <span>Username</span>
+                    </label>
+                </div>
+                <div class="form--field">
+                    <label class="form--label">
+                        <input class="form--input" type="password" id="password" required autocomplete="off"></input>
+                        <span>Password</span>
+                    </label>
+                </div>
                 <button type="submit">Login</button>
             </form>
-            <a data-link>Forgot password?</a>
+            <div class="text--center mt-36">
+                <a data-link>Forgot password?</a>
+            </div>
         </div>
-        <div>
+        <div class="container--xs text--center mt-36">
             <a data-link>Sign up</a>
         </div>
         `
     }
 
     addEventListeners() {
+
+        const inputs = document.querySelectorAll('.form--input')
+        inputs.forEach(input => {
+            input.addEventListener('input', function (event) {
+                if (input.value == '') {
+                    input.style.transform = "translateY(-50%)"
+                    input.nextElementSibling.style.transform = "translateY(-50%) scale(1)"
+                
+                } else {
+                    input.style.transform = "translateY(-20%)"
+                    input.nextElementSibling.style.transform = "translateY(-120%) scale(0.75)"
+                }
+        
+            })
+        })
+
         document.getElementById('login-form').addEventListener('submit', async (event) => {
             event.preventDefault()
             await this.handleLogin()
@@ -54,10 +77,12 @@ export class Login extends AbstractView {
             
             if (data.success) {
                 const router = new Router()
+                
+                const ws = new WebSocketManager("ws://localhost:8000/ws/chat/")
+                window.wsManager = ws
+
                 router.navigate('/')
 
-                this.WebSocketConnect()
-            
             } else {
                 console.log('error: ', data.message)
             }
@@ -69,14 +94,5 @@ export class Login extends AbstractView {
 
     getCSRFToken() {
         return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    }
-
-    WebSocketConnect() {
-        const url = 'ws://localhost:8000/ws/chat/'
-        const ws = new WebSocket(url)
-
-        ws.addEventListener('open', (event) => {
-            console.log('connect')
-        })
     }
 }
