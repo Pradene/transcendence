@@ -24,7 +24,12 @@ export class ChatRoom extends AbstractView {
     }
 
     async roomMessage(data) {
-        console.log(data)
+        const message = {
+            user: data.user,
+            content: data.content
+        }
+        
+        this.displayMessage(message)
     }
 
     async getRoomMessage(data) {
