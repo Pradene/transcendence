@@ -23,13 +23,20 @@ interface apicallresponse {
 
 /**
  * Request the server to create a game
- * 
+ *
  * @param data.username Username of the game creator
  */
 interface create_game_request extends apicallrequest {
     method: "create_game";
     data: {
-        username: string;
+        gameid: string;
+    }
+}
+
+export interface create_tournament_request extends apicallrequest {
+    method: "create_tournament";
+    data: {
+        gameid: string;
     }
 }
 
@@ -50,7 +57,7 @@ interface get_games_request extends apicallrequest {
 
 /**
  * List of all currently running games
- * 
+ *
  * @param data          A list of all currently running games
  * @param data.creator  The username of the creator of the game (same as gameid)
  * @param data.nplayers How many player are currently in the game
@@ -58,17 +65,24 @@ interface get_games_request extends apicallrequest {
  */
 interface get_games_response extends apicallresponse {
     method: "get_games",
-    data: [{
-        creator: string, //TODO remove this field when auth if functionnal, may be missused
-        player_count: number,
-        is_full: boolean
-    }]
+    data: {
+        games: [{
+            creator: string, //TODO remove this field when auth if functionnal, may be missused
+            player_count: number,
+            is_full: boolean
+        }],
+        tournaments: [{
+            creator: string,
+            player_count: number,
+            is_full: boolean
+        }]
+    }
 }
 
 /**
  * Ask the server to join a game with gameid being the username of the
  * creator of the game
- * 
+ *
  * @param data.gameid   The username of the game's creator
  */
 interface join_game_request extends apicallrequest {
@@ -88,13 +102,13 @@ interface join_game_response extends apicallresponse {
 
 /**
  * All data about a game, is used to display pong
- * 
+ *
  * @param data.status           The current status of the game
- * 
+ *
  * @param data.players          A list of all players currently in the game
  * @param data.players.name     The username of this player
  * @param data.players.position The current position of this player in the game
- * 
+ *
  * @param ball                  The ball
  * @param ball.position         The position of the ball
  */
@@ -123,13 +137,13 @@ interface update_player_request extends apicallrequest {
 }
 
 export {
-    apicall, 
+    apicall,
     apicallrequest,
-    apicallresponse, 
-    create_game_request, 
-    create_game_response, 
-    get_games_request, 
-    get_games_response, 
+    apicallresponse,
+    create_game_request,
+    create_game_response,
+    get_games_request,
+    get_games_response,
     join_game_request,
     join_game_response,
     update_game_response,

@@ -2,10 +2,10 @@ import { CurrentPlayer, Player } from "./Player";
 import { Ball } from "./Ball";
 import { Position } from "./Utils";
 import { GameSocket } from "./GameSocket";
+import { GAMECONTAINER } from "./DomElements";
 const screenWidth = 800;
 const screenHeight = 600;
 const default_color = "#ffffff";
-const container = document.querySelector("div.game-container div.game");
 class Pong {
     constructor() {
         this._current_player = undefined;
@@ -17,7 +17,7 @@ class Pong {
         this._canvas.style.backgroundColor = default_color;
         this._canvas.width = screenWidth;
         this._canvas.height = screenHeight;
-        container.appendChild(this._canvas);
+        GAMECONTAINER.appendChild(this._canvas);
     }
     /**
      * Display the game
@@ -33,7 +33,7 @@ class Pong {
      */
     stop() {
         this._current_player?.stop();
-        container.removeChild(this._canvas);
+        GAMECONTAINER.removeChild(this._canvas);
         GameSocket.get().removeGame();
     }
     /**

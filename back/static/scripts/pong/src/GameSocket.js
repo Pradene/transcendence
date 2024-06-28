@@ -1,5 +1,5 @@
 import { Pong } from "./Pong";
-import { USERNAMEINPUT, activateButtons, ROOMCONTAINER } from "./DomElements";
+import { USERNAMEINPUT, activateButtons, AVAILABLEGAMECONTAINER, AVAILABLETOURNAMENTCONTAINER } from "./DomElements";
 const hosturl = "ws://" + location.hostname + ":" + location.port + "/ws/game";
 //connect to the server, on failure script will throw an error and die
 const socket = await new Promise((resolve, reject) => {
@@ -42,39 +42,92 @@ class GameSocket {
         };
         this.send(request);
     }
-    processGames(response) {
-        let games = response.data;
-        ROOMCONTAINER.innerHTML = "";
+    processGetGames(response) {
+        let games = response.data.games;
+        let tournaments = response.data.tournaments;
+        AVAILABLEGAMECONTAINER.innerHTML = "";
         games.forEach(element => {
-            let room = document.createElement("div");
-            let creator = document.createElement("span");
-            let player_count = document.createElement("span");
-            let join = document.createElement("button");
-            room.classList.add("room");
-            creator.classList.add("gameid");
-            player_count.classList.add("player-count");
-            creator.textContent = element.creator;
-            player_count.textContent = element.player_count + "/2";
-            join.textContent = "Join";
-            join.addEventListener("click", () => {
-                let request = {
-                    method: "join_game",
-                    data: {
-                        gameid: element.creator
-                    }
-                };
-                this.send(request);
-            });
-            room.appendChild(creator);
-            room.appendChild(player_count);
-            room.appendChild(join);
-            ROOMCONTAINER.appendChild(room);
+            this.processOneGame(element.creator, element.player_count, element.is_full);
         });
+        tournaments.forEach(element => {
+            this.processOneTournament(element.creator, element.player_count, element.is_full);
+        });
+    }
+    processOneGame(creator, player_count, is_full) {
+        let game_container = document.createElement("div");
+        let creator_element = document.createElement("span");
+        let player_count_element = document.createElement("span");
+        let join_button = document.createElement("button");
+        game_container.classList.add("room");
+        creator_element.classList.add("gameid");
+        player_count_element.classList.add("player-count");
+        creator_element.textContent = creator;
+        player_count_element.textContent = player_count + "/2";
+        join_button.textContent = "Join";
+        join_button.addEventListener("click", () => {
+            let request = {
+                method: "join_game",
+                data: {
+                    gameid: creator
+                }
+            };
+            this.send(request);
+        });
+        join_button.disabled = is_full;
+        game_container.appendChild(creator_element);
+        game_container.appendChild(player_count_element);
+        game_container.appendChild(join_button);
+        AVAILABLEGAMECONTAINER.appendChild(game_container);
+    }
+    processOneTournament(creator, player_count, is_full) {
+        let tournament_container = document.createElement("div");
+        let creator_element = document.createElement("span");
+        let player_count_element = document.createElement("span");
+        let join_button = document.createElement("button");
+        tournament_container.classList.add("room");
+        creator_element.classList.add("gameid");
+        player_count_element.classList.add("player-count");
+        creator_element.textContent = creator;
+        player_count_element.textContent = player_count + "/4";
+        join_button.textContent = "Join";
+        join_button.addEventListener("click", () => {
+            let request = {
+                method: "join_game",
+                data: {
+                    gameid: creator
+                }
+            };
+            this.send(request);
+        });
+        join_button.disabled = is_full;
+        tournament_container.appendChild(creator_element);
+        tournament_container.appendChild(player_count_element);
+        tournament_container.appendChild(join_button);
+        AVAILABLETOURNAMENTCONTAINER.appendChild(tournament_container);
     }
     /**
      * Request the server to create a new game instance.
      */
     requestNewGame() {
+        console.log("Requesting new game");
+        if (this._currentGame) {
+            console.error("Already in a game");
+            return;
+        }
+        let username = USERNAMEINPUT.value;
+        if (!username) {
+            alert("Need an username");
+            return;
+        }
+        let request = {
+            method: "create_game",
+            data: {
+                gameid: username
+            }
+        };
+        this.send(request);
+    }
+    requestNewTournament() {
         if (this._currentGame) {
             return;
         }
@@ -82,9 +135,9 @@ class GameSocket {
         if (!username)
             return;
         let request = {
-            method: "create_game",
+            method: "create_tournament",
             data: {
-                username: username
+                gameid: username
             }
         };
         this.send(request);
@@ -114,10 +167,15 @@ class GameSocket {
         let gs = GameSocket.get();
         let response = JSON.parse(event.data);
         console.log("Received message", response);
+        //check for error
+        if (!response.status) {
+            alert("Error: " + response.reason);
+            return;
+        }
         //here global events
         switch (response.method) {
             case "get_games":
-                gs.processGames(response);
+                gs.processGetGames(response);
                 break;
             case "create_game":
                 gs.createNewGame(response);

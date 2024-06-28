@@ -31,12 +31,12 @@ div.game-container .game {
 div.game-container .game canvas {
   align-self: center;
 }
-div.game-container .rooms {
+div.game-container .available-games {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   border: 1px solid white;
 }
-div.game-container .rooms div.room {
+div.game-container .available-games .available-game div.room, div.game-container .available-games .available-tournament div.room {
   color: white;
   width: 100%;
   display: flex;

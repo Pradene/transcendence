@@ -86,6 +86,8 @@ class Game:
         self.__finishedLock.release()
 
     async def update(self) -> None:
+        """Send game datas to clients, and delete the game if it's finished"""
+
         # Send game datas to client
         data = self.__toJSON()
 
@@ -102,6 +104,7 @@ class Game:
             self.__shouldDelete = True
 
         self.__dataLock.acquire()
+        # data for first player
         dic1 = {
             "method": "update_game",
             "status": True,
@@ -119,6 +122,8 @@ class Game:
                 "ball": self.__ball.getPosition()
             }
         }
+
+        # data for second player
         dic2 = {
             "method": "update_game",
             "status": True,

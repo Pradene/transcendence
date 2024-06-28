@@ -37,26 +37,29 @@ div.game-container {
     }
   }
 
-  .rooms {
+  .available-games {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     border: 1px solid white;
 
-    div.room {
-      color: white;
+    .available-game, .available-tournament {
 
-      width: 100%;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
+      div.room {
+        color: white;
 
-      .gameid {
-      }
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
 
-      .player-count {
-      }
+        .gameid {
+        }
 
-      .join {
+        .player-count {
+        }
+
+        .join {
+        }
       }
     }
   }

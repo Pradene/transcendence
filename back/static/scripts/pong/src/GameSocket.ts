@@ -1,10 +1,16 @@
-import {Pong}                                                             from "./Pong";
-import {USERNAMEINPUT, activateButtons, deactivateButtons, ROOMCONTAINER} from "./DomElements";
+import {Pong}      from "./Pong";
+import {
+    USERNAMEINPUT,
+    activateButtons,
+    deactivateButtons,
+    AVAILABLEGAMECONTAINER,
+    AVAILABLETOURNAMENTCONTAINER
+}                  from "./DomElements";
 import {
     apicallrequest,
     apicallresponse,
     create_game_request,
-    create_game_response,
+    create_game_response, create_tournament_request,
     get_games_request,
     get_games_response, join_game_request, update_game_response
 } from "./Api";
@@ -27,7 +33,7 @@ const socket: WebSocket = await new Promise<WebSocket>((resolve, reject) => {
     return ws;
 }).catch((e) => {
     throw new Error("Failed to connect to server: " + e);
-});
+}) as WebSocket;
 
 class GameSocket {
     private constructor() {
@@ -57,44 +63,105 @@ class GameSocket {
         this.send(request);
     }
 
-    private processGames(response: get_games_response): void {
-        let games = response.data;
+    private processGetGames(response: get_games_response): void {
+        let games       = response.data.games;
+        let tournaments = response.data.tournaments;
 
-        ROOMCONTAINER.innerHTML = "";
+        AVAILABLEGAMECONTAINER.innerHTML = "";
         games.forEach(element => {
-            let room         = document.createElement("div");
-            let creator      = document.createElement("span");
-            let player_count = document.createElement("span");
-            let join         = document.createElement("button");
-
-            room.classList.add("room");
-            creator.classList.add("gameid");
-            player_count.classList.add("player-count");
-
-            creator.textContent      = element.creator;
-            player_count.textContent = element.player_count + "/2";
-            join.textContent         = "Join";
-            join.addEventListener("click", () => {
-                let request: join_game_request = {
-                    method: "join_game",
-                    data:   {
-                        gameid: element.creator
-                    }
-                };
-                this.send(request);
-            });
-
-            room.appendChild(creator);
-            room.appendChild(player_count);
-            room.appendChild(join);
-            ROOMCONTAINER.appendChild(room);
+            this.processOneGame(element.creator, element.player_count, element.is_full);
         });
+        tournaments.forEach(element => {
+            this.processOneTournament(element.creator, element.player_count, element.is_full);
+        })
+    }
+
+    private processOneGame(creator: string, player_count: number, is_full: boolean): void {
+        let game_container       = document.createElement("div");
+        let creator_element      = document.createElement("span");
+        let player_count_element = document.createElement("span");
+        let join_button          = document.createElement("button");
+
+        game_container.classList.add("room");
+        creator_element.classList.add("gameid");
+        player_count_element.classList.add("player-count");
+
+        creator_element.textContent      = creator;
+        player_count_element.textContent = player_count + "/2";
+        join_button.textContent          = "Join";
+        join_button.addEventListener("click", () => {
+            let request: join_game_request = {
+                method: "join_game",
+                data:   {
+                    gameid: creator
+                }
+            };
+            this.send(request);
+        });
+        join_button.disabled = is_full;
+
+        game_container.appendChild(creator_element);
+        game_container.appendChild(player_count_element);
+        game_container.appendChild(join_button);
+        AVAILABLEGAMECONTAINER.appendChild(game_container);
+    }
+
+    private processOneTournament(creator: string, player_count: number, is_full: boolean): void {
+        let tournament_container = document.createElement("div");
+        let creator_element      = document.createElement("span");
+        let player_count_element = document.createElement("span");
+        let join_button          = document.createElement("button");
+
+        tournament_container.classList.add("room");
+        creator_element.classList.add("gameid");
+        player_count_element.classList.add("player-count");
+
+        creator_element.textContent      = creator;
+        player_count_element.textContent = player_count + "/4";
+        join_button.textContent          = "Join";
+        join_button.addEventListener("click", () => {
+            let request: join_game_request = {
+                method: "join_game",
+                data:   {
+                    gameid: creator
+                }
+            };
+            this.send(request);
+        });
+        join_button.disabled = is_full;
+
+        tournament_container.appendChild(creator_element);
+        tournament_container.appendChild(player_count_element);
+        tournament_container.appendChild(join_button);
+        AVAILABLETOURNAMENTCONTAINER.appendChild(tournament_container);
     }
 
     /**
      * Request the server to create a new game instance.
      */
     public requestNewGame(): void {
+        console.log("Requesting new game")
+        if (this._currentGame) {
+            console.error("Already in a game")
+            return;
+        }
+
+        let username = USERNAMEINPUT.value;
+        if (!username) {
+            alert("Need an username");
+            return;
+        }
+
+        let request: create_game_request = {
+            method: "create_game",
+            data:   {
+                gameid: username
+            }
+        }
+        this.send(request);
+    }
+
+    public requestNewTournament(): void {
         if (this._currentGame) {
             return;
         }
@@ -103,10 +170,10 @@ class GameSocket {
         if (!username)
             return;
 
-        let request: create_game_request = {
-            method: "create_game",
+        let request: create_tournament_request = {
+            method: "create_tournament",
             data:   {
-                username: username
+                gameid: username
             }
         }
         this.send(request);
@@ -140,10 +207,16 @@ class GameSocket {
         let response = JSON.parse(event.data) as apicallresponse;
         console.log("Received message", response);
 
+        //check for error
+        if (!response.status) {
+            alert("Error: " + response.reason);
+            return;
+        }
+
         //here global events
         switch (response.method) {
             case "get_games":
-                gs.processGames(response as get_games_response);
+                gs.processGetGames(response as get_games_response);
                 break;
             case "create_game":
                 gs.createNewGame(response as create_game_response);

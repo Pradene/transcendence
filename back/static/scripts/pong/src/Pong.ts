@@ -8,7 +8,6 @@ import {GAMECONTAINER}                        from "./DomElements";
 const screenWidth: number = 800;
 const screenHeight: number = 600;
 const default_color: string = "#ffffff";
-const container: HTMLDivElement = document.querySelector("div.game-container div.game")!;
 
 class Pong {
     constructor() {
@@ -23,7 +22,7 @@ class Pong {
         this._canvas.width = screenWidth;
         this._canvas.height = screenHeight;
 
-        container.appendChild(this._canvas);
+        GAMECONTAINER.appendChild(this._canvas);
     }
 
     /**
@@ -41,7 +40,7 @@ class Pong {
      */
     public stop(): void {
         this._current_player?.stop();
-        container.removeChild(this._canvas);
+        GAMECONTAINER.removeChild(this._canvas);
         GameSocket.get().removeGame();
     }
 
@@ -90,7 +89,7 @@ class Pong {
         return this._canvas;
     }
 
-    public get running(): boolean {
+    private get running(): boolean {
         return this._running
     }
 

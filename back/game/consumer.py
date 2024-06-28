@@ -3,9 +3,12 @@ import logging
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from typing import Union, List
 import json
-from game.gameutils.PlayerInterface import PlayerInterface
+
 from game.response import Response
+
+from game.gameutils.PlayerInterface import PlayerInterface
 from game.gameutils.Game import Game
+from game.gameutils.Tournament import Tournament
 from game.gameutils.GameManager import GameManager
 
 
@@ -33,7 +36,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
         self.__interface: PlayerInterface = PlayerInterface('p1', self.updateClient, self.__deleteCurrentGame)
-        self.__currentGame: Union[Game, None] = None
+        self.__currentGame: Union[Game, Tournament, None] = None
 
         GameConsumer.USERS.append(self)
 
@@ -64,6 +67,8 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
                 await self.getGames()
             case "create_game":
                 await self.createGame(data)
+            case "create_tournament":
+                await self.createTournament(data)
             case "join_game":
                 await self.joinGame(data)
             case "update_player":
@@ -140,7 +145,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
         # Check request format
         try:
-            self.__interface.setName(data["data"]["username"])
+            self.__interface.setName(data["data"]["gameid"])
         except KeyError:
             response = GameConsumerResponse(method="create_game", status=False, reason=Response.INVALIDREQUEST)
             await self.send_json(response.toJSON())
@@ -153,6 +158,27 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         # Send the game list to all clients
         for user in GameConsumer.USERS:
             await user.getGames()
+
+    async def createTournament(self, data):
+        """Create a new tournament and add the player to it"""
+
+        # Check if the user can join a game
+        if self.__currentGame is not None:
+            response = GameConsumerResponse(method="create_tournament", status=False, reason=Response.ALREADYINGAME)
+            await self.send_json(response.toJSON())
+            return
+        
+        # Check request format
+        try:
+            tournamentid = data["data"]["gameid"]
+            
+            self.__interface.setName(tournamentid)
+            manager: GameManager = GameManager()
+            self.__currentGame = manager.createTournament(self.__interface)
+        except KeyError:
+            response = GameConsumerResponse(method="create_tournament", status=False, reason=Response.INVALIDREQUEST)
+            await self.send_json(response.toJSON())
+            return
 
     def __deleteCurrentGame(self):
         logging.log(logging.INFO, f"User {self.__interface.getName()} left the game {self.__currentGame.getGameid()}")
