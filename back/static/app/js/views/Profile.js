@@ -7,6 +7,7 @@ export class Profile extends AbstractView {
 
     async getHtml() {
         return `
+        <nav-component></nav-component>
         <h1>Profile</h1>
         `
     }

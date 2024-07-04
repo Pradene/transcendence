@@ -134,6 +134,19 @@ nav a img {
 
 
 
+
+/* CHAT */
+
+#rooms {
+	width: 100%;
+}
+
+.room {
+	padding: 12px 16px;
+	border-bottom: 1px solid #737373;
+}
+
+
 /* CHATROOM */
 
 #chatroom {
@@ -141,11 +154,20 @@ nav a img {
 	height: 90vh;
 	width: 100%;
 	max-width: 800px;
-	overflow: hidden;
 }
 
 #messages {
-	overflow-y: auto;
+	overflow-y: scroll;
+	height: 95%;
+
+	/* Remove scroll bar */
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
+}
+
+/* Safari and Chrome */
+#messages::-webkit-scrollbar {
+    display: none;
 }
 
 .message {
@@ -166,6 +188,7 @@ nav a img {
 }
 
 #message-form-container {
+	height: 5%;
 	z-index: 1;
 	position: absolute;
 	bottom: 0%;

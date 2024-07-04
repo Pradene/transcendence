@@ -15,6 +15,7 @@ urlpatterns = [
     path('chat/', views.base),
     path('chat/<int:id>/', views.baseID),
     path('login/', views.base),
+    path('signup/', views.base),
     path('profile/', views.base),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

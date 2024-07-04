@@ -5,6 +5,7 @@ export class Router {
 
         Router.instance = this
 
+        this.userConnectStatus = false;
         this.routes = routes
         this.container = container
     }
@@ -19,8 +20,25 @@ export class Router {
         this.handleRoute()
     }
 
+    userIsConnected() {
+        return this.userConnectStatus
+    }
+
+    setUserIsConnected() {
+        this.userConnectStatus = true
+    }
+
     handleRoute() {
-        const location = window.location.pathname
+        let location
+
+        if (!this.userIsConnected()
+        && window.location.pathname != '/login/'
+        && window.location.pathname != '/signup/') {
+            location = '/login/'
+        } else {
+            location = window.location.pathname
+        }
+
         const matchedRoute = this.matchRoute(location)
         if (matchedRoute) {
             const view = matchedRoute.route.view

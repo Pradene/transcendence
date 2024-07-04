@@ -7,7 +7,9 @@ export class AbstractView {
     }
 
     async getHtml() {
-        return `<p>Default View</p>`
+        return `
+        <p>Default View</p>
+        `
     }
 
     async addEventListeners() {}

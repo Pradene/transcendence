@@ -4,7 +4,10 @@ import { Chat } from './views/Chat.js'
 import { ChatRoom } from './views/ChatRoom.js'
 import { Profile } from './views/Profile.js'
 import { Login } from './views/Login.js'
+import { Signup } from "./views/Signup.js"
 import { WebSocketManager } from "./ChatWebSocket.js"
+
+import './components/Nav.js'
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -19,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {path: '/chat/', view: new Chat()},
         {path: '/chat/:id/', view: new ChatRoom()},
         {path: '/login/', view: new Login()},
+        {path: '/signup/', view: new Signup()},
         {path: '/profile/', view: new Profile()},
     ])
 

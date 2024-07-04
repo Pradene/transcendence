@@ -1,7 +1,7 @@
 import { AbstractView } from "./AbstractView.js"
 import { Router } from "../Router.js"
 
-export class Login extends AbstractView {
+export class Signup extends AbstractView {
     constructor() {
         super()
     }
@@ -10,7 +10,7 @@ export class Login extends AbstractView {
         return `
         <div class="container--fp">
             <div class="container--xs">
-                <form method="POST" id="login-form" class="form">
+                <form method="POST" id="signup-form" class="form">
                     <div class="form--field">
                         <label class="form--label">
                             <input class="form--input" type="text" id="username" required autocomplete="off"></input>
@@ -23,14 +23,17 @@ export class Login extends AbstractView {
                             <span>Password</span>
                         </label>
                     </div>
-                    <button type="submit">Login</button>
+                    <div class="form--field">
+                        <label class="form--label">
+                            <input class="form--input" type="password" id="password-confirmation" required autocomplete="off"></input>
+                            <span>Password</span>
+                        </label>
+                    </div>
+                    <button type="submit">Sign up</button>
                 </form>
-                <div class="text--center mt-36">
-                    <a data-link>Forgot password?</a>
-                </div>
             </div>
             <div class="container--xs text--center mt-36">
-                <a href='/signup/' data-link>Sign up</a>
+                <a href='/login/' data-link>Login</a>
             </div>
         </div>
         `
@@ -53,7 +56,7 @@ export class Login extends AbstractView {
             })
         })
 
-        document.getElementById('login-form').addEventListener('submit', async (event) => {
+        document.getElementById('signup-form').addEventListener('submit', async (event) => {
             event.preventDefault()
             await this.handleSubmit()
         })
@@ -61,29 +64,26 @@ export class Login extends AbstractView {
 
     async handleSubmit() {
         const username = document.getElementById("username").value
-        const password = document.getElementById("password").value
+        const password1 = document.getElementById("password").value
+        const password2 = document.getElementById("password-confirmation").value
         const csrfToken = this.getCSRFToken()
         
         try {
-            const response = await fetch("http://localhost:8000/api/account/login/", {
+            const response = await fetch("http://localhost:8000/api/account/signup/", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrfToken
                 },
-                body: JSON.stringify({username, password})
+                body: JSON.stringify({username, password1, password2})
             })
             
             const data = await response.json()
             
             if (data.success) {
-                const ws = window.wsManager
-                ws.connect('ws://localhost:8000/ws/chat/')
-                
                 const router = new Router()
 
-                router.setUserIsConnected()
-                router.navigate('/')
+                router.navigate('/login/')
 
             } else {
                 console.log('error: ', data.errors)

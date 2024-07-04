@@ -7,6 +7,7 @@ export class Home extends AbstractView {
 
     async getHtml() {
         return `
+        <nav-component></nav-component>
         <h1>Hello World</h1>
         `
     }

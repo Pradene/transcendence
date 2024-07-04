@@ -43,10 +43,8 @@ export class WebSocketManager {
     }
 
     sendMessage(message) {
-        if (this.socket.readyState === WebSocket.OPEN) {
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(JSON.stringify(message))
-        } else {
-            console.error('WebSocket is not open. Ready state:', this.socket.readyState)
         }
     }
 }

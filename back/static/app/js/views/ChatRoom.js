@@ -11,15 +11,16 @@ export class ChatRoom extends AbstractView {
 
     async getHtml() {
         return `
-            <div id="chatroom">
-                <div id="messages"></div>
-                <div id="message-form-container">
-                    <form id="message-form">
-                        <input type="text" id="message-input" placeholder="Message..."></input>
-                        <button type="submit" id="message-submit">Send</button>
-                    </form>
-                </div>
+        <nav-component></nav-component>
+        <div id="chatroom">
+            <div id="messages"></div>
+            <div id="message-form-container">
+                <form id="message-form">
+                    <input type="text" id="message-input" placeholder="Message..." autocomplete=off></input>
+                    <button type="submit" id="message-submit">Send</button>
+                </form>
             </div>
+        </div>
         `
     }
 
@@ -28,13 +29,15 @@ export class ChatRoom extends AbstractView {
             user: data.user,
             content: data.content
         }
-        
+
         this.displayMessage(message)
+        this.scrollToBottom()
     }
 
     async getRoomMessage(data) {
         const messages = data.messages
         messages.forEach(message => this.displayMessage(message))
+        this.scrollToBottom()
     }
 
     async getInitialMessages() {
@@ -64,7 +67,6 @@ export class ChatRoom extends AbstractView {
                     content: value
                 })
 
-
                 input.value = ''
             }
         })
@@ -91,5 +93,10 @@ export class ChatRoom extends AbstractView {
         `
 
         container.appendChild(div)
+    }
+
+    scrollToBottom() {
+        const container = document.getElementById('messages')
+        container.scrollTop = container.scrollHeight + 100
     }
 }
