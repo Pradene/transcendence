@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+</head>
+<body>
+	<p>3D Pong</p>
+       	 <!-- Game Container, contain the game and the list of available rooms -->
+			<canvas id="3D_Game"></canvas>
+    
+		<!-- <script type="importmap">
+			{"imports": {"three": "../../build/three.module.js"}}
+			</script> -->
+			<script type="importmap">
+				{
+				  "imports": {
+					"three": "https://cdn.jsdelivr.net/npm/three@0.166.0/build/three.module.js",
+					"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.166.0/examples/jsm/"
+				  }
+				}
+			</script>		
+			<script type="module">
+			import * as THREE from 'three';
+			import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+
+			console.log(THREE)
+	
+	
+			function main() {
+
+			
+			//get the canvas
+			const canvas = document.getElementById("3D_Game")
+			//Create the renderer
+			const renderer = new THREE.WebGLRenderer({antialias: true, canvas});
+		
+			//Create the Camera
+			const fov = 75; //field of view
+			const aspect = 2;
+			const near = 0.1; //where the render start
+			const far = 150; //where the render stop
+			const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+			camera.position.z = 8; //position of the camera on the z axis
+			/* camera.position.z = 3; //position of the camera on the z axis*/
+			//camera.position.x = -4; 
+
+			const controls = new OrbitControls(camera, canvas);
+			controls.target.set(0, 5, 0);
+			controls.update();
+
+			// class MinMaxGUIHelper {
+			// 	constructor(obj, minProp, maxProp, minDif) {
+			// 		this.obj = obj;
+			// 		this.minProp = minProp;
+			// 		this.maxProp = maxProp;
+			// 		this.minDif = minDif;
+			// 	}
+			// 	get min() {
+			// 		return this.obj[this.minProp];
+			// 	}
+			// 	set min(v) {
+			// 		this.obj[this.minProp] = v;
+			// 		this.obj[this.maxProp] = Math.max(this.obj[this.maxProp], v + this.minDif);
+			// 	}
+			// 	get max() {
+			// 		return this.obj[this.maxProp];
+			// 	}
+			// 	set max(v) {
+			// 		this.obj[this.maxProp] = v;
+			// 		this.min = this.min;  // this will call the min setter
+			// 	}
+			// }
+
+			function updateCamera() {
+				camera.updateProjectionMatrix();
+			}
+			
+			// const gui = new GUI();
+			// gui.add(camera, 'fov', 1, 180).onChange(updateCamera);
+			// const minMaxGUIHelper = new MinMaxGUIHelper(camera, 'near', 'far', 0.1);
+			// gui.add(minMaxGUIHelper, 'min', 0.1, 50, 0.1).name('near').onChange(updateCamera);
+			// gui.add(minMaxGUIHelper, 'max', 0.1, 50, 0.1).name('far').onChange(updateCamera);
+		
+			//Create the Scene
+			const scene = new THREE.Scene();
+		
+			//Create the paddle element to display in scene
+			const paddleWidth = 3;
+			const paddleHeight = 1;
+			const paddleDepth = 1;
+			const paddleGeometry = new THREE.BoxGeometry(paddleWidth, paddleHeight, paddleDepth);
+		
+			//Create the ball element
+			const radius = 1;
+			const widthSegments = 30;
+			const heightSegments = 30;
+			const ballGeometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
+		
+			//had light
+			const color = 0xFFFFFF;
+			const intensity = 3;
+			const DirectionalLight = new THREE.DirectionalLight(color, intensity);
+			DirectionalLight.position.set(-1, 2, 4);
+
+			const AmbientLight = new THREE.AmbientLight(color, 0.5);
+		
+			//Create a material for the element
+			const material = new THREE.MeshPhongMaterial({color: 0x44aa88});
+		
+			//Create a mesh : element + material
+			const player = new THREE.Mesh(paddleGeometry, material);
+			const opponent = new THREE.Mesh(paddleGeometry, material);
+			const ball = new THREE.Mesh(ballGeometry, material);
+		
+			player.position.x = -6;
+			opponent.position.x = 6;
+
+			
+			scene.add(player, opponent, ball, DirectionalLight, AmbientLight);
+			
+			function render(time){
+				/* player.position.x = Pong.player.position.x;
+				player.position.y = Pong.player.position.y;
+				opponent.position.x = Pong.opponent.position.x;
+				opponent.position.y = Pong.opponent.position.y;
+				ball.position.x = Pong.ball.position.x;
+				ball.position.y = Pong.ball.position.y; */
+				time *= 0.001;  // convert time to seconds
+ 
+ 				player.rotation.x = time;
+				player.rotation.y = time;
+				opponent.rotation.x = time;
+				opponent.rotation.y = time;
+				ball.rotation.x = time;
+				ball.rotation.y = time;
+		
+				updateCamera();
+
+				renderer.render(scene, camera);
+		
+				requestAnimationFrame(render);
+			}
+		
+			requestAnimationFrame(render);
+		};
+
+		main();
+		</script>
+</body>
+</html>

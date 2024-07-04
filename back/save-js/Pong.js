@@ -12,24 +12,21 @@ class Pong {
         this._current_player = undefined;
         this._opponent = undefined;
         this._canvas = document.createElement("canvas");
-        //this._context = this._canvas.getContext("2d");
+        this._context = this._canvas.getContext("2d");
         this._ball = new Ball(new Position(0, 0));
         this._running = false;
         this._canvas.style.backgroundColor = default_color;
         this._canvas.width = screenWidth;
         this._canvas.height = screenHeight;
-		this._renderer = new ThreeD(this._canvas);
-		// this._renderer.initThreejs()
+		this._renderer = new ThreeD();
+		this._renderer.initThreejs()
         container.appendChild(this._canvas);
     }
     /**
      * Display the game
      */
     display() {
-        //this._context.clearRect(0, 0, screenWidth, screenHeight);
-		console.log(this._current_player)
-		console.log(this._opponent)
-		console.log(this._ball)
+        this._context.clearRect(0, 0, screenWidth, screenHeight);
 		this._renderer.render(this._current_player._position[0], this._current_player._position[1], this._opponent._position[0], this._opponent._position[1], this._ball._position[0], this._ball._position[1])
 /*         this._current_player?.display(this._context);
         this._opponent?.display(this._context);
@@ -57,19 +54,12 @@ class Pong {
             this.stop();
         }
         this._current_player?.setPositionFromArray(response.data.current_player.position);
-		this._renderer._player.position.set(this._current_player._position[0], this._current_player._position[1], 0)
         this._opponent?.setPositionFromArray(response.data.opponent.position);
-		this._renderer._opponent.position.set(this._opponent._position[0], this._opponent._position[1], 0)
         this._current_player?.setScore(response.data.current_player.score);
         this._opponent?.setScore(response.data.opponent.score);
         this._ball.position = new Position(response.data.ball[0], response.data.ball[1]);
-		this._renderer._ball.position.set(this._ball._position[0], this._ball._position[1], 0)
-
         this._running = response.data.status === "running";
         //now redisplay the game
-		console.log(this._current_player)
-		console.log(this._opponent)
-		console.log(this._ball)
         this.display(); //TODO change this to be called by an interval instead
     }
     /**
@@ -108,6 +98,5 @@ class Pong {
     _opponent;
     _ball;
     _running;
-	_renderer;
 }
 export { Pong };

@@ -1,0 +1,80 @@
+{% extends "index.html" %}
+{% block title %}3D Pong{% endblock %}
+
+{% block content %}
+	<script type="module">
+		import * as THREE from 'three';
+
+
+		function main() {
+	//Create the renderer
+	const renderer = new THREE.WebGLRenderer({antialias: true, canvas});
+
+	//Create the Camera
+	const fov = 75; //field of view
+	const aspect = 2;
+	const near = 0.1; //where the render start
+	const far = 5; //where the render stop
+	const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+	camera.position.z = 3; //position of the camera on the z axis
+	camera.position.x = -4;
+
+	//Create the Scene
+	const scene = new THREE.Scene();
+
+	//Create the paddle element to display in scene
+	const paddleWidth = 4;
+	const paddleHeight = 1;
+	const paddleDepth = 1;
+	const paddleGeometry = new THREE.BoxGeometry(paddleWidth, paddleHeight, paddleDepth);
+
+	//Create the ball element
+	const radius = 1;
+	const widthSegments = 30;
+	const heightSegments = 30;
+	const ballGeometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
+
+	//had light
+	const color = 0xFFFFFF;
+	const intensity = 3;
+	const light = new THREE.DirectionalLight(color, intensity);
+	light.position.set(-1, 2, 4);
+
+	//Create a material for the element
+	const material = new THREE.MeshPhongMaterial({color: 0x44aa88});
+
+	//Create a mesh : element + material
+	const player = new THREE.Mesh(paddleGeometry, material);
+	const opponent = new THREE.Mesh(paddleGeometry, material);
+	const ball = new THREE.Mesh(ballGeometry, material);
+
+	scene.add(player, opponent, ball, light);
+
+	function render(){
+		player.position.x = Pong.player.position.x;
+		player.position.y = Pong.player.position.y;
+		opponent.position.x = Pong.opponent.position.x;
+		opponent.position.y = Pong.opponent.position.y;
+		ball.position.x = Pong.ball.position.x;
+		ball.position.y = Pong.ball.position.y;
+
+		renderer.render(scene, camera);
+
+		requestAnimationFrame(render);
+	}
+
+	requestAnimationFrame(render);
+};
+	</script>
+	<body>
+		
+   		<div data-title="3D Pong">
+			{% include "navbar.html" %} <!-- Include the navbar -->
+			<p>3D Pong</p>
+       	 	<div class="game-container"> <!-- Game Container, contain the game and the list of available rooms -->
+				<canvas id="3D_Game"></canvas>
+        	</div>
+   		</div>
+</body>
+    {% include "footer.html" %}
+{% endblock %}
