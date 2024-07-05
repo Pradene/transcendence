@@ -4,70 +4,30 @@
 	{% load static %}
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>{% block title %}Transcendence{% endblock %}</title>
-	<link rel="stylesheet" type="text/css" href="{% static 'home/css/style.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'home/css/game.css' %}">
-	<script src="{% static 'scripts/pong/dist/main.js' %}" defer></script>
+	<meta name="csrf-token" content="{{ csrf_token }}">
+	<title>Transcendence</title>
+	<link rel="stylesheet" type="text/css" href="{% static 'app/css/reset.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'app/css/var.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'app/css/style.css' %}">
+	
+	<script defer type="module" src="{% static 'app/js/main.js' %}"></script>
+
 </head>
 <body>
-	<div id="content">
-		{% block content %}
-		{% endblock %}
+	<div id="app"></div>
+	<div class="game-container"> <!-- Game Container, contain the game and the list of available rooms -->
+		<div class="game-container-header">
+			<input type="text" name="" id="username"> <!-- Username input -->
+			<button class="create-game">Create Game</button> <!-- Create Game Button -->
+			<button class="create-tournament">Create Tournament</button> <!-- Create Tournament Button -->
+			<button class="refresh-room">Refresh Room</button> <!-- Refresh Room Button -->
+		</div>
+		<div class="game"></div> <!-- Game Container, contain the game -->
+		<div class="available-games"> <!-- Available Games Container, contain the list of available games -->
+			<div class="available-game"></div> <!-- Available Game Container, contain the list of available games -->
+			<div class="available-tournament"></div> <!-- Available Tournament Container, contain the list of available tournaments -->
+		</div>
 	</div>
-
-    {% block script %}
-    {% endblock %}
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            function handleClick(event) {
-                event.preventDefault()
-                fetchContent(this.href)
-            }
-
-            function bind() {
-                document.querySelectorAll('.nav--link').forEach(link => {
-                    link.removeEventListener('click', handleClick)
-                    link.addEventListener('click', handleClick)
-                })
-            }
-            
-            function fetchContent(url) {
-                fetch(url, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok)
-                        throw new Error('Network response was not ok')
-                    return response.text()
-                })
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html')
-                    const content = doc.querySelector('div[data-title]')
-                    if (content) {
-                        document.getElementById('content').innerHTML = content.innerHTML
-                        document.title = content.getAttribute('data-title')
-                        document.body.focus()
-                    }
-                    // Only push a new state if the URL has changed
-                    if (url !== window.location.href)
-                        window.history.pushState({url: url}, '', url)
-                    bind()
-                })
-                .catch(error => console.error('Error fetching content:', error))
-            }
-            
-            window.onpopstate = function(event) {
-                if (event.state)
-                    fetchContent(event.state.url)
-            }
-            
-            bind()
-        })
-    </script>
-
+</div>
 </body>
 </html>

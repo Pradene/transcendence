@@ -1,0 +1,17 @@
+@font-face {
+	font-family: 'Epilogue';
+	src: url('../../fonts/Epilogue-Regular.ttf') format('truetype');
+}
+
+
+
+:root {
+	--main-bg-color: black;
+	--main-color: white;
+
+	--main-font-family: Epilogue;
+	--default-font-size: 12px;
+	
+	--content-width: 90%;
+	--nav-link-padding: 16px;
+}
