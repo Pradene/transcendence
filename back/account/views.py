@@ -1,40 +1,68 @@
+import json
+
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
-from .forms import LoginForm, SignupForm
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
-def userSignup(request):
-    if request.method == 'POST':
-        form = SignupForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('login')
-    else:
-        form = SignupForm()
+from .models import CustomUser
 
-    return render(request, 'account/signup.html', {'form': form})
 
-def userLogin(request):
-    if request.method == 'POST':
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-            user = authenticate(request, username=username, password=password)
-            if user:
-                login(request, user)
-                return redirect('profile')
-    else:
-        form = LoginForm()
+@require_POST
+def user_signup(request):
+    try:
+        data = json.loads(request.body)
+        
+        username = data.get('username')
+        password1 = data.get('password1')
+        password2 = data.get('password2')
 
-    return render(request, 'account/login.html', {'form': form})
+        errors = {}
 
-def userLogout(request):
-    logout(request)
-    return redirect('login')
+        if not username:
+            errors['username'] = 'This field is required.'
+        elif CustomUser.objects.filter(username=username).exists():
+            errors['username'] = 'A user with that username already exists.'
 
-def profile(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
+        if password1 != password2:
+            errors['password'] = "The password doesn't match."
+        elif len(password1) < 8:
+            errors['password'] = 'Password must be at least 8 characters long.'
 
-    return render(request, 'account/profile.html')
+        if errors:
+            return JsonResponse({'success': False, 'errors': errors})
+
+        try:
+            user = CustomUser.objects.create_user(username=username, password=password1)
+            user.save()
+            return JsonResponse({'success': True})
+        
+        except Exception as e:
+            return JsonResponse({'success': False, 'errors': str(e)})
+     
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'errors': 'Invalid JSON'})
+
+
+@require_POST
+def user_login(request):
+    try:
+        data = json.loads(request.body)
+
+        username = data.get('username')
+        password = data.get('password')
+        
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'errors': 'Login failed'})
+    
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'errors': 'Invalid JSON'})
+    
+    except Exception as e:
+        return JsonResponse({'success': False, 'errors': str(e)})

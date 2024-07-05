@@ -4,22 +4,17 @@
 	{% load static %}
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>{% block title %}Transcendence{% endblock %}</title>
+	<meta name="csrf-token" content="{{ csrf_token }}">
+	<title>Transcendence</title>
 	<link rel="stylesheet" type="text/css" href="{% static 'app/css/reset.css' %}">
 	<link rel="stylesheet" type="text/css" href="{% static 'app/css/var.css' %}">
 	<link rel="stylesheet" type="text/css" href="{% static 'app/css/style.css' %}">
+	
+	<script defer type="module" src="{% static 'app/js/main.js' %}"></script>
+
 </head>
 <body>
-	<div id="app">
-		{% block content %}
-		{% endblock %}
-	</div>
-
-    {% block script %}
-    {% endblock %}
-
-    <script src="{% static 'app/js/nav.js' %}"></script>
-	<script src="{% static 'app/js/form.js' %}"></script>
+	<div id="app"></div>
 
 </body>
 </html>
