@@ -1,5 +1,6 @@
 import { AbstractView } from "./AbstractView.js"
 import { Router } from "../Router.js"
+import { getCSRFToken } from "../utils.js"
 
 export class Login extends AbstractView {
     constructor() {
@@ -15,12 +16,14 @@ export class Login extends AbstractView {
                         <label class="form--label">
                             <input class="form--input" type="text" id="username" required autocomplete="off"></input>
                             <span>Username</span>
+                            <div class="error"></div>
                         </label>
                     </div>
                     <div class="form--field">
                         <label class="form--label">
                             <input class="form--input" type="password" id="password" required autocomplete="off"></input>
                             <span>Password</span>
+                            <div class="error"></div>
                         </label>
                     </div>
                     <button type="submit">Login</button>
@@ -62,10 +65,10 @@ export class Login extends AbstractView {
     async handleSubmit() {
         const username = document.getElementById("username").value
         const password = document.getElementById("password").value
-        const csrfToken = this.getCSRFToken()
+        const csrfToken = getCSRFToken()
         
         try {
-            const response = await fetch("http://localhost:8000/api/account/login/", {
+            const response = await fetch("/api/user/login/", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -78,7 +81,7 @@ export class Login extends AbstractView {
             
             if (data.success) {
                 const ws = window.wsManager
-                ws.connect('ws://localhost:8000/ws/chat/')
+                ws.connect('ws://localhost:3000/ws/chat/')
                 
                 const router = new Router()
 
@@ -86,6 +89,7 @@ export class Login extends AbstractView {
                 router.navigate('/')
 
             } else {
+                this.displayErrors(data.errors)
                 console.log('error: ', data.errors)
             }
                 
@@ -94,7 +98,7 @@ export class Login extends AbstractView {
         }
     }
 
-    getCSRFToken() {
-        return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    displayErrors(errors) {
+
     }
 }
