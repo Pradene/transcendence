@@ -45,7 +45,10 @@ class GameSocket {
     processGetGames(response) {
         let games = response.data.games;
         let tournaments = response.data.tournaments;
+        // clean containers
         AVAILABLEGAMECONTAINER.innerHTML = "";
+        AVAILABLETOURNAMENTCONTAINER.innerHTML = "";
+        // insert elements
         games.forEach(element => {
             this.processOneGame(element.creator, element.player_count, element.is_full);
         });

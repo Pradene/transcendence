@@ -118,18 +118,19 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             response = GameConsumerResponse(method="join_game", status=False, reason=Response.ALREADYINGAME)
             await self.send_json(response.toJSON())
             return
-        elif not manager.gameExists(gameid):
+
+        try:
+            #join the game
+            self.__currentGame = manager.getGameOrTournament(gameid)
+            logging.log(logging.INFO, self.__currentGame)
+            await self.__currentGame.join(self.__interface)
+
+            #update game list for all users
+            for user in GameConsumer.USERS:
+                await user.getGames()
+        except KeyError:
             response = GameConsumerResponse(method="join_game", status=False, reason=Response.NOSUCHGAME)
             await self.send_json(response.toJSON())
-            return
-
-        #join the game
-        self.__currentGame = manager.getGame(gameid)
-        await self.__currentGame.join(self.__interface)
-
-        #update game list for all users
-        for user in GameConsumer.USERS:
-            await user.getGames()
 
     async def createGame(self, data):
         """Create a new game and add the player to it"""
@@ -175,6 +176,9 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             self.__interface.setName(tournamentid)
             manager: GameManager = GameManager()
             self.__currentGame = manager.createTournament(self.__interface)
+
+            for user in GameConsumer.USERS:
+                await user.getGames()
         except KeyError:
             response = GameConsumerResponse(method="create_tournament", status=False, reason=Response.INVALIDREQUEST)
             await self.send_json(response.toJSON())

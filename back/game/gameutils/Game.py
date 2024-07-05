@@ -27,7 +27,7 @@ class Game:
         self.__p1.setPosition(P1_POSITION.copy())
         self.__p1.setJoined(True)
 
-        self.__deleteCallback: Callable = deleteCallback
+        self.__deleteCallback: Callable = deleteCallback    # callback to delete the game
 
     def __del__(self):
         self.__th.join()

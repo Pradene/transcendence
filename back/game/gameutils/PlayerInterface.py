@@ -7,7 +7,7 @@ class PlayerInterface:
         self.__name: str = name
         self.__movement: str = "NONE"
         self.__updateCallback: Callable = updateCallback
-        self.__deleteGameCallback: Callable = deleteGameCallback
+        self.__deleteGameCallback: Callable = deleteGameCallback # callback to delete the game from the player
         self.__position: List[float] = [0, 0]
         self.__joined: bool = False
         self.__ballspeed: int = 5 # the speed of the ball, is used to compute the by how much the paddle should move at each frame

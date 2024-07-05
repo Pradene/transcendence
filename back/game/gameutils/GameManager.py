@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Union, Callable
 from game.gameutils.Game import Game
 from game.gameutils.Tournament import Tournament
 from game.gameutils.PlayerInterface import PlayerInterface
@@ -27,7 +27,7 @@ class GameManager:
         return GameManager.GAMES[gameid]
     
     def createTournament(self, player: PlayerInterface) -> Tournament:
-        GameManager.TOURNAMENTS[player.getName()] = Tournament(player)
+        GameManager.TOURNAMENTS[player.getName()] = Tournament(player, lambda: self.__deleteTournament(player.getName()))
         return GameManager.TOURNAMENTS[player.getName()]
 
     def tournamentExists(self, name: str) -> bool:
@@ -35,13 +35,28 @@ class GameManager:
     
     def getTournament(self, name: str) -> Tournament:
         return GameManager.TOURNAMENTS[name]
+    
+    def gameOrTournamentExists(self, name: str) -> bool:
+        return self.gameExists(name) or self.tournamentExists(name)
+    
+    def getGameOrTournament(self, name: str) -> Union[Game, Tournament]:
+        if self.gameExists(name):
+            return self.getGame(name)
+        elif self.tournamentExists(name):
+            return self.getTournament(name)
+        else:
+            raise KeyError(f"Game or Tournament {name} does not exist")
 
     def __deleteGame(self, gameid: str) -> None:
         game = GameManager.GAMES.pop(gameid, None)
         game.removeFromClients()
         logging.log(logging.INFO, f"Game {gameid} deleted")
 
+    def __deleteTournament(self, name: str) -> None:
+        GameManager.TOURNAMENTS.pop(name, None)
+        logging.log(logging.INFO, f"Tournament {name} deleted")
+
     def toJSON(self) -> Dict:
         garr = [x.gameInfo() for x in GameManager.GAMES.values()]
-        tarr = []
+        tarr = [x.tournamentInfo() for x in GameManager.TOURNAMENTS.values()]
         return {"games": garr, "tournaments": tarr}

@@ -4,8 +4,8 @@ const CREATEGAMEBUTTON: HTMLButtonElement          = document.querySelector<HTML
 const CREATETOURNAMENTBUTTON: HTMLButtonElement    = document.querySelector<HTMLButtonElement>("div.game-container button.create-tournament")!;
 const REFRESHBUTTON: HTMLButtonElement             = document.querySelector<HTMLButtonElement>("div.game-container button.refresh-room")!;
 const USERNAMEINPUT: HTMLInputElement              = document.querySelector<HTMLInputElement>("div.game-container #username")!;
-const AVAILABLEGAMECONTAINER: HTMLDivElement       = document.querySelector<HTMLDivElement>("div.game-container div.available-games")!;
-const AVAILABLETOURNAMENTCONTAINER: HTMLDivElement = document.querySelector<HTMLDivElement>("div.game-container div.available-tournaments")!;
+const AVAILABLEGAMECONTAINER: HTMLDivElement       = document.querySelector<HTMLDivElement>("div.game-container div.available-game")!;
+const AVAILABLETOURNAMENTCONTAINER: HTMLDivElement = document.querySelector<HTMLDivElement>("div.game-container div.available-tournament")!;
 const GAMECONTAINER: HTMLDivElement                = document.querySelector<HTMLDivElement>("div.game-container div.game")!;
 
 /**

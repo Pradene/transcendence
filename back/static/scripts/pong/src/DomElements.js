@@ -3,8 +3,8 @@ const CREATEGAMEBUTTON = document.querySelector("div.game-container button.creat
 const CREATETOURNAMENTBUTTON = document.querySelector("div.game-container button.create-tournament");
 const REFRESHBUTTON = document.querySelector("div.game-container button.refresh-room");
 const USERNAMEINPUT = document.querySelector("div.game-container #username");
-const AVAILABLEGAMECONTAINER = document.querySelector("div.game-container div.available-games");
-const AVAILABLETOURNAMENTCONTAINER = document.querySelector("div.game-container div.available-tournaments");
+const AVAILABLEGAMECONTAINER = document.querySelector("div.game-container div.available-game");
+const AVAILABLETOURNAMENTCONTAINER = document.querySelector("div.game-container div.available-tournament");
 const GAMECONTAINER = document.querySelector("div.game-container div.game");
 /**
  * Request a new game to be created //TODO check for race condition
