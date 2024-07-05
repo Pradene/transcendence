@@ -50,7 +50,7 @@ services:
     networks:
       - transcendence
     volumes:
-      - static:/app/static
+      - $NGINX_VOLUME_LOCATION:/app/static
     depends_on:
       - back
 
