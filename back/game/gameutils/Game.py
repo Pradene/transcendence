@@ -13,7 +13,7 @@ TIME_TO_SLEEP: float = (1 / FPS)
 
 
 class Game:
-    def __init__(self, p1: PlayerInterface, deleteCallback: Callable):
+    def __init__(self, p1: PlayerInterface):
         self.__p1: Union[PlayerInterface, None] = p1
         self.__p2: Union[PlayerInterface, None] = None
         self.__ball: Ball = Ball()
@@ -26,8 +26,6 @@ class Game:
 
         self.__p1.setPosition(P1_POSITION.copy())
         self.__p1.setJoined(True)
-
-        self.__deleteCallback: Callable = deleteCallback    # callback to delete the game
 
     def __del__(self):
         self.__th.join()
@@ -56,18 +54,16 @@ class Game:
 
         while self.__p1 is not None and self.__p2 is not None and not self.isFinished():
             if self.__ball.isFinished():
-                logging.log(logging.INFO, f"Game {self.getGameid()} creating new ball")
                 self.__ball = Ball()
                 self.__p1.setPosition(P1_POSITION.copy())
                 self.__p2.setPosition(P2_POSITION.copy())
 
                 if self.__p1.won() or self.__p2.won():
                     self.__finish()
-                    await self.update()
                     break
 
             self.__dataLock.acquire()
-            self.__ball.computeNext(self.__p1, self.__p2);
+            self.__ball.computeNext(self.__p1, self.__p2)
             self.__dataLock.release()
 
             await self.update()
@@ -80,9 +76,13 @@ class Game:
 
         return finished
 
-    def __finish(self) -> None:
+    async def __finish(self) -> None:
         self.__finishedLock.acquire()
+
+        logging.log(logging.INFO, f"Game {self.getGameid()} finished")
         self.__finished = True
+        await self.update()
+        
         self.__finishedLock.release()
 
     async def update(self) -> None:
@@ -95,9 +95,6 @@ class Game:
             await self.__p1.getUpdateCallback()(data[0])
         if self.__p2 is not None:
             await self.__p2.getUpdateCallback()(data[1])
-
-        if self.__shouldDelete:
-            self.__deleteCallback(self.getGameid())
 
     def __toJSON(self) -> List[dict]:
         if self.isFinished():
@@ -156,9 +153,13 @@ class Game:
         return dic
     
     async def quit(self) -> None:
+        """Terminate the game and update the clients"""
+
         self.__finish()
         await self.update()
 
     def removeFromClients(self):
+        """Remove the game from the clients so they can join another game"""
+
         self.__p1.getDeleteGameCallback()()
         self.__p2.getDeleteGameCallback()()

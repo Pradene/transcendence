@@ -6,13 +6,11 @@ from game.gameutils.Game import Game
 from game.gameutils.PlayerInterface import PlayerInterface
 
 class Tournament:
-    def __init__(self, player: PlayerInterface, deleteCallback: Callable):
+    def __init__(self, player: PlayerInterface):
         self.__games: List[Game] = []
         self.__id = player.getName()
 
         self.__players: List[PlayerInterface] = [player]
-
-        self.__deleteTournament: Callable = deleteCallback
 
         logging.log(logging.INFO, f"Tournament {self.__id} created")
 
@@ -29,15 +27,12 @@ class Tournament:
         game1 = Game(self.__players[2], self.__deleteGame)
         game1.join(self.__players[3])
 
-    def __deleteGame(self, gameid: str) -> None:
-        for game in self.__games:
-            if game.getGameid() == gameid:
-                self.__games.remove(game)
-                break
-
     def tournamentInfo(self) -> dict:
         return {
             "creator": self.__id,
             "player_count": len(self.__players),
             "is_full": len(self.__players) == 4,
         }
+    
+    def isFinished(self) -> bool:
+        return False

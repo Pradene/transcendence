@@ -11,7 +11,6 @@ class Ball:
         self.__direction: IntVector = IntVector([.66, .33])
         self.__speed: float = BALL_SPEED
         self.__finished: bool = False
-        logging.log(logging.INFO, f"Ball created at {self.__position}")
 
     def getPosition(self) -> list[int]:
         """Returns the position of the ball"""
@@ -48,7 +47,6 @@ class Ball:
         """Finish the ball"""
 
         self.__finished = True
-        logging.log(logging.INFO, f"Ball finished at {self.__position}")
 
     def computeNext(self, p1: PlayerInterface, p2: PlayerInterface) -> None:
         ispeed = int(self.__speed)
@@ -73,7 +71,6 @@ class Ball:
             #check hit bottom wall
             elif self.getY() == SCREEN_HEIGHT - BALL_SIZE and y > 0:
                 arr = self.__revY(arr)
-                logging.log(logging.INFO, f"Ball finished at {self.__position}")
             #check hit right wall
             elif self.getX() == SCREEN_WIDTH - BALL_SIZE:
                 p1.incrPoints()

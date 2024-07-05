@@ -4,10 +4,60 @@ from game.gameutils.Tournament import Tournament
 from game.gameutils.PlayerInterface import PlayerInterface
 
 import logging
+import time
 
+from threading import Lock, Thread
+
+class ThreadingDict:
+    def __init__(self):
+        self.__dict: Dict = {}
+        self.__lock: Lock = Lock()
+        self.__thread: Thread = Thread(target=self.__checkAndDelete)
+
+        self.__thread.start()
+
+    def __del__(self):
+        self.__thread.join()
+
+    def __checkAndDelete(self):
+        while True:
+            #iterate over the keys and delete the ones that should be deleted
+            with self.__lock:
+                logging.log(logging.INFO, "Checking and deleting finished games")
+                for key in list(self.__dict.keys()):
+                    if self.__dict[key].isFinished():
+                        self.__dict.pop(key)
+                        logging.log(logging.INFO, f"Game {key} deleted")
+
+            time.sleep(1)
+
+    def __getitem__(self, key):
+        with self.__lock:
+            return self.__dict[key]
+        
+    def __setitem__(self, key, value):
+        with self.__lock:
+            self.__dict[key] = value
+
+    def __contains__(self, key):
+        with self.__lock:
+            return key in self.__dict.keys()
+        
+    def pop(self, key):
+        with self.__lock:
+            return self.__dict.pop(key, None)
+        
+    def keys(self):
+        with self.__lock:
+            return self.__dict.keys()
+        
+    def values(self):
+        with self.__lock:
+            return self.__dict.values()
+        
 class GameManager:
-    GAMES: Dict[str, Game] = {}
-    TOURNAMENTS: Dict[str, Tournament] = {}
+    GAMES: ThreadingDict = ThreadingDict()
+    TOURNAMENTS: ThreadingDict = ThreadingDict()
 
     def __init__(self):
         pass
@@ -16,7 +66,7 @@ class GameManager:
         pass
 
     def createGame(self, player: PlayerInterface) -> Game:
-        game = Game(player, self.__deleteGame)
+        game = Game(player)
         GameManager.GAMES[player.getName()] = game
         return game
 
@@ -27,7 +77,7 @@ class GameManager:
         return GameManager.GAMES[gameid]
     
     def createTournament(self, player: PlayerInterface) -> Tournament:
-        GameManager.TOURNAMENTS[player.getName()] = Tournament(player, lambda: self.__deleteTournament(player.getName()))
+        GameManager.TOURNAMENTS[player.getName()] = Tournament(player)
         return GameManager.TOURNAMENTS[player.getName()]
 
     def tournamentExists(self, name: str) -> bool:
