@@ -1,8 +1,10 @@
 FROM nginx:1.19.0-alpine
 
+RUN apk update && apk add bash
+
 COPY ./conf/nginx.conf /etc/nginx/nginx.conf
 
-COPY ./tools/script.sh /sbin/entrypoint.sh
-RUN chmod +x /sbin/entrypoint.sh
+COPY ./tools/script.sh /usr/local/bin/script.sh
+RUN chmod +x /usr/local/bin/script.sh
 
-CMD ["/sbin/entrypoint.sh"]
+CMD ["/usr/local/bin/script.sh"]
