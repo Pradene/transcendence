@@ -30,6 +30,9 @@ div.game-container .game {
 }
 div.game-container .game canvas {
   align-self: center;
+  min-width: 100%;
+  max-width: 100%;
+  aspect-ratio: 800/600;
 }
 div.game-container .available-games {
   display: flex;

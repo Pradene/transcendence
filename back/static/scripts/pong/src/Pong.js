@@ -5,7 +5,18 @@ import { GameSocket } from "./GameSocket";
 import { GAMECONTAINER } from "./DomElements";
 const screenWidth = 800;
 const screenHeight = 600;
-const default_color = "#ffffff";
+const colors = {
+    waiting: {
+        background: "#000000",
+        border: "#ffffff",
+        text: "#ffffff"
+    },
+    running: {
+        background: "#ffffff",
+        text: "#000000",
+        player: "#000000",
+    }
+};
 class Pong {
     constructor() {
         this._current_player = undefined;
@@ -14,7 +25,9 @@ class Pong {
         this._context = this._canvas.getContext("2d");
         this._ball = new Ball(new Position(0, 0));
         this._running = false;
-        this._canvas.style.backgroundColor = default_color;
+        //set the canvas properties
+        this._canvas.style.backgroundColor = colors.waiting.background;
+        this._canvas.style.border = "solid 1px " + colors.waiting.border;
         this._canvas.width = screenWidth;
         this._canvas.height = screenHeight;
         GAMECONTAINER.appendChild(this._canvas);
@@ -22,8 +35,18 @@ class Pong {
     /**
      * Display the game
      */
-    display() {
+    display(status) {
+        if (!status) {
+            this._canvas.style.backgroundColor = colors.waiting.background;
+            this._context.clearRect(0, 0, screenWidth, screenHeight);
+            this._context.font = "30px Arial";
+            this._context.fillStyle = colors.waiting.text;
+            this._context.fillText("Waiting for opponent", 10, 50);
+            return;
+        }
+        this._canvas.style.backgroundColor = colors.running.background;
         this._context.clearRect(0, 0, screenWidth, screenHeight);
+        this._context.fillStyle = colors.running.player;
         this._current_player?.display(this._context);
         this._opponent?.display(this._context);
         this._ball.display(this._context);
@@ -56,7 +79,7 @@ class Pong {
         this._ball.position = new Position(response.data.ball[0], response.data.ball[1]);
         this._running = response.data.status === "running";
         //now redisplay the game
-        this.display(); //TODO change this to be called by an interval instead
+        this.display(response.data.status === "running");
     }
     /**
      * Parse a response from the server meant for the game

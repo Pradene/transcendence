@@ -3,24 +3,37 @@ import {Ball}                                  from "./Ball";
 import {Position}                              from "./Utils";
 import {apicallresponse, update_game_response} from "./Api";
 import {GameSocket}                            from "./GameSocket";
-import {GAMECONTAINER}                        from "./DomElements";
+import {GAMECONTAINER}                         from "./DomElements";
 
-const screenWidth: number = 800;
+const screenWidth: number  = 800;
 const screenHeight: number = 600;
-const default_color: string = "#ffffff";
+const colors: any          = {
+    waiting: {
+        background: "#000000",
+        border:     "#ffffff",
+        text:       "#ffffff"
+    },
+    running: {
+        background: "#ffffff",
+        text:       "#000000",
+        player:     "#000000",
+    }
+};
 
 class Pong {
     constructor() {
         this._current_player = undefined;
-        this._opponent = undefined;
-        this._canvas = document.createElement("canvas");
-        this._context = this._canvas.getContext("2d")!;
-        this._ball = new Ball(new Position(0, 0));
-        this._running = false;
+        this._opponent       = undefined;
+        this._canvas         = document.createElement("canvas");
+        this._context        = this._canvas.getContext("2d")!;
+        this._ball           = new Ball(new Position(0, 0));
+        this._running        = false;
 
-        this._canvas.style.backgroundColor = default_color;
-        this._canvas.width = screenWidth;
-        this._canvas.height = screenHeight;
+        //set the canvas properties
+        this._canvas.style.backgroundColor = colors.waiting.background;
+        this._canvas.style.border          = "solid 1px " + colors.waiting.border;
+        this._canvas.width                 = screenWidth;
+        this._canvas.height                = screenHeight;
 
         GAMECONTAINER.appendChild(this._canvas);
     }
@@ -28,8 +41,21 @@ class Pong {
     /**
      * Display the game
      */
-    public display(): void {
+    public display(status: boolean): void {
+        if (!status) {
+            this._canvas.style.backgroundColor = colors.waiting.background;
+            this._context.clearRect(0, 0, screenWidth, screenHeight);
+
+            this._context.font      = "30px Arial";
+            this._context.fillStyle = colors.waiting.text;
+            this._context.fillText("Waiting for opponent", 10, 50);
+            return;
+        }
+
+        this._canvas.style.backgroundColor = colors.running.background;
         this._context.clearRect(0, 0, screenWidth, screenHeight);
+
+        this._context.fillStyle = colors.running.player;
         this._current_player?.display(this._context);
         this._opponent?.display(this._context);
         this._ball.display(this._context);
@@ -52,7 +78,7 @@ class Pong {
     private update(response: update_game_response): void {
         if (!this._current_player) {
             this._current_player = new CurrentPlayer("a name", new Position(0, 0));
-            this._opponent = new Player("another name", new Position(0, 0));
+            this._opponent       = new Player("another name", new Position(0, 0));
         }
 
         if (response.data.status === "finished") {
@@ -63,10 +89,10 @@ class Pong {
         this._current_player?.setScore(response.data.current_player.score);
         this._opponent?.setScore(response.data.opponent.score);
         this._ball.position = new Position(response.data.ball[0], response.data.ball[1]);
-        this._running = response.data.status === "running";
+        this._running       = response.data.status === "running";
 
         //now redisplay the game
-        this.display(); //TODO change this to be called by an interval instead
+        this.display(response.data.status === "running");
     }
 
     /**

@@ -1,12 +1,12 @@
 import logging
 import asyncio
+import threading
 from typing import Union, List, Callable
-from threading import Thread, Lock
+from threading import Thread, Lock, RLock
 
 from game.gameutils.PlayerInterface import PlayerInterface
 from game.gameutils.Ball import Ball
 from game.gameutils.defines import *
-
 
 FPS: int = 24
 TIME_TO_SLEEP: float = (1 / FPS)
@@ -21,14 +21,15 @@ class Game:
 
         self.__th: Union[Thread, None] = None
         self.__finished: bool = False
-        self.__finishedLock: Lock = Lock()
-        self.__shouldDelete: bool = False
+        self.__finishedLock: RLock = RLock()
 
         self.__p1.setPosition(P1_POSITION.copy())
         self.__p1.setJoined(True)
 
     def __del__(self):
-        self.__th.join()
+        logging.log(logging.INFO, f"Deleting game {self.getGameid()}")
+        if self.__th is not None and self.__th.is_alive():
+            self.__th.join()
         logging.log(logging.INFO, f"Game {self.getGameid()} deleted")
 
     def getGameid(self) -> str:
@@ -70,53 +71,70 @@ class Game:
             await asyncio.sleep(TIME_TO_SLEEP)
 
     def isFinished(self) -> bool:
-        self.__finishedLock.acquire()
-        finished = self.__finished
-        self.__finishedLock.release()
+        # self.__finishedLock.acquire()
 
+        logging.log(logging.INFO,
+                    f"Checking if game {self.getGameid()} is finished in thread {threading.current_thread().name}")
+        with self.__finishedLock:
+            finished = self.__finished
+        # self.__finishedLock.release()
+
+        logging.log(logging.INFO, f"Game {self.getGameid()} is finished: {finished}")
         return finished
 
     async def __finish(self) -> None:
-        self.__finishedLock.acquire()
+        """Finish the game and update the clients"""
 
-        logging.log(logging.INFO, f"Game {self.getGameid()} finished")
-        self.__finished = True
-        await self.update()
-        
-        self.__finishedLock.release()
+        logging.log(logging.INFO, f"Game {self.getGameid()} finishing, before lock in thread {threading.current_thread().name}")
+        # self.__finishedLock.acquire()
+
+        with self.__finishedLock:
+            logging.log(logging.INFO, f"Game {self.getGameid()} finishing, in lock in thread {threading.current_thread().name}")
+            self.__finished = True
+            await self.update()
+
+        # self.__finishedLock.release()
+        logging.log(logging.INFO, f"Game {self.getGameid()} finishing, after lock")
 
     async def update(self) -> None:
         """Send game datas to clients, and delete the game if it's finished"""
 
+        logging.log(logging.INFO, f"Updating game {self.getGameid()}")
+
         # Send game datas to client
         data = self.__toJSON()
 
+        logging.log(logging.INFO, f"Sending data to clients")
         if self.__p1 is not None:
             await self.__p1.getUpdateCallback()(data[0])
         if self.__p2 is not None:
             await self.__p2.getUpdateCallback()(data[1])
 
     def __toJSON(self) -> List[dict]:
-        if self.isFinished():
-            self.__shouldDelete = True
+        """Return the game data in JSON format"""
 
+        logging.log(logging.INFO, f"Before data lock")
         self.__dataLock.acquire()
+
+        logging.log(logging.INFO, f"Data lock acquired")
+        status = "finished" if self.isFinished() else "waiting" if self.__p2 is None else "running"
+
         # data for first player
         dic1 = {
             "method": "update_game",
             "status": True,
             "data":   {
-                "status": "running" if not self.isFinished() else "finished",
-                "gameid": self.getGameid(),
+                "status":         status,
+                "gameid":         self.getGameid(),
                 "current_player": {
                     "position": self.__p1.getPosition().copy(),
-                    "score": self.__p1.getScore()
+                    "score":    self.__p1.getScore()
                 },
-                "opponent": {
+                "opponent":       {
                     "position": self.__p2.getPosition().copy() if self.__p2 is not None else P2_POSITION.copy(),
-                    "score": self.__p2.getScore() if self.__p2 is not None else 0
+                    "score":    self.__p2.getScore() if self.__p2 is not None else 0
                 },
-                "ball": self.__ball.getPosition()
+                "ball":           self.__ball.getPosition()
             }
         }
 
@@ -125,20 +143,22 @@ class Game:
             "method": "update_game",
             "status": True,
             "data":   {
-                "status": "running" if not self.isFinished() else "finished",
-                "gameid": self.getGameid(),
+                "status":         status,
+                "gameid":         self.getGameid(),
                 "current_player": {
                     "position": self.__p2.getPosition().copy() if self.__p2 is not None else P2_POSITION.copy(),
-                    "score": self.__p2.getScore() if self.__p2 is not None else 0
+                    "score":    self.__p2.getScore() if self.__p2 is not None else 0
                 },
-                "opponent": {
+                "opponent":       {
                     "position": self.__p1.getPosition().copy(),
-                    "score": self.__p1.getScore()
+                    "score":    self.__p1.getScore()
                 },
-                "ball": self.__ball.getPosition()
+                "ball":           self.__ball.getPosition()
             }
         }
         self.__dataLock.release()
+
+        logging.log(logging.INFO, f"Data lock released")
         return [dic1, dic2]
 
     def gameInfo(self) -> dict:
@@ -151,12 +171,11 @@ class Game:
         self.__dataLock.release()
 
         return dic
-    
+
     async def quit(self) -> None:
         """Terminate the game and update the clients"""
 
-        self.__finish()
-        await self.update()
+        await self.__finish()
 
     def removeFromClients(self):
         """Remove the game from the clients so they can join another game"""

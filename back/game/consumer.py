@@ -40,13 +40,6 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
         GameConsumer.USERS.append(self)
 
-    def __del__(self):
-        #         super().__del__()
-
-        for user in GameConsumer.USERS:
-            if user == self:
-                GameConsumer.USERS.remove(user)
-
     async def connect(self):
         await self.accept()
         await self.getGames()
@@ -75,7 +68,18 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
                 await self.updatePlayer(data)
 
     async def disconnect(self, close_code):
-        pass
+        """Handle client disconnection"""
+
+        logging.log(logging.INFO, f"User {self.__interface.getName()} disconnecting...")
+        if self.__currentGame is not None:
+            logging.log(logging.INFO, f"User {self.__interface.getName()} is in game {self.__currentGame.getGameid()}, quitting")
+            await self.__currentGame.quit()
+            logging.log(logging.INFO, f"User {self.__interface.getName()} has quit the game {self.__currentGame.getGameid()}")
+
+        for user in GameConsumer.USERS:
+            if user == self:
+                GameConsumer.USERS.remove(user)
+        logging.log(logging.INFO, f"User {self.__interface.getName()} has disconnected")
 
     async def getGames(self):
         """Send a list of all games to the client"""
@@ -98,7 +102,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
     async def joinGame(self, data):
         """Add the player to the game"""
 
-        #check request format
+        # check request format
         gameid: str = ""
         try:
             gameid = data["data"]["gameid"]
@@ -107,7 +111,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             await self.send_json(response.toJSON())
             return
 
-        #Check if the user can join a game
+        # Check if the user can join a game
         manager: GameManager = GameManager()
         username = self.__interface.getName()
         if username == "":
@@ -120,12 +124,12 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             return
 
         try:
-            #join the game
+            # join the game
             self.__currentGame = manager.getGameOrTournament(gameid)
             logging.log(logging.INFO, self.__currentGame)
             await self.__currentGame.join(self.__interface)
 
-            #update game list for all users
+            # update game list for all users
             for user in GameConsumer.USERS:
                 await user.getGames()
         except KeyError:
@@ -168,11 +172,11 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             response = GameConsumerResponse(method="create_tournament", status=False, reason=Response.ALREADYINGAME)
             await self.send_json(response.toJSON())
             return
-        
+
         # Check request format
         try:
             tournamentid = data["data"]["gameid"]
-            
+
             self.__interface.setName(tournamentid)
             manager: GameManager = GameManager()
             self.__currentGame = manager.createTournament(self.__interface)
@@ -200,10 +204,12 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             movement = data["data"]["movement"]
             self.__interface.setMovement(movement)
         except KeyError as error:
-            response = GameConsumerResponse(method="update_player", status=False, reason=f"{Response.INVALIDREQUEST}: {error}")
+            response = GameConsumerResponse(method="update_player", status=False,
+                                            reason=f"{Response.INVALIDREQUEST}: {error}")
             await self.send_json(response.toJSON())
             return
         except ValueError as error:
-            response = GameConsumerResponse(method="update_player", status=False, reason=f"{Response.INVALIDMOVEMENT}: {error}")
+            response = GameConsumerResponse(method="update_player", status=False,
+                                            reason=f"{Response.INVALIDMOVEMENT}: {error}")
             await self.send_json(response.toJSON())
             return
