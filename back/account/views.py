@@ -13,10 +13,18 @@ def search_users(request):
     query = request.GET.get('q', '')
     if query:
         users = CustomUser.objects.filter(username__icontains=query)
-        user_list = [{'id': user.id, 'username': user.username} for user in users]
+        user_list = [{'id': user.id, 'name': user.username} for user in users]
         return JsonResponse({'success': True, 'users': user_list})
     
     return JsonResponse({'success': False, 'users': []})
+
+
+@require_GET
+def get_friends(request):
+    user = request.user
+    friends = CustomUser.objects.filter(friends=user)
+    friend_list = [{'id': friend.id, 'name': friend.username} for friend in friends]
+    return JsonResponse({'success': True, 'users': friend_list})
 
 
 @require_POST

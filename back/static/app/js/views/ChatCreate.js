@@ -1,11 +1,11 @@
 import { getCSRFToken } from "../utils.js"
 import { AbstractView } from "./AbstractView.js"
 
-export class Chat extends AbstractView {
+export class ChatCreate extends AbstractView {
     constructor() {
         super()
 
-        this.rooms = []
+        this.users = []
     }
 
     async getHtml() {
@@ -17,16 +17,18 @@ export class Chat extends AbstractView {
             </nav>
             <div class="flex">
                 <label>
-                    <input type="text" id="input" class="" placeholder="Search" autocomplete="off"></input>
+                    <input type="text" id="input" placeholder="Search" autocomplete="off"></input>
                 </label>
-                <a href='/chat/create-room/' data-link>Create Room</a>
             </div>
-            <div id="rooms"></div>
+            <div>
+                <ul id="users-list">
+                </ul>
+            </div>
         `
     }
 
-    async addEventListeners() {     
-        const response = await fetch(`/api/chat/get-chatrooms/`, {
+    async addEventListeners() {   
+        const response = await fetch(`/api/user/get-friends/`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -37,8 +39,8 @@ export class Chat extends AbstractView {
         const data = await response.json()
 
         if (data.success) {
-            this.rooms = data.rooms
-            this.displayRooms()
+            this.users = data.users
+            this.displayUsers()
         }
 
         const input = document.getElementById('input')
@@ -48,28 +50,29 @@ export class Chat extends AbstractView {
     async handleSearch(event) {
         const query = event.target.value
         
-        const rooms = document.querySelectorAll('.room')
-        for (let room of rooms) {
-            const name = room.querySelector('a').textContent
+        const users = document.querySelectorAll('.user')
+        for (let user of users) {
+            const name = user.querySelector('p').textContent
             if (query && !name.includes(query)) {
-                room.classList.add('hidden')
+                user.classList.add('hidden')
             } else {
-                room.classList.remove('hidden')
+                user.classList.remove('hidden')
             }
         }
     }
 
-    displayRooms() {
-        const container = document.getElementById('rooms')
+    displayUsers() {
+        const container = document.getElementById('users-list')
         container.innerHTML = ''
         
-        this.rooms.forEach((room) => {
-            const el = document.createElement('div')
-            el.classList.add('room')
+        this.users.forEach((user) => {
+            console.log(user)
+            const el = document.createElement('li')
+            el.classList.add('user')
             el.innerHTML = `
-                <a href="/chat/${room.id}/" data-link>
-                ${room.name}
-                </a>
+                <p>
+                ${user.name}
+                </p>
             `
 
             container.appendChild(el)
