@@ -2,9 +2,9 @@ class NavComponent extends HTMLElement {
     connectedCallback() {
         this.innerHTML = `
             <nav>
-	        	<h1>
-	        		<a href='/' data-link>Pong</a>
-	        	</h1>
+	        	<a href='/' data-link>
+	        		<h1>Pong</h1>
+	        	</a>
 	        	<div>
 	        		<a href='/chat/' data-link>
 	        			<img src="/static/assets/chat.svg" alt="Chat">

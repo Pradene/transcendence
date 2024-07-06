@@ -1,13 +1,14 @@
 import json
 
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST, require_GET
 
 from .models import CustomUser
 
 
+@login_required
 @require_GET
 def search_users(request):
     query = request.GET.get('q', '')
@@ -19,6 +20,7 @@ def search_users(request):
     return JsonResponse({'success': False, 'users': []})
 
 
+@login_required
 @require_GET
 def get_friends(request):
     user = request.user

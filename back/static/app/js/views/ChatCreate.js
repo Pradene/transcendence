@@ -10,11 +10,7 @@ export class ChatCreate extends AbstractView {
 
     async getHtml() {
         return `
-            <nav>
-                <div>
-                    <a href='/' data-link>Pong</a>
-                </div>
-            </nav>
+            <nav-component></nav-component>
             <div class="flex">
                 <label>
                     <input type="text" id="input" placeholder="Search" autocomplete="off"></input>

@@ -10,18 +10,16 @@ export class Chat extends AbstractView {
 
     async getHtml() {
         return `
-            <nav>
-                <div>
-                    <a href='/' data-link>Pong</a>
-                </div>
-            </nav>
+            <nav-component></nav-component>
             <div class="flex">
                 <label>
-                    <input type="text" id="input" class="" placeholder="Search" autocomplete="off"></input>
+                    <input type="text" id="input" class="search-bar" placeholder="Search" autocomplete="off"></input>
                 </label>
                 <a href='/chat/create-room/' data-link>Create Room</a>
             </div>
-            <div id="rooms"></div>
+            <div>
+                <ul id="rooms-list" class="list"></ul>
+            </div>
         `
     }
 
@@ -48,9 +46,9 @@ export class Chat extends AbstractView {
     async handleSearch(event) {
         const query = event.target.value
         
-        const rooms = document.querySelectorAll('.room')
+        const rooms = document.querySelectorAll('.list-item')
         for (let room of rooms) {
-            const name = room.querySelector('a').textContent
+            const name = room.querySelector('.name').textContent
             if (query && !name.includes(query)) {
                 room.classList.add('hidden')
             } else {
@@ -60,15 +58,19 @@ export class Chat extends AbstractView {
     }
 
     displayRooms() {
-        const container = document.getElementById('rooms')
+        const container = document.getElementById('rooms-list')
         container.innerHTML = ''
         
         this.rooms.forEach((room) => {
-            const el = document.createElement('div')
-            el.classList.add('room')
+            const el = document.createElement('li')
+            el.classList.add('list-item')
             el.innerHTML = `
                 <a href="/chat/${room.id}/" data-link>
-                ${room.name}
+                    <img class="profile-pic" alt="Profile Picture">
+                    <div class="room-info">
+                        <span class="name">${room.name}</span>
+                        <span class="latest-message">Hello</span>
+                    </div>
                 </a>
             `
 

@@ -9,32 +9,34 @@ export class Signup extends AbstractView {
 
     async getHtml() {
         return `
-        <div class="container--fp">
-            <div class="container--xs">
-                <form method="POST" id="signup-form" class="form">
-                    <div class="form--field">
-                        <label class="form--label">
-                            <input class="form--input" type="text" id="username" required autocomplete="off"></input>
-                            <span>Username</span>
-                        </label>
-                    </div>
-                    <div class="form--field">
-                        <label class="form--label">
-                            <input class="form--input" type="password" id="password" required autocomplete="off"></input>
-                            <span>Password</span>
-                        </label>
-                    </div>
-                    <div class="form--field">
-                        <label class="form--label">
-                            <input class="form--input" type="password" id="password-confirmation" required autocomplete="off"></input>
-                            <span>Password</span>
-                        </label>
-                    </div>
-                    <button type="submit">Sign up</button>
-                </form>
-            </div>
-            <div class="container--xs text--center mt-36">
-                <a href='/login/' data-link>Login</a>
+        <div class="fp">
+            <div>
+                <div class="container-xs">
+                    <form method="POST" id="signup-form" class="form">
+                        <div class="form-field">
+                            <label class="form-label">
+                                <input class="form-input" type="text" id="username" required autocomplete="off"></input>
+                                <span>Username</span>
+                            </label>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">
+                                <input class="form-input" type="password" id="password" required autocomplete="off"></input>
+                                <span>Password</span>
+                            </label>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">
+                                <input class="form-input" type="password" id="password-confirmation" required autocomplete="off"></input>
+                                <span>Password</span>
+                            </label>
+                        </div>
+                        <button type="submit">Sign up</button>
+                    </form>
+                </div>
+                <div class="container-xs text-center mt-36">
+                    <a href='/login/' data-link>Login</a>
+                </div>
             </div>
         </div>
         `
@@ -42,7 +44,7 @@ export class Signup extends AbstractView {
 
     addEventListeners() {
 
-        const inputs = document.querySelectorAll('.form--input')
+        const inputs = document.querySelectorAll('.form-input')
         inputs.forEach(input => {
             input.addEventListener('input', function (event) {
                 if (input.value == '') {

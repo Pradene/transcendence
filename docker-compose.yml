@@ -14,7 +14,7 @@ services:
     networks:
       - transcendence
     volumes:
-      - static:/app/static
+      - static:/app/staticfiles
     depends_on:
       db:
         condition: service_healthy
@@ -50,7 +50,7 @@ services:
     networks:
       - transcendence
     volumes:
-      - $NGINX_VOLUME_LOCATION:/app/static
+      - static:/usr/share/nginx/static
     depends_on:
       - back
 
