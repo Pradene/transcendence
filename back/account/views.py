@@ -2,12 +2,21 @@ import json
 
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
-from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 
 from .models import CustomUser
+
+
+@require_GET
+def search_users(request):
+    query = request.GET.get('q', '')
+    if query:
+        users = CustomUser.objects.filter(username__icontains=query)
+        user_list = [{'id': user.id, 'username': user.username} for user in users]
+        return JsonResponse({'success': True, 'users': user_list})
+    
+    return JsonResponse({'success': False, 'users': []})
 
 
 @require_POST

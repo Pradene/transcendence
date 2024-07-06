@@ -193,3 +193,12 @@ nav a img {
 	position: absolute;
 	bottom: 0%;
 }
+
+.flex {
+	display: flex;
+	justify-content: space-between;
+}
+
+.hidden {
+	display: none;
+}

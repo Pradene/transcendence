@@ -1,5 +1,6 @@
 import { AbstractView } from "./AbstractView.js"
 import { Router } from "../Router.js"
+import { getCSRFToken } from "../utils.js"
 
 export class Signup extends AbstractView {
     constructor() {
@@ -66,10 +67,10 @@ export class Signup extends AbstractView {
         const username = document.getElementById("username").value
         const password1 = document.getElementById("password").value
         const password2 = document.getElementById("password-confirmation").value
-        const csrfToken = this.getCSRFToken()
+        const csrfToken = getCSRFToken()
         
         try {
-            const response = await fetch("http://localhost:8000/api/account/signup/", {
+            const response = await fetch("/api/user/signup/", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -92,9 +93,5 @@ export class Signup extends AbstractView {
         } catch (error) {
             console.log('error: ', error)
         }
-    }
-
-    getCSRFToken() {
-        return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     }
 }

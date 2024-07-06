@@ -9,7 +9,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     path('api/chat/', include('chat.urls')),
-    path('api/account/', include('account.urls')),
+    path('api/user/', include('account.urls')),
 
     path('', views.base),
     path('chat/', views.base),
@@ -18,4 +18,4 @@ urlpatterns = [
     path('signup/', views.base),
     path('profile/', views.base),
 
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+]

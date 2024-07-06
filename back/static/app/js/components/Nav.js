@@ -7,10 +7,10 @@ class NavComponent extends HTMLElement {
 	        	</h1>
 	        	<div>
 	        		<a href='/chat/' data-link>
-	        			<img src="../../assets/chat.svg" alt="Chat">
+	        			<img src="/static/assets/chat.svg" alt="Chat">
 	        		</a>
 	        		<a href='/profile/' data-link>
-	        			<img src="../../assets/user.svg" alt="Profile">
+	        			<img src="/static/assets/user.svg" alt="Profile">
 	        		</a>
 	        	</div>
 	        </nav>
