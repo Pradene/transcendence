@@ -13,11 +13,6 @@ class GameModel(models.Model):
 
 
 class TournamentModel(models.Model):
-    user1 = models.ForeignKey('account.CustomUser', on_delete=models.CASCADE)
-    user2 = models.ForeignKey('account.CustomUser', on_delete=models.CASCADE)
-    user3 = models.ForeignKey('account.CustomUser', on_delete=models.CASCADE)
-    user4 = models.ForeignKey('account.CustomUser', on_delete=models.CASCADE)
-
     game1 = models.ForeignKey('GameModel', on_delete=models.CASCADE)
     game2 = models.ForeignKey('GameModel', on_delete=models.CASCADE)
     game3 = models.ForeignKey('GameModel', on_delete=models.CASCADE)

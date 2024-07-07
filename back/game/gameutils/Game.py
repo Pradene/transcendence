@@ -8,7 +8,8 @@ from game.gameutils.Ball import Ball
 from game.gameutils.defines import *
 from game.gameutils.abstractgame import AbstractGame
 
-from game import models
+from game import models as gamemodels
+from account import models as accountmodels
 
 FPS: int = 24
 TIME_TO_SLEEP: float = (1 / FPS)
@@ -28,6 +29,8 @@ class Game(AbstractGame):
         self.__p1.setPosition(P1_POSITION.copy())
         self.__p1.setJoined(True)
         self.__p1.setScore(0)
+
+        self.__gamemodel: Union[gamemodels.GameModel | None] = None
 
 
     def __del__(self):
@@ -162,4 +165,21 @@ class Game(AbstractGame):
     def saveToDB(self) -> None:
         """Save the game to the database"""
 
-        pass
+        user1 = accountmodels.CustomUser.objects.get(username=self.__p1.getName())
+        user2 = accountmodels.CustomUser.objects.get(username=self.__p2.getName())
+
+        dbentry = gamemodels.GameModel(
+            player1=user1,
+            player2=user2,
+            score1=self.__p1.getScore(),
+            score2=self.__p2.getScore(),
+            winner=user1 if self.__p1.won() else user2
+        )
+        dbentry.save()
+
+        self.__gamemodel = dbentry
+
+    def getGameModel(self) -> Union[gamemodels.GameModel, None]:
+        """Return the game model"""
+
+        return self.__gamemodel

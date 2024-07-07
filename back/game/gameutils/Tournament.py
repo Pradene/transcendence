@@ -3,11 +3,15 @@ import logging
 import time
 from typing import List, Union
 
+import account.models
 from game.gameutils.Game import Game
 from game.gameutils.PlayerInterface import PlayerInterface
 from game.gameutils.abstractgame import AbstractGame
 
 from threading import Thread
+
+import game.models as gamemodels
+import account.models as accountmodels
 
 
 class Tournament(AbstractGame):
@@ -109,4 +113,15 @@ class Tournament(AbstractGame):
         pass
 
     def saveToDB(self) -> None:
-        pass
+        game1 = self.__games[0].getGameModel()
+        game2 = self.__games[1].getGameModel()
+        game3 = self.__games[2].getGameModel()
+        winner = accountmodels.CustomUser.objects.get(username=self.getWinner().getName())
+
+        dbentry = gamemodels.TournamentModel(
+            game1=game1,
+            game2=game2,
+            game3=game3,
+            winner=winner
+        )
+        dbentry.save()
