@@ -107,3 +107,6 @@ class Tournament(AbstractGame):
 
     async def update(self) -> None:
         pass
+
+    def saveToDB(self) -> None:
+        pass

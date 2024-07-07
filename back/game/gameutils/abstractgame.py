@@ -29,6 +29,10 @@ class AbstractGame(ABC):
     async def update(self) -> None:
         pass
 
+    @abstractmethod
+    def saveToDB(self) -> None:
+        pass
+
     def isFinished(self) -> bool:
         with self._finishedLock:
             return self._finished
@@ -38,6 +42,9 @@ class AbstractGame(ABC):
             self._finished = True
             self._winner = winner
             await self.update()
+
+            if winner is not None:
+                self.saveToDB()
 
     def getWinner(self) -> Union[PlayerInterface, None]:
         return self._winner

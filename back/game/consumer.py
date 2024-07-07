@@ -39,6 +39,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         super().__init__(args, kwargs)
         self.__interface: PlayerInterface = PlayerInterface('p1', self.updateClient, self.__deleteCurrentGame)
         self.__currentGame: Union[Game, Tournament, None] = None
+        self.__user = None
 
         GameConsumer.USERS.append(self)
 
@@ -49,6 +50,13 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             MODULE_INITIALISED = True
 
     async def connect(self):
+        self.__user = self.scope["user"]
+
+        if not self.__user.is_authenticated:
+            await self.close()
+            return
+
+        self.__interface.setName(self.__user.username)
         await self.accept()
         await self.getGames()
 

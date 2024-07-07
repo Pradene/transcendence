@@ -8,6 +8,8 @@ from game.gameutils.Ball import Ball
 from game.gameutils.defines import *
 from game.gameutils.abstractgame import AbstractGame
 
+from game import models
+
 FPS: int = 24
 TIME_TO_SLEEP: float = (1 / FPS)
 
@@ -156,3 +158,8 @@ class Game(AbstractGame):
         """Start the game loop"""
 
         self.__th.start()
+
+    def saveToDB(self) -> None:
+        """Save the game to the database"""
+
+        pass
