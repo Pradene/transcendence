@@ -1,8 +1,13 @@
-from django.http import JsonResponse
+import json
+
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET
+from django.http import JsonResponse
 
 from .models import ChatRoom
 
+
+@login_required
 @require_GET
 def get_chatrooms(request):
     user = request.user
@@ -10,6 +15,8 @@ def get_chatrooms(request):
     chatroom_list = [{'id': room.id, 'name': room.name} for room in chatrooms]
     return JsonResponse({'success': True, 'rooms': chatroom_list})
 
+
+@login_required
 @require_GET
 def search_chatroom(request):
     user = request.user

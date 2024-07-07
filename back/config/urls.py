@@ -11,11 +11,5 @@ urlpatterns = [
     path('api/chat/', include('chat.urls')),
     path('api/user/', include('account.urls')),
 
-    path('', views.base),
-    path('chat/', views.base),
-    path('chat/<int:id>/', views.baseID),
-    path('login/', views.base),
-    path('signup/', views.base),
-    path('profile/', views.base),
-
+    re_path(r'^.*$', views.base),
 ]

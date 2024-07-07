@@ -1,22 +1,32 @@
 import json
 
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST, require_GET
 
 from .models import CustomUser
 
 
+@login_required
 @require_GET
 def search_users(request):
     query = request.GET.get('q', '')
     if query:
         users = CustomUser.objects.filter(username__icontains=query)
-        user_list = [{'id': user.id, 'username': user.username} for user in users]
+        user_list = [{'id': user.id, 'name': user.username} for user in users]
         return JsonResponse({'success': True, 'users': user_list})
     
     return JsonResponse({'success': False, 'users': []})
+
+
+@login_required
+@require_GET
+def get_friends(request):
+    user = request.user
+    friends = CustomUser.objects.filter(friends=user)
+    friend_list = [{'id': friend.id, 'name': friend.username} for friend in friends]
+    return JsonResponse({'success': True, 'users': friend_list})
 
 
 @require_POST

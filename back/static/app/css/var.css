@@ -6,8 +6,11 @@
 
 
 :root {
-	--main-bg-color: black;
-	--main-color: white;
+	--main-bg-color: #020202;
+	--secondary-bg-color: #262626;
+	
+	--main-color: #fafafa;
+	--secondary-color: #dbdbdb;
 
 	--main-font-family: Epilogue;
 	--default-font-size: 12px;

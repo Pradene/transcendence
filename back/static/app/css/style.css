@@ -11,139 +11,11 @@ p, a, li, span, button {
 
 #app {
 	width: 100%;
-	max-width: calc(800px - 24px);
+	max-width: 800px;
 	padding: 0px 12px;
 
 	margin-left: auto;
 	margin-right: auto;
-}
-
-nav {
-	width: 100%;
-	max-width: 800px;
-	margin-left: auto;
-	margin-right: auto;
-
-	display: flex;
-	justify-content: space-between;
-}
-
-nav div {
-	display: flex;
-}
-
-nav a {
-	text-decoration: none;
-    border: none;
-    padding: 12px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    cursor: pointer;
-	font-size: 16px;
-}
-
-nav a img {
-    width: 16px;
-    height: 16px;
-	pointer-events: none;
-}
-
-
-
-/* FORM */
-
-.mt-36 {
-	margin-top: 36px;
-}
-
-.container--xs {
-	width: 100%;
-	max-width: 350px;
-	margin-left: auto;
-	margin-right: auto;
-}
-
-.text--center {
-	text-align: center;
-}
-
-.form {
-	display: block;
-	width: 80%;
-	max-width: 350px;
-	margin-left: auto;
-	margin-right: auto;
-	padding: 36px 0px;
-}
-
-.form--field {
-	overflow: hidden;
-	display: block;
-	position: relative;
-	box-sizing: border-box;
-	border-bottom: 2px solid #b4b4b4;
-	margin-bottom: 12px;
-}
-
-.form--label {
-	position: relative;
-	display: block;
-	height: 36px;
-	padding: 6px 0px;
-	background-color: var(--main-bg-color);
-	font-family: var(--main-font-family);
-}
-
-.form--label input {
-	position: absolute;
-	border: none;
-	outline: none;
-	top: 50%;
-	height: 24px;
-	width: 100%;
-	background-color: var(--main-bg-color);
-	color: var(--main-color);
-	font-family: var(--main-font-family);
-	transform-origin: left;
-	transform: translateY(-50%);
-	transition: transform ease-in-out .1s;
-}
-
-.form--label span {
-	position: absolute;
-	top: 55%;
-	left: 3px;
-	z-index: 1;
-	color: #737373;
-	transform-origin: left;
-	transform: translateY(-50%);
-	transition: transform ease-in-out .1s;
-}
-
-.form button {
-	border: none;
-	outline: none;
-	width: 100%;
-	padding: 12px 0px;
-	background-color: #fff;
-	color: #000;
-	font-size: 12px;
-	font-family: var(--main-font-family);
-}
-
-
-
-
-/* CHAT */
-
-#rooms {
-	width: 100%;
-}
-
-.room {
-	padding: 12px 16px;
-	border-bottom: 1px solid #737373;
 }
 
 
@@ -194,11 +66,58 @@ nav a img {
 	bottom: 0%;
 }
 
-.flex {
-	display: flex;
-	justify-content: space-between;
+
+/* LISTS */
+
+.list {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+	border: 1px solid var(--secondary-bg-color);
+	border-radius: 12px;
+	overflow-y: scroll;
+    list-style-type: none;
+
+	/* Remove scroll bar */
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
 }
 
-.hidden {
-	display: none;
+/* Safari and Chrome */
+.list::-webkit-scrollbar {
+    display: none;
+}
+
+.list li:not(:last-child) {
+    border-bottom: 1px solid var(--secondary-bg-color);
+}
+
+.list-item a {
+    display: flex;
+    align-items: center;
+    padding: 12px 18px;
+    text-decoration: none;
+    color: inherit;
+    transition: background-color 0.3s;
+}
+
+.list-item a:hover {
+    background-color: var(--secondary-bg-color);
+}
+
+.list-item .room-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.list-item .name {
+    font-weight: bold;
+    font-size: 14px;
+    color: var(--main-color);
+	margin-bottom: 6px;
+}
+
+.list-item .latest-message {
+    font-size: 12px;
+    color: var(--secondary-color);
 }

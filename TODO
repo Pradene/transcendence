@@ -1,8 +1,4 @@
 - login error
-- login page redirection if not connected
-- login style
-
-- nginx configuration to serve static files
 
 - create chat room button
 - user friends

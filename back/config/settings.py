@@ -128,3 +128,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ASGI_APPLICATION = 'config.asgi.application'
 
 AUTH_USER_MODEL = 'account.CustomUser'
+
+# Set session expiration to 1 day (adjust as needed)
+SESSION_COOKIE_AGE = 86400

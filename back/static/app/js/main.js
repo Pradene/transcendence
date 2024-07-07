@@ -1,6 +1,7 @@
 import { Router } from "./Router.js"
 import { Home } from './views/Home.js'
 import { Chat } from './views/Chat.js'
+import { ChatCreate } from "./views/ChatCreate.js"
 import { ChatRoom } from './views/ChatRoom.js'
 import { Profile } from './views/Profile.js'
 import { Login } from './views/Login.js'
@@ -20,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const router = new Router(app, [
         {path: '/', view: new Home()},
         {path: '/chat/', view: new Chat()},
+        {path: '/chat/create-room/', view: new ChatCreate()},
         {path: '/chat/:id/', view: new ChatRoom()},
         {path: '/login/', view: new Login()},
         {path: '/signup/', view: new Signup()},
