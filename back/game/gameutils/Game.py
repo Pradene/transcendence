@@ -1,46 +1,47 @@
 import logging
 import asyncio
-import threading
-from typing import Union, List, Callable
-from threading import Thread, Lock, RLock
+from typing import Union
+from threading import Thread, Lock
 
 from game.gameutils.PlayerInterface import PlayerInterface
 from game.gameutils.Ball import Ball
 from game.gameutils.defines import *
+from game.gameutils.abstractgame import AbstractGame
 
 FPS: int = 24
 TIME_TO_SLEEP: float = (1 / FPS)
 
 
-class Game:
+class Game(AbstractGame):
     def __init__(self, p1: PlayerInterface):
+        super().__init__(p1)
+
         self.__p1: Union[PlayerInterface, None] = p1
         self.__p2: Union[PlayerInterface, None] = None
         self.__ball: Ball = Ball()
         self.__dataLock: Lock = Lock()
 
         self.__th: Thread = Thread(target=asyncio.run, args=(self.__gameLoop(),))
-        self.__finished: bool = False
-        self.__finishedLock: RLock = RLock()
 
         self.__p1.setPosition(P1_POSITION.copy())
         self.__p1.setJoined(True)
+        self.__p1.setScore(0)
+
 
     def __del__(self):
-        logging.log(logging.INFO, f"Deleting game {self.getGameid()}")
         if self.__th is not None and self.__th.is_alive():
             self.__th.join()
-        logging.log(logging.INFO, f"Game {self.getGameid()} deleted")
-
-    def getGameid(self) -> str:
-        return self.__p1.getName()
 
     async def join(self, p2: PlayerInterface) -> None:
         """Join a player to the game"""
 
+        if self.__p2 is not None:
+            raise RuntimeError("Game is full")
+
         self.__p2 = p2
         self.__p2.setPosition(P2_POSITION.copy())
         self.__p2.setJoined(True)
+        self.__p2.setScore(0)
 
         # send game data to clients
         await self.update()
@@ -55,7 +56,7 @@ class Game:
                 self.__p2.setPosition(P2_POSITION.copy())
 
                 if self.__p1.won() or self.__p2.won():
-                    await self.__finish()
+                    await self._setFinished(self.__p1 if self.__p1.won() else self.__p2)
                     break
 
             self.__dataLock.acquire()
@@ -64,20 +65,6 @@ class Game:
 
             await self.update()
             await asyncio.sleep(TIME_TO_SLEEP)
-
-    def isFinished(self) -> bool:
-
-        with self.__finishedLock:
-            finished = self.__finished
-
-        return finished
-
-    async def __finish(self) -> None:
-        """Finish the game and update the clients"""
-
-        with self.__finishedLock:
-            self.__finished = True
-            await self.update()
 
     async def update(self) -> None:
         """Send game datas to clients, and delete the game if it's finished"""
@@ -152,10 +139,10 @@ class Game:
     async def quit(self) -> None:
         """Terminate the game and update the clients"""
 
-        await self.__finish()
+        await self._setFinished()
 
     def removeFromClients(self):
-        """Remove the game from the clients so they can join another game"""
+        """Remove the game from the clients, so they can join another game"""
 
         self.__p1.getDeleteGameCallback()()
         self.__p2.getDeleteGameCallback()()

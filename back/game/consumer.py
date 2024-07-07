@@ -79,7 +79,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         """Handle client disconnection"""
 
         logging.log(logging.INFO, f"User {self.__interface.getName()} disconnecting...")
-        if self.__currentGame is not None:
+        if self.isInGame():
             logging.log(logging.INFO, f"User {self.__interface.getName()} is in game {self.__currentGame.getGameid()}, quitting")
             await self.__currentGame.quit()
             logging.log(logging.INFO, f"User {self.__interface.getName()} has quit the game {self.__currentGame.getGameid()}")
@@ -88,6 +88,11 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             if user == self:
                 GameConsumer.USERS.remove(user)
         logging.log(logging.INFO, f"User {self.__interface.getName()} has disconnected")
+
+    def isInGame(self) -> bool:
+        """Check if the user is in a game"""
+
+        return self.__currentGame is not None and self.__currentGame.isFinished() is not True
 
     async def getGames(self):
         """Send a list of all games to the client"""
@@ -130,7 +135,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             response = GameConsumerResponse(method="join_game", status=False, reason=Response.INVALIDUSERNAME)
             await self.send_json(response.toJSON())
             return
-        elif self.__currentGame is not None:
+        elif self.isInGame():
             response = GameConsumerResponse(method="join_game", status=False, reason=Response.ALREADYINGAME)
             await self.send_json(response.toJSON())
             return
@@ -140,12 +145,18 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             self.__currentGame = manager.getGameOrTournament(gameid)
             logging.log(logging.INFO, self.__currentGame)
             await self.__currentGame.join(self.__interface)
-            self.__currentGame.start()
+
+            # if game is not a tournament, start it
+            if manager.getTournament(gameid) is None:
+                self.__currentGame.start()
 
             # update game list for all users
             await GameConsumer.onGameChange()
         except KeyError:
             response = GameConsumerResponse(method="join_game", status=False, reason=Response.NOSUCHGAME)
+            await self.send_json(response.toJSON())
+        except RuntimeError as error:
+            response = GameConsumerResponse(method="join_game", status=False, reason=str(error))
             await self.send_json(response.toJSON())
 
     async def createGame(self, data):
@@ -157,7 +168,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             response = GameConsumerResponse(method="create_game", status=False, reason=Response.INVALIDUSERNAME)
             await self.send_json(response.toJSON())
             return
-        elif self.__currentGame is not None:
+        elif self.isInGame():
             response = GameConsumerResponse(method="create_game", status=False, reason=Response.ALREADYINGAME)
             await self.send_json(response.toJSON())
             return
@@ -180,7 +191,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         from game.gameutils.GameManager import GameManager
 
         # Check if the user can join a game
-        if self.__currentGame is not None:
+        if self.isInGame():
             response = GameConsumerResponse(method="create_tournament", status=False, reason=Response.ALREADYINGAME)
             await self.send_json(response.toJSON())
             return
@@ -192,6 +203,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             self.__interface.setName(tournamentid)
             manager: GameManager = GameManager.getInstance()
             self.__currentGame = manager.createTournament(self.__interface)
+            await self.__currentGame.join(self.__interface) # required to trigger the update method
 
             for user in GameConsumer.USERS:
                 await user.getGames()
@@ -199,6 +211,9 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             response = GameConsumerResponse(method="create_tournament", status=False, reason=Response.INVALIDREQUEST)
             await self.send_json(response.toJSON())
             return
+        except RuntimeError:
+            response = GameConsumerResponse(method="create_tournament", status=False, reason=Response.GAMEFULL)
+            await self.send_json(response.toJSON())
 
     def __deleteCurrentGame(self):
         logging.log(logging.INFO, f"User {self.__interface.getName()} left the game {self.__currentGame.getGameid()}")
@@ -207,9 +222,9 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
     async def updatePlayer(self, data) -> None:
         """Update player movement"""
 
-        if not self.__currentGame:
-            response = GameConsumerResponse(method="update_player", status=False, reason=Response.NOTINGAME)
-            await self.send_json(response.toJSON())
+        if not self.isInGame():
+            # response = GameConsumerResponse(method="update_player", status=False, reason=Response.NOTINGAME)
+            # await self.send_json(response.toJSON())
             return
 
         try:

@@ -95,6 +95,11 @@ class PlayerInterface:
         """Returns the score of the player"""
 
         return self.__points
+
+    def setScore(self, score: int) -> None:
+        """Sets the score of the player"""
+
+        self.__points = score
     
     def incrPoints(self) -> None:
         self.__points += 1
