@@ -2,9 +2,9 @@ from typing import List, Tuple
 import logging
 
 class IntVector:
-    def __init__(self, vector: list[int]):
-        self.x: int = vector[0]
-        self.y: int = vector[1]
+    def __init__(self, vector: list[float]):
+        self.x: float = vector[0]
+        self.y: float = vector[1]
 
     def reverseX(self) -> None:
         self.x = -self.x

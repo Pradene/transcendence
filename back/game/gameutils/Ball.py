@@ -2,13 +2,26 @@ from typing import List, Tuple
 from game.gameutils.PlayerInterface import PlayerInterface, PADDLE_HEIGHT, PADDLE_WIDTH
 from game.gameutils.IntVector import IntVector
 from game.gameutils.defines import *
-import logging
 
+import random
+import math
+
+
+def genStartVector() -> IntVector:
+    """Generates a random starting vector for the ball"""
+
+    angle = random.uniform(0, 2 * math.pi)
+    while math.cos(angle) < BALL_MIN_COS or math.sin(angle) < BALL_MIN_SIN:
+        angle = random.uniform(0, 2 * math.pi)
+
+    sin = math.sin(angle) if angle < math.pi else -math.sin(angle)
+    cos = math.cos(angle) if angle < math.pi else -math.cos(angle)
+    return IntVector([cos, sin])
 
 class Ball:
     def __init__(self):
         self.__position: list[int] = BALL_BASE_POSITION.copy()
-        self.__direction: IntVector = IntVector([.66, .33])
+        self.__direction: IntVector = genStartVector()
         self.__speed: float = BALL_SPEED
         self.__finished: bool = False
 
@@ -26,7 +39,7 @@ class Ball:
     def incrSpeed(self) -> None:
         """Increases the speed of the ball, should be called after hitting a paddle"""
 
-        self.__speed += BALL_SPEE_INCREMENT
+        self.__speed += BALL_SPEED_INCREMENT
 
     def __revX(self, arr: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
         narr = [(-x, y) for x, y in arr]

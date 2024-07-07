@@ -19,7 +19,7 @@ class Game:
         self.__ball: Ball = Ball()
         self.__dataLock: Lock = Lock()
 
-        self.__th: Union[Thread, None] = None
+        self.__th: Thread = Thread(target=asyncio.run, args=(self.__gameLoop(),))
         self.__finished: bool = False
         self.__finishedLock: RLock = RLock()
 
@@ -44,11 +44,6 @@ class Game:
 
         # send game data to clients
         await self.update()
-
-        # logging.log(logging.INFO, f"{self.__p2.getName()} joined the game {self.getGameid()}")
-        # start the game
-        self.__th = Thread(target=asyncio.run, args=(self.__gameLoop(),))
-        self.__th.start()
 
     async def __gameLoop(self) -> None:
         # logging.log(logging.INFO, f"Game {self.getGameid()} started")
@@ -84,7 +79,6 @@ class Game:
             self.__finished = True
             await self.update()
 
-
     async def update(self) -> None:
         """Send game datas to clients, and delete the game if it's finished"""
 
@@ -101,7 +95,7 @@ class Game:
 
         self.__dataLock.acquire()
 
-        status = "finished" if self.isFinished() else "waiting" if self.__p2 is None else "running"
+        status = "finished" if self.isFinished() else "waiting" if not self.isStarted() else "running"
 
         # data for first player
         dic1 = {
@@ -165,3 +159,13 @@ class Game:
 
         self.__p1.getDeleteGameCallback()()
         self.__p2.getDeleteGameCallback()()
+
+    def isStarted(self) -> bool:
+        """Return True if the game loop is started"""
+
+        return self.__th.is_alive()
+
+    def start(self) -> None:
+        """Start the game loop"""
+
+        self.__th.start()
