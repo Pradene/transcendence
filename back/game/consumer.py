@@ -9,7 +9,6 @@ from game.response import Response
 from game.gameutils.PlayerInterface import PlayerInterface
 from game.gameutils.Game import Game
 from game.gameutils.Tournament import Tournament
-from game.gameutils.GameManager import GameManager
 
 
 # This is a global variable that is used to check if the module has been initialised
@@ -44,6 +43,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         GameConsumer.USERS.append(self)
 
         if not MODULE_INITIALIZED:
+            from game.gameutils.GameManager import GameManager
             logging.log(logging.INFO, "Initialising GameConsumer")
             GameManager.setUserList(GameConsumer.USERS)
             MODULE_INITIALISED = True
@@ -92,6 +92,8 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
     async def getGames(self):
         """Send a list of all games to the client"""
 
+        from game.gameutils.GameManager import GameManager
+
         manager: GameManager = GameManager.getInstance()
         response: GameConsumerResponse = GameConsumerResponse(method="get_games", status=True, data=manager.toJSON())
 
@@ -109,6 +111,8 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
     async def joinGame(self, data):
         """Add the player to the game"""
+
+        from game.gameutils.GameManager import GameManager
 
         # check request format
         gameid: str = ""
@@ -147,6 +151,8 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
     async def createGame(self, data):
         """Create a new game and add the player to it"""
 
+        from game.gameutils.GameManager import GameManager
+
         if self.__interface.getName() == "":
             response = GameConsumerResponse(method="create_game", status=False, reason=Response.INVALIDUSERNAME)
             await self.send_json(response.toJSON())
@@ -174,6 +180,8 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
     async def createTournament(self, data):
         """Create a new tournament and add the player to it"""
+
+        from game.gameutils.GameManager import GameManager
 
         # Check if the user can join a game
         if self.__currentGame is not None:

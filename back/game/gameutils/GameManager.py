@@ -78,9 +78,11 @@ class ThreadingDict:
 
 
 class GameManager:
+    from game.consumer import GameConsumer
+
     GAMES: ThreadingDict = ThreadingDict()
     TOURNAMENTS: ThreadingDict = ThreadingDict()
-    USERLIST: List = []
+    USERLIST: List[GameConsumer] = []
     __instance = None
 
     def __init__(self):
