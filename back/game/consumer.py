@@ -171,12 +171,12 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             return
 
         manager: GameManager = GameManager.getInstance()
-        self.__currentGame = manager.createGame(self.__interface)
+        self.__currentGame = await manager.createGame(self.__interface)
         await self.__currentGame.update()
 
         # Send the game list to all clients
-        for user in GameConsumer.USERS:
-            await user.getGames()
+        # for user in GameConsumer.USERS:
+        #     await user.getGames()
 
     async def createTournament(self, data):
         """Create a new tournament and add the player to it"""
@@ -229,3 +229,8 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
                                             reason=f"{Response.INVALIDMOVEMENT}: {error}")
             await self.send_json(response.toJSON())
             return
+
+    @staticmethod
+    async def onGameChange():
+        for user in GameConsumer.USERS:
+            await user.getGames()

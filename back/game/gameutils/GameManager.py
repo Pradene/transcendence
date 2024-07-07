@@ -5,76 +5,76 @@ from game.gameutils.PlayerInterface import PlayerInterface
 
 import logging
 import time
+import asyncio
 
-from threading import Lock, Thread
+from threading import RLock, Thread
 
 
 class ThreadingDict:
     def __init__(self):
         self.__dict: Dict = {}
-        self.__lock: Lock = Lock()
-        self.__thread: Thread = Thread(target=self.__checkAndDelete)
+        # self.__ondelete: Callable = onDelete
+        self.__lock: RLock = RLock()
+        self.__thread: Thread = Thread(target=asyncio.run, args=(self.__checkAndDelete(),))
 
         self.__thread.start()
 
     def __del__(self):
         self.__thread.join()
 
-    def __checkAndDelete(self):
+    async def __checkAndDelete(self):
+        oneDeleted: bool = False
+
         while True:
 
-            self.__lock.acquire()
-            # iterate over the keys and delete the ones that should be deleted
-            for key in list(self.__dict.keys()):
-                if self.__dict[key].isFinished():
-                    self.__dict.pop(key)
-                    logging.log(logging.INFO, f"Game {key} deleted")
-            self.__lock.release()
+            with self.__lock:
+                # iterate over the keys and delete the ones that should be deleted
+                for key in list(self.__dict.keys()):
+                    if self.__dict[key].isFinished():
+                        self.__dict.pop(key)
+                        logging.log(logging.INFO, f"Game {key} deleted")
+                        oneDeleted = True
+
+            if oneDeleted:
+                from game.consumer import GameConsumer
+                oneDeleted = False
+                await GameConsumer.onGameChange()
 
             time.sleep(1)
 
     def __getitem__(self, key):
-
-        self.__lock.acquire()
-        item = self.__dict[key]
-        self.__lock.release()
+        with self.__lock:
+            item = self.__dict[key]
 
         return item
 
     def __setitem__(self, key, value):
-
-        self.__lock.acquire()
-        self.__dict[key] = value
-        self.__lock.release()
+        with self.__lock:
+            self.__dict[key] = value
 
     def __contains__(self, key):
-        self.__lock.acquire()
-        check = key in self.__dict.keys()
-        self.__lock.release()
+        with self.__lock:
+            check = key in self.__dict
 
         return check
 
     def pop(self, key):
-
-        self.__lock.acquire()
-        item = self.__dict.pop(key, None)
-        self.__lock.release()
+        with self.__lock:
+            item = self.__dict.pop(key)
 
         return item
 
     def keys(self):
-        self.__lock.acquire()
-        item = self.__dict.keys()
-        self.__lock.release()
+        with self.__lock:
+            keys = self.__dict.keys()
 
-        return item
+        return keys
 
     def values(self):
-        self.__lock.acquire()
-        items = self.__dict.values()
-        self.__lock.release()
+        with self.__lock:
+            values = self.__dict.values()
 
-        return items
+        return values
 
 
 class GameManager:
@@ -91,9 +91,12 @@ class GameManager:
     def __del__(self):
         pass
 
-    def createGame(self, player: PlayerInterface) -> Game:
+    async def createGame(self, player: PlayerInterface) -> Game:
+        from game.consumer import GameConsumer
         game = Game(player)
         GameManager.GAMES[player.getName()] = game
+
+        await GameConsumer.onGameChange()
         return game
 
     def gameExists(self, gameid: str) -> bool:
