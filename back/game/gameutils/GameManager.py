@@ -80,6 +80,8 @@ class ThreadingDict:
 class GameManager:
     GAMES: ThreadingDict = ThreadingDict()
     TOURNAMENTS: ThreadingDict = ThreadingDict()
+    USERLIST: List = []
+    __instance = None
 
     def __init__(self):
         pass
@@ -132,3 +134,15 @@ class GameManager:
         garr = [x.gameInfo() for x in GameManager.GAMES.values()]
         tarr = [x.tournamentInfo() for x in GameManager.TOURNAMENTS.values()]
         return {"games": garr, "tournaments": tarr}
+
+    @staticmethod
+    def getInstance() -> 'GameManager':
+        if GameManager.__instance is None:
+            logging.log(logging.INFO, "Creating GameManager instance")
+            GameManager.__instance = GameManager()
+        return GameManager.__instance
+
+    @staticmethod
+    def setUserList(userlist: List):
+        GameManager.USERLIST = userlist
+        logging.log(logging.INFO, "Userlist set")

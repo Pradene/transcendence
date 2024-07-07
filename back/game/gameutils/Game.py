@@ -60,7 +60,7 @@ class Game:
                 self.__p2.setPosition(P2_POSITION.copy())
 
                 if self.__p1.won() or self.__p2.won():
-                    self.__finish()
+                    await self.__finish()
                     break
 
             self.__dataLock.acquire()
@@ -71,40 +71,26 @@ class Game:
             await asyncio.sleep(TIME_TO_SLEEP)
 
     def isFinished(self) -> bool:
-        # self.__finishedLock.acquire()
 
-        logging.log(logging.INFO,
-                    f"Checking if game {self.getGameid()} is finished in thread {threading.current_thread().name}")
         with self.__finishedLock:
             finished = self.__finished
-        # self.__finishedLock.release()
 
-        logging.log(logging.INFO, f"Game {self.getGameid()} is finished: {finished}")
         return finished
 
     async def __finish(self) -> None:
         """Finish the game and update the clients"""
 
-        logging.log(logging.INFO, f"Game {self.getGameid()} finishing, before lock in thread {threading.current_thread().name}")
-        # self.__finishedLock.acquire()
-
         with self.__finishedLock:
-            logging.log(logging.INFO, f"Game {self.getGameid()} finishing, in lock in thread {threading.current_thread().name}")
             self.__finished = True
             await self.update()
 
-        # self.__finishedLock.release()
-        logging.log(logging.INFO, f"Game {self.getGameid()} finishing, after lock")
 
     async def update(self) -> None:
         """Send game datas to clients, and delete the game if it's finished"""
 
-        logging.log(logging.INFO, f"Updating game {self.getGameid()}")
-
         # Send game datas to client
         data = self.__toJSON()
 
-        logging.log(logging.INFO, f"Sending data to clients")
         if self.__p1 is not None:
             await self.__p1.getUpdateCallback()(data[0])
         if self.__p2 is not None:
@@ -113,10 +99,8 @@ class Game:
     def __toJSON(self) -> List[dict]:
         """Return the game data in JSON format"""
 
-        logging.log(logging.INFO, f"Before data lock")
         self.__dataLock.acquire()
 
-        logging.log(logging.INFO, f"Data lock acquired")
         status = "finished" if self.isFinished() else "waiting" if self.__p2 is None else "running"
 
         # data for first player
@@ -158,7 +142,6 @@ class Game:
         }
         self.__dataLock.release()
 
-        logging.log(logging.INFO, f"Data lock released")
         return [dic1, dic2]
 
     def gameInfo(self) -> dict:

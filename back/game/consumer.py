@@ -12,6 +12,9 @@ from game.gameutils.Tournament import Tournament
 from game.gameutils.GameManager import GameManager
 
 
+# This is a global variable that is used to check if the module has been initialised
+MODULE_INITIALIZED: bool = False
+
 class GameConsumerResponse:
     def __init__(self, method: str, status: bool, data: dict = {}, reason: str = ""):
         self.method = method
@@ -39,6 +42,11 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         self.__currentGame: Union[Game, Tournament, None] = None
 
         GameConsumer.USERS.append(self)
+
+        if not MODULE_INITIALIZED:
+            logging.log(logging.INFO, "Initialising GameConsumer")
+            GameManager.setUserList(GameConsumer.USERS)
+            MODULE_INITIALISED = True
 
     async def connect(self):
         await self.accept()
@@ -84,7 +92,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
     async def getGames(self):
         """Send a list of all games to the client"""
 
-        manager: GameManager = GameManager()
+        manager: GameManager = GameManager.getInstance()
         response: GameConsumerResponse = GameConsumerResponse(method="get_games", status=True, data=manager.toJSON())
 
         await self.send_json(response.toJSON())
@@ -112,7 +120,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             return
 
         # Check if the user can join a game
-        manager: GameManager = GameManager()
+        manager: GameManager = GameManager.getInstance()
         username = self.__interface.getName()
         if username == "":
             response = GameConsumerResponse(method="join_game", status=False, reason=Response.INVALIDUSERNAME)
@@ -156,7 +164,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             await self.send_json(response.toJSON())
             return
 
-        manager: GameManager = GameManager()
+        manager: GameManager = GameManager.getInstance()
         self.__currentGame = manager.createGame(self.__interface)
         await self.__currentGame.update()
 
@@ -178,7 +186,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             tournamentid = data["data"]["gameid"]
 
             self.__interface.setName(tournamentid)
-            manager: GameManager = GameManager()
+            manager: GameManager = GameManager.getInstance()
             self.__currentGame = manager.createTournament(self.__interface)
 
             for user in GameConsumer.USERS:
