@@ -112,13 +112,10 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -128,5 +125,4 @@ ASGI_APPLICATION = 'config.asgi.application'
 
 AUTH_USER_MODEL = 'account.CustomUser'
 
-# Set session expiration to 1 day (adjust as needed)
-SESSION_COOKIE_AGE = 86400
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'

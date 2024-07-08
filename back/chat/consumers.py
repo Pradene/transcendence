@@ -39,17 +39,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         data = json.loads(text_data)
         message_type = data.get('type')
 
-        if message_type == 'get_rooms':
-            await self.get_rooms()
-        
-        elif message_type == 'send_room_message':
-            await self.send_room_message(data)
-        
-        elif message_type == 'get_room_message':
-            await self.get_room_message(data)
+        if message_type == 'message':
+            await self.message(data)
 
 
-    async def send_room_message(self, data):
+    async def message(self, data):
         content = data['content']
         room_id = data['room']
 
@@ -75,44 +69,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         content = event['content']
 
         await self.send(text_data=json.dumps({
-            'type': 'room_message',
             'room': room_id,
             'user': user,
             'content': content
         }))
 
-
-    async def get_room_message(self, data):
-        room_id = data['room']
-        messages = await self.get_messages(room_id=room_id)
-        
-        await self.send(text_data=json.dumps({
-            'type': 'get_room_message',
-            'messages': messages
-        }))
-
-
-    async def get_rooms(self):
-        rooms = await self.get_user_rooms()
-        serialized_data = await self.get_serialized_data(rooms)
-        
-        await self.send(text_data=json.dumps({
-            'type': 'get_rooms',
-            'rooms': serialized_data
-        }))
-
-
-    # return all messages from a room
-    @database_sync_to_async
-    def get_messages(self, room_id):
-        messages = Message.objects.filter(room_id=room_id).order_by('timestamp')
-        return [{'user': message.user.username, 'content': message.content} for message in messages]
-
-    # serialize ChatRoom objects to JSON
-    @database_sync_to_async
-    def get_serialized_data(self, rooms):
-        serializer = ChatRoomSerializer(rooms, many=True)
-        return serializer.data
 
     # get all rooms of an user
     @database_sync_to_async

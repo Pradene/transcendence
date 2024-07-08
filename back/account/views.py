@@ -3,6 +3,7 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth import authenticate, login, logout
+# from django.contrib.sessions.models import Session
 from django.http import JsonResponse
 
 from .models import CustomUser
@@ -85,3 +86,9 @@ def user_login(request):
     
     except Exception as e:
         return JsonResponse({'success': False, 'errors': str(e)})
+
+@login_required
+@require_POST
+def user_logout(request):
+    logout(request)
+    return JsonResponse({'success': True})

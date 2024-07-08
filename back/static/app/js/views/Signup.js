@@ -7,7 +7,7 @@ export class Signup extends AbstractView {
         super()
     }
 
-    async getHtml() {
+    getHtml() {
         return `
         <div class="fp">
             <div>
@@ -42,7 +42,7 @@ export class Signup extends AbstractView {
         `
     }
 
-    addEventListeners() {
+    async addEventListeners() {
 
         const inputs = document.querySelectorAll('.form-input')
         inputs.forEach(input => {
@@ -59,13 +59,13 @@ export class Signup extends AbstractView {
             })
         })
 
-        document.getElementById('signup-form').addEventListener('submit', async (event) => {
-            event.preventDefault()
-            await this.handleSubmit()
-        })
+        const form = document.getElementById('signup-form')
+        form.addEventListener('submit', this.handleSubmit.bind(this))
     }
 
-    async handleSubmit() {
+    async handleSubmit(event) {
+        event.preventDefault()
+
         const username = document.getElementById("username").value
         const password1 = document.getElementById("password").value
         const password2 = document.getElementById("password-confirmation").value
@@ -84,7 +84,7 @@ export class Signup extends AbstractView {
             const data = await response.json()
             
             if (data.success) {
-                const router = new Router()
+                const router = Router.get()
 
                 router.navigate('/login/')
 

@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('get-chatrooms/', views.get_chatrooms),
-    path('search-chatroom/', views.search_chatroom),
+    path('rooms/', views.get_rooms),
+    path('rooms/<int:room_id>/', views.get_room),
+    path('search-rooms/', views.search_rooms),
 ]

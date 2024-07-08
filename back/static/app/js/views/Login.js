@@ -1,13 +1,14 @@
 import { AbstractView } from "./AbstractView.js"
 import { Router } from "../Router.js"
 import { getCSRFToken } from "../utils.js"
+import { WebSocketManager } from "../ChatWebSocket.js"
 
 export class Login extends AbstractView {
     constructor() {
         super()
     }
 
-    async getHtml() {
+    getHtml() {
         return `
         <div class="fp">
             <div>
@@ -41,7 +42,7 @@ export class Login extends AbstractView {
         `
     }
 
-    addEventListeners() {
+    async addEventListeners() {
 
         const inputs = document.querySelectorAll('.form-input')
         inputs.forEach(input => {
@@ -58,13 +59,13 @@ export class Login extends AbstractView {
             })
         })
 
-        document.getElementById('login-form').addEventListener('submit', async (event) => {
-            event.preventDefault()
-            await this.handleSubmit()
-        })
+        const form = document.getElementById('login-form')
+        form.addEventListener('submit', this.handleSubmit.bind(this))
     }
 
-    async handleSubmit() {
+    async handleSubmit(event) {
+        event.preventDefault()
+
         const username = document.getElementById("username").value
         const password = document.getElementById("password").value
         const csrfToken = getCSRFToken()
@@ -82,25 +83,21 @@ export class Login extends AbstractView {
             const data = await response.json()
             
             if (data.success) {
-                const ws = window.wsManager
+                const ws = WebSocketManager.get()
                 ws.connect('ws://localhost:3000/ws/chat/')
                 
-                const router = new Router()
+                localStorage.setItem('isAuthenticated', 'true')
+                localStorage.setItem('username', username)
 
-                router.setUserIsConnected()
+                const router = Router.get()
                 router.navigate('/')
 
             } else {
-                this.displayErrors(data.errors)
                 console.log('error: ', data.errors)
             }
                 
         } catch (error) {
             console.log('error: ', error)
         }
-    }
-
-    displayErrors(errors) {
-
     }
 }

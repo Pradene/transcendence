@@ -8,7 +8,7 @@ export class ChatCreate extends AbstractView {
         this.users = []
     }
 
-    async getHtml() {
+    getHtml() {
         return `
             <nav-component></nav-component>
             <div class="flex">
@@ -24,26 +24,39 @@ export class ChatCreate extends AbstractView {
     }
 
     async addEventListeners() {   
-        const response = await fetch(`/api/user/get-friends/`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCSRFToken()
-            }
-        })
-
-        const data = await response.json()
-
-        if (data.success) {
-            this.users = data.users
-            this.displayUsers()
-        }
-
+        await this.getUsers()
+        
         const input = document.getElementById('input')
         input.addEventListener('keyup', this.handleSearch.bind(this))
     }
+
+    async getUsers() {
+        try {
+
+            const response = await fetch(`/api/user/get-friends/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                }
+            })
+
+            const data = await response.json()
+
+            if (data.success) {
+                this.users = data.users
+                this.displayUsers()
+            
+            } else {
+                console.log('Failed to fetch data:', data.error)
+            }
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
     
-    async handleSearch(event) {
+    handleSearch(event) {
         const query = event.target.value
         
         const users = document.querySelectorAll('.user')

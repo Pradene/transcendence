@@ -5,10 +5,11 @@ export class Chat extends AbstractView {
     constructor() {
         super()
 
-        this.rooms = []
+        this.handleSearch = this.handleSearch.bind(this)
+        this.handleReceivedMessage = this.handleReceivedMessage.bind(this)
     }
 
-    async getHtml() {
+    getHtml() {
         return `
             <nav-component></nav-component>
             <div class="flex">
@@ -23,26 +24,43 @@ export class Chat extends AbstractView {
         `
     }
 
-    async addEventListeners() {     
-        const response = await fetch(`/api/chat/get-chatrooms/`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCSRFToken()
-            }
-        })
-
-        const data = await response.json()
-
-        if (data.success) {
-            this.rooms = data.rooms
-            this.displayRooms()
-        }
+    async addEventListeners() {
+        await this.getInitialData()
 
         const input = document.getElementById('input')
-        input.addEventListener('keyup', this.handleSearch.bind(this))
+        input.removeEventListener('keyup', this.handleSearch)
+        input.addEventListener('keyup', this.handleSearch)
+    
+        document.removeEventListener('wsMessage', this.handleReceivedMessage)
+        document.addEventListener('wsMessage', this.handleReceivedMessage)
+    }
+
+    async getInitialData() {
+        try {
+            const response = await fetch(`/api/chat/rooms/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                }
+            })
+
+            const data = await response.json()
+
+            if (data.success) {
+                const rooms = data.rooms
+                this.displayRooms(rooms)
+            
+            } else {
+                console.log('Failed to fetch data:', data.error)
+            }
+
+        } catch (error) {
+            console.log(error)
+        }
     }
     
+
     async handleSearch(event) {
         const query = event.target.value
         
@@ -57,24 +75,37 @@ export class Chat extends AbstractView {
         }
     }
 
-    displayRooms() {
-        const container = document.getElementById('rooms-list')
-        container.innerHTML = ''
-        
-        this.rooms.forEach((room) => {
-            const el = document.createElement('li')
-            el.classList.add('list-item')
-            el.innerHTML = `
-                <a href="/chat/${room.id}/" data-link>
-                    <img class="profile-pic" alt="Profile Picture">
-                    <div class="room-info">
-                        <span class="name">${room.name}</span>
-                        <span class="latest-message">Hello</span>
-                    </div>
-                </a>
-            `
+    handleReceivedMessage(event) {
+        const message = event.detail
+        console.log(message)
+    }
 
-            container.appendChild(el)
-        })
+    displayRooms(rooms) {     
+        if (!rooms)
+            return
+
+        rooms.forEach(room => this.displayRoom(room))
+    }
+    
+    displayRoom(room) {
+        if (!room)
+            return
+
+        const container = document.getElementById('rooms-list')
+        const message = (room.last_message ? room.last_message.content : 'Send a message...')
+        
+        const el = document.createElement('li')
+        el.classList.add('list-item')
+        el.innerHTML = `
+            <a href="/chat/${room.id}/" data-link>
+                <img class="profile-pic" alt="Profile Picture">
+                <div class="room-info">
+                    <span class="name">${room.name}</span>
+                    <span class="latest-message">${message}</span>
+                </div>
+            </a>
+        `
+        
+        container.appendChild(el)
     }
 }

@@ -3,11 +3,10 @@ export class Router {
         if (Router.instance)
             return Router.instance
 
-        Router.instance = this
-
-        this.userConnectStatus = false;
         this.routes = routes
         this.container = container
+        
+        Router.instance = this
     }
 
     init() {
@@ -20,18 +19,11 @@ export class Router {
         this.handleRoute()
     }
 
-    userIsConnected() {
-        return this.userConnectStatus
-    }
-
-    setUserIsConnected() {
-        this.userConnectStatus = true
-    }
-
     handleRoute() {
-        let location
+        let location = null
+        const isAuthenticated = localStorage.getItem('isAuthenticated')
 
-        if (!this.userIsConnected()
+        if (!isAuthenticated
         && window.location.pathname != '/login/'
         && window.location.pathname != '/signup/') {
             location = '/login/'
@@ -76,5 +68,9 @@ export class Router {
         return Object.fromEntries(keys.map(
             (key, i) => [key, values[i]]
         ))
+    }
+
+    static get() {
+        return (Router.instance ? Router.instance : new Router())
     }
 }

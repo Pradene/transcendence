@@ -1,15 +1,15 @@
 import { AbstractView } from "./AbstractView.js"
+import { getCSRFToken } from "../utils.js"
 
 export class ChatRoom extends AbstractView {
     constructor() {
         super()
 
-        window.wsManager.addHandler('room_message', this.roomMessage.bind(this))
-        window.wsManager.addHandler('get_room_message', this.getRoomMessage.bind(this))
-
+        this.handleSentMessage = this.handleSentMessage.bind(this)
+        this.handleReceivedMessage = this.handleReceivedMessage.bind(this)
     }
 
-    async getHtml() {
+    getHtml() {
         return `
         <nav-component></nav-component>
         <div id="chatroom">
@@ -24,79 +24,98 @@ export class ChatRoom extends AbstractView {
         `
     }
 
-    async roomMessage(data) {
-        const message = {
-            user: data.user,
-            content: data.content
-        }
-
-        this.displayMessage(message)
-        this.scrollToBottom()
+    async addEventListeners() {
+        await this.getInitialMessages()
+        
+        const form = document.getElementById('message-form')
+        form.removeEventListener('submit', this.handleSentMessage)
+        form.addEventListener('submit', this.handleSentMessage)
+        
+        document.removeEventListener('wsMessage', this.handleReceivedMessage)
+        document.addEventListener('wsMessage', this.handleReceivedMessage)
     }
 
-    async getRoomMessage(data) {
-        const messages = data.messages
-        messages.forEach(message => this.displayMessage(message))
-        this.scrollToBottom()
-    }
 
     async getInitialMessages() {
         const roomID = this.getRoomID()
 
-        await window.wsManager.sendMessage({
-            type: 'get_room_message',
-            room: roomID
-        })
-    }
-
-    handleSentMessage() {
-        const button = document.getElementById('message-form')
-        
-        button.addEventListener('submit', async (event) => {
-            event.preventDefault()
-
+        try {
+            const response = await fetch(`/api/chat/rooms/${roomID}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                }
+            })
             
-            const input = document.getElementById('message-input')
-            const value = input.value
-            const roomID = this.getRoomID()
-
-            if (input.value != '') {                
-                await window.wsManager.sendMessage({
-                    type: 'send_room_message',
-                    room: roomID,
-                    content: value
-                })
-
-                input.value = ''
+            const data = await response.json()
+            
+            if (data.success) {
+                if (data.room && data.room.messages)
+                    this.displayMessages(data.room.messages)
+            
+            } else {
+                console.log('Failed to fetch data:', data.error)
             }
-        })
-    }
 
-    addEventListeners() {
-        if (window.wsManager) {
-            this.getInitialMessages()
-            this.handleSentMessage()
+        } catch (error) {
+            console.log(error)
         }
     }
+
+
+    async handleSentMessage(event) {        
+        event.preventDefault()
+    
+        const input = document.getElementById('message-input')
+        const value = input.value
+        const roomID = this.getRoomID()
+        if (input.value != '') {                
+            await window.wsManager.sendMessage({
+                type: 'message',
+                room: roomID,
+                content: value
+            })
+            input.value = ''
+        }
+    }
+
+
+    handleReceivedMessage(event) {
+        const message = event.detail
+
+        if (message.room == this.getRoomID()) {
+            this.displayMessage(message)
+        }
+    }
+
 
     getRoomID() {
         return location.pathname.split('/')[2]
     }
 
+
+    displayMessages(messages) {
+        if (!messages)
+            return
+
+        messages.forEach(message => this.displayMessage(message))
+    }
+    
     displayMessage(message) {
+        if (!message)
+            return
+
         const container = document.getElementById('messages')
-        const div = document.createElement('div')
-        div.classList.add('message')
-        div.innerHTML = `
-            <h5>${message.user}</h5>
-            <p>${message.content}</p>
+        
+        const el = document.createElement('div')
+        el.classList.add('message')
+        el.innerHTML = `
+        <h5>${message.user}</h5>
+        <p>${message.content}</p>
         `
 
-        container.appendChild(div)
-    }
-
-    scrollToBottom() {
-        const container = document.getElementById('messages')
-        container.scrollTop = container.scrollHeight + 100
+        container.appendChild(el)
+        container.scrollTop = container.scrollHeight
     }
 }

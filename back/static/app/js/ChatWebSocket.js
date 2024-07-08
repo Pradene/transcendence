@@ -3,10 +3,10 @@ export class WebSocketManager {
         if (WebSocketManager.instance)
             return WebSocketManager.instance
 
-        WebSocketManager.instance = this
-
         this.socket = null
         this.handlers = []
+
+        WebSocketManager.instance = this
     }
 
     connect(url) {
@@ -30,21 +30,19 @@ export class WebSocketManager {
     }
 
     handleMessage(event) {
-        const data = JSON.parse(event.data)
+        const message = JSON.parse(event.data)
 
-        this.handlers.forEach(handler => {
-            if (handler.type == data.type)
-                handler.callback(data)
-        })
-    }
-
-    addHandler(type, callback) {
-        this.handlers.push({type, callback})
+        const e = new CustomEvent('wsMessage', {detail: message})
+        document.dispatchEvent(e)
     }
 
     sendMessage(message) {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(JSON.stringify(message))
         }
+    }
+
+    static get() {
+        return (WebSocketManager.instance ? WebSocketManager.instance : new WebSocketManager())
     }
 }

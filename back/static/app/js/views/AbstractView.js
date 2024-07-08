@@ -6,7 +6,7 @@ export class AbstractView {
         document.title = title
     }
 
-    async getHtml() {
+    getHtml() {
         return `
         <p>Default View</p>
         `
@@ -15,7 +15,7 @@ export class AbstractView {
     async addEventListeners() {}
 
     async render(container) {
-        container.innerHTML = await this.getHtml()
-        this.addEventListeners()
+        container.innerHTML = this.getHtml()
+        await this.addEventListeners()
     }
 }

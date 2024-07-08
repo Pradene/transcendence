@@ -28,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
         {path: '/profile/', view: new Profile()},
     ])
 
-    window.router = router
     router.init()
 
     document.body.addEventListener('click', (event) => {
