@@ -1,5 +1,6 @@
 import { AbstractView } from "./AbstractView.js"
 import { Router } from "../Router.js"
+import { getCSRFToken } from "../utils.js"
 
 export class Profile extends AbstractView {
     constructor() {
@@ -21,7 +22,8 @@ export class Profile extends AbstractView {
         button.addEventListener('click', this.logout)
     }
 
-    async logout() {
+    async logout(event) {
+        console.log('logout')        
         try {
             const response = await fetch(`/api/user/logout/`, {
                 method: 'POST',
@@ -33,9 +35,12 @@ export class Profile extends AbstractView {
 
             const data = await response.json()
 
+            console.log(data)
+
             if (data.success) {
                 localStorage.removeItem('isAuthenticated')
                 localStorage.removeItem('username')
+
                 const router = Router.get()
                 router.navigate('/login/')
 
@@ -43,7 +48,7 @@ export class Profile extends AbstractView {
                 console.log('Failed to fetch data:', data.error)
             }
         } catch (error) {
-
+            console.log(error)
         }
     }
 }
