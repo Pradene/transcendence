@@ -14,6 +14,7 @@ export class Home extends AbstractView {
         return `
         <nav-component></nav-component>
         <h1>Hello World</h1>
+        <script src="/static/scrips/pong/dist/main.js" type="application/javascript"></script>
         `
     }
 }

@@ -1,5 +1,7 @@
 import logging
 import asyncio
+import time
+
 from typing import Union
 from threading import Thread, Lock
 
@@ -54,6 +56,11 @@ class Game(AbstractGame):
     async def __gameLoop(self) -> None:
         # logging.log(logging.INFO, f"Game {self.getGameid()} started")
 
+        # wait 5 seconds for game start
+        for i in range(0, 5):
+            await self.update(i + 1)
+            time.sleep(1)
+
         while self.__p1 is not None and self.__p2 is not None and not self.isFinished():
             if self.__ball.isFinished():
                 self.__ball = Ball()
@@ -71,18 +78,18 @@ class Game(AbstractGame):
             await self.update()
             await asyncio.sleep(TIME_TO_SLEEP)
 
-    async def update(self) -> None:
+    async def update(self, timer: Union[int | None] = None) -> None:
         """Send game datas to clients, and delete the game if it's finished"""
 
         # Send game datas to client
-        data = self.__toJSON()
+        data = self.__toJSON(timer)
 
         if self.__p1 is not None:
             await self.__p1.getUpdateCallback()(data[0])
         if self.__p2 is not None:
             await self.__p2.getUpdateCallback()(data[1])
 
-    def __toJSON(self) -> List[dict]:
+    def __toJSON(self, timer: Union[int | None] = None) -> List[dict]:
         """Return the game data in JSON format"""
 
         self.__dataLock.acquire()
@@ -126,6 +133,11 @@ class Game(AbstractGame):
                 "ball":           self.__ball.getPosition()
             }
         }
+
+        if timer is not None:
+            dic1.data.timer = timer
+            dic2.data.timer = timer
+
         self.__dataLock.release()
 
         return [dic1, dic2]
