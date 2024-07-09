@@ -41,7 +41,7 @@ class Pong {
     /**
      * Display the game
      */
-    public display(status: boolean): void {
+    public display(status: boolean, timer?: number): void {
         if (!status) {
             this._canvas.style.backgroundColor = colors.waiting.background;
             this._context.clearRect(0, 0, screenWidth, screenHeight);
@@ -58,7 +58,17 @@ class Pong {
         this._context.fillStyle = colors.running.player;
         this._current_player?.display(this._context);
         this._opponent?.display(this._context);
+
         this._ball.display(this._context);
+    }
+
+    public displayTimer(timer: number): void {
+        this._canvas.style.backgroundColor = colors.running.background;
+        this._context.clearRect(0, 0, screenWidth, screenHeight);
+
+        this._context.fillStyle = colors.running.player;
+        this._context.font      = "30px Arial";
+        this._context.fillText(String(timer), screenWidth / 2, screenHeight / 2);
     }
 
     /**
@@ -92,7 +102,12 @@ class Pong {
         this._running       = response.data.status === "running";
 
         //now redisplay the game
-        this.display(response.data.status === "running");
+        let timer: number | undefined = response.data.timer;
+
+        if (typeof timer === "undefined")
+            this.display(response.data.status === "running");
+        else
+            this.displayTimer(timer);
     }
 
     /**

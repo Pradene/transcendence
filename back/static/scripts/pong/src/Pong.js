@@ -35,7 +35,7 @@ class Pong {
     /**
      * Display the game
      */
-    display(status) {
+    display(status, timer) {
         if (!status) {
             this._canvas.style.backgroundColor = colors.waiting.background;
             this._context.clearRect(0, 0, screenWidth, screenHeight);
@@ -50,6 +50,13 @@ class Pong {
         this._current_player?.display(this._context);
         this._opponent?.display(this._context);
         this._ball.display(this._context);
+    }
+    displayTimer(timer) {
+        this._canvas.style.backgroundColor = colors.running.background;
+        this._context.clearRect(0, 0, screenWidth, screenHeight);
+        this._context.fillStyle = colors.running.player;
+        this._context.font = "30px Arial";
+        this._context.fillText(String(timer), screenWidth / 2, screenHeight / 2);
     }
     /**
      * Stop the game
@@ -79,7 +86,11 @@ class Pong {
         this._ball.position = new Position(response.data.ball[0], response.data.ball[1]);
         this._running = response.data.status === "running";
         //now redisplay the game
-        this.display(response.data.status === "running");
+        let timer = response.data.timer;
+        if (typeof timer === "undefined")
+            this.display(response.data.status === "running");
+        else
+            this.displayTimer(timer);
     }
     /**
      * Parse a response from the server meant for the game
