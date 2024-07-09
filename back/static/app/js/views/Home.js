@@ -6,6 +6,11 @@ export class Home extends AbstractView {
     }
 
     async getHtml() {
+        const head = document.querySelector('head')
+        const script = document.createElement('script')
+        script.src = 'static/scripts/pong/dist/main.js'
+        head.appendChild(script)
+
         return `
         <nav-component></nav-component>
         <h1>Hello World</h1>

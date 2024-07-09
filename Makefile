@@ -16,3 +16,8 @@ up:
 
 down:
 	docker compose down
+
+re:
+	-docker container prune -f
+	-docker volume rm transcendance_database transcendance_static
+	${MAKE} ${NAME}
