@@ -15,14 +15,14 @@ class ThreadingDict:
         self.__dict: Dict = {}
         # self.__ondelete: Callable = onDelete
         self.__lock: RLock = RLock()
-        self.__thread: Thread = Thread(target=asyncio.run, args=(self.__checkAndDelete(),))
+        self.__thread: Thread = Thread(target=self.__checkAndDelete)
 
         self.__thread.start()
 
     def __del__(self):
         self.__thread.join()
 
-    async def __checkAndDelete(self):
+    def __checkAndDelete(self):
         oneDeleted: bool = False
 
         while True:
@@ -31,14 +31,16 @@ class ThreadingDict:
                 # iterate over the keys and delete the ones that should be deleted
                 for key in list(self.__dict.keys()):
                     if self.__dict[key].isFinished():
-                        self.__dict.pop(key)
+                        game = self.__dict.pop(key)
+                        if game.getWinner() is not None:
+                            game.saveToDB()
                         logging.log(logging.INFO, f"Game {key} deleted")
                         oneDeleted = True
 
             if oneDeleted:
                 from game.consumer import GameConsumer
                 oneDeleted = False
-                await GameConsumer.onGameChange()
+                asyncio.run(GameConsumer.onGameChange())
 
             time.sleep(1)
 

@@ -135,8 +135,8 @@ class Game(AbstractGame):
         }
 
         if timer is not None:
-            dic1.data.timer = timer
-            dic2.data.timer = timer
+            dic1["data"]["timer"] = timer
+            dic2["data"]["timer"] = timer
 
         self.__dataLock.release()
 
@@ -179,13 +179,14 @@ class Game(AbstractGame):
 
         user1 = accountmodels.CustomUser.objects.get(username=self.__p1.getName())
         user2 = accountmodels.CustomUser.objects.get(username=self.__p2.getName())
+        winner = accountmodels.CustomUser.objects.get(username=self.getWinner().getName())
 
-        dbentry = gamemodels.GameModel(
-            player1=user1,
-            player2=user2,
-            score1=self.__p1.getScore(),
-            score2=self.__p2.getScore(),
-            winner=user1 if self.__p1.won() else user2
+        dbentry = gamemodels.GameModel.objects.create(
+            user1 = user1,
+            user2 = user2,
+            user1_score = self.__p1.getScore(),
+            user2_score = self.__p2.getScore(),
+            winner = winner
         )
         dbentry.save()
 

@@ -2,7 +2,6 @@ import { GameSocket } from "./GameSocket";
 const CREATEGAMEBUTTON = document.querySelector("div.game-container button.create-game");
 const CREATETOURNAMENTBUTTON = document.querySelector("div.game-container button.create-tournament");
 const REFRESHBUTTON = document.querySelector("div.game-container button.refresh-room");
-const USERNAMEINPUT = document.querySelector("div.game-container #username");
 const AVAILABLEGAMECONTAINER = document.querySelector("div.game-container div.available-game");
 const AVAILABLETOURNAMENTCONTAINER = document.querySelector("div.game-container div.available-tournament");
 const GAMECONTAINER = document.querySelector("div.game-container div.game");
@@ -52,4 +51,4 @@ function deactivateButtons() {
     deactivateButton(CREATEGAMEBUTTON);
     deactivateButton(REFRESHBUTTON);
 }
-export { activateButtons, deactivateButtons, USERNAMEINPUT, AVAILABLEGAMECONTAINER, AVAILABLETOURNAMENTCONTAINER, GAMECONTAINER };
+export { activateButtons, deactivateButtons, AVAILABLEGAMECONTAINER, AVAILABLETOURNAMENTCONTAINER, GAMECONTAINER };

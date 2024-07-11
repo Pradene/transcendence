@@ -1,3 +1,5 @@
+import logging
+
 from abc import ABC, abstractmethod
 from typing import Union
 
@@ -12,6 +14,8 @@ class AbstractGame(ABC):
         self._winner: Union[PlayerInterface, None] = None
         self._finished: bool = False
         self._finishedLock: RLock = RLock()
+
+        logging.log(logging.INFO, f"Game {self.getGameid()} created")
 
     @abstractmethod
     async def join(self, player: PlayerInterface) -> None:
@@ -42,9 +46,6 @@ class AbstractGame(ABC):
             self._finished = True
             self._winner = winner
             await self.update()
-
-            if winner is not None:
-                self.saveToDB()
 
     def getWinner(self) -> Union[PlayerInterface, None]:
         return self._winner

@@ -1,8 +1,6 @@
 import {Pong}      from "./Pong";
 import {
-    USERNAMEINPUT,
     activateButtons,
-    deactivateButtons,
     AVAILABLEGAMECONTAINER,
     AVAILABLETOURNAMENTCONTAINER
 }                  from "./DomElements";
@@ -150,16 +148,9 @@ class GameSocket {
             return;
         }
 
-        let username = USERNAMEINPUT.value;
-        if (!username) {
-            alert("Need an username");
-            return;
-        }
-
         let request: create_game_request = {
             method: "create_game",
             data:   {
-                gameid: username
             }
         }
         this.send(request);
@@ -170,14 +161,9 @@ class GameSocket {
             return;
         }
 
-        let username = USERNAMEINPUT.value;
-        if (!username)
-            return;
-
         let request: create_tournament_request = {
             method: "create_tournament",
             data:   {
-                gameid: username
             }
         }
         this.send(request);

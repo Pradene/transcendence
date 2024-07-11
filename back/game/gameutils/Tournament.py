@@ -101,6 +101,8 @@ class Tournament(AbstractGame):
         while not game3.isFinished():
             time.sleep(1)
 
+        winner3 = game3.getWinner()
+        logging.log(logging.INFO, f"Game 2 finished, winner: {winner3.getName()}")
         await self._setFinished(game3.getWinner())
 
     async def quit(self) -> None:
@@ -113,9 +115,18 @@ class Tournament(AbstractGame):
         pass
 
     def saveToDB(self) -> None:
+        game1 = self.__games[0]
+        game2 = self.__games[1]
+        game3 = self.__games[2]
+
+        game1.saveToDB()
+        game2.saveToDB()
+        game3.saveToDB()
+
         game1 = self.__games[0].getGameModel()
         game2 = self.__games[1].getGameModel()
         game3 = self.__games[2].getGameModel()
+
         winner = accountmodels.CustomUser.objects.get(username=self.getWinner().getName())
 
         dbentry = gamemodels.TournamentModel(

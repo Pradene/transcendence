@@ -1,5 +1,5 @@
 import { Pong } from "./Pong";
-import { USERNAMEINPUT, activateButtons, AVAILABLEGAMECONTAINER, AVAILABLETOURNAMENTCONTAINER } from "./DomElements";
+import { activateButtons, AVAILABLEGAMECONTAINER, AVAILABLETOURNAMENTCONTAINER } from "./DomElements";
 const hosturl = "ws://" + location.hostname + ":" + location.port + "/ws/game";
 //connect to the server, on failure script will throw an error and die
 const socket = await new Promise((resolve, reject) => {
@@ -117,16 +117,9 @@ class GameSocket {
             console.error("Already in a game");
             return;
         }
-        let username = USERNAMEINPUT.value;
-        if (!username) {
-            alert("Need an username");
-            return;
-        }
         let request = {
             method: "create_game",
-            data: {
-                gameid: username
-            }
+            data: {}
         };
         this.send(request);
     }
@@ -134,14 +127,9 @@ class GameSocket {
         if (this._currentGame) {
             return;
         }
-        let username = USERNAMEINPUT.value;
-        if (!username)
-            return;
         let request = {
             method: "create_tournament",
-            data: {
-                gameid: username
-            }
+            data: {}
         };
         this.send(request);
     }

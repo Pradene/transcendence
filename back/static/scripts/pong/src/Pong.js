@@ -56,7 +56,7 @@ class Pong {
         this._context.clearRect(0, 0, screenWidth, screenHeight);
         this._context.fillStyle = colors.running.player;
         this._context.font = "30px Arial";
-        this._context.fillText(String(timer), screenWidth / 2, screenHeight / 2);
+        this._context.fillText(String(5 - timer), screenWidth / 2, screenHeight / 2);
     }
     /**
      * Stop the game

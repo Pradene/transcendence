@@ -3,7 +3,6 @@ import {GameSocket} from "./GameSocket";
 const CREATEGAMEBUTTON: HTMLButtonElement          = document.querySelector<HTMLButtonElement>("div.game-container button.create-game")!;
 const CREATETOURNAMENTBUTTON: HTMLButtonElement    = document.querySelector<HTMLButtonElement>("div.game-container button.create-tournament")!;
 const REFRESHBUTTON: HTMLButtonElement             = document.querySelector<HTMLButtonElement>("div.game-container button.refresh-room")!;
-const USERNAMEINPUT: HTMLInputElement              = document.querySelector<HTMLInputElement>("div.game-container #username")!;
 const AVAILABLEGAMECONTAINER: HTMLDivElement       = document.querySelector<HTMLDivElement>("div.game-container div.available-game")!;
 const AVAILABLETOURNAMENTCONTAINER: HTMLDivElement = document.querySelector<HTMLDivElement>("div.game-container div.available-tournament")!;
 const GAMECONTAINER: HTMLDivElement                = document.querySelector<HTMLDivElement>("div.game-container div.game")!;
@@ -64,7 +63,6 @@ function deactivateButtons(): void {
 export {
     activateButtons,
     deactivateButtons,
-    USERNAMEINPUT,
     AVAILABLEGAMECONTAINER,
     AVAILABLETOURNAMENTCONTAINER,
     GAMECONTAINER

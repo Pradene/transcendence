@@ -56,6 +56,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             await self.close()
             return
 
+        logging.log(logging.INFO, f"New GameConsumer connected: {str(self.__user)}:{self.__user.username}")
         self.__interface.setName(self.__user.username)
         await self.accept()
         await self.getGames()
@@ -151,12 +152,14 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         try:
             # join the game
             self.__currentGame = manager.getGameOrTournament(gameid)
-            logging.log(logging.INFO, self.__currentGame)
             await self.__currentGame.join(self.__interface)
 
             # if game is not a tournament, start it
-            if manager.getTournament(gameid) is None:
+            try:
+                manager.getGame(gameid)
                 self.__currentGame.start()
+            except KeyError:
+                pass
 
             # update game list for all users
             await GameConsumer.onGameChange()
@@ -181,14 +184,6 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             await self.send_json(response.toJSON())
             return
 
-        # Check request format
-        try:
-            self.__interface.setName(data["data"]["gameid"])
-        except KeyError:
-            response = GameConsumerResponse(method="create_game", status=False, reason=Response.INVALIDREQUEST)
-            await self.send_json(response.toJSON())
-            return
-
         manager: GameManager = GameManager.getInstance()
         self.__currentGame = await manager.createGame(self.__interface)
         await self.__currentGame.update()
@@ -206,9 +201,6 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
         # Check request format
         try:
-            tournamentid = data["data"]["gameid"]
-
-            self.__interface.setName(tournamentid)
             manager: GameManager = GameManager.getInstance()
             self.__currentGame = manager.createTournament(self.__interface)
             await self.__currentGame.join(self.__interface) # required to trigger the update method
