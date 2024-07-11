@@ -1,15 +1,15 @@
 import json
 
-from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
+from config.decorators import jwt_required
 from .models import ChatRoom, Message
 
-@login_required
+@jwt_required
 @require_GET
-def get_rooms(request):
+def getRoomsView(request):
     user = request.user
     chatrooms = ChatRoom.objects.filter(users=user)
 
@@ -27,12 +27,12 @@ def get_rooms(request):
         }
         chatroom_list.append(chatroom_info)
 
-    return JsonResponse({'success': True, 'rooms': chatroom_list})
+    return JsonResponse({'rooms': chatroom_list}, status=200)
 
 
-@login_required
+@jwt_required
 @require_GET
-def get_room(request, room_id):
+def getRoomView(request, room_id):
     user = request.user
     chatroom = get_object_or_404(
         ChatRoom.objects.filter(users=user, id=room_id)
@@ -47,17 +47,17 @@ def get_room(request, room_id):
         'messages': message_list
     }
 
-    return JsonResponse({'success': True, 'room': chatroom_info})
+    return JsonResponse({'room': chatroom_info}, status=200)
 
 
-@login_required
+@jwt_required
 @require_GET
-def search_rooms(request):
+def searchRoomsView(request):
     user = request.user
     query = request.GET.get('q', '')
     if query:
         chatrooms = ChatRoom.objects.filter(users=user, name__icontains=query)
         chatroom_list = [{'id': room.id, 'name': room.name} for room in chatrooms]
-        return JsonResponse({'success': True, 'rooms': chatroom_list})
+        return JsonResponse({'rooms': chatroom_list}, status=200)
     
-    return JsonResponse({'success': False, 'rooms': []})
+    return JsonResponse(status=400)

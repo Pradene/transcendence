@@ -37,23 +37,23 @@ export class Chat extends AbstractView {
 
     async getInitialData() {
         try {
-            const token = localStorage.getItem('token')
+            const access = localStorage.getItem('access')
+
             const response = await fetch(`/api/chat/rooms/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${access}`
                 }
             })
 
-            const data = await response.json()
-
-            if (data.success) {
+            if (response.ok) {
+                const data = await response.json()
                 const rooms = data.rooms
                 this.displayRooms(rooms)
             
             } else {
-                console.log('Failed to fetch data:', data.error)
+                console.log('Failed to fetch data')
             }
 
         } catch (error) {

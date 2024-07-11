@@ -6,6 +6,8 @@ import { WebSocketManager } from "../ChatWebSocket.js"
 export class Login extends AbstractView {
     constructor() {
         super()
+
+        this.handleSubmit = this.handleSubmit.bind(this)
     }
 
     isProtected() {
@@ -50,7 +52,7 @@ export class Login extends AbstractView {
 
         const inputs = document.querySelectorAll('.form-input')
         inputs.forEach(input => {
-            input.addEventListener('input', function (event) {
+            input.addEventListener('input', function () {
                 if (input.value == '') {
                     input.style.transform = "translateY(-50%)"
                     input.nextElementSibling.style.transform = "translateY(-50%) scale(1)"
@@ -64,7 +66,7 @@ export class Login extends AbstractView {
         })
 
         const form = document.getElementById('login-form')
-        form.addEventListener('submit', this.handleSubmit.bind(this))
+        form.addEventListener('submit', this.handleSubmit)
     }
 
     async handleSubmit(event) {
@@ -84,10 +86,10 @@ export class Login extends AbstractView {
                 body: JSON.stringify({username, password})
             })
             
-            const data = await response.json()
-            
-            if (data.success) {
-                localStorage.setItem('token', data.token)
+            if (response.ok) {
+                const data = await response.json()
+                localStorage.setItem('access', data.access)
+                localStorage.setItem('refresh', data.refresh)
 
                 const ws = WebSocketManager.get()
                 ws.connect('ws://localhost:3000/ws/chat/')
@@ -96,7 +98,7 @@ export class Login extends AbstractView {
                 router.navigate('/')
 
             } else {
-                console.log('error: ', data.errors)
+                console.log('error: Failed to fetch data')
             }
                 
         } catch (error) {

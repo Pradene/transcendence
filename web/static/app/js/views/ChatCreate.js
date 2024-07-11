@@ -31,24 +31,24 @@ export class ChatCreate extends AbstractView {
     }
 
     async getUsers() {
-        const token = localStorage.getItem('token')
+        const access = localStorage.getItem('access')
+
         try {
             const response = await fetch(`/api/user/get-friends/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${access}`
                 }
             })
-
-            const data = await response.json()
-
-            if (data.success) {
+            
+            if (response.ok) {
+                const data = await response.json()
                 this.users = data.users
                 this.displayUsers()
             
             } else {
-                console.log('Failed to fetch data:', data.error)
+                console.log('Failed to fetch data')
             }
 
         } catch (error) {

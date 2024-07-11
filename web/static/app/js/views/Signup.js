@@ -5,6 +5,8 @@ import { getCSRFToken } from "../utils.js"
 export class Signup extends AbstractView {
     constructor() {
         super()
+
+        this.handleSubmit = this.handleSubmit.bind(this)
     }
 
     isProtected() {
@@ -64,7 +66,7 @@ export class Signup extends AbstractView {
         })
 
         const form = document.getElementById('signup-form')
-        form.addEventListener('submit', this.handleSubmit.bind(this))
+        form.addEventListener('submit', this.handleSubmit)
     }
 
     async handleSubmit(event) {
@@ -85,16 +87,14 @@ export class Signup extends AbstractView {
                 },
                 body: JSON.stringify({username, password1, password2})
             })
-            
-            const data = await response.json()
-            
-            if (data.success) {
+
+            if (response.ok) {
                 const router = Router.get()
 
                 router.navigate('/login/')
 
             } else {
-                console.log('error: ', data.errors)
+                console.log('error: Failed to fetch data')
             }
                 
         } catch (error) {

@@ -24,26 +24,25 @@ export class Profile extends AbstractView {
     }
 
     async logout() {
-        const token = localStorage.getItem('token')
+        const access = localStorage.getItem('access')
+        const refresh = localStorage.getItem('refresh')
         const csrfToken = getCSRFToken()
-
-        console.log('logout')
-        console.log(csrfToken)
         
         try {
             const response = await fetch("/api/user/logout/", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': `Bearer ${access}`,
                     'X-CSRFToken': csrfToken
-                }
+                },
+                body: JSON.stringify({ refresh })
             })
 
-            const data = await response.json()
-
-            if (data.success) {
-                localStorage.removeItem('token')
+            
+            if (response.ok) {
+                localStorage.removeItem('access')
+                localStorage.removeItem('refresh')
                 
                 const ws = WebSocketManager.get()
                 ws.disconnect()
@@ -52,7 +51,7 @@ export class Profile extends AbstractView {
                 router.navigate('/login/')
 
             } else {
-                console.log('Failed to fetch data:', data.error)
+                console.log('error: Failed to fetch data')
             }
 
         } catch (error) {

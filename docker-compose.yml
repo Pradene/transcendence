@@ -50,7 +50,8 @@ services:
     networks:
       - transcendence
     volumes:
-      - $NGINX_VOLUME:/usr/share/nginx/static
+      - $NGINX_STATIC_VOLUME:/usr/share/nginx/static
+      - $NGINX_MEDIA_VOLUME:/usr/share/nginx/media
     depends_on:
       - web
 

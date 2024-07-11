@@ -20,9 +20,8 @@ export class Router {
     }
 
     handleRoute() {
-        const isAuthenticated = localStorage.getItem('token')
+        const isAuthenticated = localStorage.getItem('refresh')
 
-       
         const location = window.location.pathname
         const matchedRoute = this.matchRoute(location)
         if (matchedRoute) {

@@ -31,19 +31,20 @@ document.addEventListener('DOMContentLoaded', () => {
     router.init()
 
     document.body.addEventListener('click', (event) => {        
-        if (isDataLink(event.target)) {
+        const link = isDataLink(event.target)
+        if (link) {
             event.preventDefault()
-            router.navigate(event.target.href)
+            router.navigate(link)
         }
     })
 })
 
 const isDataLink = (elem) => {
-    var match = false
+    let match = null
 
     while (elem && elem.nodeName.toLowerCase() != 'body') {
         if (elem.matches('[data-link]')) {
-            match = true
+            match = elem.href
             break
         }
         
