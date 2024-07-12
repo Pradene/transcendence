@@ -45,6 +45,8 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile
+      args:
+        - HOST_HOSTNAME=$HOST_HOSTNAME
     ports:
       - 3000:3000
     networks:
