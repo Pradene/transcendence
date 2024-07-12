@@ -1,4 +1,5 @@
 import os
+import logging
 
 from pathlib import Path
 from django.core.management.utils import get_random_secret_key
@@ -43,15 +44,18 @@ MIDDLEWARE = [
 ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:3000',    'http://made-f0Br8s7.clusters.42paris.fr:3000',
-
-    'http://localhost:8000'    
+    'http://localhost:3000',
+    f'http://{os.getenv("HOST_HOSTNAME")}:3000',
 ]
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
+    f'http://{os.getenv("HOST_HOSTNAME")}:3000',
     'http://localhost:8000'    
 ]
+
+logging.log(logging.INFO, f"CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}\n")
+logging.log(logging.INFO, f"CORS_ALLOWED_ORIGINS: {CORS_ALLOWED_ORIGINS}\n")
 
 ROOT_URLCONF = 'config.urls'
 

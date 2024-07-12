@@ -9,8 +9,8 @@ BALL_SIZE: int = 4
 BALL_SPEED: int = 8
 BALL_SPEED_INCREMENT: float = .3
 BALL_BASE_POSITION: List[int] = [400 - 2, 300 - 2]
-BALL_MIN_COS: float = 0.2
 BALL_MIN_SIN: float = 0.2
+BALL_MAX_SIN: float = 0.8
 
 PADDLE_SPEED: int = 8
 PADDLE_WIDTH: int = 8

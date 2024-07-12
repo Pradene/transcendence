@@ -13,7 +13,7 @@ from game.gameutils.abstractgame import AbstractGame
 from game import models as gamemodels
 from account import models as accountmodels
 
-FPS: int = 24
+FPS: int = 30
 TIME_TO_SLEEP: float = (1 / FPS)
 
 

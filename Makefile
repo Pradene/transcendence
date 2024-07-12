@@ -1,5 +1,6 @@
 NAME		:= Transcendance
 DOCKER_FLAGS 	:= --build
+HOST_HOSTNAME	:= $(shell hostname)
 
 ifneq ($(fg),)
 	DOCKER_FLAGS += -d
@@ -8,8 +9,8 @@ endif
 all: ${NAME} ;
 
 ${NAME}:
-	docker compose build --parallel
-	docker compose up
+	HOST_HOSTNAME=$(HOST_HOSTNAME) docker compose build --parallel
+	HOST_HOSTNAME=$(HOST_HOSTNAME) docker compose up
 
 up:
 	docker compose up -d

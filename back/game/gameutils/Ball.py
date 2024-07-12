@@ -11,7 +11,7 @@ def genStartVector() -> IntVector:
     """Generates a random starting vector for the ball"""
 
     angle = random.uniform(0, math.pi)
-    while math.cos(angle) < BALL_MIN_COS or math.sin(angle) < BALL_MIN_SIN:
+    while math.sin(angle) < BALL_MIN_SIN or math.sin(angle) > BALL_MAX_SIN:
         angle = random.uniform(0, math.pi)
 
     sin = math.sin(angle) * 2 - 1
@@ -78,6 +78,9 @@ class Ball:
             elif self.getX() + BALL_SIZE == p2.getX() and x > 0 and self.getY() >= p2.getY() and self.getY() <= p2.getY() + PADDLE_HEIGHT:
                 arr = self.__revX(arr)
                 self.incrSpeed()
+            #check hit p1 or p2 vertically
+            elif self.__hitPlayer(y, p1) or self.__hitPlayer(y, p2):
+                arr = self.__revY(arr)
             #check hit top wall
             elif self.getY() == 0 and y < 0:
                 arr = self.__revY(arr)
@@ -101,3 +104,14 @@ class Ball:
             self.__position[1] += y
             p1.move()
             p2.move()
+
+    def __hitPlayer(self, y, player: PlayerInterface) -> bool:
+        cx = self.getX()
+        px = player.getX()
+
+        if y != 0 and cx > px and cx < px + PADDLE_WIDTH:
+            if y == -1 and self.getY() == player.getY() + PADDLE_HEIGHT:
+                return True
+            elif y == 1 and self.getY() + BALL_SIZE == player.getY():
+                return True
+        return False
