@@ -32,8 +32,7 @@ class ThreadingDict:
                 for key in list(self.__dict.keys()):
                     if self.__dict[key].isFinished():
                         game = self.__dict.pop(key)
-                        if game.getWinner() is not None:
-                            game.saveToDB()
+                        game.saveToDB()
                         logging.log(logging.INFO, f"Game {key} deleted")
                         oneDeleted = True
 
@@ -138,7 +137,7 @@ class GameManager:
         logging.log(logging.INFO, f"Tournament {name} deleted")
 
     def toJSON(self) -> Dict:
-        garr = [x.gameInfo() for x in GameManager.GAMES.values()]
+        garr = [x.gameInfo() for x in GameManager.GAMES.values() if not x.gameInfo()["is_full"]]
         tarr = [x.tournamentInfo() for x in GameManager.TOURNAMENTS.values()]
         return {"games": garr, "tournaments": tarr}
 

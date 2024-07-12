@@ -1,3 +1,5 @@
+import logging
+
 from typing import Callable, Union, List
 
 from game.gameutils.defines import *
@@ -117,5 +119,6 @@ class PlayerInterface:
                 self.__position[1] = 0
         elif self.__movement == "DOWN":
             self.__position[1] += speed
-            if self.__position[1] > 800 - PADDLE_HEIGHT:
-                self.__position[1] = 800 - PADDLE_HEIGHT
+            if self.__position[1] > SCREEN_HEIGHT - PADDLE_HEIGHT:
+                self.__position[1] = SCREEN_HEIGHT - PADDLE_HEIGHT
+

@@ -123,6 +123,9 @@ class Tournament(AbstractGame):
         game2.saveToDB()
         game3.saveToDB()
 
+        if self.getWinner() is None:
+            return
+
         game1 = self.__games[0].getGameModel()
         game2 = self.__games[1].getGameModel()
         game3 = self.__games[2].getGameModel()

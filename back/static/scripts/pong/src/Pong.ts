@@ -9,14 +9,15 @@ const screenWidth: number  = 800;
 const screenHeight: number = 600;
 const colors: any          = {
     waiting: {
-        background: "#000000",
-        border:     "#ffffff",
-        text:       "#ffffff"
+        background: "#000000ff",
+        border:     "#ffffffff",
+        text:       "#ffffffff"
     },
     running: {
-        background: "#ffffff",
-        text:       "#000000",
-        player:     "#000000",
+        background: "#000000ff",
+        text:       "#ffffffff",
+        player:     "#ffffffff",
+        border:     "#ffffffff"
     }
 };
 

@@ -10,12 +10,12 @@ import math
 def genStartVector() -> IntVector:
     """Generates a random starting vector for the ball"""
 
-    angle = random.uniform(0, 2 * math.pi)
+    angle = random.uniform(0, math.pi)
     while math.cos(angle) < BALL_MIN_COS or math.sin(angle) < BALL_MIN_SIN:
-        angle = random.uniform(0, 2 * math.pi)
+        angle = random.uniform(0, math.pi)
 
-    sin = math.sin(angle) if angle < math.pi else -math.sin(angle)
-    cos = math.cos(angle) if angle < math.pi else -math.cos(angle)
+    sin = math.sin(angle) * 2 - 1
+    cos = math.cos(angle) * 2 - 1
     return IntVector([cos, sin])
 
 class Ball:

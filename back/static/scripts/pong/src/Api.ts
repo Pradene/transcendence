@@ -131,7 +131,7 @@ interface update_game_response extends apicallresponse {
 interface update_player_request extends apicallrequest {
     method: "update_player",
     data: {
-        movement: "UP" | "DOWN" | "NONE"
+        movement: string
     }
 }
 

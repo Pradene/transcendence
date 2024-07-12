@@ -1,6 +1,5 @@
 import { Position } from "./Utils";
 import { GameSocket } from "./GameSocket";
-const default_color = "#515151";
 const default_height = 32;
 const default_width = 8;
 /**
@@ -22,9 +21,8 @@ class Player {
     setScore(value) {
         this._score = value;
     }
-    constructor(name, position, color = default_color) {
+    constructor(name, position) {
         this._name = name;
-        this._color = color;
         this._position = position;
         this._score = 0;
     }
@@ -41,17 +39,13 @@ class Player {
      * @param canvas
      */
     display(canvas) {
-        canvas.fillStyle = this._color;
         canvas.fillRect(this._position.x, this._position.y, default_width, default_height);
         canvas.font = "20px Arial";
         canvas.fillText(String(this._score), this._position.x, 20);
     }
     stop() {
     }
-    update() {
-    }
     _name;
-    _color;
     _position;
     _score;
 }
@@ -59,8 +53,8 @@ class Player {
  * Represents the current player in the game.
  */
 class CurrentPlayer extends Player {
-    constructor(name, position, color = default_color) {
-        super(name, position, color);
+    constructor(name, position) {
+        super(name, position);
         this._movement = "NONE";
         this._boundHandlerUp = this._keyUpHandler.bind(this);
         this._boundHandlerDown = this._keyDownHandler.bind(this);
@@ -68,7 +62,6 @@ class CurrentPlayer extends Player {
         window.addEventListener("keyup", this._boundHandlerUp);
     }
     _keyDownHandler(event) {
-        ;
         if (event.key === "w")
             this.movement = "UP";
         else if (event.key === "s")
@@ -86,7 +79,6 @@ class CurrentPlayer extends Player {
         let request = {
             method: "update_player",
             data: {
-                // @ts-ignore
                 movement: this._movement
             }
         };
@@ -109,5 +101,4 @@ class CurrentPlayer extends Player {
     _boundHandlerUp;
     _boundHandlerDown;
 }
-export default { Player, CurrentPlayer };
 export { Player, CurrentPlayer };

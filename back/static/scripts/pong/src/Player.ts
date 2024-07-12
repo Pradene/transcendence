@@ -2,7 +2,6 @@ import {Position}              from "./Utils";
 import {GameSocket}            from "./GameSocket";
 import {update_player_request} from "./Api";
 
-const default_color: string = "#515151";
 const default_height: number = 32;
 const default_width: number = 8;
 
@@ -31,9 +30,8 @@ class Player {
         this._score = value;
     }
 
-    constructor(name: string, position: Position, color: string = default_color) {
+    constructor(name: string, position: Position) {
         this._name = name;
-        this._color = color;
         this._position = position;
         this._score = 0;
     }
@@ -52,7 +50,6 @@ class Player {
      * @param canvas
      */
     public display(canvas: CanvasRenderingContext2D): void {
-        canvas.fillStyle = this._color;
         canvas.fillRect(this._position.x,
                         this._position.y,
                         default_width,
@@ -64,12 +61,7 @@ class Player {
     public stop(): void {
     }
 
-    public update(): void {
-
-    }
-
     private _name: string;
-    private _color: string;
     private _position: Position;
     private _score: number;
 }
@@ -78,8 +70,8 @@ class Player {
  * Represents the current player in the game.
  */
 class CurrentPlayer extends Player {
-    constructor(name: string, position: Position, color: string = default_color) {
-        super(name, position, color);
+    constructor(name: string, position: Position) {
+        super(name, position);
         this._movement = "NONE";
         this._boundHandlerUp = this._keyUpHandler.bind(this);
         this._boundHandlerDown = this._keyDownHandler.bind(this);
@@ -88,7 +80,6 @@ class CurrentPlayer extends Player {
     }
 
     private _keyDownHandler(event: KeyboardEvent): void {
-        ;
         if (event.key === "w")
             this.movement = "UP";
         else if (event.key === "s")
@@ -108,7 +99,6 @@ class CurrentPlayer extends Player {
         let request: update_player_request = {
             method: "update_player",
             data:   {
-                // @ts-ignore
                 movement: this._movement
             }
         }
@@ -136,5 +126,4 @@ class CurrentPlayer extends Player {
     private _boundHandlerDown: (arg0: KeyboardEvent) => void;
 }
 
-export default {Player, CurrentPlayer};
 export {Player, CurrentPlayer};

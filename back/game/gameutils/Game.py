@@ -32,6 +32,8 @@ class Game(AbstractGame):
         self.__p1.setJoined(True)
         self.__p1.setScore(0)
 
+        self.__score: tuple[int] = (0, 0)
+
         self.__gamemodel: Union[gamemodels.GameModel | None] = None
 
 
@@ -68,6 +70,7 @@ class Game(AbstractGame):
                 self.__p2.setPosition(P2_POSITION.copy())
 
                 if self.__p1.won() or self.__p2.won():
+                    self.__score = (self.__p1.getScore(), self.__p2.getScore())
                     await self._setFinished(self.__p1 if self.__p1.won() else self.__p2)
                     break
 
@@ -177,6 +180,9 @@ class Game(AbstractGame):
     def saveToDB(self) -> None:
         """Save the game to the database"""
 
+        if self.getWinner() is None:
+            return
+
         user1 = accountmodels.CustomUser.objects.get(username=self.__p1.getName())
         user2 = accountmodels.CustomUser.objects.get(username=self.__p2.getName())
         winner = accountmodels.CustomUser.objects.get(username=self.getWinner().getName())
@@ -184,8 +190,8 @@ class Game(AbstractGame):
         dbentry = gamemodels.GameModel.objects.create(
             user1 = user1,
             user2 = user2,
-            user1_score = self.__p1.getScore(),
-            user2_score = self.__p2.getScore(),
+            user1_score = self.__score[0],
+            user2_score = self.__score[1],
             winner = winner
         )
         dbentry.save()
