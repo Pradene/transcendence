@@ -38,16 +38,12 @@ class GameSocket {
         this._websocket           = socket;
         this._currentGame         = null;
         this._websocket.onmessage = this.redirectMessages
-
-        // setInterval(() => {
-        //     this.requestGames();
-        // }, 1000);
     }
 
     /**
      * Access global GameSocket instance.
      */
-    public static get(): GameSocket {
+    public static async get(): Promise<GameSocket> {
         return GameSocket.#GameSocket;
     }
 
@@ -192,8 +188,8 @@ class GameSocket {
      * Parse messages from the server.
      * @param event
      */
-    public redirectMessages(event: MessageEvent): void {
-        let gs       = GameSocket.get();
+    public async redirectMessages(event: MessageEvent): Promise<void> {
+        let gs       = await GameSocket.get();
         let response = JSON.parse(event.data) as apicallresponse;
         console.log("Received message", response);
 
@@ -227,9 +223,17 @@ class GameSocket {
         this._currentGame = null;
     }
 
+    public close(): void {
+        this._currentGame?.stop();
+        this.removeGame();
+        this._websocket.close();
+
+        console.log("Closing game socket");
+    }
+
     private _websocket: WebSocket;
     private _currentGame: Pong | null;
-    static #GameSocket: GameSocket = new GameSocket();
+    static #GameSocket: GameSocket= new GameSocket();
 }
 
 export {GameSocket};

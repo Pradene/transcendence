@@ -6,20 +6,24 @@ const REFRESHBUTTON: HTMLButtonElement             = document.querySelector<HTML
 const AVAILABLEGAMECONTAINER: HTMLDivElement       = document.querySelector<HTMLDivElement>("div.game-container div.available-game")!;
 const AVAILABLETOURNAMENTCONTAINER: HTMLDivElement = document.querySelector<HTMLDivElement>("div.game-container div.available-tournament")!;
 const GAMECONTAINER: HTMLDivElement                = document.querySelector<HTMLDivElement>("div.game-container div.game")!;
+const FIRST_LINK: NodeListOf<HTMLAnchorElement>    = document.querySelectorAll<HTMLAnchorElement>("nav div a[data-link]")!;
 
 /**
  * Request a new game to be created //TODO check for race condition
  */
-function createGameButtonCallback(): void {
-    GameSocket.get().requestNewGame();
+async function createGameButtonCallback(): Promise<void> {
+    let gs: GameSocket = await GameSocket.get();
+    gs.requestNewGame();
 }
 
-function refreshButtonCallback(): void {
-    GameSocket.get().requestGames();
+async function refreshButtonCallback(): Promise<void> {
+    let gs: GameSocket = await GameSocket.get();
+    gs.requestGames();
 }
 
-function createTournamentButtonCallback(): void {
-    GameSocket.get().requestNewTournament();
+async function createTournamentButtonCallback(): void {
+    let gs: GameSocket = await GameSocket.get();
+    gs.requestNewTournament();
 }
 
 /**
@@ -48,6 +52,12 @@ function activateButtons(): void {
     activateButton(CREATEGAMEBUTTON);
     activateButton(CREATETOURNAMENTBUTTON);
     activateButton(REFRESHBUTTON);
+
+    FIRST_LINK.forEach((link) => {
+       this.addEventListener("click", (event) => {
+           GameSocket.get().close();
+       });
+    });
 }
 
 /**

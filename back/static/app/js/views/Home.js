@@ -1,5 +1,7 @@
 import { AbstractView } from "./AbstractView.js"
 
+let game_loaded = false
+
 export class Home extends AbstractView {
     constructor() {
         super()
@@ -7,9 +9,6 @@ export class Home extends AbstractView {
 
     async getHtml() {
         const head = document.querySelector('head')
-        const script = document.createElement('script')
-        script.src = 'static/scripts/pong/dist/main.js'
-        head.appendChild(script)
 
         return `
         <nav-component></nav-component>
@@ -26,7 +25,18 @@ export class Home extends AbstractView {
 		    	<div class="available-tournament"></div> <!-- Available Tournament Container, contain the list of available tournaments -->
 		    </div>
 	    </div>
-        <script src="/static/scrips/pong/dist/main.js" type="application/javascript"></script>
         `
+    }
+
+    async render(container) {
+        container.innerHTML = await this.getHtml()
+        this.addEventListeners()
+
+        if (!game_loaded) {
+            const script = document.createElement('script')
+            script.src = 'static/scripts/pong/dist/main.js'
+            document.body.appendChild(script)
+            game_loaded = true
+        }
     }
 }
