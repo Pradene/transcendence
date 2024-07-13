@@ -41,11 +41,15 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    f'{os.getenv("HOST_HOSTNAME")}'
+]
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
     f'http://{os.getenv("HOST_HOSTNAME")}:3000',
+    'http://*.42paris.fr',
+    'http://*.42paris.fr:3000',
 ]
 
 CORS_ALLOWED_ORIGINS = [
