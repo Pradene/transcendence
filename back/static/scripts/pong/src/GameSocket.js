@@ -1,25 +1,8 @@
 import { Pong } from "./Pong";
 import { activateButtons, AVAILABLEGAMECONTAINER, AVAILABLETOURNAMENTCONTAINER } from "./DomElements";
 const hosturl = "ws://" + location.hostname + ":" + location.port + "/ws/game";
-//connect to the server, on failure script will throw an error and die
-const socket = await new Promise((resolve, reject) => {
-    let ws = new WebSocket(hosturl);
-    console.log("Connecting to server...");
-    ws.onopen = () => {
-        resolve(ws);
-    };
-    ws.onerror = (e) => {
-        reject(e);
-    };
-}).then((ws) => {
-    console.log("Connected to server.");
-    activateButtons();
-    return ws;
-}).catch((e) => {
-    throw new Error("Failed to connect to server: " + e);
-});
 class GameSocket {
-    constructor() {
+    constructor(socket) {
         this._websocket = socket;
         this._currentGame = null;
         this._websocket.onmessage = this.redirectMessages;
@@ -28,6 +11,25 @@ class GameSocket {
      * Access global GameSocket instance.
      */
     static async get() {
+        if (GameSocket.#GameSocket === null) {
+            const socket = await new Promise((resolve, reject) => {
+                let ws = new WebSocket(hosturl);
+                console.log("Connecting to server...");
+                ws.onopen = () => {
+                    resolve(ws);
+                };
+                ws.onerror = (e) => {
+                    reject(e);
+                };
+            }).then((ws) => {
+                console.log("Connected to server.");
+                activateButtons();
+                return ws;
+            }).catch((e) => {
+                throw new Error("Failed to connect to server: " + e);
+            });
+            this.#GameSocket = new GameSocket(socket);
+        }
         return GameSocket.#GameSocket;
     }
     /**
@@ -185,10 +187,11 @@ class GameSocket {
         this._currentGame?.stop();
         this.removeGame();
         this._websocket.close();
+        GameSocket.#GameSocket = null;
         console.log("Closing game socket");
     }
     _websocket;
     _currentGame;
-    static #GameSocket = new GameSocket();
+    static #GameSocket = null;
 }
 export { GameSocket };

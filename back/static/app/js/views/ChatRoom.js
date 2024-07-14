@@ -11,7 +11,7 @@ export class ChatRoom extends AbstractView {
 
     async getHtml() {
         return `
-        <nav-component></nav-component>
+<!--        <nav-component></nav-component>-->
         <div id="chatroom">
             <div id="messages"></div>
             <div id="message-form-container">

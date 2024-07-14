@@ -11,7 +11,7 @@ export class Home extends AbstractView {
         const head = document.querySelector('head')
 
         return `
-        <nav-component></nav-component>
+<!--        <nav-component></nav-component>-->
         <h1>Hello World</h1>
         <div class="game-container"> <!-- Game Container, contain the game and the list of available rooms -->
 		    <div class="game-container-header">
@@ -34,8 +34,9 @@ export class Home extends AbstractView {
 
         if (!game_loaded) {
             const script = document.createElement('script')
+            const appcontainer = document.querySelector('div#app')
             script.src = 'static/scripts/pong/dist/main.js'
-            document.body.appendChild(script)
+            appcontainer.appendChild(script)
             game_loaded = true
         }
     }
