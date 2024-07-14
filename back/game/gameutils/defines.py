@@ -14,6 +14,6 @@ BALL_MAX_SIN: float = 0.8
 
 PADDLE_SPEED: int = 8
 PADDLE_WIDTH: int = 8
-PADDLE_HEIGHT: int = 32
+PADDLE_HEIGHT: int = 32 * 2
 
 POINTS_TO_WIN: int = 5

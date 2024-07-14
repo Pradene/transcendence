@@ -2,7 +2,7 @@ import {Position}              from "./Utils";
 import {GameSocket}            from "./GameSocket";
 import {update_player_request} from "./Api";
 
-const default_height: number = 32;
+const default_height: number = 32 * 2;
 const default_width: number = 8;
 
 /**

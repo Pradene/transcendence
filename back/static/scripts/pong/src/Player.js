@@ -1,6 +1,6 @@
 import { Position } from "./Utils";
 import { GameSocket } from "./GameSocket";
-const default_height = 32;
+const default_height = 32 * 2;
 const default_width = 8;
 /**
  * Represents a player in the game.
