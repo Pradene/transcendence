@@ -74,8 +74,8 @@ class CurrentPlayer extends Player {
      * Update the player's movement on the server.
      * @private
      */
-    _update() {
-        let gs = GameSocket.get();
+    async _update() {
+        let gs = await GameSocket.get();
         let request = {
             method: "update_player",
             data: {
@@ -88,7 +88,7 @@ class CurrentPlayer extends Player {
         if (this._movement === value)
             return;
         this._movement = value;
-        this._update();
+        this._update().then(r => { });
     }
     stop() {
         super.stop();

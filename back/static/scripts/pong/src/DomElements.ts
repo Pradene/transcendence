@@ -21,7 +21,7 @@ async function refreshButtonCallback(): Promise<void> {
     gs.requestGames();
 }
 
-async function createTournamentButtonCallback(): void {
+async function createTournamentButtonCallback(): Promise<void> {
     let gs: GameSocket = await GameSocket.get();
     gs.requestNewTournament();
 }
@@ -54,9 +54,10 @@ function activateButtons(): void {
     activateButton(REFRESHBUTTON);
 
     FIRST_LINK.forEach((link) => {
-       this.addEventListener("click", (event) => {
-           GameSocket.get().close();
-       });
+        link.addEventListener("click", async (event) => {
+            let gs = await GameSocket.get();
+            gs.close();
+        });
     });
 }
 

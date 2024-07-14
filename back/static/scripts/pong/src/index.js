@@ -1,2 +1,2 @@
 import { GameSocket } from "./GameSocket";
-const sock = GameSocket.get();
+const sock = await GameSocket.get();

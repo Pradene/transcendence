@@ -5,17 +5,21 @@ const REFRESHBUTTON = document.querySelector("div.game-container button.refresh-
 const AVAILABLEGAMECONTAINER = document.querySelector("div.game-container div.available-game");
 const AVAILABLETOURNAMENTCONTAINER = document.querySelector("div.game-container div.available-tournament");
 const GAMECONTAINER = document.querySelector("div.game-container div.game");
+const FIRST_LINK = document.querySelectorAll("nav div a[data-link]");
 /**
  * Request a new game to be created //TODO check for race condition
  */
-function createGameButtonCallback() {
-    GameSocket.get().requestNewGame();
+async function createGameButtonCallback() {
+    let gs = await GameSocket.get();
+    gs.requestNewGame();
 }
-function refreshButtonCallback() {
-    GameSocket.get().requestGames();
+async function refreshButtonCallback() {
+    let gs = await GameSocket.get();
+    gs.requestGames();
 }
-function createTournamentButtonCallback() {
-    GameSocket.get().requestNewTournament();
+async function createTournamentButtonCallback() {
+    let gs = await GameSocket.get();
+    gs.requestNewTournament();
 }
 /**
  * Activate a button
@@ -41,6 +45,12 @@ function activateButtons() {
     activateButton(CREATEGAMEBUTTON);
     activateButton(CREATETOURNAMENTBUTTON);
     activateButton(REFRESHBUTTON);
+    FIRST_LINK.forEach((link) => {
+        link.addEventListener("click", async (event) => {
+            let gs = await GameSocket.get();
+            gs.close();
+        });
+    });
 }
 /**
  * Disable buttons, should be called on lost connection //TODO call it

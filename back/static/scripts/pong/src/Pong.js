@@ -62,10 +62,11 @@ class Pong {
     /**
      * Stop the game
      */
-    stop() {
+    async stop() {
+        let gs = await GameSocket.get();
         this._current_player?.stop();
         GAMECONTAINER.removeChild(this._canvas);
-        GameSocket.get().removeGame();
+        gs.removeGame();
     }
     /**
      * Update the game data and display it.

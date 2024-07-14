@@ -75,10 +75,11 @@ class Pong {
     /**
      * Stop the game
      */
-    public stop(): void {
+    public async stop(): Promise<void> {
+        let gs: GameSocket = await GameSocket.get();
         this._current_player?.stop();
         GAMECONTAINER.removeChild(this._canvas);
-        GameSocket.get().removeGame();
+        gs.removeGame();
     }
 
     /**
