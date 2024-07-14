@@ -46,16 +46,16 @@ ALLOWED_HOSTS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:3000',
-    f'http://{os.getenv("HOST_HOSTNAME")}:3000',
-    'http://*.42paris.fr',
-    'http://*.42paris.fr:3000',
+    'https://localhost:3000',
+    f'https://{os.getenv("HOST_HOSTNAME")}:3000',
+    'https://*.42paris.fr',
+    'https://*.42paris.fr:3000',
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    f'http://{os.getenv("HOST_HOSTNAME")}:3000',
-    'http://localhost:8000'    
+    'https://localhost:3000',
+    f'https://{os.getenv("HOST_HOSTNAME")}:3000',
+    'https://localhost:8000'    
 ]
 
 logging.log(logging.INFO, f"CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}\n")

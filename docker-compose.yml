@@ -54,6 +54,7 @@ services:
       - transcendence
     volumes:
       - $NGINX_VOLUME_LOCATION:/app/static
+      - ssl_certs:/etc/nginx/ssl
     depends_on:
       - back
 
@@ -64,3 +65,4 @@ networks:
 volumes:
   static:
   database:
+  ssl_certs:

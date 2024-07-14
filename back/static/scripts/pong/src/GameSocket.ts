@@ -13,7 +13,7 @@ import {
     get_games_response, join_game_request, update_game_response
 } from "./Api";
 
-const hosturl: string = "ws://" + location.hostname + ":" + location.port + "/ws/game";
+const hosturl: string = "wss://" + location.hostname + ":" + location.port + "/ws/game";
 
 
 class GameSocket {
