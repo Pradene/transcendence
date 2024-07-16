@@ -10,7 +10,7 @@ export class ChatCreate extends AbstractView {
 
     getHtml() {
         return `
-            <nav-component></nav-component>
+<!--            <nav-component></nav-component>-->
             <div class="flex">
                 <label>
                     <input type="text" id="input" placeholder="Search" autocomplete="off"></input>

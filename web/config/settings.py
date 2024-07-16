@@ -1,16 +1,17 @@
 import os
-import datetime
 
 from pathlib import Path
 from django.core.management.utils import get_random_secret_key
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# SECURITY WARNING:
+# keep the secret key used in production secret!
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', get_random_secret_key())
+
 # SECURITY WARNING: 
 # don't run with debug turned on in production!
 DEBUG = True
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', get_random_secret_key())
 
 INSTALLED_APPS = [
     'daphne',
@@ -25,6 +26,7 @@ INSTALLED_APPS = [
     'channels',
     'account',
     'chat',
+    'game'
 ]
 
 MIDDLEWARE = [
@@ -38,18 +40,26 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    f'{os.getenv("HOST_HOSTNAME")}'
+]
 
 CSRF_COOKIE_AGE = 86400
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:3000',
-    'http://localhost:8000'    
+    'https://localhost:3000',
+    f'https://{os.getenv("HOST_HOSTNAME")}:3000',
+    'https://*.42paris.fr',
+    'https://*.42paris.fr:3000',
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'http://localhost:8000'    
+    'https://localhost:3000',
+    f'https://{os.getenv("HOST_HOSTNAME")}:3000',
+    'https://localhost:8000'
 ]
+
+logging.log(logging.INFO, f"CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}\n")
+logging.log(logging.INFO, f"CORS_ALLOWED_ORIGINS: {CORS_ALLOWED_ORIGINS}\n")
 
 ROOT_URLCONF = 'config.urls'
 
@@ -114,14 +124,21 @@ AUTH_PASSWORD_VALIDATORS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LANGUAGE_CODE = 'en-us'
+
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
+
 USE_L10N = True
+
 USE_TZ = True
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # WSGI_APPLICATION = 'config.wsgi.application'
 ASGI_APPLICATION = 'config.asgi.application'
 
 AUTH_USER_MODEL = 'account.CustomUser'
+
+# Set session expiration to 1 day (adjust as needed)
+SESSION_COOKIE_AGE = 86400

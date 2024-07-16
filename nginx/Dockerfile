@@ -1,10 +1,18 @@
 FROM nginx:1.19.0-alpine
 
-RUN apk update && apk add bash
+ARG		NGINX_CONF_FILE=/etc/nginx/nginx.conf
+ARG		HOST_HOSTNAME=$HOST_HOSTNAME
 
-COPY ./conf/nginx.conf /etc/nginx/nginx.conf
+RUN		apk update && \
+		apk add		bash \
+				sed \
+				openssl
 
-COPY ./tools/script.sh /usr/local/bin/script.sh
-RUN chmod +x /usr/local/bin/script.sh
+COPY	./conf/nginx.conf $NGINX_CONF_FILE
+RUN		sed 's/$HOST_HOSTNAME/'$HOST_HOSTNAME'/g' $NGINX_CONF_FILE >/tmp/tmp && \
+		mv /tmp/tmp $NGINX_CONF_FILE
 
-CMD ["/usr/local/bin/script.sh"]
+COPY ./tools/script.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+CMD ["/entrypoint.sh"]
