@@ -62,7 +62,7 @@ def userSignupView(request):
         try:
             user = CustomUser.objects.create_user(username=username, password=password1)
             user.save()
-            return JsonResponse(status=200)
+            return JsonResponse({}, status=200)
         
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)

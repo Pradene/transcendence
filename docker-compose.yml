@@ -1,9 +1,9 @@
 services:
-  back:
-    container_name: back
-    image: back
+  web:
+    container_name: web
+    image: web
     build:
-      context: ./back
+      context: ./web
       dockerfile: Dockerfile
     environment:
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
@@ -19,7 +19,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-
 
   db:
     container_name: db
@@ -56,7 +55,7 @@ services:
       - $NGINX_VOLUME_LOCATION:/app/static
       - ssl_certs:/etc/nginx/ssl
     depends_on:
-      - back
+      - web
 
 networks:
   transcendence:

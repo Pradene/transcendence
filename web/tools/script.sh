@@ -10,7 +10,7 @@ RETV=$?
 if [ ! $RETV -eq 0 ]; then
     echo "Migrations changes detected, migrating..."
     
-    python3 ./manage.py makemigrations account game chat
+    python3 ./manage.py makemigrations
     python3 ./manage.py migrate
 fi
 
