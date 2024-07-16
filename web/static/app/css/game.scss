@@ -26,18 +26,29 @@ div.game-container {
     }
   }
 
-  .game {
+  .container {
     display: flex;
-    width: 100%;
-    min-width: 100%;
-    border: 1px solid white;
+    flex-direction: row;
 
-    canvas {
-      align-self: center;
+    .user-list {
+      width: auto;
+      display: flex;
+      flex-direction: column ;
+    }
 
-      min-width: 100%;
-      max-width: 100%;
-      aspect-ratio: 800 / 600;
+    .game {
+      display: flex;
+      width: 800px;
+      min-width: 800px;
+      border: 1px solid white;
+
+      canvas {
+        align-self: center;
+
+        min-width: 100%;
+        max-width: 100%;
+        aspect-ratio: 800 / 600;
+      }
     }
   }
 

@@ -53,7 +53,7 @@ services:
       - transcendence
     volumes:
       - $NGINX_VOLUME_LOCATION:/app/static
-      - ssl_certs:/etc/nginx/ssl
+      - ssl_certs:/etc/ssl
     depends_on:
       - web
 

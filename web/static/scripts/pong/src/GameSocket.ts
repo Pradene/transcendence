@@ -1,17 +1,17 @@
-import {Pong}      from "./Pong";
+import {Pong} from "./Pong";
 import {
     activateButtons,
     AVAILABLEGAMECONTAINER,
-    AVAILABLETOURNAMENTCONTAINER
-}                  from "./DomElements";
+    AVAILABLETOURNAMENTCONTAINER, USERSCONTAINER
+}             from "./DomElements";
 import {
     apicallrequest,
     apicallresponse,
     create_game_request,
     create_game_response, create_tournament_request,
     get_games_request,
-    get_games_response, join_game_request, update_game_response
-} from "./Api";
+    get_games_response, get_users_request, join_game_request, update_game_response
+}             from "./Api";
 
 const hosturl: string = "wss://" + location.hostname + ":" + location.port + "/ws/game";
 
@@ -27,7 +27,7 @@ class GameSocket {
      * Access global GameSocket instance.
      */
     public static async get(): Promise<GameSocket> {
-        if (GameSocket.#GameSocket === null ) {
+        if (GameSocket.#GameSocket === null) {
             const socket: WebSocket = await new Promise<WebSocket>((resolve, reject) => {
                 let ws = new WebSocket(hosturl);
                 console.log("Connecting to server...");
@@ -61,12 +61,22 @@ class GameSocket {
         this.send(request);
     }
 
+    private processGetUsers(response: get_users_request): void {
+        USERSCONTAINER.innerHTML = "<h2>Users:</h2>";
+
+        response.data.users.forEach((element) => {
+            let user         = document.createElement("p");
+            user.textContent = element;
+            USERSCONTAINER.appendChild(user);
+        });
+    }
+
     private processGetGames(response: get_games_response): void {
         let games       = response.data.games;
         let tournaments = response.data.tournaments;
 
         // clean containers
-        AVAILABLEGAMECONTAINER.innerHTML = "";
+        AVAILABLEGAMECONTAINER.innerHTML       = "";
         AVAILABLETOURNAMENTCONTAINER.innerHTML = "";
 
         // insert elements
@@ -150,8 +160,7 @@ class GameSocket {
 
         let request: create_game_request = {
             method: "create_game",
-            data:   {
-            }
+            data:   {}
         }
         this.send(request);
     }
@@ -163,8 +172,7 @@ class GameSocket {
 
         let request: create_tournament_request = {
             method: "create_tournament",
-            data:   {
-            }
+            data:   {}
         }
         this.send(request);
     }
@@ -207,6 +215,9 @@ class GameSocket {
         switch (response.method) {
             case "get_games":
                 gs.processGetGames(response as get_games_response);
+                break;
+            case "get_users":
+                gs.processGetUsers(response as get_users_request);
                 break;
             case "create_game":
                 gs.createNewGame(response as create_game_response);

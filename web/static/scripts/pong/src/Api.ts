@@ -135,6 +135,13 @@ interface update_player_request extends apicallrequest {
     }
 }
 
+interface get_users_request extends apicallrequest {
+    method: "get_users",
+    data: {
+        users: string[]
+    }
+}
+
 export {
     apicall,
     apicallrequest,
@@ -146,5 +153,6 @@ export {
     join_game_request,
     join_game_response,
     update_game_response,
-    update_player_request
+    update_player_request,
+    get_users_request
 };

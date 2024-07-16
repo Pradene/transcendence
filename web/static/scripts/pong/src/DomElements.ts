@@ -6,6 +6,7 @@ let REFRESHBUTTON: HTMLButtonElement             = document.querySelector<HTMLBu
 let AVAILABLEGAMECONTAINER: HTMLDivElement       = document.querySelector<HTMLDivElement>("div.game-container div.available-game")!;
 let AVAILABLETOURNAMENTCONTAINER: HTMLDivElement = document.querySelector<HTMLDivElement>("div.game-container div.available-tournament")!;
 let GAMECONTAINER: HTMLDivElement                = document.querySelector<HTMLDivElement>("div.game-container div.game")!;
+let USERSCONTAINER: HTMLDivElement               = document.querySelector<HTMLDivElement>("div.game-container div.user-list")!;
 
 const FIRST_LINK: NodeListOf<HTMLAnchorElement> = document.querySelectorAll<HTMLAnchorElement>("nav div a[data-link]")!;
 const HOME_LINK: HTMLAnchorElement              = document.querySelector<HTMLAnchorElement>("nav > a")!;
@@ -17,6 +18,7 @@ function regenerateButtons(): void {
     AVAILABLEGAMECONTAINER       = document.querySelector<HTMLDivElement>("div.game-container div.available-game")!;
     AVAILABLETOURNAMENTCONTAINER = document.querySelector<HTMLDivElement>("div.game-container div.available-tournament")!;
     GAMECONTAINER                = document.querySelector<HTMLDivElement>("div.game-container div.game")!;
+    USERSCONTAINER               = document.querySelector<HTMLDivElement>("div.game-container div.user-list")!;
 }
 
 /**
@@ -94,5 +96,6 @@ export {
     deactivateButtons,
     AVAILABLEGAMECONTAINER,
     AVAILABLETOURNAMENTCONTAINER,
-    GAMECONTAINER
+    GAMECONTAINER,
+    USERSCONTAINER
 };

@@ -19,7 +19,10 @@ export class Home extends AbstractView {
 		    	<button class="create-tournament">Create Tournament</button> <!-- Create Tournament Button -->
 		    	<button class="refresh-room">Refresh Room</button> <!-- Refresh Room Button -->
 		    </div>
-		    <div class="game"></div> <!-- Game Container, contain the game -->
+		    <div class="container">
+		        <div class="user-list"></div>
+		        <div class="game"></div>
+		    </div>
 		    <div class="available-games"> <!-- Available Games Container, contain the list of available games -->
 		    	<div class="available-game"></div> <!-- Available Game Container, contain the list of available games -->
 		    	<div class="available-tournament"></div> <!-- Available Tournament Container, contain the list of available tournaments -->

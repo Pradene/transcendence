@@ -41,8 +41,6 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         self.__currentGame: Union[Game, Tournament, None] = None
         self.__user = None
 
-        GameConsumer.USERS.append(self)
-
         if not MODULE_INITIALIZED:
             from game.gameutils.GameManager import GameManager
             logging.log(logging.INFO, "Initialising GameConsumer")
@@ -55,11 +53,17 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         if not self.__user.is_authenticated:
             await self.close()
             return
+        elif self.__user.username in [user.getUsername() for user in GameConsumer.USERS]:
+            await self.close()
+            return
+
+        GameConsumer.USERS.append(self)
 
         logging.log(logging.INFO, f"New GameConsumer connected: {str(self.__user)}:{self.__user.username}")
         self.__interface.setName(self.__user.username)
         await self.accept()
         await self.getGames()
+        await self.onUserChange()
 
     async def receive(self, text_data=None, bytes_data=None, **kwargs):
         """Handle incoming messages from the client"""
@@ -97,6 +101,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             if user == self:
                 GameConsumer.USERS.remove(user)
         logging.log(logging.INFO, f"User {self.__interface.getName()} has disconnected")
+        await GameConsumer.onUserChange()
 
     def isInGame(self) -> bool:
         """Check if the user is in a game"""
@@ -243,5 +248,27 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
     @staticmethod
     async def onGameChange():
+        """Update the game list for all users"""
         for user in GameConsumer.USERS:
             await user.getGames()
+
+    @staticmethod
+    async def onUserChange():
+        """Update the user list for all users"""
+        """Is triggered when a user connects or disconnects"""
+
+        userlist: List[str] = [user.getUsername() for user in GameConsumer.USERS]
+
+        for user in GameConsumer.USERS:
+            await user.updateUserList(userlist)
+
+    async def updateUserList(self, userlist: List[str]):
+        """Send the updated user list to the client"""
+
+        response: GameConsumerResponse = GameConsumerResponse(method="get_users", status=True, data={"users": userlist})
+        await self.send_json(response.toJSON())
+
+    def getUsername(self) -> str:
+        """Return the username of the user"""
+
+        return self.__user.username
