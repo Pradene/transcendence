@@ -42,8 +42,8 @@ MIDDLEWARE = [
 ]
 
 ALLOWED_HOSTS = [
-    f'{os.getenv("HOST_HOSTNAME")}',
-    f'{os.getenv("HOST_HOSTNAME")}:3000',
+    f'https://{os.getenv("HOST_HOSTNAME")}',
+    f'https://{os.getenv("HOST_HOSTNAME")}:3000',
 ]
 
 CSRF_COOKIE_AGE = 86400

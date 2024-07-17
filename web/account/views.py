@@ -53,8 +53,8 @@ def userSignupView(request):
 
         if password1 != password2:
             error['password'] = "The password doesn't match."
-        elif len(password1) < 8:
-            error['password'] = 'Password must be at least 8 characters long.'
+        # elif len(password1) < 8:
+        #     error['password'] = 'Password must be at least 8 characters long.'
 
         if error:
             return JsonResponse({'error': error}, status=400)

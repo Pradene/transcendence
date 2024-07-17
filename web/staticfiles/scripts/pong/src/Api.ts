@@ -29,12 +29,14 @@ interface apicallresponse {
 interface create_game_request extends apicallrequest {
     method: "create_game";
     data: {
+        mode: number;
     }
 }
 
 export interface create_tournament_request extends apicallrequest {
     method: "create_tournament";
     data: {
+        mode: number;
     }
 }
 

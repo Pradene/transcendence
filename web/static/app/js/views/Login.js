@@ -92,7 +92,7 @@ export class Login extends AbstractView {
                 localStorage.setItem('refresh', data.refresh)
 
                 const ws = WebSocketManager.get()
-                ws.connect('wss://localhost:3000/ws/chat/')
+                ws.connect('wss://' + location.hostname + ':' + location.port + '/ws/chat/')
 
                 updateCSRFToken()
 

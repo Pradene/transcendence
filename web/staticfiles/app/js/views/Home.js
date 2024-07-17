@@ -17,6 +17,12 @@ export class Home extends AbstractView {
 		    	<button class="create-game">Create Game</button> <!-- Create Game Button -->
 		    	<button class="create-tournament">Create Tournament</button> <!-- Create Tournament Button -->
 		    	<button class="refresh-room">Refresh Room</button> <!-- Refresh Room Button -->
+		    	<div class="settings">
+		    	    <input type="radio" name="none" id="none">
+		    	    <input type="radio" name="storm" id="storm">
+		    	    <input type="radio" name="wind" id="wind">
+		    	    <input type="radio" name="geo" id="geo">
+		    	</div>
 		    </div>
 		    <div class="container">
 		        <div class="user-list"></div>
