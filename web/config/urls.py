@@ -10,6 +10,8 @@ urlpatterns = [
     
     path('api/chat/', include('chat.urls')),
     path('api/user/', include('account.urls')),
+    
+    path('api/csrf-token/', views.getCSRFTokenView),
 
-    re_path(r'^.*$', views.base),
+    re_path(r'^.*$', views.base)
 ]

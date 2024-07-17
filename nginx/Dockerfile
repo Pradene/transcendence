@@ -4,7 +4,7 @@ ARG		NGINX_CONF_FILE=/etc/nginx/nginx.conf
 ARG		HOST_HOSTNAME=$HOST_HOSTNAME
 
 RUN		apk update && \
-		apk add		bash \
+		apk add bash \
 				sed \
 				openssl
 

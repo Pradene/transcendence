@@ -24,8 +24,8 @@ export class ChatRoom extends AbstractView {
         `
     }
 
-    async addEventListeners() {
-        await this.getInitialMessages()
+    addEventListeners() {
+        this.getInitialMessages()
         
         const form = document.getElementById('message-form')
         form.removeEventListener('submit', this.handleSentMessage)
@@ -51,6 +51,7 @@ export class ChatRoom extends AbstractView {
             
             if (response.ok) {
                 const data = await response.json()
+                console.log(data)
                 if (data.room && data.room.messages)
                     this.displayMessages(data.room.messages)
             
@@ -70,6 +71,7 @@ export class ChatRoom extends AbstractView {
         const input = document.getElementById('message-input')
         const value = input.value
         const roomID = this.getRoomID()
+        console.log('message sent')
         if (input.value != '') {                
             await window.wsManager.sendMessage({
                 type: 'message',

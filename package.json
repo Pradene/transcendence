@@ -1,0 +1,22 @@
+{
+  "name": "transcendence",
+  "version": "1.0.0",
+  "description": "To run the program and start the server just run :",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Pradene/transcendence.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Pradene/transcendence/issues"
+  },
+  "homepage": "https://github.com/Pradene/transcendence#readme",
+  "workspaces": [
+    "web/static/scripts/pong"
+  ]
+}

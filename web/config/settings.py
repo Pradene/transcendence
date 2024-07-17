@@ -42,7 +42,8 @@ MIDDLEWARE = [
 ]
 
 ALLOWED_HOSTS = [
-    f'{os.getenv("HOST_HOSTNAME")}'
+    f'https://{os.getenv("HOST_HOSTNAME")}',
+    f'https://{os.getenv("HOST_HOSTNAME")}:3000',
 ]
 
 CSRF_COOKIE_AGE = 86400
@@ -50,13 +51,14 @@ CSRF_TRUSTED_ORIGINS = [
     'https://localhost:3000',
     f'https://{os.getenv("HOST_HOSTNAME")}:3000',
     'https://*.42paris.fr',
-    'https://*.42paris.fr:3000',
+    'https://*.42paris.fr:3000'
 ]
 
 CORS_ALLOWED_ORIGINS = [
     'https://localhost:3000',
     f'https://{os.getenv("HOST_HOSTNAME")}:3000',
-    'https://localhost:8000'
+    'https://*.42paris.fr',
+    'https://*.42paris.fr:3000'
 ]
 
 logging.log(logging.INFO, f"CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}\n")

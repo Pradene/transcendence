@@ -1,6 +1,6 @@
 import { AbstractView } from "./AbstractView.js"
 import { Router } from "../Router.js"
-import { getCSRFToken } from "../utils.js"
+import { getCSRFToken, updateCSRFToken } from "../utils.js"
 import { WebSocketManager } from "../ChatWebSocket.js"
 
 export class Profile extends AbstractView {
@@ -46,6 +46,8 @@ export class Profile extends AbstractView {
                 
                 const ws = WebSocketManager.get()
                 ws.disconnect()
+
+                updateCSRFToken()
 
                 const router = Router.get()
                 router.navigate('/login/')

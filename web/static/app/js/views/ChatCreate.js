@@ -10,7 +10,7 @@ export class ChatCreate extends AbstractView {
 
     getHtml() {
         return `
-<!--            <nav-component></nav-component>-->
+            <nav-component></nav-component>
             <div class="flex">
                 <label>
                     <input type="text" id="input" placeholder="Search" autocomplete="off"></input>
@@ -23,8 +23,8 @@ export class ChatCreate extends AbstractView {
         `
     }
 
-    async addEventListeners() {   
-        await this.getUsers()
+    addEventListeners() {   
+        this.getUsers()
         
         const input = document.getElementById('input')
         input.addEventListener('keyup', this.handleSearch.bind(this))

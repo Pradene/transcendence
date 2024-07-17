@@ -16,10 +16,10 @@ export class AbstractView {
         `
     }
 
-    async addEventListeners() {}
+    addEventListeners() {}
 
-    async render(container) {
+    render(container) {
         container.innerHTML = this.getHtml()
-        await this.addEventListeners()
+        this.addEventListeners()
     }
 }

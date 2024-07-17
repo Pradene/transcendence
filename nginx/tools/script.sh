@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 SSL_DIR="/etc/ssl"
 CERT_FILE="$SSL_DIR/certs/nginx-selfsigned.crt"
@@ -15,5 +15,4 @@ if [ ! -f $CERT_FILE ] || [ ! -f $KEY_FILE ]; then
 		-subj "/C=FR/ST=Paris/L=Paris/O=42/OU=42/CN=localhost"
 fi
 
-chmod -R a+r /app
 nginx -g "daemon off;"
