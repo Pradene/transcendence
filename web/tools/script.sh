@@ -2,7 +2,7 @@
 
 cd /app
 
-# python manage.py collectstatic --noinput
+python manage.py collectstatic --noinput
 
 python3 ./manage.py makemigrations --check
 RETV=$?

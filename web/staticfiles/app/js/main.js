@@ -9,9 +9,12 @@ import { Signup } from "./views/Signup.js"
 import { WebSocketManager } from "./ChatWebSocket.js"
 
 import './components/Nav.js'
+import { initCSRFToken } from "./utils.js"
 
 
 document.addEventListener('DOMContentLoaded', () => {
+
+    initCSRFToken()
 
     const app = document.getElementById('app')
 

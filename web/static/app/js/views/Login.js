@@ -1,6 +1,6 @@
 import { AbstractView } from "./AbstractView.js"
 import { Router } from "../Router.js"
-import { getCSRFToken } from "../utils.js"
+import { getCSRFToken, updateCSRFToken } from "../utils.js"
 import { WebSocketManager } from "../ChatWebSocket.js"
 
 export class Login extends AbstractView {
@@ -92,7 +92,9 @@ export class Login extends AbstractView {
                 localStorage.setItem('refresh', data.refresh)
 
                 const ws = WebSocketManager.get()
-                ws.connect('ws://localhost:3000/ws/chat/')
+                ws.connect('wss://localhost:3000/ws/chat/')
+
+                updateCSRFToken()
 
                 const router = Router.get()
                 router.navigate('/')

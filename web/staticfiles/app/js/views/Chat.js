@@ -24,8 +24,8 @@ export class Chat extends AbstractView {
         `
     }
 
-    async addEventListeners() {
-        await this.getInitialData()
+    addEventListeners() {
+        this.getInitialData()
 
         const input = document.getElementById('input')
         input.removeEventListener('keyup', this.handleSearch)
