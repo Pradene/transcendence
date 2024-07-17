@@ -4,10 +4,9 @@ import {Position}                              from "./Utils";
 import {apicallresponse, update_game_response} from "./Api";
 import {GameSocket}                            from "./GameSocket";
 import {GAMECONTAINER}                         from "./DomElements";
+import {CANVAS_HEIGHT, CANVAS_WIDTH}           from "./Defines";
 
-const screenWidth: number  = 800;
-const screenHeight: number = 600;
-const colors: any          = {
+const colors: any = {
     waiting: {
         background: "#000000ff",
         border:     "#ffffffff",
@@ -33,8 +32,8 @@ class Pong {
         //set the canvas properties
         this._canvas.style.backgroundColor = colors.waiting.background;
         this._canvas.style.border          = "solid 1px " + colors.waiting.border;
-        this._canvas.width                 = screenWidth;
-        this._canvas.height                = screenHeight;
+        this._canvas.width                 = CANVAS_WIDTH;
+        this._canvas.height                = CANVAS_HEIGHT;
 
         GAMECONTAINER.appendChild(this._canvas);
     }
@@ -45,7 +44,7 @@ class Pong {
     public display(status: boolean, timer?: number): void {
         if (!status) {
             this._canvas.style.backgroundColor = colors.waiting.background;
-            this._context.clearRect(0, 0, screenWidth, screenHeight);
+            this._context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
             this._context.font      = "30px Arial";
             this._context.fillStyle = colors.waiting.text;
@@ -54,7 +53,7 @@ class Pong {
         }
 
         this._canvas.style.backgroundColor = colors.running.background;
-        this._context.clearRect(0, 0, screenWidth, screenHeight);
+        this._context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
         this._context.fillStyle = colors.running.player;
         this._current_player?.display(this._context);
@@ -65,11 +64,11 @@ class Pong {
 
     public displayTimer(timer: number): void {
         this._canvas.style.backgroundColor = colors.running.background;
-        this._context.clearRect(0, 0, screenWidth, screenHeight);
+        this._context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
         this._context.fillStyle = colors.running.player;
         this._context.font      = "30px Arial";
-        this._context.fillText(String(5 - timer), screenWidth / 2, screenHeight / 2);
+        this._context.fillText(String(5 - timer), CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
     }
 
     /**
@@ -138,16 +137,16 @@ class Pong {
 
     private set running(status: boolean) {
         if (!this.running && status) {
-            //TODO start game (player key input catch)
             this._running = true;
         } else if (this.running && !status) {
-            this.stop(); //game is not running anymore
-            this._running = false
+            this.stop().then(() => {
+                this._running = false;
+            });
         }
     }
 
-    private _canvas: HTMLCanvasElement;
-    private _context: CanvasRenderingContext2D;
+    private readonly _canvas: HTMLCanvasElement;
+    private readonly _context: CanvasRenderingContext2D;
     private _current_player: CurrentPlayer | undefined;
     private _opponent: Player | undefined;
     private _ball: Ball;

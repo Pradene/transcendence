@@ -1,6 +1,5 @@
 import {Position} from "./Utils";
-
-const ball_size: number = 4;
+import {BALL_RADIUS} from "./Defines";
 
 class Ball {
     constructor(position: Position) {
@@ -18,8 +17,8 @@ class Ball {
     display(canvas: CanvasRenderingContext2D): void {
         canvas.fillRect(this._position.x,
                         this._position.y,
-                        ball_size,
-                        ball_size);
+                        BALL_RADIUS,
+                        BALL_RADIUS);
     }
 
     private _position: Position;

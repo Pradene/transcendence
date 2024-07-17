@@ -1,9 +1,7 @@
-import {Position}              from "./Utils";
-import {GameSocket}            from "./GameSocket";
-import {update_player_request} from "./Api";
-
-const default_height: number = 32 * 2;
-const default_width: number = 8;
+import {Position}                    from "./Utils";
+import {GameSocket}                  from "./GameSocket";
+import {update_player_request}       from "./Api";
+import {PADDLE_HEIGHT, PADDLE_WIDTH} from "./Defines";
 
 /**
  * Represents a player in the game.
@@ -31,9 +29,9 @@ class Player {
     }
 
     constructor(name: string, position: Position) {
-        this._name = name;
+        this._name     = name;
         this._position = position;
-        this._score = 0;
+        this._score    = 0;
     }
 
     /**
@@ -52,8 +50,8 @@ class Player {
     public display(canvas: CanvasRenderingContext2D): void {
         canvas.fillRect(this._position.x,
                         this._position.y,
-                        default_width,
-                        default_height);
+                        PADDLE_WIDTH,
+                        PADDLE_HEIGHT);
         canvas.font = "20px Arial";
         canvas.fillText(String(this._score), this._position.x, 20);
     }
@@ -72,8 +70,8 @@ class Player {
 class CurrentPlayer extends Player {
     constructor(name: string, position: Position) {
         super(name, position);
-        this._movement = "NONE";
-        this._boundHandlerUp = this._keyUpHandler.bind(this);
+        this._movement         = "NONE";
+        this._boundHandlerUp   = this._keyUpHandler.bind(this);
         this._boundHandlerDown = this._keyDownHandler.bind(this);
         window.addEventListener("keypress", this._boundHandlerDown);
         window.addEventListener("keyup", this._boundHandlerUp);
@@ -95,7 +93,7 @@ class CurrentPlayer extends Player {
      * @private
      */
     private async _update(): Promise<void> {
-        let gs: GameSocket = await  GameSocket.get();
+        let gs: GameSocket                 = await GameSocket.get();
         let request: update_player_request = {
             method: "update_player",
             data:   {
@@ -110,7 +108,8 @@ class CurrentPlayer extends Player {
         if (this._movement === value)
             return;
         this._movement = value;
-        this._update().then(r => {});
+        this._update().then(r => {
+        });
     }
 
     stop(): void {

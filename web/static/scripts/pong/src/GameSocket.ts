@@ -12,6 +12,7 @@ import {
     get_games_request,
     get_games_response, get_users_request, join_game_request, update_game_response
 }             from "./Api";
+import {GAME_MODE} from "./Defines";
 
 const hosturl: string = "wss://" + location.hostname + ":" + location.port + "/ws/game";
 
@@ -160,7 +161,9 @@ class GameSocket {
 
         let request: create_game_request = {
             method: "create_game",
-            data:   {}
+            data:   {
+                mode: GAME_MODE.NONE
+            }
         }
         this.send(request);
     }
@@ -172,7 +175,9 @@ class GameSocket {
 
         let request: create_tournament_request = {
             method: "create_tournament",
-            data:   {}
+            data:   {
+                mode: GAME_MODE.NONE
+            }
         }
         this.send(request);
     }
