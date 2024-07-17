@@ -1,4 +1,4 @@
-NAME		:= Transcendance
+NAME			:= Transcendance
 DOCKER_FLAGS 	:= --build
 HOST_HOSTNAME	:= $(shell hostname)
 
@@ -6,7 +6,7 @@ ifneq ($(fg),)
 	DOCKER_FLAGS += -d
 endif
 
-all: ${NAME} ;
+all: ${NAME}
 
 ${NAME}: build_scripts
 	HOST_HOSTNAME=$(HOST_HOSTNAME) docker compose build --parallel
@@ -25,5 +25,5 @@ down:
 re:
 	-docker container prune -f
 	-docker volume prune -f
-	-docker volume rm transcendance_database transcendance_static
+	-docker volume rm transcendance_database
 	${MAKE} ${NAME}

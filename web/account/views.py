@@ -71,7 +71,6 @@ def userSignupView(request):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
 
-@csrf_exempt
 @require_POST
 def userLoginView(request):
     try:
@@ -103,36 +102,6 @@ def userLoginView(request):
     
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
-
-
-# @csrf_exempt
-# @require_POST
-# def userLoginView(request):
-#     logging.log(logging.INFO, 'login')
-#     try:
-#         data = json.loads(request.body)
-
-#         username = data.get('username')
-#         password = data.get('password')
-#         user = authenticate(request, username=username, password=password)
-        
-#         logging.log(logging.INFO, f'user: {user.id}')
-
-#         if user is not None:
-#             login(request, user)
-#             logging.log(logging.INFO, 'login success')
-#             access_token = create_access_token(user)
-#             refresh_token = create_resfresh_token(user)
-#             logging.log(logging.INFO, f'access: {access_token}\nrefresh: {refresh_token}')
-#             return JsonResponse({'access': access_token, 'refresh': refresh_token}, status=200)
-#         else:
-#             return JsonResponse({'error': 'Login failed'}, status=400)
-    
-#     except json.JSONDecodeError:
-#         return JsonResponse({'error': 'Invalid JSON'}, status=400)
-    
-#     except Exception as e:
-#         return JsonResponse({'error': str(e)}, status=400)
 
 
 @jwt_required

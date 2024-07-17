@@ -15,10 +15,7 @@ services:
     networks:
       - transcendence
     volumes:
-      - static:/app/staticfiles
-    depends_on:
-      db:
-        condition: service_healthy
+      - $DJANGO_VOLUME:/app
 
   db:
     container_name: db
@@ -33,11 +30,6 @@ services:
       - transcendence
     volumes:
       - database:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
   nginx:
     container_name: nginx
@@ -52,16 +44,14 @@ services:
     networks:
       - transcendence
     volumes:
-      - $NGINX_VOLUME_LOCATION:/app/static
+      - $NGINX_STATIC_VOLUME:/usr/share/nginx/static
+      - $NGINX_MEDIA_VOLUME:/usr/share/nginx/media
       - ssl_certs:/etc/ssl
-    depends_on:
-      - web
 
 networks:
   transcendence:
     driver: bridge
 
 volumes:
-  static:
   database:
   ssl_certs:

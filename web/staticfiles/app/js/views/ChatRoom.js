@@ -24,8 +24,8 @@ export class ChatRoom extends AbstractView {
         `
     }
 
-    async addEventListeners() {
-        await this.getInitialMessages()
+    addEventListeners() {
+        this.getInitialMessages()
         
         const form = document.getElementById('message-form')
         form.removeEventListener('submit', this.handleSentMessage)

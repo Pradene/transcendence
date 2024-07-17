@@ -7,8 +7,7 @@ export class Home extends AbstractView {
         super()
     }
 
-    async getHtml() {
-        const head = document.querySelector('head')
+    getHtml() {
 
         return `
         <nav-component></nav-component>
@@ -32,7 +31,7 @@ export class Home extends AbstractView {
     }
 
     async render(container) {
-        container.innerHTML = await this.getHtml()
+        container.innerHTML = this.getHtml()
         this.addEventListeners()
 
         if (!game_loaded) {
