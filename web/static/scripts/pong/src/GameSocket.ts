@@ -2,8 +2,8 @@ import {Pong} from "./Pong";
 import {
     activateButtons,
     AVAILABLEGAMECONTAINER,
-    AVAILABLETOURNAMENTCONTAINER, USERSCONTAINER
-}             from "./DomElements";
+    AVAILABLETOURNAMENTCONTAINER, getModifiersFromSettings, USERSCONTAINER
+} from "./DomElements";
 import {
     apicallrequest,
     apicallresponse,
@@ -162,7 +162,7 @@ class GameSocket {
         let request: create_game_request = {
             method: "create_game",
             data:   {
-                mode: GAME_MODE.NONE
+                modifiers: getModifiersFromSettings()
             }
         }
         this.send(request);
@@ -176,7 +176,7 @@ class GameSocket {
         let request: create_tournament_request = {
             method: "create_tournament",
             data:   {
-                mode: GAME_MODE.NONE
+                modifiers: getModifiersFromSettings()
             }
         }
         this.send(request);

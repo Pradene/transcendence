@@ -1,4 +1,5 @@
 import {GameSocket} from "./GameSocket";
+import {GAME_MODE}  from "./Defines";
 
 let CREATEGAMEBUTTON: HTMLButtonElement          = document.querySelector<HTMLButtonElement>("div.game-container button.create-game")!;
 let CREATETOURNAMENTBUTTON: HTMLButtonElement    = document.querySelector<HTMLButtonElement>("div.game-container button.create-tournament")!;
@@ -89,6 +90,23 @@ function deactivateButtons(): void {
     REFRESHBUTTON.removeEventListener("click", refreshButtonCallback);
     deactivateButton(CREATEGAMEBUTTON);
     deactivateButton(REFRESHBUTTON);
+}
+
+export function getModifiersFromSettings(): string[] {
+    let wind: HTMLInputElement       = document.querySelector("#wind")!;
+    let rain: HTMLInputElement       = document.querySelector("#rain")!;
+    let lightnight: HTMLInputElement = document.querySelector("#lightnight")!;
+
+    let modifiers: string[] = [];
+
+    if (wind.checked)
+        modifiers.push(GAME_MODE.WIND);
+    if (rain.checked)
+        modifiers.push(GAME_MODE.RAIN);
+    if (lightnight.checked)
+        modifiers.push(GAME_MODE.LIGHTNIGHT);
+
+    return modifiers;
 }
 
 export {

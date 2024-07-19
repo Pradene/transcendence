@@ -29,14 +29,14 @@ interface apicallresponse {
 interface create_game_request extends apicallrequest {
     method: "create_game";
     data: {
-        mode: number;
+        modifiers: string[]
     }
 }
 
 export interface create_tournament_request extends apicallrequest {
     method: "create_tournament";
     data: {
-        mode: number;
+        modifiers: string[]
     }
 }
 
@@ -55,6 +55,13 @@ interface get_games_request extends apicallrequest {
     method: "get_games";
 }
 
+interface game_data {
+    creator: string,
+    modifiers: string[],
+    player_count: number,
+    is_full: boolean
+}
+
 /**
  * List of all currently running games
  *
@@ -66,16 +73,8 @@ interface get_games_request extends apicallrequest {
 interface get_games_response extends apicallresponse {
     method: "get_games",
     data: {
-        games: [{
-            creator: string, //TODO remove this field when auth if functionnal, may be missused
-            player_count: number,
-            is_full: boolean
-        }],
-        tournaments: [{
-            creator: string,
-            player_count: number,
-            is_full: boolean
-        }]
+        games: game_data[]
+        tournaments: game_data[]
     }
 }
 

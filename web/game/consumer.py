@@ -180,11 +180,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
         from game.gameutils.GameManager import GameManager
 
-        if self.__interface.getName() == "":
-            response = GameConsumerResponse(method="create_game", status=False, reason=Response.INVALIDUSERNAME)
-            await self.send_json(response.toJSON())
-            return
-        elif self.isInGame():
+        if self.isInGame():
             response = GameConsumerResponse(method="create_game", status=False, reason=Response.ALREADYINGAME)
             await self.send_json(response.toJSON())
             return

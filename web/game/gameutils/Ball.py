@@ -2,6 +2,7 @@ from typing import List, Tuple
 from game.gameutils.PlayerInterface import PlayerInterface, PADDLE_HEIGHT, PADDLE_WIDTH
 from game.gameutils.IntVector import IntVector
 from game.gameutils.defines import *
+from game.gameutils.gamemodifier.gamemodifier import GameModifier
 
 import random
 import math
@@ -17,6 +18,7 @@ def genStartVector() -> IntVector:
     sin = math.sin(angle) * 2 - 1
     cos = math.cos(angle) * 2 - 1
     return IntVector([cos, sin])
+
 
 class Ball:
     def __init__(self):
@@ -50,49 +52,58 @@ class Ball:
         narr = [(x, -y) for x, y in arr]
         self.__direction.reverseY()
         return narr
-    
+
     def isFinished(self) -> bool:
         """Did the current ball hit the left or right wall"""
 
         return self.__finished
-    
+
     def finishBall(self) -> None:
         """Finish the ball"""
 
         self.__finished = True
 
-    def computeNext(self, p1: PlayerInterface, p2: PlayerInterface) -> None:
+    def computeNext(self, p1: PlayerInterface, p2: PlayerInterface, modifiers: List[GameModifier] = []) -> None:
+        """Computes the next position of the ball"""
+
+        # recompute the ball vector based on the speed
         ispeed = int(self.__speed)
-        arr = self.__direction.computeMoves(ispeed)
-        p1.setBallSpeed(ispeed)
-        p2.setBallSpeed(ispeed)
+        self.__direction.setNorm(ispeed)
+
+        turn_vec: IntVector = self.__direction
+        for mod in modifiers:
+            turn_vec += mod.getVector()
+        arr = turn_vec.computeMoves()
+
+        p1.setBallSpeed(len(arr))
+        p2.setBallSpeed(len(arr))
 
         while len(arr) > 0 and not self.isFinished():
             x, y = arr[0]
 
-            #check hit p1 paddle horizontally
-            if self.getX() == p1.getX() + PADDLE_WIDTH and x < 0 and self.getY() >= p1.getY() and self.getY() <= p1.getY() + PADDLE_HEIGHT:
+            # check hit p1 paddle horizontally
+            if self.getX() == p1.getX() + PADDLE_WIDTH and x < 0 and p1.getY() <= self.getY() <= p1.getY() + PADDLE_HEIGHT:
                 arr = self.__revX(arr)
                 self.incrSpeed()
-            #check hit p2 paddle horizontally
-            elif self.getX() + BALL_SIZE == p2.getX() and x > 0 and self.getY() >= p2.getY() and self.getY() <= p2.getY() + PADDLE_HEIGHT:
+            # check hit p2 paddle horizontally
+            elif self.getX() + BALL_SIZE == p2.getX() and x > 0 and p2.getY() <= self.getY() <= p2.getY() + PADDLE_HEIGHT:
                 arr = self.__revX(arr)
                 self.incrSpeed()
-            #check hit p1 or p2 vertically
+            # check hit p1 or p2 vertically
             elif self.__hitPlayer(y, p1) or self.__hitPlayer(y, p2):
                 arr = self.__revY(arr)
-            #check hit top wall
+            # check hit top wall
             elif self.getY() == 0 and y < 0:
                 arr = self.__revY(arr)
-            #check hit bottom wall
+            # check hit bottom wall
             elif self.getY() == SCREEN_HEIGHT - BALL_SIZE and y > 0:
                 arr = self.__revY(arr)
-            #check hit right wall
+            # check hit right wall
             elif self.getX() == SCREEN_WIDTH - BALL_SIZE:
                 p1.incrPoints()
                 self.finishBall()
                 break
-            #check hit left wall
+            # check hit left wall
             elif self.getX() == 0:
                 p2.incrPoints()
                 self.finishBall()
@@ -109,7 +120,7 @@ class Ball:
         cx = self.getX()
         px = player.getX()
 
-        if y != 0 and cx > px and cx < px + PADDLE_WIDTH:
+        if y != 0 and px < cx < px + PADDLE_WIDTH:
             if y == -1 and self.getY() == player.getY() + PADDLE_HEIGHT:
                 return True
             elif y == 1 and self.getY() + BALL_SIZE == player.getY():

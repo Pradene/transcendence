@@ -18,14 +18,9 @@ export class Home extends AbstractView {
 		    	<button class="create-tournament">Create Tournament</button> <!-- Create Tournament Button -->
 		    	<button class="refresh-room">Refresh Room</button> <!-- Refresh Room Button -->
 		    	<div class="settings">
-		    	    <label for="none">None</label>
-		    	    <input type="radio" name="none" id="none">
-		    	    <label for="storm">Storm</label>
-		    	    <input type="radio" name="storm" id="storm">
-		    	    <label for="wind">Wind</label>
-		    	    <input type="radio" name="wind" id="wind">
-		    	    <label for="geo">Geo</label>
-		    	    <input type="radio" name="geo" id="geo">
+		    	    <div class="setting"><label for="wind">Wind</label><input type="checkbox" name="setting" id="wind"></div>
+		    	    <div class="setting"><label for="rain">Rain</label><input type="checkbox" name="setting" id="rain"></div>
+		    	    <div class="setting"><label for="lightnight">Lightnight</label><input type="checkbox" name="setting" id="lightnight"></div>
 		    	</div>
 		    </div>
 		    <div class="container">

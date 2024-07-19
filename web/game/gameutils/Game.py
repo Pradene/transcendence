@@ -9,6 +9,7 @@ from game.gameutils.PlayerInterface import PlayerInterface
 from game.gameutils.Ball import Ball
 from game.gameutils.defines import *
 from game.gameutils.abstractgame import AbstractGame
+from game.gameutils.gamemodifier.gamemodifier import GameModifier
 
 from game import models as gamemodels
 from account import models as accountmodels
@@ -18,7 +19,7 @@ TIME_TO_SLEEP: float = (1 / FPS)
 
 
 class Game(AbstractGame):
-    def __init__(self, p1: PlayerInterface):
+    def __init__(self, p1: PlayerInterface, modifiers: List[GameModifier] = []):
         super().__init__(p1)
 
         self.__p1: Union[PlayerInterface, None] = p1
@@ -35,6 +36,8 @@ class Game(AbstractGame):
         self.__score: tuple[int] = (0, 0)
 
         self.__gamemodel: Union[gamemodels.GameModel | None] = None
+
+        self.__modifiers: List[GameModifier] = modifiers
 
 
     def __del__(self):
@@ -75,7 +78,7 @@ class Game(AbstractGame):
                     break
 
             self.__dataLock.acquire()
-            self.__ball.computeNext(self.__p1, self.__p2)
+            self.__ball.computeNext(self.__p1, self.__p2, self.__modifiers)
             self.__dataLock.release()
 
             await self.update()
