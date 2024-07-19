@@ -8,8 +8,18 @@ class ChatRoom(models.Model):
     is_private =  models.BooleanField(default=True)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="rooms")
     
-    def __str__(self):
-        return self.name
+    def create(cls, name, is_private=True, users=None):
+        room = cls.objects.create(name=name, is_private=is_private)
+        if users:
+            room.users.add(users)
+    
+    def join(self, user):
+        if not self.is_private:
+            self.users.add(user)
+
+    def quit(self, user):
+        if not self.is_private:
+            self.users.remove(user)
 
 
 class Message(models.Model):

@@ -1,4 +1,4 @@
-import { getCSRFToken } from "../utils.js"
+import { getURL, getRequest } from "../utils.js"
 import { AbstractView } from "./AbstractView.js"
 
 export class Chat extends AbstractView {
@@ -36,26 +36,14 @@ export class Chat extends AbstractView {
     }
 
     async getInitialData() {
+        const url = getURL('api/user/rooms/')
+        
         try {
-            const access = localStorage.getItem('access')
+            const data = getRequest(url)
 
-            const response = await fetch(`/api/chat/rooms/`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${access}`
-                }
-            })
-
-            if (response.ok) {
-                const data = await response.json()
-                const rooms = data.rooms
-                this.displayRooms(rooms)
+            const rooms = data.rooms
+            this.displayRooms(rooms)
             
-            } else {
-                console.log('Failed to fetch data')
-            }
-
         } catch (error) {
             console.log(error)
         }

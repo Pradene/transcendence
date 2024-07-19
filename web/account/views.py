@@ -8,33 +8,77 @@ from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 
-from .models import CustomUser, BlackListedToken
+from .models import CustomUser, BlackListedToken, FriendList, FriendRequest
+from .utils import create_access_token, create_refresh_token, decode_token
+from .serializers import FriendRequestSerializer, CustomUserSerializer
 from config import settings
 from config.decorators import jwt_required
-from .utils import create_access_token, create_refresh_token, decode_token
 
 
+# Search
 @jwt_required
 @require_GET
 def searchUsersView(request):
     query = request.GET.get('q', '')
     if query:
         users = CustomUser.objects.filter(username__icontains=query)
-        user_list = [{'id': user.id, 'name': user.username} for user in users]
-        return JsonResponse({'users': user_list}, status=200)
+        serializer = CustomUserSerializer(users, many=True)
+        return JsonResponse(serializer.data, safe=False, status=200)
     
-    return JsonResponse({'users': []}, status=400)
+    return JsonResponse({}, status=400)
 
 
+
+#Friend Requests
 @jwt_required
 @require_GET
 def getFriendsView(request):
     user = request.user
-    friends = CustomUser.objects.filter(friends=user)
-    friend_list = [{'id': friend.id, 'name': friend.username} for friend in friends]
-    return JsonResponse({'users': friend_list}, status=200)
+    friends = FriendList.objects.get(user=user).friends.all()
+    serializer = CustomUserSerializer(friends, many=True)
+    return JsonResponse(serializer.data, safe=False, status=200)
 
 
+@jwt_required
+@require_GET
+def getFriendRequestsView(request):
+    user = request.user
+    logging.info(f'friend requests of {user}')
+    friend_requests = FriendRequest.objects.filter(receiver=user)
+    serializer = FriendRequestSerializer(friend_requests, many=True)
+    return JsonResponse(serializer.data, safe=False, status=200)
+
+
+@jwt_required
+@require_POST
+def sendFriendRequestView(request, user_id):
+    sender = request.user
+    receiver = CustomUser.objects.get(id=user_id)
+
+    if sender == receiver:
+        return JsonResponse({'error': 'You cannot send to yourself'}, status=400)
+
+    if FriendRequest.objects.filter(sender=sender, receiver=receiver):
+        return JsonResponse({'error': 'A friend request alreay exists'}, status=400)
+    
+    elif FriendRequest.objects.filter(sender=receiver, receiver=sender):
+        return JsonResponse({'error': 'A friend request alreay exists'}, status=400)
+    
+    else:
+        friend_request = FriendRequest.objects.create(sender=sender, receiver=receiver)
+        serializer = FriendRequestSerializer(friend_request)
+        return JsonResponse(serializer.data, safe=False, status=200)
+
+def acceptFriendRequestView(request, user_id):
+    receiver = request.user
+    sender = CustomUser.objects.get(id=user_id)
+    friend_request = FriendRequest.objects.get(receiver=receiver, sender=sender)
+    friend_request.accept()
+    return JsonResponse({'message': 'friend request accepted'}, status=200)
+
+
+
+# Registration
 @require_POST
 def userSignupView(request):
     try:
@@ -61,24 +105,24 @@ def userSignupView(request):
 
         try:
             user = CustomUser.objects.create_user(username=username, password=password1)
-            user.save()
             return JsonResponse({}, status=200)
         
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
-     
+
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
 
 @require_POST
 def userLoginView(request):
+    logging.info(f'login')
     try:
         data = json.loads(request.body)
 
         username = data.get('username')
         password = data.get('password')
-        
+
         try:
             user = authenticate(request, username=username, password=password)
             if user is None:
@@ -92,10 +136,11 @@ def userLoginView(request):
         try:
             access_token = create_access_token(user)
             refresh_token = create_refresh_token(user)
+            return JsonResponse({'access': access_token, 'refresh': refresh_token}, status=200)
+        
         except Exception as token_error:
             return JsonResponse({'error': str(token_error)}, status=400)
 
-        return JsonResponse({'access': access_token, 'refresh': refresh_token}, status=200)
     
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
@@ -107,7 +152,8 @@ def userLoginView(request):
 @jwt_required
 @require_POST
 def refreshTokenView(request):
-    refresh_token = request.data.get('refresh')
+    data = json.loads(request.body)
+    refresh_token = data.get('refresh')
     user_id = decode_token(refresh_token)
 
     if user_id is not None:
@@ -124,18 +170,12 @@ def refreshTokenView(request):
 @jwt_required
 @require_POST
 def userLogoutView(request):
-    logging.info('logout')
     try:
         data = json.loads(request.body)
-        logging.info('Data parsed')
 
         refresh_token = data.get('refresh')
-        logging.info(f'{refresh_token}')
         
         token = BlackListedToken.objects.create(token=refresh_token)
-        token.save()
-
-        logging.info('token deleted')
 
         logout(request)
         return JsonResponse({}, status=200)

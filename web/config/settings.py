@@ -14,6 +14,10 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', get_random_secret_key())
 # don't run with debug turned on in production!
 DEBUG = True
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend'
+]
+
 INSTALLED_APPS = [
     'daphne',
     'django.contrib.admin',
@@ -42,23 +46,23 @@ MIDDLEWARE = [
 ]
 
 ALLOWED_HOSTS = [
-    f'https://{os.getenv("HOST_HOSTNAME")}',
-    f'https://{os.getenv("HOST_HOSTNAME")}:3000',
+    f'{os.getenv("HOST_HOSTNAME")}'
 ]
 
+# Set session expiration to 1 day (adjust as needed)
 CSRF_COOKIE_AGE = 86400
 CSRF_TRUSTED_ORIGINS = [
-    'https://localhost:3000',
-    f'https://{os.getenv("HOST_HOSTNAME")}:3000',
-    'https://*.42paris.fr',
-    'https://*.42paris.fr:3000'
+    f'https://{os.getenv("HOST_HOSTNAME")}',
+    f'https://{os.getenv("HOST_HOSTNAME")}:5000',
+    f'http://{os.getenv("HOST_HOSTNAME")}',
+    f'http://{os.getenv("HOST_HOSTNAME")}:3000',
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'https://localhost:3000',
-    f'https://{os.getenv("HOST_HOSTNAME")}:3000',
-    'https://*.42paris.fr',
-    'https://*.42paris.fr:3000'
+    f'https://{os.getenv("HOST_HOSTNAME")}',
+    f'https://{os.getenv("HOST_HOSTNAME")}:5000',
+    f'http://{os.getenv("HOST_HOSTNAME")}',
+    f'http://{os.getenv("HOST_HOSTNAME")}:3000',
 ]
 
 logging.log(logging.INFO, f"CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}\n")
@@ -142,6 +146,3 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ASGI_APPLICATION = 'config.asgi.application'
 
 AUTH_USER_MODEL = 'account.CustomUser'
-
-# Set session expiration to 1 day (adjust as needed)
-SESSION_COOKIE_AGE = 86400

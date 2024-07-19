@@ -1,4 +1,4 @@
-import { getCSRFToken } from "../utils.js"
+import { getURL, getRequest } from "../utils.js"
 import { AbstractView } from "./AbstractView.js"
 
 export class ChatCreate extends AbstractView {
@@ -31,25 +31,13 @@ export class ChatCreate extends AbstractView {
     }
 
     async getUsers() {
-        const access = localStorage.getItem('access')
+        const url = getURL('api/user/friends/')
 
         try {
-            const response = await fetch(`/api/user/get-friends/`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${access}`
-                }
-            })
+            const data = await getRequest(url)
             
-            if (response.ok) {
-                const data = await response.json()
-                this.users = data.users
-                this.displayUsers()
-            
-            } else {
-                console.log('Failed to fetch data')
-            }
+            this.users = data.users
+            this.displayUsers()
 
         } catch (error) {
             console.log(error)
@@ -62,8 +50,10 @@ export class ChatCreate extends AbstractView {
         const users = document.querySelectorAll('.user')
         for (let user of users) {
             const name = user.querySelector('p').textContent
+            
             if (query && !name.includes(query)) {
                 user.classList.add('hidden')
+            
             } else {
                 user.classList.remove('hidden')
             }

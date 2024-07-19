@@ -1,6 +1,6 @@
 import { AbstractView } from "./AbstractView.js"
 import { Router } from "../Router.js"
-import { getCSRFToken } from "../utils.js"
+import { getURL, postRequest } from "../utils.js"
 
 export class Signup extends AbstractView {
     constructor() {
@@ -41,19 +41,19 @@ export class Signup extends AbstractView {
                     </form>
                 </div>
                 <div class="container-xs text-center mt-36">
-                    <a href='/login/' data-link>Login</a>
+                    <a href="/login/" data-link>Login</a>
                 </div>
             </div>
         </div>
         `
     }
 
-    async addEventListeners() {
+    addEventListeners() {
 
-        const inputs = document.querySelectorAll('.form-input')
+        const inputs = document.querySelectorAll(".form-input")
         inputs.forEach(input => {
-            input.addEventListener('input', function (event) {
-                if (input.value == '') {
+            input.addEventListener("input", function (event) {
+                if (input.value == "") {
                     input.style.transform = "translateY(-50%)"
                     input.nextElementSibling.style.transform = "translateY(-50%) scale(1)"
                 
@@ -65,40 +65,27 @@ export class Signup extends AbstractView {
             })
         })
 
-        const form = document.getElementById('signup-form')
-        form.addEventListener('submit', this.handleSubmit)
+        const form = document.getElementById("signup-form")
+        form.addEventListener("submit", this.handleSubmit)
     }
 
     async handleSubmit(event) {
         event.preventDefault()
 
-        const username = document.getElementById('username').value
-        const password1 = document.getElementById('password').value
-        const password2 = document.getElementById('password-confirmation').value
+        const username = document.getElementById("username").value
+        const password1 = document.getElementById("password").value
+        const password2 = document.getElementById("password-confirmation").value
         
-        const csrfToken = getCSRFToken()
+        const url = getURL("api/user/signup/")
 
         try {
-            const response = await fetch("/api/user/signup/", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({username, password1, password2})
-            })
+            await postRequest(url, {username, password1, password2})
+            
+            const router = Router.get()
+            router.navigate("/login/")
 
-            if (response.ok) {
-                const router = Router.get()
-
-                router.navigate('/login/')
-
-            } else {
-                console.log('error: Failed to fetch data')
-            }
-                
         } catch (error) {
-            console.log('error: ', error)
+            console.log("error: ", error)
         }
     }
 }

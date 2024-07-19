@@ -1,5 +1,5 @@
 import { AbstractView } from "./AbstractView.js"
-import { getCSRFToken } from "../utils.js"
+import { getURL, getRequest } from "../utils.js"
 
 export class ChatRoom extends AbstractView {
     constructor() {
@@ -38,27 +38,15 @@ export class ChatRoom extends AbstractView {
 
     async getInitialMessages() {
         const roomID = this.getRoomID()
-        const access = localStorage.getItem('access')
+        const url = getURL(`api/chat/rooms/${roomID}/`)
 
         try {
-            const response = await fetch(`/api/chat/rooms/${roomID}/`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${access}`
-                }
-            })
+            const data = await getRequest(url)
             
-            if (response.ok) {
-                const data = await response.json()
-                console.log(data)
-                if (data.room && data.room.messages)
-                    this.displayMessages(data.room.messages)
-            
-            } else {
-                console.log('error: Failed to fetch data')
-            }
-
+            console.log(data)
+            if (data.room && data.room.messages)
+                this.displayMessages(data.room.messages)
+    
         } catch (error) {
             console.log(error)
         }
@@ -115,7 +103,7 @@ export class ChatRoom extends AbstractView {
         el.classList.add('message')
         el.innerHTML = `
             <div>
-                <h5>${message.user}</h5>
+                <h5>${message.username}</h5>
                 <p>${message.content}</p>
             </div>
         `

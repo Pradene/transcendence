@@ -6,6 +6,7 @@ COPY requirements.txt .
 
 RUN apk update && \
     apk add --no-cache postgresql-dev gcc python3-dev musl-dev bash
+
 RUN pip install -r requirements.txt
 
 COPY . /app

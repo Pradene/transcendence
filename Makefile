@@ -22,7 +22,7 @@ up:
 down:
 	docker compose down
 
-re:
+re: down
 	-docker container prune -f
 	-docker volume prune -f
 	-docker volume rm transcendance_database

@@ -1,6 +1,6 @@
 import { AbstractView } from "./AbstractView.js"
 import { Router } from "../Router.js"
-import { getCSRFToken, updateCSRFToken } from "../utils.js"
+import { getURL, postRequest, updateCSRFToken } from "../utils.js"
 import { WebSocketManager } from "../ChatWebSocket.js"
 
 export class Login extends AbstractView {
@@ -48,8 +48,7 @@ export class Login extends AbstractView {
         `
     }
 
-    async addEventListeners() {
-
+    addEventListeners() {
         const inputs = document.querySelectorAll('.form-input')
         inputs.forEach(input => {
             input.addEventListener('input', function () {
@@ -74,34 +73,23 @@ export class Login extends AbstractView {
 
         const username = document.getElementById("username").value
         const password = document.getElementById("password").value
-        const csrfToken = getCSRFToken()
+        const url = getURL("api/user/login/")
         
         try {
-            const response = await fetch("/api/user/login/", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({username, password})
-            })
+            const data = await postRequest(url, {'username': username, 'password': password})
             
-            if (response.ok) {
-                const data = await response.json()
-                localStorage.setItem('access', data.access)
-                localStorage.setItem('refresh', data.refresh)
+            console.log(data)
 
-                const ws = WebSocketManager.get()
-                ws.connect('wss://' + location.hostname + ':' + location.port + '/ws/chat/')
-
-                updateCSRFToken()
-
-                const router = Router.get()
-                router.navigate('/')
-
-            } else {
-                console.log('error: Failed to fetch data')
-            }
+            localStorage.setItem('access', data.access)
+            localStorage.setItem('refresh', data.refresh)
+            
+            const ws = WebSocketManager.get()
+            ws.connect('wss://' + location.hostname + ':' + location.port + '/ws/chat/')
+            
+            updateCSRFToken()
+            
+            const router = Router.get()
+            router.navigate('/')
                 
         } catch (error) {
             console.log('error: ', error)
