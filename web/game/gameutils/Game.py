@@ -9,6 +9,7 @@ from game.gameutils.PlayerInterface import PlayerInterface
 from game.gameutils.Ball import Ball
 from game.gameutils.defines import *
 from game.gameutils.abstractgame import AbstractGame
+
 from game.gameutils.gamemodifier.gamemodifier import GameModifier
 
 from game import models as gamemodels
@@ -16,7 +17,6 @@ from account import models as accountmodels
 
 FPS: int = 30
 TIME_TO_SLEEP: float = (1 / FPS)
-
 
 class Game(AbstractGame):
     def __init__(self, p1: PlayerInterface, modifiers: List[GameModifier] = []):
@@ -117,7 +117,8 @@ class Game(AbstractGame):
                     "position": self.__p2.getPosition().copy() if self.__p2 is not None else P2_POSITION.copy(),
                     "score":    self.__p2.getScore() if self.__p2 is not None else 0
                 },
-                "ball":           self.__ball.getPosition()
+                "ball":           self.__ball.getPosition(),
+                "modifiers":     [modifier.modifierType() for modifier in self.__modifiers]
             }
         }
 
@@ -136,7 +137,8 @@ class Game(AbstractGame):
                     "position": self.__p1.getPosition().copy(),
                     "score":    self.__p1.getScore()
                 },
-                "ball":           self.__ball.getPosition()
+                "ball":           self.__ball.getPosition(),
+                "modifiers":     [modifier.modifierType() for modifier in self.__modifiers]
             }
         }
 

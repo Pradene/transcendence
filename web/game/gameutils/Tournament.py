@@ -12,10 +12,11 @@ from threading import Thread
 
 import game.models as gamemodels
 import account.models as accountmodels
+from game.gameutils.gamemodifier.gamemodifier import GameModifier
 
 
 class Tournament(AbstractGame):
-    def __init__(self, player: PlayerInterface):
+    def __init__(self, player: PlayerInterface, modifiers: List[GameModifier] = []):
         super().__init__(player)
 
         self.__players: List[PlayerInterface] = []
@@ -36,7 +37,7 @@ class Tournament(AbstractGame):
 
         # if first or second player, create a game
         if nplayers == 1 or nplayers == 2:
-            ngame = Game(player)
+            ngame = Game(player, modifiers=self.getModifiers())
             self.__games.append(ngame)
             await ngame.update()
         elif nplayers == 3:

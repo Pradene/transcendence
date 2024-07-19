@@ -54,3 +54,7 @@ class IntVector:
                 ratio += bratio
 
         return arr
+
+    def copy(self):
+        nvector = [self.x, self.y]
+        return IntVector(nvector)

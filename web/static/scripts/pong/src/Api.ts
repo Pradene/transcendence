@@ -125,6 +125,7 @@ interface update_game_response extends apicallresponse {
             score: number
         },
         ball: Array<number>,
+        modifiers: string[],
         timer?: number
     }
 }

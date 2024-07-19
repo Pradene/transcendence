@@ -2,6 +2,7 @@ from typing import List, Dict, Union, Callable
 from game.gameutils.Game import Game
 from game.gameutils.Tournament import Tournament
 from game.gameutils.PlayerInterface import PlayerInterface
+from game.gameutils.gamemodifier.gamemodifier import GameModifier
 
 import logging
 import time
@@ -92,9 +93,9 @@ class GameManager:
     def __del__(self):
         pass
 
-    async def createGame(self, player: PlayerInterface) -> Game:
+    async def createGame(self, player: PlayerInterface, modifiers: List[GameModifier]) -> Game:
         from game.consumer import GameConsumer
-        game = Game(player)
+        game = Game(player, modifiers)
         GameManager.GAMES[player.getName()] = game
 
         await GameConsumer.onGameChange()
@@ -106,8 +107,8 @@ class GameManager:
     def getGame(self, gameid: str) -> Game:
         return GameManager.GAMES[gameid]
 
-    def createTournament(self, player: PlayerInterface) -> Tournament:
-        GameManager.TOURNAMENTS[player.getName()] = Tournament(player)
+    def createTournament(self, player: PlayerInterface, modifiers: List[GameModifier]) -> Tournament:
+        GameManager.TOURNAMENTS[player.getName()] = Tournament(player, modifiers=modifiers)
         return GameManager.TOURNAMENTS[player.getName()]
 
     def tournamentExists(self, name: str) -> bool:

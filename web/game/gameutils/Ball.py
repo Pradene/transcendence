@@ -70,7 +70,7 @@ class Ball:
         ispeed = int(self.__speed)
         self.__direction.setNorm(ispeed)
 
-        turn_vec: IntVector = self.__direction
+        turn_vec: IntVector = self.__direction.copy()
         for mod in modifiers:
             turn_vec += mod.getVector()
         arr = turn_vec.computeMoves()

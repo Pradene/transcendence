@@ -10,9 +10,32 @@ from game.gameutils.PlayerInterface import PlayerInterface
 from game.gameutils.Game import Game
 from game.gameutils.Tournament import Tournament
 
+from game.gameutils.gamemodifier.gamemodifier import GameModifier
+from game.gameutils.gamemodifier.rainmodifier import RainModifier
+from game.gameutils.gamemodifier.windmodifier import WindModifier
+from game.gameutils.gamemodifier.lighnightmodifier import LightnightModifier
 
 # This is a global variable that is used to check if the module has been initialised
 MODULE_INITIALIZED: bool = False
+MODIFIERS: dict[str, callable] = {
+    "Rain":       lambda: RainModifier(),
+    "Wind":       lambda: WindModifier(),
+    "Lightnight": lambda: LightnightModifier()
+}
+
+
+def createGameModifiers(modifiers: list[str]) -> list[GameModifier]:
+    """Create a list of GameModifier objects from a list of modifier names"""
+
+    gameModifiers = []
+
+    for modifier in modifiers:
+        if modifier not in MODIFIERS.keys():
+            raise ValueError(f"Modifier {modifier} does not exist")
+        else:
+            gameModifiers.append(MODIFIERS[modifier]())
+    return gameModifiers
+
 
 class GameConsumerResponse:
     def __init__(self, method: str, status: bool, data: dict = {}, reason: str = ""):
@@ -93,9 +116,11 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
         logging.log(logging.INFO, f"User {self.__interface.getName()} disconnecting...")
         if self.isInGame():
-            logging.log(logging.INFO, f"User {self.__interface.getName()} is in game {self.__currentGame.getGameid()}, quitting")
+            logging.log(logging.INFO,
+                        f"User {self.__interface.getName()} is in game {self.__currentGame.getGameid()}, quitting")
             await self.__currentGame.quit()
-            logging.log(logging.INFO, f"User {self.__interface.getName()} has quit the game {self.__currentGame.getGameid()}")
+            logging.log(logging.INFO,
+                        f"User {self.__interface.getName()} has quit the game {self.__currentGame.getGameid()}")
 
         for user in GameConsumer.USERS:
             if user == self:
@@ -180,14 +205,25 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
         from game.gameutils.GameManager import GameManager
 
+        modifiers: List[GameModifier] = []
+
+        # Check if the user can join a game
         if self.isInGame():
             response = GameConsumerResponse(method="create_game", status=False, reason=Response.ALREADYINGAME)
             await self.send_json(response.toJSON())
             return
 
-        manager: GameManager = GameManager.getInstance()
-        self.__currentGame = await manager.createGame(self.__interface)
-        await self.__currentGame.update()
+        try:
+            modifiers = createGameModifiers(data["data"]["modifiers"])
+            manager: GameManager = GameManager.getInstance()
+            self.__currentGame = await manager.createGame(self.__interface, modifiers=modifiers)
+            await self.__currentGame.update()
+        except KeyError:
+            response = GameConsumerResponse(method="create_game", status=False, reason=Response.INVALIDREQUEST)
+            await self.send_json(response.toJSON())
+        except ValueError:
+            response = GameConsumerResponse(method="create_game", status=False, reason=Response.INVALIDREQUEST)
+            await self.send_json(response.toJSON())
 
     async def createTournament(self, data):
         """Create a new tournament and add the player to it"""
@@ -202,9 +238,10 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
         # Check request format
         try:
+            modifiers: List[GameModifier] = createGameModifiers(data["data"]["modifiers"])
             manager: GameManager = GameManager.getInstance()
-            self.__currentGame = manager.createTournament(self.__interface)
-            await self.__currentGame.join(self.__interface) # required to trigger the update method
+            self.__currentGame = manager.createTournament(self.__interface, modifiers)
+            await self.__currentGame.join(self.__interface)  # required to trigger the update method
 
             for user in GameConsumer.USERS:
                 await user.getGames()
@@ -214,6 +251,9 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             return
         except RuntimeError:
             response = GameConsumerResponse(method="create_tournament", status=False, reason=Response.GAMEFULL)
+            await self.send_json(response.toJSON())
+        except ValueError:
+            response = GameConsumerResponse(method="create_tournament", status=False, reason=Response.INVALIDREQUEST)
             await self.send_json(response.toJSON())
 
     def __deleteCurrentGame(self):
@@ -238,7 +278,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             return
         except ValueError as error:
             response = GameConsumerResponse(method="update_player", status=False,
-                                            reason=f"{Response.INVALIDMOVEMENT}: {error}")
+                                            reason=f"{Response.INVALIDREQUEST}: {error}")
             await self.send_json(response.toJSON())
             return
 

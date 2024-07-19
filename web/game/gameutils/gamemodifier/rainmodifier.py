@@ -1,9 +1,9 @@
 from game.gameutils.IntVector import IntVector
-from gamemodifier import GameModifier
+from game.gameutils.gamemodifier.gamemodifier import GameModifier
 
 
 class RainModifier(GameModifier):
-    def __init__(self, strength: float):
+    def __init__(self, strength: float = 1.0):
         super().__init__()
         self.__strength: float = strength
 

@@ -11,7 +11,7 @@ def genRandomWind() -> tuple[float, float]:
 
 
 class WindModifier(GameModifier):
-    def __init__(self, windSpeed: float):
+    def __init__(self, windSpeed: float = 5.0):
         super().__init__()
 
         direction = genRandomWind()

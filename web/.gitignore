@@ -5,3 +5,4 @@ node_modules
 **/node_modules
 
 static/scripts/pong/webpack.js
+staticfiles/
