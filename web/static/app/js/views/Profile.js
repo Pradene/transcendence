@@ -31,10 +31,13 @@ export class Profile extends AbstractView {
         this.getFriendRequests()
 
         const button = document.getElementById("logout")
-        button.addEventListener("click", () => this.logout)
+        button.addEventListener("click", () => this.logout())
 
         const search = document.getElementById("search-form")
-        search.addEventListener("submit", () => this.searchUser)
+        search.addEventListener("submit", (event) => {
+            event.preventDefault()
+            this.searchUser()
+        })
     }
 
 
@@ -138,9 +141,7 @@ export class Profile extends AbstractView {
 
 
     // Searching users
-    async searchUser(event) {
-        event.preventDefault()
-
+    async searchUser() {
         const query = document.getElementById("search-input").value
         const url = getURL(`api/user/search-users/?q=${query}`)
         
@@ -188,7 +189,7 @@ export class Profile extends AbstractView {
         const refresh = localStorage.getItem("refresh")
 
         try {
-            await postRequest(url, {refresh})
+            await postRequest(url, {refresh: refresh})
 
             localStorage.removeItem("access")
             localStorage.removeItem("refresh")
@@ -196,7 +197,7 @@ export class Profile extends AbstractView {
             const ws = WebSocketManager.get()
             ws.disconnect()
             
-            updateCSRFToken()
+            await updateCSRFToken()
             
             const router = Router.get()
             router.navigate("/login/")

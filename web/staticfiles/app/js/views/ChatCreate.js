@@ -17,31 +17,17 @@ export class ChatCreate extends AbstractView {
                 </label>
             </div>
             <div>
-                <ul id="users-list">
+                <ul id="friends">
                 </ul>
             </div>
         `
     }
 
-    addEventListeners() {   
-        this.getUsers()
+    addEventListeners() {
+        this.getFriends()
         
         const input = document.getElementById('input')
-        input.addEventListener('keyup', this.handleSearch.bind(this))
-    }
-
-    async getUsers() {
-        const url = getURL('api/user/friends/')
-
-        try {
-            const data = await getRequest(url)
-            
-            this.users = data.users
-            this.displayUsers()
-
-        } catch (error) {
-            console.log(error)
-        }
+        input.addEventListener('keyup', () => this.handleSearch())
     }
     
     handleSearch(event) {
@@ -60,18 +46,28 @@ export class ChatCreate extends AbstractView {
         }
     }
 
-    displayUsers() {
-        const container = document.getElementById('users-list')
+    async getFriends() {
+        const url = getURL('api/user/friends/')
+
+        try {
+            const data = await getRequest(url)
+            this.displayFriends(data)
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    displayFriends(friends) {
+        const container = document.getElementById('friends')
         container.innerHTML = ''
         
-        this.users.forEach((user) => {
-            console.log(user)
+        friends.forEach(friend => {
             const el = document.createElement('li')
             el.classList.add('user')
             el.innerHTML = `
-                <p>
-                ${user.name}
-                </p>
+                <p>${friend.username}</p>
+                <button>Add</button>
             `
 
             container.appendChild(el)

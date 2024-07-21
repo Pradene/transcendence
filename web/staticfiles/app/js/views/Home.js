@@ -11,7 +11,6 @@ export class Home extends AbstractView {
 
         return `
         <nav-component></nav-component>
-        <h1>Hello World</h1>
         <div class="game-container"> <!-- Game Container, contain the game and the list of available rooms -->
 		    <div class="game-container-header">
 		    	<button class="create-game">Create Game</button> <!-- Create Game Button -->

@@ -6,9 +6,6 @@ import { WebSocketManager } from "../ChatWebSocket.js"
 export class Profile extends AbstractView {
     constructor() {
         super()
-
-        this.logout = this.logout.bind(this)
-        this.searchUser = this.searchUser.bind(this)
     }
 
     getHtml() {
@@ -24,17 +21,54 @@ export class Profile extends AbstractView {
         </ul>
         <ul id="friend-requests">
         </ul>
+        <ul id="friends">
+        </ul>
         `
     }
 
     addEventListeners() {
+        this.getFriends()
         this.getFriendRequests()
 
         const button = document.getElementById("logout")
-        button.addEventListener("click", this.logout)
+        button.addEventListener("click", () => this.logout())
 
         const search = document.getElementById("search-form")
-        search.addEventListener("submit", this.searchUser)
+        search.addEventListener("submit", (event) => {
+            event.preventDefault()
+            this.searchUser()
+        })
+    }
+
+
+    // Friends
+    async getFriends() {
+        const url = getURL("api/user/friends/")
+
+        try {
+            const data = await getRequest(url)
+            this.displayFriends(data)
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    displayFriends(friends) {
+        if (!friends)
+            return
+
+        console.log("friends", friends)
+
+        const container = document.getElementById('friends')
+        friends.forEach(friend => {
+            const el = document.createElement('li')
+            el.innerHTML = `
+                <p>${friend.username}</p>
+            `
+
+            container.appendChild(el)
+        })
     }
 
 
@@ -107,9 +141,7 @@ export class Profile extends AbstractView {
 
 
     // Searching users
-    async searchUser(event) {
-        event.preventDefault()
-
+    async searchUser() {
         const query = document.getElementById("search-input").value
         const url = getURL(`api/user/search-users/?q=${query}`)
         
@@ -157,7 +189,7 @@ export class Profile extends AbstractView {
         const refresh = localStorage.getItem("refresh")
 
         try {
-            await postRequest(url, {refresh})
+            await postRequest(url, {refresh: refresh})
 
             localStorage.removeItem("access")
             localStorage.removeItem("refresh")
@@ -165,7 +197,7 @@ export class Profile extends AbstractView {
             const ws = WebSocketManager.get()
             ws.disconnect()
             
-            updateCSRFToken()
+            await updateCSRFToken()
             
             const router = Router.get()
             router.navigate("/login/")

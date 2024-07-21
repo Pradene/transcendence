@@ -1,110 +1,110 @@
+import { Router } from "./Router.js"
+
+export function getURL(url) {
+    return "https://" + location.hostname + ":" + location.port + "/" + url
+}
+
+// CSRF Tokens utils
+
 export function getCSRFToken() {
-    const token = localStorage.getItem('csrf-token')
+    const token = localStorage.getItem("csrf-token")
 
     return token ? token : null
 }
 
 export function initCSRFToken() {
-    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    const token = document.querySelector("meta[name='csrf-token']").getAttribute("content")
     
-    localStorage.setItem('csrf-token', token)
+    localStorage.setItem("csrf-token", token)
 }
 
-export function updateCSRFToken() {
-    fetch('/api/csrf-token/')
-    .then(response => response.json())
-    .then(data => {
-        const token = data.token
-        
-        localStorage.removeItem('csrf-token')
-        localStorage.setItem('csrf-token', token)
-    })
+export async function updateCSRFToken() {
+    const url = getURL("api/csrf-token/")
+    
+    try {
+        const response = await fetch(url)
+    
+        if (response.ok) {
+            const data = await response.json()
+
+            console.log(localStorage.getItem("csrf-token"))
+            const token = data.token
+            console.log("csrf updated: ", token)
+
+            localStorage.removeItem("csrf-token")
+            localStorage.setItem("csrf-token", token)
+        } else {
+            console.log("error")
+        }
+
+    } catch (error) {
+
+    }
 }
 
-// export function getCSRFToken() {
-    // return document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-// }
 
-// export function getCSRFToken() {
-//     const name = 'csrftoken'
-//     let token = null
-
-//     if (document.cookie && document.cookie !== '') {
-//         const cookies = document.cookie.split(';')
-//         for (let i = 0; i < cookies.length; i++) {
-            
-//             const cookie = cookies[i].trim()
-
-//             // Does this cookie string begin with the name we want?
-//             if (cookie.substring(0, name.length + 1) === (name + '=')) {
-//                 token = decodeURIComponent(cookie.substring(name.length + 1))
-//                 break
-//             }
-//         }
-//     }
-
-//     return token
-// }
+// Requests to server utils
 
 async function refreshToken() {
+    console.log("Refresh token")
+
+    const url = getURL("api/user/refresh-token/")
+
+    const refresh = localStorage.getItem("refresh")
     const csrfToken = getCSRFToken()
-    const refresh = localStorage.getItem('refresh')
 
     if (!refresh)
-        throw new Error('not connected')
+        throw new Error("not connected")
     
     try {
         let headers = new Headers()
 
-        headers.append('Content-type', 'application/json')
-        headers.append('X-CSRFToken', csrfToken)
-        if (access)
-            headers.append('Authorization', `Bearer ${access}`)
+        headers.append("Content-type", "application/json")
+        headers.append("X-CSRFToken", csrfToken)
 
-        const response = await fetch('api/user/refresh-token/', {
-            method: 'POST',
+        const response = await fetch(url, {
+            method: "POST",
             headers: headers,
-            body: JSON.stringify({'refresh': refresh})
+            body: JSON.stringify({refresh: refresh})
         })
 
         if (response.ok) {
             const data = await response.json()
-            localStorage.setItem('access', data.access)
+            localStorage.setItem("access", data.access)
 
         } else {
-            console.log('error: Failed to fetch data')
+            localStorage.removeItem("refresh")
+            localStorage.removeItem("access")
+
+            const router = Router.get()
+            router.navigate("/login/")
         }
             
     } catch (error) {
-        console.log('error: ', error)
+        console.log("error: ", error)
     }
 }
 
 export async function postRequest(url, body) {
-    const access = localStorage.getItem('access')
+    const access = localStorage.getItem("access")
     const csrfToken = getCSRFToken()
-
-    console.log(body)
     
     try {
         let headers = new Headers()
 
-        headers.append('Content-type', 'application/json')
-        headers.append('X-CSRFToken', csrfToken)
+        headers.append("Content-type", "application/json")
+        headers.append("X-CSRFToken", csrfToken)
         if (access)
-            headers.append('Authorization', `Bearer ${access}`)
+            headers.append("Authorization", `Bearer ${access}`)
 
         const response = await fetch(url, {
-            method: 'POST',
+            method: "POST",
             headers: headers,
             body: JSON.stringify(body)
         })
 
-        console.log(response.status)
-
-
         if (response.ok) {
-            console.log('Success')
+            console.log("Success")
             const data = await response.json()
 
             return data
@@ -112,32 +112,32 @@ export async function postRequest(url, body) {
         } else {
             if (response.status == 401) {
                 await refreshToken()
-                return postRequest(url, body)
+                postRequest(url, body)
 
             } else {
-                console.log('error: Failed to fetch data')
+                console.log("error: Failed to fetch data")
             }
         }
-            
+
     } catch (error) {
-        console.log('error: ', error)
+        console.log("error: ", error)
     }
 }
 
 export async function getRequest(url) {
-    const access = localStorage.getItem('access')
+    const access = localStorage.getItem("access")
     const csrfToken = getCSRFToken()
     
     try {
         let headers = new Headers()
 
-        headers.append('Content-type', 'application/json')
-        headers.append('X-CSRFToken', csrfToken)
+        headers.append("Content-type", "application/json")
+        headers.append("X-CSRFToken", csrfToken)
         if (access)
-            headers.append('Authorization', `Bearer ${access}`)
+            headers.append("Authorization", `Bearer ${access}`)
 
         const response = await fetch(url, {
-            method: 'GET',
+            method: "GET",
             headers: headers
         })
 
@@ -146,23 +146,49 @@ export async function getRequest(url) {
             return data
 
         } else {
-            if (response.status == 401) {
-                // Need to refresh access token
-                
-                // await refreshToken()
-                // return getRequest(url)
-                console.log('not authorized')
+            if (response.status == 401) {                
+                await refreshToken()
+                getRequest(url)
 
             } else {
-                console.log('error: Failed to fetch data')
+                console.log("error: Failed to fetch data")
             }
         }
-            
+
     } catch (error) {
-        console.log('error: ', error)
+        console.log("error: ", error)
     }
 }
 
-export function getURL(url) {
-    return "https://" + location.hostname + ":" + location.port + "/" + url
+export async function checkLogin() {
+    const url = getURL("api/user/check-login/")
+    const refresh = localStorage.getItem("refresh")
+
+    const csrfToken = getCSRFToken()
+
+    try {
+        let headers = new Headers()
+        
+        headers.append("Content-type", "application/json")
+        headers.append("X-CSRFToken", csrfToken)
+        
+        const response = await fetch(url, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify({refresh: refresh})
+        })
+        
+        if (response.ok) {
+            const data = await response.json()
+            console.log(data)
+            return true
+        
+        } else {
+            console.log("error from server")
+            return false
+        }
+        
+    } catch (error) {
+        return false
+    }
 }

@@ -4,9 +4,6 @@ import { getURL, getRequest } from "../utils.js"
 export class ChatRoom extends AbstractView {
     constructor() {
         super()
-
-        this.handleSentMessage = this.handleSentMessage.bind(this)
-        this.handleReceivedMessage = this.handleReceivedMessage.bind(this)
     }
 
     getHtml() {
@@ -28,11 +25,9 @@ export class ChatRoom extends AbstractView {
         this.getInitialMessages()
         
         const form = document.getElementById('message-form')
-        form.removeEventListener('submit', this.handleSentMessage)
-        form.addEventListener('submit', this.handleSentMessage)
+        form.addEventListener('submit', () => this.handleSentMessage)
         
-        document.removeEventListener('wsMessage', this.handleReceivedMessage)
-        document.addEventListener('wsMessage', this.handleReceivedMessage)
+        document.addEventListener('wsMessage', () => this.handleReceivedMessage)
     }
 
 

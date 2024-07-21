@@ -6,8 +6,6 @@ import { WebSocketManager } from "../ChatWebSocket.js"
 export class Login extends AbstractView {
     constructor() {
         super()
-
-        this.handleSubmit = this.handleSubmit.bind(this)
     }
 
     isProtected() {
@@ -65,7 +63,7 @@ export class Login extends AbstractView {
         })
 
         const form = document.getElementById('login-form')
-        form.addEventListener('submit', this.handleSubmit)
+        form.addEventListener('submit', (event) => this.handleSubmit(event))
     }
 
     async handleSubmit(event) {
@@ -76,7 +74,7 @@ export class Login extends AbstractView {
         const url = getURL("api/user/login/")
         
         try {
-            const data = await postRequest(url, {'username': username, 'password': password})
+            const data = await postRequest(url, {username: username, password: password})
             
             console.log(data)
 
@@ -85,8 +83,8 @@ export class Login extends AbstractView {
             
             const ws = WebSocketManager.get()
             ws.connect('wss://' + location.hostname + ':' + location.port + '/ws/chat/')
-            
-            updateCSRFToken()
+
+            await updateCSRFToken()
             
             const router = Router.get()
             router.navigate('/')

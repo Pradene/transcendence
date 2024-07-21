@@ -5,8 +5,6 @@ import { getURL, postRequest } from "../utils.js"
 export class Signup extends AbstractView {
     constructor() {
         super()
-
-        this.handleSubmit = this.handleSubmit.bind(this)
     }
 
     isProtected() {
@@ -49,8 +47,8 @@ export class Signup extends AbstractView {
     }
 
     addEventListeners() {
-
         const inputs = document.querySelectorAll(".form-input")
+        
         inputs.forEach(input => {
             input.addEventListener("input", function (event) {
                 if (input.value == "") {
@@ -61,12 +59,11 @@ export class Signup extends AbstractView {
                     input.style.transform = "translateY(-20%)"
                     input.nextElementSibling.style.transform = "translateY(-120%) scale(0.75)"
                 }
-        
             })
         })
 
         const form = document.getElementById("signup-form")
-        form.addEventListener("submit", this.handleSubmit)
+        form.addEventListener("submit", (event) => this.handleSubmit(event))
     }
 
     async handleSubmit(event) {
@@ -79,7 +76,11 @@ export class Signup extends AbstractView {
         const url = getURL("api/user/signup/")
 
         try {
-            await postRequest(url, {username, password1, password2})
+            await postRequest(url, {
+                username: username, 
+                password1: password1, 
+                password2: password2
+            })
             
             const router = Router.get()
             router.navigate("/login/")

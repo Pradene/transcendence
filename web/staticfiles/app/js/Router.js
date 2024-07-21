@@ -1,3 +1,5 @@
+import { checkLogin } from "./utils.js"
+
 export class Router {
     constructor(container, routes = []) {
         if (Router.instance)
@@ -19,9 +21,10 @@ export class Router {
         this.handleRoute()
     }
 
-    handleRoute() {
-        const isAuthenticated = localStorage.getItem('refresh')
+    async handleRoute() {
+        // const isAuthenticated = localStorage.getItem("refresh")
 
+        const isAuthenticated = await checkLogin()
         const location = window.location.pathname
         const matchedRoute = this.matchRoute(location)
         if (matchedRoute) {
