@@ -4,7 +4,7 @@ from game.gameutils.gamemodifier.gamemodifier import GameModifier
 
 
 class LightnightModifier(GameModifier):
-    def __init__(self, probability: float = 0.01):
+    def __init__(self, probability: float = 0.05):
         super().__init__()
         self.__probability: float = probability
         self.__active: bool = False
