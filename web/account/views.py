@@ -34,7 +34,8 @@ def searchUsersView(request):
 @require_GET
 def getFriendsView(request):
     user = request.user
-    friends = FriendList.objects.get(user=user).friends.all()
+    friend_list, created = FriendList.objects.get_or_create(user=user)
+    friends = friend_list.friends.all()
     serializer = CustomUserSerializer(friends, many=True)
     return JsonResponse(serializer.data, safe=False, status=200)
 
@@ -43,7 +44,6 @@ def getFriendsView(request):
 @require_GET
 def getFriendRequestsView(request):
     user = request.user
-    logging.info(f"friend requests of {user}")
     friend_requests = FriendRequest.objects.filter(receiver=user)
     serializer = FriendRequestSerializer(friend_requests, many=True)
     return JsonResponse(serializer.data, safe=False, status=200)
@@ -80,7 +80,7 @@ def acceptFriendRequestView(request, user_id):
 
 # Registration
 @require_POST
-def userSignupView(request):
+def signupView(request):
     try:
         data = json.loads(request.body)
         
@@ -88,20 +88,15 @@ def userSignupView(request):
         password1 = data.get("password1")
         password2 = data.get("password2")
 
-        error = {}
-
         if not username:
-            error["username"] = "This field is required."
+            return JsonResponse({"error": "This field is required."}, status=400)
         elif CustomUser.objects.filter(username=username).exists():
-            error["username"] = "A user with that username already exists."
+            return JsonResponse({"error": "A user with that username already exists."}, status=400)
 
         if password1 != password2:
-            error["password"] = "The password doesn't match."
+            return JsonResponse({"error": "The password doesn't match."}, status=400)
         # elif len(password1) < 8:
-        #     error["password"] = "Password must be at least 8 characters long."
-
-        if error:
-            return JsonResponse({"error": error}, status=400)
+            # return JsonResponse({"error": "Password must be at least 8 characters long."}, status=400)
 
         try:
             user = CustomUser.objects.create_user(username=username, password=password1)
@@ -115,8 +110,7 @@ def userSignupView(request):
 
 
 @require_POST
-def userLoginView(request):
-    logging.info(f"login")
+def loginView(request):
     try:
         data = json.loads(request.body)
 
@@ -158,8 +152,6 @@ def checkLoginView(request):
         refresh = data.get("refresh")
         user_id = decode_token(refresh)
 
-        logging.info(f'id: {user_id}')
-
         user = CustomUser.objects.get(id=user_id)
         if user.is_authenticated:
             return JsonResponse({"authenticated": True}, status=200)
@@ -193,7 +185,7 @@ def refreshTokenView(request):
 
 @jwt_required
 @require_POST
-def userLogoutView(request):
+def logoutView(request):
     try:
         data = json.loads(request.body)
 

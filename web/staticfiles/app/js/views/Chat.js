@@ -1,12 +1,9 @@
-import { getURL, getRequest } from "../utils.js"
+import { getURL, apiRequest } from "../utils.js"
 import { AbstractView } from "./AbstractView.js"
 
 export class Chat extends AbstractView {
     constructor() {
         super()
-
-        this.handleSearch = this.handleSearch.bind(this)
-        this.handleReceivedMessage = this.handleReceivedMessage.bind(this)
     }
 
     getHtml() {
@@ -28,21 +25,18 @@ export class Chat extends AbstractView {
         this.getInitialData()
 
         const input = document.getElementById('input')
-        input.removeEventListener('keyup', this.handleSearch)
-        input.addEventListener('keyup', this.handleSearch)
+        input.addEventListener('keyup', (event) => this.handleSearch(event))
     
-        document.removeEventListener('wsMessage', this.handleReceivedMessage)
-        document.addEventListener('wsMessage', this.handleReceivedMessage)
+        document.addEventListener('wsMessage', (event) => this.handleReceivedMessage(event))
     }
 
     async getInitialData() {
-        const url = getURL('api/user/rooms/')
+        const url = getURL('api/chat/rooms/')
         
         try {
-            const data = getRequest(url)
+            const data = await apiRequest(url)
 
-            const rooms = data.rooms
-            this.displayRooms(rooms)
+            this.displayRooms(data)
             
         } catch (error) {
             console.log(error)

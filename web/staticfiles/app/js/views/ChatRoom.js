@@ -1,5 +1,5 @@
 import { AbstractView } from "./AbstractView.js"
-import { getURL, getRequest } from "../utils.js"
+import { getURL, apiRequest } from "../utils.js"
 
 export class ChatRoom extends AbstractView {
     constructor() {
@@ -36,11 +36,11 @@ export class ChatRoom extends AbstractView {
         const url = getURL(`api/chat/rooms/${roomID}/`)
 
         try {
-            const data = await getRequest(url)
+            const data = await apiRequest(url)
             
-            console.log(data)
-            if (data.room && data.room.messages)
-                this.displayMessages(data.room.messages)
+            // Change path of the route to api/rooms/{id} ? /messages
+            if (data)
+                this.displayMessages(data)
     
         } catch (error) {
             console.log(error)

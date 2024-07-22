@@ -1,6 +1,6 @@
 import { AbstractView } from "./AbstractView.js"
 import { Router } from "../Router.js"
-import { getURL, postRequest, updateCSRFToken } from "../utils.js"
+import { getURL, apiRequest, updateCSRFToken } from "../utils.js"
 import { WebSocketManager } from "../ChatWebSocket.js"
 
 export class Login extends AbstractView {
@@ -14,33 +14,32 @@ export class Login extends AbstractView {
 
     getHtml() {
         return `
-        <div class="fp">
-            <div>
-                <div class="container-xs">
-                    <form method="POST" id="login-form" class="form">
-                        <div class="form-field">
-                            <label class="form-label">
-                                <input class="form-input" type="text" id="username" required autocomplete="off"></input>
-                                <span>Username</span>
-                                <div class="error"></div>
-                            </label>
-                        </div>
-                        <div class="form-field">
-                            <label class="form-label">
-                                <input class="form-input" type="password" id="password" required autocomplete="off"></input>
-                                <span>Password</span>
-                                <div class="error"></div>
-                            </label>
-                        </div>
-                        <button type="submit">Login</button>
-                    </form>
-                    <div class="text-center mt-36">
-                        <a data-link>Forgot password?</a>
+        <div class="container--fullpage">
+            <div class="container-xs">
+                <div id="error"></div>
+                <form method="POST" id="login-form" class="form">
+                    <div class="form-field">
+                        <label class="form-label">
+                            <input class="form-input" type="text" id="username" required autocomplete="off"></input>
+                            <span>Username</span>
+                            <div class="error"></div>
+                        </label>
                     </div>
+                    <div class="form-field">
+                        <label class="form-label">
+                            <input class="form-input" type="password" id="password" required autocomplete="off"></input>
+                            <span>Password</span>
+                            <div class="error"></div>
+                        </label>
+                    </div>
+                    <button type="submit">Login</button>
+                </form>
+                <div class="text-center mt-36">
+                    <a data-link>Forgot password?</a>
                 </div>
-                <div class="container-xs text-center mt-36">
-                    <a href='/signup/' data-link>Sign up</a>
-                </div>
+            </div>
+            <div class="container-xs text-center mt-36">
+                <a href='/signup/' data-link>Sign up</a>
             </div>
         </div>
         `
@@ -69,14 +68,19 @@ export class Login extends AbstractView {
     async handleSubmit(event) {
         event.preventDefault()
 
-        const username = document.getElementById("username").value
-        const password = document.getElementById("password").value
-        const url = getURL("api/user/login/")
+        const username = document.getElementById("username")
+        const password = document.getElementById("password")
+        const url = getURL("api/users/login/")
         
         try {
-            const data = await postRequest(url, {username: username, password: password})
-            
-            console.log(data)
+            const data = await apiRequest(
+                url,
+                "POST",
+                {
+                    username: username.value,
+                    password: password.value
+                }
+            )
 
             localStorage.setItem('access', data.access)
             localStorage.setItem('refresh', data.refresh)
@@ -89,8 +93,23 @@ export class Login extends AbstractView {
             const router = Router.get()
             router.navigate('/')
                 
-        } catch (error) {
-            console.log('error: ', error)
+        } catch (e) {
+            username.value = ""
+            password.value = ""
+            
+            this.displayErrors(e.message)
         }
+    }
+
+    displayErrors(error) {
+        const container = document.getElementById("error")
+        container.innerHTML = ""
+
+        const el = document.createElement('div')
+        el.innerHTML = `
+            <p>${error}</p>
+        `
+
+        container.appendChild(el)
     }
 }

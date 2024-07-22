@@ -1,7 +1,6 @@
-- login error
-
-- create chat room button
-- user friends
 - private chat room and public chat room
+  create private chat room when users become friends 
 
-- websocket chat
+- friends request with websockets
+
+- chat page display messages

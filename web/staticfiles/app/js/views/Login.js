@@ -1,6 +1,6 @@
 import { AbstractView } from "./AbstractView.js"
 import { Router } from "../Router.js"
-import { getURL, postRequest, updateCSRFToken } from "../utils.js"
+import { getURL, apiRequest, updateCSRFToken } from "../utils.js"
 import { WebSocketManager } from "../ChatWebSocket.js"
 
 export class Login extends AbstractView {
@@ -71,12 +71,14 @@ export class Login extends AbstractView {
 
         const username = document.getElementById("username").value
         const password = document.getElementById("password").value
-        const url = getURL("api/user/login/")
+        const url = getURL("api/users/login/")
         
         try {
-            const data = await postRequest(url, {username: username, password: password})
-            
-            console.log(data)
+            const data = await apiRequest(
+                url,
+                "POST",
+                {username: username, password: password}
+            )
 
             localStorage.setItem('access', data.access)
             localStorage.setItem('refresh', data.refresh)

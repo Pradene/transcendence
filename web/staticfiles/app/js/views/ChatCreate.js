@@ -1,11 +1,9 @@
-import { getURL, getRequest } from "../utils.js"
+import { getURL, apiRequest } from "../utils.js"
 import { AbstractView } from "./AbstractView.js"
 
 export class ChatCreate extends AbstractView {
     constructor() {
         super()
-
-        this.users = []
     }
 
     getHtml() {
@@ -27,7 +25,9 @@ export class ChatCreate extends AbstractView {
         this.getFriends()
         
         const input = document.getElementById('input')
-        input.addEventListener('keyup', () => this.handleSearch())
+        input.addEventListener('keyup', (event) => {
+            this.handleSearch(event)
+        })
     }
     
     handleSearch(event) {
@@ -47,10 +47,10 @@ export class ChatCreate extends AbstractView {
     }
 
     async getFriends() {
-        const url = getURL('api/user/friends/')
+        const url = getURL('api/users/friends/')
 
         try {
-            const data = await getRequest(url)
+            const data = await apiRequest(url)
             this.displayFriends(data)
 
         } catch (error) {

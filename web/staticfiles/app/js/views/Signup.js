@@ -1,6 +1,6 @@
 import { AbstractView } from "./AbstractView.js"
 import { Router } from "../Router.js"
-import { getURL, postRequest } from "../utils.js"
+import { getURL, apiRequest } from "../utils.js"
 
 export class Signup extends AbstractView {
     constructor() {
@@ -17,6 +17,7 @@ export class Signup extends AbstractView {
             <div>
                 <div class="container-xs">
                     <form method="POST" id="signup-form" class="form">
+                        <div id="error"></div>
                         <div class="form-field">
                             <label class="form-label">
                                 <input class="form-input" type="text" id="username" required autocomplete="off"></input>
@@ -73,20 +74,37 @@ export class Signup extends AbstractView {
         const password1 = document.getElementById("password").value
         const password2 = document.getElementById("password-confirmation").value
         
-        const url = getURL("api/user/signup/")
+        const url = getURL("api/users/signup/")
 
         try {
-            await postRequest(url, {
-                username: username, 
-                password1: password1, 
-                password2: password2
-            })
+            await apiRequest(
+                url,
+                "POST",
+                {
+                    username: username, 
+                    password1: password1, 
+                    password2: password2
+                }
+            )
             
             const router = Router.get()
             router.navigate("/login/")
 
         } catch (error) {
-            console.log("error: ", error)
+            console.log(error)
+            this.displayErrors(error)
         }
+    }
+
+    displayErrors(error) {
+        const container = document.getElementById("error")
+        container.innerHTML = ""
+
+        const el = document.createElement('div')
+        el.innerHTML = `
+            ${error}
+        `
+
+        container.appendChild(el)
     }
 }

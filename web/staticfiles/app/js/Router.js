@@ -22,9 +22,8 @@ export class Router {
     }
 
     async handleRoute() {
-        // const isAuthenticated = localStorage.getItem("refresh")
-
         const isAuthenticated = await checkLogin()
+
         const location = window.location.pathname
         const matchedRoute = this.matchRoute(location)
         if (matchedRoute) {

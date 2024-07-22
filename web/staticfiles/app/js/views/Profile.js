@@ -1,6 +1,6 @@
 import { AbstractView } from "./AbstractView.js"
 import { Router } from "../Router.js"
-import { getRequest, getURL, postRequest, updateCSRFToken } from "../utils.js"
+import { apiRequest, getURL, updateCSRFToken } from "../utils.js"
 import { WebSocketManager } from "../ChatWebSocket.js"
 
 export class Profile extends AbstractView {
@@ -43,10 +43,11 @@ export class Profile extends AbstractView {
 
     // Friends
     async getFriends() {
-        const url = getURL("api/user/friends/")
+        const url = getURL("api/users/friends/")
 
         try {
-            const data = await getRequest(url)
+            const data = await apiRequest(url)
+            
             this.displayFriends(data)
 
         } catch (error) {
@@ -77,10 +78,11 @@ export class Profile extends AbstractView {
     // Get all the friend requests
     // maybe need to make it inside of consumer
     async getFriendRequests() {
-        const url = getURL("api/user/friend-requests/")
+        const url = getURL("api/users/friend-requests/")
 
         try {
-            const data = await getRequest(url)
+            const data = await apiRequest(url)
+
             this.displayIncomingFriendRequests(data)
 
         } catch (error) {
@@ -91,8 +93,6 @@ export class Profile extends AbstractView {
     displayIncomingFriendRequests(requests) {
         if (!requests)
             return
-
-        console.log("friends request", requests)
 
         const container = document.getElementById("friend-requests")
         requests.forEach(request => {
@@ -114,10 +114,10 @@ export class Profile extends AbstractView {
     }
 
     async acceptIncomingFriendRequest(id) {
-        const url = getURL(`api/user/friend-requests/${id}/accept/`)
+        const url = getURL(`api/users/friend-requests/${id}/accept/`)
 
         try {
-            const data = await postRequest(url, {})
+            const data = await apiRequest(url, "POST", {})
             console.log(data)
 
         } catch (error) {
@@ -128,10 +128,10 @@ export class Profile extends AbstractView {
 
     // Send a friend request
     async sendFriendRequest(id) {
-        const url = getURL(`api/user/friend-requests/${id}/`)
+        const url = getURL(`api/users/friend-requests/${id}/`)
         
         try {
-            const data = await postRequest(url, {})
+            const data = await apiRequest(url, "POST", {})
             console.log(data)
 
         } catch (error) {
@@ -143,10 +143,11 @@ export class Profile extends AbstractView {
     // Searching users
     async searchUser() {
         const query = document.getElementById("search-input").value
-        const url = getURL(`api/user/search-users/?q=${query}`)
+        const url = getURL(`api/users/?q=${query}`)
         
         try {
-            const data = await getRequest(url)
+            const data = await apiRequest(url)
+            
             this.displayUsers(data)
 
         } catch (error) {
@@ -185,11 +186,15 @@ export class Profile extends AbstractView {
 
     // Logout
     async logout() {
-        const url = getURL(`api/user/logout/`)
+        const url = getURL(`api/users/logout/`)
         const refresh = localStorage.getItem("refresh")
 
         try {
-            await postRequest(url, {refresh: refresh})
+            await apiRequest(
+                url,
+                "POST",
+                {refresh: refresh}
+            )
 
             localStorage.removeItem("access")
             localStorage.removeItem("refresh")
