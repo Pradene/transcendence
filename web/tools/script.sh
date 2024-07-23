@@ -4,7 +4,8 @@ cd /app
 
 python manage.py collectstatic --noinput
 
-python3 ./manage.py makemigrations --check
+python3 ./manage.py makemigrations
+python3 ./manage.py migrate
 RETV=$?
 
 if [ ! $RETV -eq 0 ]; then

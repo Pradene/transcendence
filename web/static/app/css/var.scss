@@ -1,0 +1,12 @@
+$main-color: #000000;
+$sec-color: #ffffff;
+$onl-color: #ff5900;
+$def-color: #17ff00;
+$main-font: Epilogue;
+$def-font-size: 12px;
+
+@mixin btn {
+	padding: 12px 0px;
+	border: 1px solid $sec-color;
+	background-color: $main-color;
+}

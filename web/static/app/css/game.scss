@@ -14,15 +14,12 @@ div.game-container {
     min-width: 100%;
 
     button {
-      padding: 1.5rem;
-      margin: 1rem;
-      border: 1px solid #ffffff;
-      border-radius: 3px;
-      background-color: grey;
-
-      &.active {
-        background-color: green;
-      }
+      @include btn;
+      background-color: $onl-color;
+      color: $main-color;
+      // &.active {
+      //   background-color: $sec-color;
+      // }
     }
   }
 
@@ -33,14 +30,14 @@ div.game-container {
     .user-list {
       width: auto;
       display: flex;
-      flex-direction: column ;
+      flex-direction: column;
     }
 
     .game {
       display: flex;
       width: 800px;
       min-width: 800px;
-      border: 1px solid white;
+      border: 1px solid $sec-color;
 
       canvas {
         align-self: center;
@@ -55,12 +52,12 @@ div.game-container {
   .available-games {
     display: flex;
     flex-direction: row;
-    border: 1px solid white;
+    border: 1px solid $sec-color;
 
     .available-game, .available-tournament {
 
       div.room {
-        color: white;
+        color: $main-color;
 
         width: 100%;
         display: flex;

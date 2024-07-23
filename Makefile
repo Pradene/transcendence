@@ -15,6 +15,7 @@ ${NAME}: build_scripts
 build_scripts:
 	npm i
 	npm run build -w web/static/scripts/pong
+	npm run build -w web/static/app/css
 
 up:
 	docker compose up -d

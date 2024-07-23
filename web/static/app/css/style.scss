@@ -1,5 +1,51 @@
-@import "game";
+@import 'var.scss';
 
-div.test {
-  color: red;
+body {
+	background-color: $main-color;
+
+	#app {
+		@import 'game';
+	}
 }
+
+h1, h2, h3, h4, h5, h6,
+p, a, li, span, button {
+	font-family: $main-font;
+	font-size: $def-font-size;
+	color: $sec-color;
+}
+
+#chatroom {
+	position: relative;
+	height: 90vh;
+	width: 100%;
+	max-width: 800px;
+}
+
+#messages {
+	overflow-y: scroll;
+	height: 95%;
+
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+#messages::-webkit-scrollbar {
+    display: none;
+}
+
+.message {
+	width: fit-content;
+	margin-bottom: 8px;
+	padding: 8px 12px;
+	border-radius: 10px;
+	color: $def-color;
+	.send {
+		color: $sec-color;
+	}
+	.received {
+		color: $onl-color;
+	}
+}
+
+@import 'form';

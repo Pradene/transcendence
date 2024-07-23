@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Pradene/transcendence#readme",
   "workspaces": [
-    "web/static/scripts/pong"
+    "web/static/scripts/pong",
+    "web/static/app/css"
   ]
 }
