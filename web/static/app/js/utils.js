@@ -100,12 +100,11 @@ async function refreshToken() {
 
         localStorage.setItem("access", data.access)
 
-    } catch (error) {
+    } catch (e) {
         localStorage.removeItem("refresh")
         localStorage.removeItem("access")
         
-        const router = Router.get()
-        router.navigate("/login/")
+        Router.get().navigate("/login/")
     }
 }
 

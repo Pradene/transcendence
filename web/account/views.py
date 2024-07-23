@@ -15,6 +15,21 @@ from config import settings
 from config.decorators import jwt_required
 
 
+@jwt_required
+@require_GET
+def userView(request, user_id=None):
+    if user_id is None:
+        user = request.user
+    else:
+        try:
+            user = CustomUser.objects.get(id=user_id)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    serializer = CustomUserSerializer(user)
+    return JsonResponse(serializer.data, safe=False, status=200)
+
+
 # Search
 @jwt_required
 @require_GET
@@ -25,7 +40,7 @@ def searchUsersView(request):
         serializer = CustomUserSerializer(users, many=True)
         return JsonResponse(serializer.data, safe=False, status=200)
     
-    return JsonResponse({}, status=400)
+    return JsonResponse({"error": "User not found"}, status=400)
 
 
 
@@ -69,13 +84,19 @@ def sendFriendRequestView(request, user_id):
         serializer = FriendRequestSerializer(friend_request)
         return JsonResponse(serializer.data, safe=False, status=200)
 
+
+@jwt_required
+@require_POST
 def acceptFriendRequestView(request, user_id):
     receiver = request.user
-    sender = CustomUser.objects.get(id=user_id)
-    friend_request = FriendRequest.objects.get(receiver=receiver, sender=sender)
-    friend_request.accept()
-    return JsonResponse({"message": "friend request accepted"}, status=200)
-
+    try:
+        sender = CustomUser.objects.get(id=user_id)
+        friend_request = FriendRequest.objects.get(receiver=receiver, sender=sender)
+        friend_request.accept()
+        return JsonResponse({"message": "friend request accepted"}, status=200)
+        
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
 
 
 # Registration

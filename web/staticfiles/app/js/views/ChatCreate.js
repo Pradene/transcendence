@@ -11,7 +11,7 @@ export class ChatCreate extends AbstractView {
             <nav-component></nav-component>
             <div class="flex">
                 <label>
-                    <input type="text" id="input" placeholder="Search" autocomplete="off"></input>
+                    <input type="text" id="input" class="search-bar" placeholder="Search" autocomplete="off"></input>
                 </label>
             </div>
             <div>
@@ -28,6 +28,18 @@ export class ChatCreate extends AbstractView {
         input.addEventListener('keyup', (event) => {
             this.handleSearch(event)
         })
+    }
+
+    async getFriends() {
+        const url = getURL('api/users/friends/')
+
+        try {
+            const data = await apiRequest(url)
+            this.displayFriends(data)
+
+        } catch (error) {
+            console.log(error)
+        }
     }
     
     handleSearch(event) {
@@ -46,18 +58,6 @@ export class ChatCreate extends AbstractView {
         }
     }
 
-    async getFriends() {
-        const url = getURL('api/users/friends/')
-
-        try {
-            const data = await apiRequest(url)
-            this.displayFriends(data)
-
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
     displayFriends(friends) {
         const container = document.getElementById('friends')
         container.innerHTML = ''
@@ -67,8 +67,10 @@ export class ChatCreate extends AbstractView {
             el.classList.add('user')
             el.innerHTML = `
                 <p>${friend.username}</p>
-                <button>Add</button>
+                <button></button>
             `
+
+
 
             container.appendChild(el)
         })

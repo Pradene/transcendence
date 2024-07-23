@@ -14,40 +14,37 @@ export class Login extends AbstractView {
 
     getHtml() {
         return `
-        <div class="fp">
-            <div>
-                <div class="container-xs">
-                    <form method="POST" id="login-form" class="form">
-                        <div class="form-field">
-                            <label class="form-label">
-                                <input class="form-input" type="text" id="username" required autocomplete="off"></input>
-                                <span>Username</span>
-                                <div class="error"></div>
-                            </label>
-                        </div>
-                        <div class="form-field">
-                            <label class="form-label">
-                                <input class="form-input" type="password" id="password" required autocomplete="off"></input>
-                                <span>Password</span>
-                                <div class="error"></div>
-                            </label>
-                        </div>
-                        <button type="submit">Login</button>
-                    </form>
-                    <div class="text-center mt-36">
-                        <a data-link>Forgot password?</a>
+        <div class="container--fullpage">
+            <div class="container--small">
+                <form method="POST" id="login-form" class="form">
+                    <div id="error" class="form__error hidden"></div>
+                    <div class="form__field">
+                        <label class="form__label">
+                            <input class="form__input" type="text" id="username" required autocomplete="off"></input>
+                            <span>Username</span>
+                        </label>
                     </div>
+                    <div class="form__field">
+                        <label class="form__label">
+                            <input class="form__input" type="password" id="password" required autocomplete="off"></input>
+                            <span>Password</span>
+                        </label>
+                    </div>
+                    <button type="submit">Login</button>
+                </form>
+                <div class="container--text-center mt-36">
+                    <a data-link>Forgot password?</a>
                 </div>
-                <div class="container-xs text-center mt-36">
-                    <a href='/signup/' data-link>Sign up</a>
-                </div>
+            </div>
+            <div class="container--small container--text-center mt-36">
+                <a href='/signup/' data-link>Sign up</a>
             </div>
         </div>
         `
     }
 
     addEventListeners() {
-        const inputs = document.querySelectorAll('.form-input')
+        const inputs = document.querySelectorAll('.form__input')
         inputs.forEach(input => {
             input.addEventListener('input', function () {
                 if (input.value == '') {
@@ -69,15 +66,18 @@ export class Login extends AbstractView {
     async handleSubmit(event) {
         event.preventDefault()
 
-        const username = document.getElementById("username").value
-        const password = document.getElementById("password").value
+        const username = document.getElementById("username")
+        const password = document.getElementById("password")
         const url = getURL("api/users/login/")
         
         try {
             const data = await apiRequest(
                 url,
                 "POST",
-                {username: username, password: password}
+                {
+                    username: username.value,
+                    password: password.value
+                }
             )
 
             localStorage.setItem('access', data.access)
@@ -88,11 +88,26 @@ export class Login extends AbstractView {
 
             await updateCSRFToken()
             
-            const router = Router.get()
-            router.navigate('/')
+            Router.get().navigate('/')
                 
-        } catch (error) {
-            console.log('error: ', error)
+        } catch (e) {
+            username.value = ""
+            password.value = ""
+            
+            this.displayErrors(e.message)
         }
+    }
+
+    displayErrors(error) {
+        const container = document.getElementById("error")
+        container.classList.remove("hidden")
+        container.innerHTML = ""
+
+        const el = document.createElement('p')
+        el.innerHTML = `
+            ${error}
+        `
+
+        container.appendChild(el)
     }
 }

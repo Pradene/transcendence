@@ -27,13 +27,13 @@ class CustomUserManager(BaseUserManager):
         Creates and saves a superuser with the given usename
         and password.
         """
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
 
-        if extra_fields.get('is_staff') is not True:
-            raise ValueError('Superuser must have is_staff=True.')
-        if extra_fields.get('is_superuser') is not True:
-            raise ValueError('Superuser must have is_superuser=True.')
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError("Superuser must have is_staff=True.")
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("Superuser must have is_superuser=True.")
 
         user = self.create_user(username, password, **extra_fields)
 
@@ -42,14 +42,14 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=32, unique=True)
-    picture = models.ImageField(upload_to='profile-pictures/', blank=True, null=True, default='default.png')
+    picture = models.ImageField(upload_to="profile-pictures/", default="profile-pictures/default.png", blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
     objects = CustomUserManager()
 
-    USERNAME_FIELD = 'username'
+    USERNAME_FIELD = "username"
     REQUIRED_FIELDS = []
 
     def __str__(self):
@@ -57,8 +57,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 class FriendList(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='friends')
-    friends = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='friend_of')
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="friends")
+    friends = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="friend_of")
 
     def add_friend(self, user):
         if user not in self.friends.all():
@@ -79,8 +79,8 @@ class FriendList(models.Model):
         
 
 class FriendRequest(models.Model):
-    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='sender')
-    receiver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='receiver')
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sender")
+    receiver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="receiver")
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def accept(self):

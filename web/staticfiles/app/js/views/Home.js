@@ -36,15 +36,11 @@ export class Home extends AbstractView {
     }
 
     addEventListeners() {
-        if (!game_loaded) {
-            const script = document.createElement('script')
-            const appcontainer = document.querySelector('div#app')
-            
-            script.src = 'static/scripts/pong/dist/main.js'
-            
-            appcontainer.appendChild(script)
-            
-            // game_loaded = true
-        }
+        const script = document.createElement('script')
+        const appcontainer = document.querySelector('div#app')
+        
+        script.src = 'static/scripts/pong/dist/main.js'
+        
+        appcontainer.appendChild(script)
     }
 }

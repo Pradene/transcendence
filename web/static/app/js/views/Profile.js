@@ -11,22 +11,35 @@ export class Profile extends AbstractView {
     getHtml() {
         return `
         <nav-component></nav-component>
-        <h1>Profile</h1>
-        <button id="logout">Logout</button>
+        <div class="profile">
+            <div class="flex">
+                <img id="pp" class="pp--large"></img>
+                <div>
+                    <div class="flex">
+                        <p id="username" class="profile__username"></p>
+                        <button id="logout" class="logout-button">
+                            <img src="/static/assets/power-off.svg" alt="Logout">
+                        </button>
+                    </div>
+                    <a href="/login/edit/" id="edit" class="button" data-link>Edit profile</a>
+                </div>
+            </div>
+            <p id="bio"></p>
+        </div>
+        <ul id="games" class="list"></ul>
         <form id="search-form">
-            <input type="text" id="search-input" placeholder="Search User" autocomplete=off></input>
-            <button type="submit" id="search-submit">Send</button>
+            <input type="text" id="search-input" class="search-bar" placeholder="Username..." autocomplete=off></input>
+            <button type="submit" id="search-submit" class="search-bar__button">Search</button>
         </form>
-        <ul id="list">
-        </ul>
-        <ul id="friend-requests">
-        </ul>
-        <ul id="friends">
-        </ul>
+        <ul id="list" class="list"></ul>
+        <ul id="friend-requests" class="list"></ul>
+        <ul id="friends" class="list" class="list"></ul>
         `
     }
 
     addEventListeners() {
+        this.getUser()
+        this.getGames()
         this.getFriends()
         this.getFriendRequests()
 
@@ -40,6 +53,56 @@ export class Profile extends AbstractView {
         })
     }
 
+    // Logout
+    async logout() {
+        const url = getURL(`api/users/logout/`)
+        const refresh = localStorage.getItem("refresh")
+
+        try {
+            await apiRequest(
+                url,
+                "POST",
+                {refresh: refresh}
+            )
+
+            localStorage.removeItem("access")
+            localStorage.removeItem("refresh")
+            
+            const ws = WebSocketManager.get()
+            ws.disconnect()
+            
+            await updateCSRFToken()
+            
+            Router.get().navigate("/login/")
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
+    async getUser() {
+        const url = getURL("api/users/")
+
+        try {
+            const data = await apiRequest(url)            
+            this.displayProfile(data)
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    displayProfile(data) {
+        const pp = document.getElementById("pp")
+        const username = document.getElementById("username")
+        const bio = document.getElementById("bio")
+
+        username.textContent = data.username
+        bio.textContent = data.bio
+        pp.src = data.picture
+    }
+
 
     // Friends
     async getFriends() {
@@ -47,7 +110,6 @@ export class Profile extends AbstractView {
 
         try {
             const data = await apiRequest(url)
-            
             this.displayFriends(data)
 
         } catch (error) {
@@ -55,17 +117,46 @@ export class Profile extends AbstractView {
         }
     }
 
-    displayFriends(friends) {
-        if (!friends)
+    async getGames() {
+        const url = getURL("api/games/")
+
+        try {
+            const data = await apiRequest(url)
+            console.log(data)
+            this.displayGames(data)
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    displayGames(games) {
+        const container = document.getElementById("games")
+        container.innerHTML = ""
+        
+        if (!games)
             return
 
-        console.log("friends", friends)
+        games.forEach(game => {
 
-        const container = document.getElementById('friends')
-        friends.forEach(friend => {
-            const el = document.createElement('li')
+            const player = game.player
+            const pScore = game.player_score
+
+            const opponent = game.opponent
+            const oScore = game.opponent_score
+            
+            const el = document.createElement("li")
+            el.classList.add("list__item")
             el.innerHTML = `
-                <p>${friend.username}</p>
+                <div class="flex" style="flex:1">
+                    <img src="${player.picture}" class="pp"></img>
+                    <p class="info">${player.username}</p>
+                </div>
+                <div>${pScore} VS ${oScore}</div>
+                <div class="flex" style="flex:1">
+                    <p class="info" style="text-align:right">${opponent.username}</p>
+                    <img src="${opponent.picture}" class="pp"></img>
+                </div>
             `
 
             container.appendChild(el)
@@ -82,7 +173,6 @@ export class Profile extends AbstractView {
 
         try {
             const data = await apiRequest(url)
-
             this.displayIncomingFriendRequests(data)
 
         } catch (error) {
@@ -90,28 +180,6 @@ export class Profile extends AbstractView {
         }
     }
 
-    displayIncomingFriendRequests(requests) {
-        if (!requests)
-            return
-
-        const container = document.getElementById("friend-requests")
-        requests.forEach(request => {
-            const sender = request.sender
-
-            const el = document.createElement("li")
-            el.innerHTML = `
-                <p>${sender.username}</p>
-                <button>Accept</button>
-            `
-
-            const button = el.querySelector("button")
-            button.addEventListener("click", () => {
-                this.acceptIncomingFriendRequest(sender.id)
-            })
-
-            container.appendChild(el)
-        })
-    }
 
     async acceptIncomingFriendRequest(id) {
         const url = getURL(`api/users/friend-requests/${id}/accept/`)
@@ -143,7 +211,7 @@ export class Profile extends AbstractView {
     // Searching users
     async searchUser() {
         const query = document.getElementById("search-input").value
-        const url = getURL(`api/users/?q=${query}`)
+        const url = getURL(`api/users/search/?q=${query}`)
         
         try {
             const data = await apiRequest(url)
@@ -166,12 +234,14 @@ export class Profile extends AbstractView {
             
             const username = user.username
             const id = user.id
+            const picture = user.picture
             
             const el = document.createElement("li")
-            el.classList.add("list-item")
+            el.classList.add("list__item")
             el.innerHTML = `
-                <p>${username}</p>
-                <button>Add</button>
+                <img src="${picture}" class="pp"></img>
+                <p class="info">${username}</p>
+                <button class="button">Add</button>
             `
 
             const button = el.querySelector("button")
@@ -183,32 +253,47 @@ export class Profile extends AbstractView {
         })
     }
 
+    displayIncomingFriendRequests(requests) {
+        if (!requests)
+            return
 
-    // Logout
-    async logout() {
-        const url = getURL(`api/users/logout/`)
-        const refresh = localStorage.getItem("refresh")
+        const container = document.getElementById("friend-requests")
+        requests.forEach(request => {
+            const sender = request.sender
 
-        try {
-            await apiRequest(
-                url,
-                "POST",
-                {refresh: refresh}
-            )
+            const el = document.createElement("li")
+            el.innerHTML = `
+                <p>${sender.username}</p>
+                <button>Accept</button>
+            `
 
-            localStorage.removeItem("access")
-            localStorage.removeItem("refresh")
-            
-            const ws = WebSocketManager.get()
-            ws.disconnect()
-            
-            await updateCSRFToken()
-            
-            const router = Router.get()
-            router.navigate("/login/")
+            const button = el.querySelector("button")
+            button.addEventListener("click", () => {
+                this.acceptIncomingFriendRequest(sender.id)
+            })
 
-        } catch (error) {
-            console.log(error)
-        }
+            container.appendChild(el)
+        })
+    }
+
+    displayFriends(friends) {
+        if (!friends)
+            return
+
+        console.log("friends", friends)
+
+        const container = document.getElementById('friends')
+        friends.forEach(friend => {
+            const el = document.createElement('li')
+            el.classList.add("list__item")
+            el.innerHTML = `
+                <img src="${friend.picture}" class="pp"></img>
+                <div class="info">
+                    <p>${friend.username}</p>
+                </div>
+            `
+
+            container.appendChild(el)
+        })
     }
 }

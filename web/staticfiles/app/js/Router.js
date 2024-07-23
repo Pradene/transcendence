@@ -13,10 +13,19 @@ export class Router {
 
     init() {
         window.addEventListener('popstate', () => this.handleRoute())
+        
+        if (!window.location.pathname.endsWith("/")) {
+            location += "/"
+            history.pushState(null, null, location)
+        }
+
         this.handleRoute()
     }
 
     navigate(path) {
+        if (!path.endsWith("/"))
+            path += "/"
+
         history.pushState(null, null, path)
         this.handleRoute()
     }

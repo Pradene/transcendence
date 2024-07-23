@@ -35,8 +35,8 @@ export async function updateCSRFToken() {
             throw new Error(`Failed to fetch data: ${response.status}`)
         }
         
-    } catch (error) {
-        throw new Error(error)
+    } catch (e) {
+        throw e
     }
 }
 
@@ -66,12 +66,11 @@ export async function apiRequest(url, method = "GET", body = null) {
         const response = await fetch(url, options)
         const data = await response.json()
 
-        console.log(data)
-
         if (response.ok) {
             return data
 
         } else {
+            console.log(data.error)
             if (response.status == 401) {
                 await refreshToken()
                 return await apiRequest(url, method, body)
@@ -81,8 +80,8 @@ export async function apiRequest(url, method = "GET", body = null) {
             }
         }
 
-    } catch (error) {
-        throw new Error(error)
+    } catch (e) {
+        throw e
     }
 }
 
@@ -101,12 +100,11 @@ async function refreshToken() {
 
         localStorage.setItem("access", data.access)
 
-    } catch (error) {
+    } catch (e) {
         localStorage.removeItem("refresh")
         localStorage.removeItem("access")
         
-        const router = Router.get()
-        router.navigate("/login/")
+        Router.get().navigate("/login/")
     }
 }
 
@@ -124,7 +122,7 @@ export async function checkLogin() {
         
         return data.authenticated
         
-    } catch (error) {
+    } catch (e) {
         return false
     }
 }

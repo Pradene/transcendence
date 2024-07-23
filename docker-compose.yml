@@ -13,6 +13,8 @@ services:
       - transcendence
     volumes:
       - $DJANGO_VOLUME:/app
+    depends_on:
+      - db
 
   db:
     container_name: db
@@ -43,6 +45,8 @@ services:
       - $NGINX_STATIC_VOLUME:/usr/share/nginx/static
       - $NGINX_MEDIA_VOLUME:/usr/share/nginx/media
       - ssl_certs:/etc/ssl
+    depends_on:
+      - web
 
 networks:
   transcendence:

@@ -47,7 +47,7 @@ export class Chat extends AbstractView {
     async handleSearch(event) {
         const query = event.target.value
         
-        const rooms = document.querySelectorAll('.list-item')
+        const rooms = document.querySelectorAll('.list__item')
         for (let room of rooms) {
             const name = room.querySelector('.name').textContent
             if (query && !name.includes(query)) {
@@ -80,7 +80,7 @@ export class Chat extends AbstractView {
         const message = (room.last_message ? room.last_message.content : 'Send a message...')
         
         const el = document.createElement('li')
-        el.classList.add('list-item')
+        el.classList.add('list__item')
         el.innerHTML = `
             <a href="/chat/${room.id}/" data-link>
                 <img class="profile-pic" alt="Profile Picture">
