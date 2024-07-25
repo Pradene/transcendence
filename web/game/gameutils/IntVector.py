@@ -13,6 +13,8 @@ class IntVector:
         self.y = -self.y
 
     def getVector(self) -> list[float]:
+        """Returns the vector as a list"""
+
         return [self.x, self.y]
 
     def getNorm(self) -> float:

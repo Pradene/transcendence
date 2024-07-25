@@ -4,6 +4,8 @@ from game.gameutils.IntVector import IntVector
 from game.gameutils.defines import *
 from game.gameutils.gamemodifier.gamemodifier import GameModifier
 
+from enum import Enum
+
 import random
 import math
 
@@ -22,7 +24,7 @@ def genStartVector() -> IntVector:
 
 class Ball:
     def __init__(self):
-        self.__position: list[int] = BALL_BASE_POSITION.copy()
+        self.__position: list[float] = BALL_BASE_POSITION.copy()
         self.__direction: IntVector = genStartVector()
         self.__speed: float = BALL_SPEED
         self.__finished: bool = False
@@ -30,28 +32,24 @@ class Ball:
     def getPosition(self) -> list[int]:
         """Returns the position of the ball"""
 
-        return self.__position.copy()
+        return [int(self.__position[0]), int(self.__position[1])]
 
     def getX(self) -> int:
-        return self.__position[0]
+        return int(self.__position[0])
 
     def getY(self) -> int:
-        return self.__position[1]
+        return int(self.__position[1])
 
     def incrSpeed(self) -> None:
         """Increases the speed of the ball, should be called after hitting a paddle"""
 
         self.__speed += BALL_SPEED_INCREMENT
 
-    def __revX(self, arr: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
-        narr = [(-x, y) for x, y in arr]
+    def __revX(self) -> None:
         self.__direction.reverseX()
-        return narr
 
-    def __revY(self, arr: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
-        narr = [(x, -y) for x, y in arr]
+    def __revY(self) -> None:
         self.__direction.reverseY()
-        return narr
 
     def isFinished(self) -> bool:
         """Did the current ball hit the left or right wall"""
@@ -63,6 +61,41 @@ class Ball:
 
         self.__finished = True
 
+    def genVector(self, modifiers: List[GameModifier]) -> IntVector:
+        nvector = self.__direction.copy()
+        for mod in modifiers:
+            nvector += mod.getVector()
+
+        return nvector
+
+    def __move_by_one(self, vector: IntVector, current: float) -> float:
+        lx, ly = vector.getVector()
+        x, y = self.__position
+        xratio: float = 1.0
+        yratio: float = 1.0
+        remaining: float = 1.0 - current
+
+        # compute xratio
+        if lx > 0:
+            target = x + 1 if self.getX() == x else math.ceil(x)
+            xratio = (target - x) / lx
+        elif lx < 0:
+            target = x - 1 if self.getX() == x else math.floor(x)
+            xratio = (target - x) / lx
+
+        # compute yratio
+        if ly > 0:
+            target = y + 1 if self.getY() == y else math.ceil(y)
+            yratio = (target - y) / ly
+        elif ly < 0:
+            target = y - 1 if self.getY() == y else math.floor(y)
+            yratio = (target - y) / ly
+
+        # get the minimum ratio and update the position
+        mratio = min(xratio, yratio, remaining)
+        self.__position = [x + lx * mratio, y + ly * mratio]
+        return current + mratio
+
     def computeNext(self, p1: PlayerInterface, p2: PlayerInterface, modifiers: List[GameModifier] = []) -> None:
         """Computes the next position of the ball"""
 
@@ -70,59 +103,44 @@ class Ball:
         ispeed = int(self.__speed)
         self.__direction.setNorm(ispeed)
 
-        turn_vec: IntVector = self.__direction.copy()
-        for mod in modifiers:
-            turn_vec += mod.getVector()
-        arr = turn_vec.computeMoves()
+        turn_vec: IntVector = self.genVector(modifiers)
+        ratio = 0.0
 
-        p1.setBallSpeed(len(arr))
-        p2.setBallSpeed(len(arr))
-
-        while len(arr) > 0 and not self.isFinished():
-            x, y = arr[0]
+        while ratio < 1 and not self.isFinished():
+            lratio = self.__move_by_one(turn_vec, ratio)
+            ratio += lratio
 
             # check hit p1 paddle horizontally
-            if self.getX() == p1.getX() + PADDLE_WIDTH and x < 0 and p1.getY() <= self.getY() <= p1.getY() + PADDLE_HEIGHT:
-                arr = self.__revX(arr)
+            if turn_vec.x < 0 and self.__hitPlayerHor(p1):
                 self.incrSpeed()
+                self.__revX()
+                turn_vec = self.genVector(modifiers)
+            #check hit p1 paddle vertically
+            elif turn_vec.y != 0 and self.__hitPlayerVert(p1):
+                self.__revY()
+                turn_vec = self.genVector(modifiers)
             # check hit p2 paddle horizontally
-            elif self.getX() + BALL_SIZE == p2.getX() and x > 0 and p2.getY() <= self.getY() <= p2.getY() + PADDLE_HEIGHT:
-                arr = self.__revX(arr)
+            elif turn_vec.x > 0 and self.__hitPlayerHor(p2):
                 self.incrSpeed()
-            # check hit p1 or p2 vertically
-            elif self.__hitPlayer(y, p1) or self.__hitPlayer(y, p2):
-                arr = self.__revY(arr)
-            # check hit top wall
-            elif self.getY() == 0 and y < 0:
-                arr = self.__revY(arr)
-            # check hit bottom wall
-            elif self.getY() == SCREEN_HEIGHT - BALL_SIZE and y > 0:
-                arr = self.__revY(arr)
-            # check hit right wall
-            elif self.getX() == SCREEN_WIDTH - BALL_SIZE:
-                p1.incrPoints()
+                self.__revX()
+                turn_vec = self.genVector(modifiers)
+            # check hit p2 paddle vertically
+            elif turn_vec.y != 0 and self.__hitPlayerVert(p2):
+                self.__revY()
+                turn_vec = self.genVector(modifiers)
+            # check hit right or left wall
+            elif self.getX() == 0 or self.getX() + BALL_SIZE == SCREEN_WIDTH:
                 self.finishBall()
-                break
-            # check hit left wall
-            elif self.getX() == 0:
-                p2.incrPoints()
-                self.finishBall()
-                break
+            # check hit top or bottom wall
+            elif self.getY() == 0 or self.getY() + BALL_SIZE == SCREEN_HEIGHT:
+                self.__revY()
+                turn_vec = self.genVector(modifiers)
 
-            x, y = arr[0]
-            arr = arr[1:] if len(arr) > 1 else []
-            self.__position[0] += x
-            self.__position[1] += y
-            p1.move()
-            p2.move()
+            p1.move(lratio)
+            p2.move(lratio)
 
-    def __hitPlayer(self, y, player: PlayerInterface) -> bool:
-        cx = self.getX()
-        px = player.getX()
+    def __hitPlayerVert(self, p: PlayerInterface):
+        return self.getY() + BALL_SIZE == p.getY() or self.getY() == p.getY() + PADDLE_HEIGHT
 
-        if y != 0 and px < cx < px + PADDLE_WIDTH:
-            if y == -1 and self.getY() == player.getY() + PADDLE_HEIGHT:
-                return True
-            elif y == 1 and self.getY() + BALL_SIZE == player.getY():
-                return True
+    def __hitPlayerHor(self, p: PlayerInterface):
         return False
