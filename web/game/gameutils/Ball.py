@@ -147,7 +147,7 @@ class Ball:
 
     def __hitP2Vert(self, p: PlayerInterface):
         if self.getY() + BALL_SIZE == p.getY() or self.getY() == p.getY() + PADDLE_HEIGHT:
-            if p.getX() - BALL_SIZE <= self.getX() <= p.getX + PADDLE_WIDTH:
+            if p.getX() - BALL_SIZE <= self.getX() <= p.getX() + PADDLE_WIDTH:
                 return True
         return False
 
