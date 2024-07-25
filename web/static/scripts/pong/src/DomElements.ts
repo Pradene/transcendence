@@ -93,9 +93,9 @@ function deactivateButtons(): void {
 }
 
 export function getModifiersFromSettings(): string[] {
-    let wind: HTMLInputElement       = document.querySelector("#wind")!;
-    let rain: HTMLInputElement       = document.querySelector("#rain")!;
-    let lightnight: HTMLInputElement = document.querySelector("#lightnight")!;
+    let wind: HTMLInputElement       = document.querySelector<HTMLInputElement>("#wind")!;
+    let rain: HTMLInputElement       = document.querySelector<HTMLInputElement>("#rain")!;
+    let lightnight: HTMLInputElement = document.querySelector<HTMLInputElement>("#lightnight")!;
 
     let modifiers: string[] = [];
 
