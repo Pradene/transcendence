@@ -50,14 +50,6 @@ p, a, li, span, button {
 	background-color: #fff;
 }
 
-.message .send {
-	background-color: red;
-}
-
-.message .received {
-	background-color: blue;
-}
-
 .message h5 {
 	color: #000;
 }
@@ -81,8 +73,6 @@ p, a, li, span, button {
     width: 100%;
     padding: 0;
     margin: 0;
-	border: 1px solid var(--secondary-bg-color);
-	border-radius: 12px;
 	overflow-y: scroll;
     list-style-type: none;
 
@@ -96,36 +86,38 @@ p, a, li, span, button {
     display: none;
 }
 
-.list li:not(:last-child) {
-    border-bottom: 1px solid var(--secondary-bg-color);
+.list__item {
+	display: flex;
+	align-items: center;
+	padding: 12px 18px;
 }
 
-.list-item a {
+.list__item:hover {
+    background-color: var(--secondary-bg-color);
+}
+
+.list__item a {
     display: flex;
     align-items: center;
-    padding: 12px 18px;
     text-decoration: none;
     color: inherit;
     transition: background-color 0.3s;
 }
 
-.list-item a:hover {
-    background-color: var(--secondary-bg-color);
-}
-
-.list-item .room-info {
+.list__item .info {
     display: flex;
     flex-direction: column;
+	flex: 1;
 }
 
-.list-item .name {
+.list__item .name {
     font-weight: bold;
     font-size: 14px;
     color: var(--main-color);
 	margin-bottom: 6px;
 }
 
-.list-item .latest-message {
+.list__item .latest-message {
     font-size: 12px;
     color: var(--secondary-color);
 }

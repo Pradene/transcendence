@@ -7,9 +7,11 @@ import { Profile } from './views/Profile.js'
 import { Login } from './views/Login.js'
 import { Signup } from "./views/Signup.js"
 import { WebSocketManager } from "./ChatWebSocket.js"
+import { EditProfile } from "./views/EditProfile.js"
+
+import { initCSRFToken } from "./utils.js"
 
 import './components/Nav.js'
-import { initCSRFToken } from "./utils.js"
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -29,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {path: '/login/', view: new Login()},
         {path: '/signup/', view: new Signup()},
         {path: '/profile/', view: new Profile()},
+        {path: '/profile/edit/', view: new EditProfile()},
     ])
 
     router.init()

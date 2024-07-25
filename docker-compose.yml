@@ -10,11 +10,13 @@ services:
     environment:
       - HOST_HOSTNAME=$HOST_HOSTNAME
     ports:
-      - 8000:8000
+      - "8000:8000"
     networks:
       - transcendence
     volumes:
       - $DJANGO_VOLUME:/app
+    depends_on:
+      - db
 
   db:
     container_name: db
@@ -37,13 +39,16 @@ services:
       args:
         - HOST_HOSTNAME=$HOST_HOSTNAME
     ports:
-      - 3000:3000
+      - "3000:80"
+      - "5000:443"
     networks:
       - transcendence
     volumes:
       - $NGINX_STATIC_VOLUME:/usr/share/nginx/static
       - $NGINX_MEDIA_VOLUME:/usr/share/nginx/media
       - ssl_certs:/etc/ssl
+    depends_on:
+      - web
 
 networks:
   transcendence:

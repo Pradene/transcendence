@@ -4,25 +4,97 @@
 
 .flex {
 	display: flex;
-	justify-content: space-between;
 	align-items: center;
 }
 
 
+.profile {
+	margin-bottom: 32px;
+}
 
-.profile-pic {
-    width: 50px;
-    height: 50px;
+.pp {
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     margin-right: 15px;
 }
 
+.pp--large {
+	width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.logout-button {
+	border: none;
+	outline: none;
+	background-color: transparent;
+	padding: 8px;
+	cursor: pointer;
+}
+
+.logout-button img {
+	width: 16px;
+	height: 16px;
+}
+
+.button {
+	border: none;
+	outline: none;
+	padding: 8px 12px;
+	color: var(--main-bg-color);
+	background: var(--main-color);
+}
+
+.profile__username {
+	font-size: 18px;
+}
+
+
+
 .search-bar {
 	background: transparent;
+	outline: none;
 	border: 1px solid var(--secondary-bg-color);
 	border-radius: 12px;
 	color: var(--main-color);
-	outline: none;
 	padding: 8px;
 	font-size: 12px;
+}
+
+.search-bar__button {
+	background: var(--main-color);
+	outline: none;
+	border: none;
+	border-radius: 12px;
+	color: var(--main-bg-color);
+	padding: 8px 12px;
+	margin-left: 8px;
+	font-size: 12px;
+}
+
+
+.mt-36 {
+	margin-top: 36px;
+}
+
+
+.container--fullpage {
+	display: flex;
+	flex-direction: column;
+    align-items: center;
+	justify-content: center;
+    height: 100vh;
+}
+
+.container--small {
+	width: 100%;
+	max-width: 350px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.container--text-center {
+	text-align: center;
 }

@@ -1,4 +1,4 @@
-NAME			:= Transcendance
+NAME			:= Transcendence
 DOCKER_FLAGS 	:= --build
 HOST_HOSTNAME	:= $(shell hostname)
 
@@ -22,8 +22,6 @@ up:
 down:
 	docker compose down
 
-re:
+re: down
 	-docker container prune -f
-	-docker volume prune -f
-	-docker volume rm transcendance_database
 	${MAKE} ${NAME}

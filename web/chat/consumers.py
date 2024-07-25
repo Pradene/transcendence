@@ -57,7 +57,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             {
                 'type': 'room_message',
                 'room': room.id,
-                'user': user.username,
+                'username': user.username,
                 'content': content
             }
         )
@@ -65,14 +65,80 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def room_message(self, event):
         room_id = event['room']
-        user = event['user']
+        username = event['username']
         content = event['content']
 
         await self.send(text_data=json.dumps({
             'room': room_id,
-            'user': user,
+            'username': username,
             'content': content
         }))
+
+
+    async def create_room(self, data):
+        room_name = data.get('room_name')
+        is_private = data.get('is_private', True)
+        user_ids = data.get('users', [])
+
+        if self.user.id not in user_ids:
+            user_ids.append(self.users.id)
+
+        users = CustomUser.objects.filter(id__in=user_ids)
+
+        room = ChatRoom.create_room(name=room_name, is_private=is_private, users=users)
+        
+        await self.send(text_data=json.dumps({
+            'action': 'room_created',
+            'room_id': room.id,
+            'room_name': room.name,
+            'is_private': room.is_private
+        }))
+
+    
+    async def join_room(self, data):
+        room_id = data.get('room_id')
+        try:
+            room = ChatRoom.objects.get(id=room_id)
+            room.join_room(self.user)
+            
+            await self.channel_layer.group_add(
+                f'chat_{room_id}',
+                self.channel_name
+            )
+
+            await self.send(text_data=json.dumps({
+                'action': 'room_joined',
+                'room_id': room_id
+            }))
+        
+        except ChatRoom.DoesNotExist:
+            await self.send(text_data=json.dumps({
+                'action': 'error',
+                'message': 'Room does not exist'
+            }))
+
+
+    async def quit_room(self, data):
+        room_id = data.get('room_id')
+        try:
+            room = ChatRoom.objects.get(id=room_id)
+            room.quit(self.user)
+            
+            await self.channel_layer.group_discard({
+                f'chat_{room_id}',
+                self.channel_name
+            })
+
+            await self.send(text_data=json_dumps({
+                'type': 'room_quit',
+                'room_id': room_id
+            }))
+        
+        except ChatRoom.DoesNotExist:
+            await self.send(text_data=json.dumps({
+                'action': 'error',
+                'message': 'Room does not exist'
+            }))
 
 
     # get all rooms of an user

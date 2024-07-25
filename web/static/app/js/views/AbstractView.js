@@ -10,11 +10,7 @@ export class AbstractView {
         document.title = title
     }
 
-    getHtml() {
-        return `
-        <p>Default View</p>
-        `
-    }
+    getHtml() {}
 
     addEventListeners() {}
 

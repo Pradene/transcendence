@@ -1,12 +1,9 @@
 import { AbstractView } from "./AbstractView.js"
-import { getCSRFToken } from "../utils.js"
+import { getURL, apiRequest } from "../utils.js"
 
 export class ChatRoom extends AbstractView {
     constructor() {
         super()
-
-        this.handleSentMessage = this.handleSentMessage.bind(this)
-        this.handleReceivedMessage = this.handleReceivedMessage.bind(this)
     }
 
     getHtml() {
@@ -28,37 +25,23 @@ export class ChatRoom extends AbstractView {
         this.getInitialMessages()
         
         const form = document.getElementById('message-form')
-        form.removeEventListener('submit', this.handleSentMessage)
-        form.addEventListener('submit', this.handleSentMessage)
+        form.addEventListener('submit', () => this.handleSentMessage)
         
-        document.removeEventListener('wsMessage', this.handleReceivedMessage)
-        document.addEventListener('wsMessage', this.handleReceivedMessage)
+        document.addEventListener('wsMessage', () => this.handleReceivedMessage)
     }
 
 
     async getInitialMessages() {
         const roomID = this.getRoomID()
-        const access = localStorage.getItem('access')
+        const url = getURL(`api/chat/rooms/${roomID}/`)
 
         try {
-            const response = await fetch(`/api/chat/rooms/${roomID}/`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${access}`
-                }
-            })
+            const data = await apiRequest(url)
             
-            if (response.ok) {
-                const data = await response.json()
-                console.log(data)
-                if (data.room && data.room.messages)
-                    this.displayMessages(data.room.messages)
-            
-            } else {
-                console.log('error: Failed to fetch data')
-            }
-
+            // Change path of the route to api/rooms/{id} ? /messages
+            if (data)
+                this.displayMessages(data)
+    
         } catch (error) {
             console.log(error)
         }
@@ -115,7 +98,7 @@ export class ChatRoom extends AbstractView {
         el.classList.add('message')
         el.innerHTML = `
             <div>
-                <h5>${message.user}</h5>
+                <h5>${message.username}</h5>
                 <p>${message.content}</p>
             </div>
         `

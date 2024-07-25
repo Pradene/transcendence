@@ -1,12 +1,9 @@
-import { getCSRFToken } from "../utils.js"
+import { getURL, apiRequest } from "../utils.js"
 import { AbstractView } from "./AbstractView.js"
 
 export class Chat extends AbstractView {
     constructor() {
         super()
-
-        this.handleSearch = this.handleSearch.bind(this)
-        this.handleReceivedMessage = this.handleReceivedMessage.bind(this)
     }
 
     getHtml() {
@@ -28,34 +25,19 @@ export class Chat extends AbstractView {
         this.getInitialData()
 
         const input = document.getElementById('input')
-        input.removeEventListener('keyup', this.handleSearch)
-        input.addEventListener('keyup', this.handleSearch)
+        input.addEventListener('keyup', (event) => this.handleSearch(event))
     
-        document.removeEventListener('wsMessage', this.handleReceivedMessage)
-        document.addEventListener('wsMessage', this.handleReceivedMessage)
+        document.addEventListener('wsMessage', (event) => this.handleReceivedMessage(event))
     }
 
     async getInitialData() {
+        const url = getURL('api/chat/rooms/')
+        
         try {
-            const access = localStorage.getItem('access')
+            const data = await apiRequest(url)
 
-            const response = await fetch(`/api/chat/rooms/`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${access}`
-                }
-            })
-
-            if (response.ok) {
-                const data = await response.json()
-                const rooms = data.rooms
-                this.displayRooms(rooms)
+            this.displayRooms(data)
             
-            } else {
-                console.log('Failed to fetch data')
-            }
-
         } catch (error) {
             console.log(error)
         }
@@ -65,7 +47,7 @@ export class Chat extends AbstractView {
     async handleSearch(event) {
         const query = event.target.value
         
-        const rooms = document.querySelectorAll('.list-item')
+        const rooms = document.querySelectorAll('.list__item')
         for (let room of rooms) {
             const name = room.querySelector('.name').textContent
             if (query && !name.includes(query)) {
@@ -98,7 +80,7 @@ export class Chat extends AbstractView {
         const message = (room.last_message ? room.last_message.content : 'Send a message...')
         
         const el = document.createElement('li')
-        el.classList.add('list-item')
+        el.classList.add('list__item')
         el.innerHTML = `
             <a href="/chat/${room.id}/" data-link>
                 <img class="profile-pic" alt="Profile Picture">

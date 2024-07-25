@@ -1,50 +1,128 @@
+import { Router } from "./Router.js"
+
+export function getURL(url) {
+    return "https://" + location.hostname + ":" + location.port + "/" + url
+}
+
+// CSRF Tokens utils
+
 export function getCSRFToken() {
-    const token = localStorage.getItem('csrf-token')
-    console.log(token)
+    const token = localStorage.getItem("csrf-token")
 
     return token ? token : null
 }
 
 export function initCSRFToken() {
-    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-    console.log(token)
+    const token = document.querySelector("meta[name='csrf-token']").getAttribute("content")
     
-    localStorage.setItem('csrf-token', token)
+    localStorage.setItem("csrf-token", token)
 }
 
-export function updateCSRFToken() {
-    fetch('/api/csrf-token/')
-    .then(response => response.json())
-    .then(data => {
-        const token = data.token
-        console.log(token)
+export async function updateCSRFToken() {
+    const url = getURL("api/csrf-token/")
+    
+    try {
+        const response = await fetch(url)
+    
+        if (response.ok) {
+            const data = await response.json()
+            const token = data.token
+
+            localStorage.removeItem("csrf-token")
+            localStorage.setItem("csrf-token", token)
         
-        localStorage.removeItem('csrf-token')
-        localStorage.setItem('csrf-token', token)
-    })
+        } else {
+            throw new Error(`Failed to fetch data: ${response.status}`)
+        }
+        
+    } catch (e) {
+        throw e
+    }
 }
 
-// export function getCSRFToken() {
-    // return document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-// }
 
-// export function getCSRFToken() {
-//     const name = 'csrftoken'
-//     let token = null
+// Requests to server utils
 
-//     if (document.cookie && document.cookie !== '') {
-//         const cookies = document.cookie.split(';')
-//         for (let i = 0; i < cookies.length; i++) {
-            
-//             const cookie = cookies[i].trim()
+export async function apiRequest(url, method = "GET", body = null) {
+    const access = localStorage.getItem("access")
+    const csrfToken = getCSRFToken()
+    
+    try {
+        let headers = new Headers()
 
-//             // Does this cookie string begin with the name we want?
-//             if (cookie.substring(0, name.length + 1) === (name + '=')) {
-//                 token = decodeURIComponent(cookie.substring(name.length + 1))
-//                 break
-//             }
-//         }
-//     }
+        headers.append("Content-type", "application/json")
+        if (csrfToken)  headers.append("X-CSRFToken", csrfToken)
+        if (access)     headers.append("Authorization", `Bearer ${access}`)
 
-//     return token
-// }
+        const options = {
+            method: method.toUpperCase(),
+            headers: headers
+        }
+
+        if (body) {
+            options.body = JSON.stringify(body)
+        }
+
+        const response = await fetch(url, options)
+        const data = await response.json()
+
+        if (response.ok) {
+            return data
+
+        } else {
+            console.log(data.error)
+            if (response.status == 401) {
+                await refreshToken()
+                return await apiRequest(url, method, body)
+
+            } else {
+                throw new Error(data.error)
+            }
+        }
+
+    } catch (e) {
+        throw e
+    }
+}
+
+async function refreshToken() {
+    const url = getURL("api/users/refresh-token/")
+
+    const refresh = localStorage.getItem("refresh")
+    if (!refresh) throw new Error("not connected")
+    
+    try {
+        const data = await apiRequest(
+            url,
+            "POST",
+            {refresh: refresh}
+        )
+
+        localStorage.setItem("access", data.access)
+
+    } catch (e) {
+        localStorage.removeItem("refresh")
+        localStorage.removeItem("access")
+        
+        Router.get().navigate("/login/")
+    }
+}
+
+
+export async function checkLogin() {
+    const url = getURL("api/users/check-login/")
+    const refresh = localStorage.getItem("refresh")
+
+    try {
+        const data = await apiRequest(
+            url,
+            "POST",
+            {refresh: refresh}
+        )
+        
+        return data.authenticated
+        
+    } catch (e) {
+        return false
+    }
+}

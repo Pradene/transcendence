@@ -1,4 +1,5 @@
 import jwt
+
 from django.conf import settings
 from datetime import datetime, timedelta
 
@@ -7,7 +8,7 @@ from account.models import CustomUser
 def create_access_token(user):
     try:
         payload = {
-            'exp': datetime.utcnow() + timedelta(minutes=5),
+            'exp': datetime.utcnow() + timedelta(minutes=1),
             'iat': datetime.utcnow(),
             'user': user.id
         }

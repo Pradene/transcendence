@@ -1,11 +1,9 @@
-import { getCSRFToken } from "../utils.js"
+import { getURL, apiRequest } from "../utils.js"
 import { AbstractView } from "./AbstractView.js"
 
 export class ChatCreate extends AbstractView {
     constructor() {
         super()
-
-        this.users = []
     }
 
     getHtml() {
@@ -13,43 +11,31 @@ export class ChatCreate extends AbstractView {
             <nav-component></nav-component>
             <div class="flex">
                 <label>
-                    <input type="text" id="input" placeholder="Search" autocomplete="off"></input>
+                    <input type="text" id="input" class="search-bar" placeholder="Search" autocomplete="off"></input>
                 </label>
             </div>
             <div>
-                <ul id="users-list">
+                <ul id="friends">
                 </ul>
             </div>
         `
     }
 
-    addEventListeners() {   
-        this.getUsers()
+    addEventListeners() {
+        this.getFriends()
         
         const input = document.getElementById('input')
-        input.addEventListener('keyup', this.handleSearch.bind(this))
+        input.addEventListener('keyup', (event) => {
+            this.handleSearch(event)
+        })
     }
 
-    async getUsers() {
-        const access = localStorage.getItem('access')
+    async getFriends() {
+        const url = getURL('api/users/friends/')
 
         try {
-            const response = await fetch(`/api/user/get-friends/`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${access}`
-                }
-            })
-            
-            if (response.ok) {
-                const data = await response.json()
-                this.users = data.users
-                this.displayUsers()
-            
-            } else {
-                console.log('Failed to fetch data')
-            }
+            const data = await apiRequest(url)
+            this.displayFriends(data)
 
         } catch (error) {
             console.log(error)
@@ -62,27 +48,29 @@ export class ChatCreate extends AbstractView {
         const users = document.querySelectorAll('.user')
         for (let user of users) {
             const name = user.querySelector('p').textContent
+            
             if (query && !name.includes(query)) {
                 user.classList.add('hidden')
+            
             } else {
                 user.classList.remove('hidden')
             }
         }
     }
 
-    displayUsers() {
-        const container = document.getElementById('users-list')
+    displayFriends(friends) {
+        const container = document.getElementById('friends')
         container.innerHTML = ''
         
-        this.users.forEach((user) => {
-            console.log(user)
+        friends.forEach(friend => {
             const el = document.createElement('li')
             el.classList.add('user')
             el.innerHTML = `
-                <p>
-                ${user.name}
-                </p>
+                <p>${friend.username}</p>
+                <button></button>
             `
+
+
 
             container.appendChild(el)
         })

@@ -1,7 +1,34 @@
-- login error
-
-- create chat room button
-- user friends
 - private chat room and public chat room
+  create private chat room when users become friends 
 
-- websocket chat
+- friends request with websockets
+
+- chat page display messages
+
+- profile page
+  - make edit profile page
+    change: username, pp, bio
+  
+  - see dashboard (game historic)
+
+  - see friends with a button
+
+done:
+- game (remote)
+- tournament
+- registration
+- matchmaking ?
+- https
+
+modules done:
+- django backend (1)
+- db (1/2)
+- user management (1)
+- remote players (1)
+- game customization (1/2)
+- live chat (1)
+
+x 3D (1)
+
+- server side pong (1)
+- 

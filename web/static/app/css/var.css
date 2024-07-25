@@ -3,9 +3,9 @@
 	src: url('../../fonts/Epilogue-Regular.ttf') format('truetype');
 }
 
-
-
 :root {
+	--error-color: #ae3636;
+	
 	--main-bg-color: #020202;
 	--secondary-bg-color: #262626;
 	

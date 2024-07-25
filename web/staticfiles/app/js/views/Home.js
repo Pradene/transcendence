@@ -11,7 +11,6 @@ export class Home extends AbstractView {
 
         return `
         <nav-component></nav-component>
-        <h1>Hello World</h1>
         <div class="game-container"> <!-- Game Container, contain the game and the list of available rooms -->
 		    <div class="game-container-header">
 		    	<button class="create-game">Create Game</button> <!-- Create Game Button -->
@@ -36,16 +35,12 @@ export class Home extends AbstractView {
         `
     }
 
-    async render(container) {
-        container.innerHTML = this.getHtml()
-        this.addEventListeners()
-
-        if (!game_loaded) {
-            const script = document.createElement('script')
-            const appcontainer = document.querySelector('div#app')
-            script.src = 'static/scripts/pong/dist/main.js'
-            appcontainer.appendChild(script)
-            // game_loaded = true
-        }
+    addEventListeners() {
+        const script = document.createElement('script')
+        const appcontainer = document.querySelector('div#app')
+        
+        script.src = 'static/scripts/pong/dist/main.js'
+        
+        appcontainer.appendChild(script)
     }
 }
