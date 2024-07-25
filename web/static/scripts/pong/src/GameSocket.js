@@ -1,7 +1,7 @@
 import { Pong } from "./Pong";
 import { activateButtons, AVAILABLEGAMECONTAINER, AVAILABLETOURNAMENTCONTAINER, USERSCONTAINER } from "./DomElements";
 import { GAME_MODE } from "./Defines";
-const hosturl = "wss://" + location.hostname + ":" + location.port + "/ws/game";
+const hosturl = "wss://" + location.hostname + ":" + location.port + "/ws/game/";
 class GameSocket {
     constructor(socket) {
         this._websocket = socket;

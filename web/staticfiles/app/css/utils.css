@@ -7,9 +7,55 @@
 	align-items: center;
 }
 
+.grid {
+	display: grid;
+    grid-template-columns: repeat(8, 1fr); /* 8 columns */
+    gap: 20px;
+	width: 100%;
+    margin: auto;
+}
+
+.grid > div {
+	border-radius: 8px;
+	background: red;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+}
 
 .profile {
-	margin-bottom: 32px;
+	height: 200px;
+	grid-column: span 3;
+}
+
+.friend-requests {
+	height: 200px;
+	grid-column: span 5;
+}
+
+.games {
+	height: 200px;
+	grid-column: span 8;
+}
+
+.search-form {
+	height: 200px;
+	grid-column: span 4;
+}
+
+.friends {
+	height: 200px;
+	grid-column: span 4;
+}
+
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile, .games, .friends, .friend-requests, .search-form {
+        grid-column: span 1;
+    }
 }
 
 .pp {

@@ -1,9 +1,17 @@
 import { AbstractView } from "./AbstractView.js"
 import { getURL, apiRequest } from "../utils.js"
+import { WebSocketManager } from "../ChatWebSocket.js"
 
 export class ChatRoom extends AbstractView {
     constructor() {
         super()
+
+        this.sendMessageListener = (event) => {
+            event.preventDefault()
+            this.sendMessage()
+        }
+        
+        this.receiveMessageListener = (event) => this.receiveMessage(event.detail)
     }
 
     getHtml() {
@@ -22,25 +30,26 @@ export class ChatRoom extends AbstractView {
     }
 
     addEventListeners() {
-        this.getInitialMessages()
+        this.getMessages()
         
         const form = document.getElementById('message-form')
-        form.addEventListener('submit', () => this.handleSentMessage)
         
-        document.addEventListener('wsMessage', () => this.handleReceivedMessage)
+        form.removeEventListener('submit', this.sendMessageListener)
+        form.addEventListener('submit', this.sendMessageListener)
+        
+        document.removeEventListener('wsMessage', this.receiveMessageListener)
+        document.addEventListener('wsMessage', this.receiveMessageListener)
     }
 
 
-    async getInitialMessages() {
+    async getMessages() {
         const roomID = this.getRoomID()
         const url = getURL(`api/chat/rooms/${roomID}/`)
 
         try {
             const data = await apiRequest(url)
-            
-            // Change path of the route to api/rooms/{id} ? /messages
-            if (data)
-                this.displayMessages(data)
+            console.log(data)
+            this.displayMessages(data)
     
         } catch (error) {
             console.log(error)
@@ -48,36 +57,32 @@ export class ChatRoom extends AbstractView {
     }
 
 
-    async handleSentMessage(event) {        
-        event.preventDefault()
-    
+    async sendMessage() {
         const input = document.getElementById('message-input')
         const value = input.value
         const roomID = this.getRoomID()
-        console.log('message sent')
-        if (input.value != '') {                
-            await window.wsManager.sendMessage({
+
+        if (input.value != '') {
+            const ws = WebSocketManager.get()
+            await ws.sendMessage('chat', {
                 type: 'message',
                 room: roomID,
                 content: value
             })
+
             input.value = ''
         }
     }
 
 
-    handleReceivedMessage(event) {
-        const message = event.detail
+    receiveMessage(data) {
+        const message = data.message
         console.log(message)
 
-        if (message.room == this.getRoomID()) {
+        if (message.action == "message"
+        && message.room == this.getRoomID()) {
             this.displayMessage(message)
         }
-    }
-
-
-    getRoomID() {
-        return location.pathname.split('/')[2]
     }
 
 
@@ -92,23 +97,26 @@ export class ChatRoom extends AbstractView {
         if (!message)
             return
 
-        const container = document.getElementById('messages')
+        const username = message.user
+        const content = message.content
         
+        const container = document.getElementById('messages')
+
         const el = document.createElement('div')
         el.classList.add('message')
         el.innerHTML = `
             <div>
-                <h5>${message.username}</h5>
-                <p>${message.content}</p>
+                <h5>${username}</h5>
+                <p>${content}</p>
             </div>
         `
 
-        if (message.user === localStorage.getItem('username'))
-            el.classList.add('send')
-        else
-            el.classList.add('received')
-
         container.appendChild(el)
         container.scrollTop = container.scrollHeight
+    }
+
+
+    getRoomID() {
+        return location.pathname.split('/')[2]
     }
 }

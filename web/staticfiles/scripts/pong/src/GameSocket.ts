@@ -14,7 +14,7 @@ import {
 }             from "./Api";
 import {GAME_MODE} from "./Defines";
 
-const hosturl: string = "wss://" + location.hostname + ":" + location.port + "/ws/game";
+const hosturl: string = "wss://" + location.hostname + ":" + location.port + "/ws/game/";
 
 
 class GameSocket {

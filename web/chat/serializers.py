@@ -21,8 +21,11 @@ class ChatRoomSerializer(serializers.ModelSerializer):
 
 
 class MessageSerializer(serializers.ModelSerializer):
-    user = CustomUserSerializer(read_only=True)
+    user = serializers.SerializerMethodField()
     
     class Meta:
         model = Message
         fields = ('id', 'user', 'content', 'timestamp')
+
+    def get_user(self, obj):
+        return obj.user.username if obj.user else None

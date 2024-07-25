@@ -45,11 +45,11 @@ def roomsView(request):
 @require_GET
 def roomView(request, room_id):
     user = request.user
-    chatroom = get_object_or_404(
+    room = get_object_or_404(
         ChatRoom.objects.filter(users=user, id=room_id)
     )
 
-    messages = Message.objects.filter(room=chatroom).order_by('timestamp')
+    messages = Message.objects.filter(room=room).order_by('timestamp')
     serializer = MessageSerializer(messages, many=True)
 
     return JsonResponse(serializer.data, safe=False, status=200)
@@ -61,7 +61,7 @@ def searchRoomsView(request):
     user = request.user
     query = request.GET.get('q', '')
     if query:
-        chatrooms = ChatRoom.objects.filter(users=user, name__icontains=query)
+        rooms = ChatRoom.objects.filter(users=user, name__icontains=query)
         serializer = ChatRoomSerializer(rooms, many=True)
         return JsonResponse(serializer.data, safe=False, status=200)
     

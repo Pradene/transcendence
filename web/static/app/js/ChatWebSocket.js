@@ -3,50 +3,58 @@ export class WebSocketManager {
         if (WebSocketManager.instance)
             return WebSocketManager.instance
 
-        this.socket = null
-        this.handlers = []
+        this.sockets = {}
 
         WebSocketManager.instance = this
     }
 
-    connect(url) {
-        this.socket = new WebSocket(url)
+    connect(url, type) {
+        const socket = new WebSocket(url)
 
-        this.socket.onopen = (event) => {
+        socket.onopen = (event) => {
             console.log('WebSocket connection established')
         }
 
-        this.socket.onmessage = (event) => {
+        socket.onmessage = (event) => {
             this.handleMessage(event)
         }
 
-        this.socket.onclose = (event) => {
+        socket.onclose = (event) => {
             console.log('WebSocket connection closed')
         }
 
-        this.socket.onerror = (error) => {
+        socket.onerror = (error) => {
             console.error('WebSocket error:', error)
         }
+
+        this.sockets[type]= socket
     }
 
-    disconnect() {
-        if (!this.socket)
+    disconnect(type) {
+        const socket = this.sockets[type]
+        if (!socket)
             return
         
-        this.socket.close()
-        this.socket = null
+        socket.close()
+        delete this.sockets[type]
     }
 
     handleMessage(event) {
         const message = JSON.parse(event.data)
 
-        const e = new CustomEvent('wsMessage', {detail: message})
+        const e = new CustomEvent('wsMessage', {
+            detail: {
+                message
+            }
+        })
+
         document.dispatchEvent(e)
     }
 
-    sendMessage(message) {
-        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-            this.socket.send(JSON.stringify(message))
+    sendMessage(type, message) {
+        const socket = this.sockets[type]
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify(message))
         }
     }
 

@@ -11,29 +11,41 @@ export class Profile extends AbstractView {
     getHtml() {
         return `
         <nav-component></nav-component>
-        <div class="profile">
-            <div class="flex">
-                <img id="pp" class="pp--large"></img>
+        <div class="grid">
+            <div class="profile">
                 <div>
                     <div class="flex">
-                        <p id="username" class="profile__username"></p>
-                        <button id="logout" class="logout-button">
-                            <img src="/static/assets/power-off.svg" alt="Logout">
-                        </button>
+                        <img id="pp" class="pp--large"></img>
+                        <div>
+                            <div class="flex">
+                                <p id="username" class="profile__username"></p>
+                                <button id="logout" class="logout-button">
+                                    <img src="/static/assets/power-off.svg" alt="Logout">
+                                </button>
+                            </div>
+                            <a href="/login/edit/" id="edit" class="button" data-link>Edit profile</a>
+                        </div>
                     </div>
-                    <a href="/login/edit/" id="edit" class="button" data-link>Edit profile</a>
+                    <p id="bio"></p>
                 </div>
             </div>
-            <p id="bio"></p>
+            <div class="friend-requests">
+                <ul id="friend-requests" class="list"></ul>
+            </div>
+            <div class="games">
+                <ul id="games" class="list"></ul>
+            </div>
+            <div class="search-form">
+                <form id="search-form">
+                    <input type="text" id="search-input" class="search-bar" placeholder="Username..." autocomplete=off></input>
+                    <button type="submit" id="search-submit" class="search-bar__button">Search</button>
+                </form>
+                <ul id="list" class="list"></ul>
+            </div>
+            <div class="friends">
+                <ul id="friends" class="list" class="list"></ul>
+            </div>
         </div>
-        <ul id="games" class="list"></ul>
-        <form id="search-form">
-            <input type="text" id="search-input" class="search-bar" placeholder="Username..." autocomplete=off></input>
-            <button type="submit" id="search-submit" class="search-bar__button">Search</button>
-        </form>
-        <ul id="list" class="list"></ul>
-        <ul id="friend-requests" class="list"></ul>
-        <ul id="friends" class="list" class="list"></ul>
         `
     }
 
@@ -69,7 +81,8 @@ export class Profile extends AbstractView {
             localStorage.removeItem("refresh")
             
             const ws = WebSocketManager.get()
-            ws.disconnect()
+            ws.disconnect('chat')
+            ws.disconnect('friends')
             
             await updateCSRFToken()
             
@@ -182,15 +195,25 @@ export class Profile extends AbstractView {
 
 
     async acceptIncomingFriendRequest(id) {
-        const url = getURL(`api/users/friend-requests/${id}/accept/`)
 
-        try {
-            const data = await apiRequest(url, "POST", {})
-            console.log(data)
+        console.log(id)
 
-        } catch (error) {
-            console.log(error)
-        }
+        const ws = WebSocketManager.get()
+
+        await ws.sendMessage('friends', {
+            'type': 'friend_request_accepted',
+            'sender': id
+        })
+
+        // const url = getURL(`api/users/friend-requests/${id}/accept/`)
+
+        // try {
+        //     const data = await apiRequest(url, "POST", {})
+        //     console.log(data)
+
+        // } catch (error) {
+        //     console.log(error)
+        // }
     }
 
 

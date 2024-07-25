@@ -4,6 +4,9 @@ import { AbstractView } from "./AbstractView.js"
 export class Chat extends AbstractView {
     constructor() {
         super()
+
+        this.handleSearchListener = (event) => this.handleSearch(event)
+        this.receiveMessageListener = (event) => this.receiveMessage(event.detail)
     }
 
     getHtml() {
@@ -22,47 +25,27 @@ export class Chat extends AbstractView {
     }
 
     addEventListeners() {
-        this.getInitialData()
+        this.getRooms()
 
         const input = document.getElementById('input')
-        input.addEventListener('keyup', (event) => this.handleSearch(event))
+
+        input.removeEventListener('keyup', this.handleSearchListener)
+        input.addEventListener('keyup', this.handleSearchListener)
     
-        document.addEventListener('wsMessage', (event) => this.handleReceivedMessage(event))
+        document.removeEventListener('wsMessage', this.receiveMessageListener)
+        document.addEventListener('wsMessage', this.receiveMessageListener)
     }
 
-    async getInitialData() {
+    async getRooms() {
         const url = getURL('api/chat/rooms/')
         
         try {
             const data = await apiRequest(url)
-
             this.displayRooms(data)
             
         } catch (error) {
             console.log(error)
         }
-    }
-    
-
-    async handleSearch(event) {
-        const query = event.target.value
-        
-        const rooms = document.querySelectorAll('.list__item')
-        for (let room of rooms) {
-            const name = room.querySelector('.name').textContent
-            if (query && !name.includes(query)) {
-                room.classList.add('hidden')
-            } else {
-                room.classList.remove('hidden')
-            }
-        }
-    }
-
-    handleReceivedMessage(event) {
-        const message = event.detail
-
-        const rooms = document.querySelectorAll('.room')
-        console.log(message)
     }
 
     displayRooms(rooms) {
@@ -92,5 +75,25 @@ export class Chat extends AbstractView {
         `
         
         container.appendChild(el)
+    }
+    
+
+    async handleSearch(event) {
+        const query = event.target.value
+        
+        const rooms = document.querySelectorAll('.list__item')
+        for (let room of rooms) {
+            const name = room.querySelector('.name').textContent
+            if (query && !name.includes(query)) {
+                room.classList.add('hidden')
+            } else {
+                room.classList.remove('hidden')
+            }
+        }
+    }
+
+    receiveMessage(data) {
+        const rooms = document.querySelectorAll('.room')
+        console.log(data)
     }
 }

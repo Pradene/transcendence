@@ -37,7 +37,7 @@ class ThreadingDict:
                         oneDeleted = True
 
             if oneDeleted:
-                from game.consumer import GameConsumer
+                from game.consumers import GameConsumer
                 oneDeleted = False
                 asyncio.run(GameConsumer.onGameChange())
 
@@ -79,7 +79,7 @@ class ThreadingDict:
 
 
 class GameManager:
-    from game.consumer import GameConsumer
+    from game.consumers import GameConsumer
 
     GAMES: ThreadingDict = ThreadingDict()
     TOURNAMENTS: ThreadingDict = ThreadingDict()
@@ -93,7 +93,7 @@ class GameManager:
         pass
 
     async def createGame(self, player: PlayerInterface) -> Game:
-        from game.consumer import GameConsumer
+        from game.consumers import GameConsumer
         game = Game(player)
         GameManager.GAMES[player.getName()] = game
 
