@@ -111,21 +111,21 @@ class Ball:
             ratio += lratio
 
             # check hit p1 paddle horizontally
-            if turn_vec.x < 0 and self.__hitPlayerHor(p1):
+            if turn_vec.x < 0 and self.__hitP1Hor(p1):
                 self.incrSpeed()
                 self.__revX()
                 turn_vec = self.genVector(modifiers)
             #check hit p1 paddle vertically
-            elif turn_vec.y != 0 and self.__hitPlayerVert(p1):
+            elif turn_vec.y != 0 and self.__hitP2Vert(p1):
                 self.__revY()
                 turn_vec = self.genVector(modifiers)
             # check hit p2 paddle horizontally
-            elif turn_vec.x > 0 and self.__hitPlayerHor(p2):
+            elif turn_vec.x > 0 and self.__hitP2Hor(p2):
                 self.incrSpeed()
                 self.__revX()
                 turn_vec = self.genVector(modifiers)
             # check hit p2 paddle vertically
-            elif turn_vec.y != 0 and self.__hitPlayerVert(p2):
+            elif turn_vec.y != 0 and self.__hitP2Vert(p2):
                 self.__revY()
                 turn_vec = self.genVector(modifiers)
             # check hit right or left wall
@@ -139,8 +139,26 @@ class Ball:
             p1.move(lratio)
             p2.move(lratio)
 
-    def __hitPlayerVert(self, p: PlayerInterface):
-        return self.getY() + BALL_SIZE == p.getY() or self.getY() == p.getY() + PADDLE_HEIGHT
+    def __hitP1Vert(self, p: PlayerInterface):
+        if self.getY() + BALL_SIZE == p.getY() or self.getY() == p.getY() + PADDLE_HEIGHT:
+            if p.getX() - BALL_SIZE <= self.getX() <= p.getX() + PADDLE_WIDTH:
+                return True
+        return False
 
-    def __hitPlayerHor(self, p: PlayerInterface):
+    def __hitP2Vert(self, p: PlayerInterface):
+        if self.getY() + BALL_SIZE == p.getY() or self.getY() == p.getY() + PADDLE_HEIGHT:
+            if p.getX() - BALL_SIZE <= self.getX() <= p.getX + PADDLE_WIDTH:
+                return True
+        return False
+
+    def __hitP1Hor(self, p: PlayerInterface):
+        if self.getX() == p.getX():
+            if p.getY() - BALL_SIZE <= self.getY() <= p.getY() + PADDLE_HEIGHT:
+                return True
+        return False
+    
+    def __hitP2Hor(self, p: PlayerInterface):
+        if self.getX() + BALL_SIZE == p.getX():
+            if p.getY() - BALL_SIZE <= self.getY() <= p.getY() + PADDLE_HEIGHT:
+                return True
         return False
