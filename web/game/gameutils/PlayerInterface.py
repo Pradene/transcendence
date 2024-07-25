@@ -109,16 +109,16 @@ class PlayerInterface:
     def won(self) -> bool:
         return self.__points >= POINTS_TO_WIN
     
-    def move(self):
+    def move(self, ratio: float):
         """Moves the player"""
     
         speed: float = PADDLE_SPEED / self.__ballspeed
         if self.__movement == "UP":
-            self.__position[1] -= speed
+            self.__position[1] -= speed * ratio
             if self.__position[1] < 0:
                 self.__position[1] = 0
         elif self.__movement == "DOWN":
-            self.__position[1] += speed
+            self.__position[1] += speed * ratio
             if self.__position[1] > SCREEN_HEIGHT - PADDLE_HEIGHT:
                 self.__position[1] = SCREEN_HEIGHT - PADDLE_HEIGHT
 
