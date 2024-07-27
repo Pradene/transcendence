@@ -74,15 +74,9 @@
 		transform: translateY(-50%);
 		transition: transform ease-in-out .1s;
 	}
+
 	button {
 		@include btn;
-		width: 100%;
-		color: $sec-color;
-		font-size: 12px;
-		font-family: $main-font;
-		&.active {
-			background-color: $onl-color;
-		}
 	}
 }
 

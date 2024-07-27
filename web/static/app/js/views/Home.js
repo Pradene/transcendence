@@ -11,23 +11,23 @@ export class Home extends AbstractView {
 
         return `
         <nav-component></nav-component>
-        <h1>Hello World</h1>
+        <h1>Hello World</h1><br><br>
         <div class="game-container"> <!-- Game Container, contain the game and the list of available rooms -->
 		    <div class="game-container-header">
-		    	<button class="create-game">Create Game</button> <!-- Create Game Button -->
+		    	<div class="settings">
+					<input type="radio" name="none" id="none">
+		    	    <label for="none">None</label>
+		    	    <input type="radio" name="storm" id="storm">
+		    	    <label for="storm">Storm</label>
+		    	    <input type="radio" name="wind" id="wind">
+		    	    <label for="wind">Wind</label>
+		    	    <input type="radio" name="geo" id="geo">
+		    	    <label for="geo">Geo</label>
+		    	</div>
+				<button class="create-game">Create Game</button> <!-- Create Game Button -->
 		    	<button class="create-tournament">Create Tournament</button> <!-- Create Tournament Button -->
 		    	<button class="refresh-room">Refresh Room</button> <!-- Refresh Room Button -->
-		    	<div class="settings">
-		    	    <label for="none">None</label>
-		    	    <input type="radio" name="none" id="none">
-		    	    <label for="storm">Storm</label>
-		    	    <input type="radio" name="storm" id="storm">
-		    	    <label for="wind">Wind</label>
-		    	    <input type="radio" name="wind" id="wind">
-		    	    <label for="geo">Geo</label>
-		    	    <input type="radio" name="geo" id="geo">
-		    	</div>
-		    </div>
+		    </div><br>
 		    <div class="container">
 		        <div class="user-list"></div>
 		        <div class="game"></div>

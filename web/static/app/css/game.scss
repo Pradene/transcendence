@@ -15,11 +15,6 @@ div.game-container {
 
     button {
       @include btn;
-      background-color: $onl-color;
-      color: $main-color;
-      // &.active {
-      //   background-color: $sec-color;
-      // }
     }
   }
 

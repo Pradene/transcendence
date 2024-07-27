@@ -17,6 +17,7 @@ export class Login extends AbstractView {
     getHtml() {
         return `
         <div class="fp">
+        <canvas id="background-canvas"></canvas>
             <div>
                 <div class="container-xs">
                     <form method="POST" id="login-form" class="form">
@@ -44,11 +45,13 @@ export class Login extends AbstractView {
                     <a href='/signup/' data-link>Sign up</a>
                 </div>
             </div>
-        </div>
-        `
-    }
+            </div>
+            `
+        }
 
-    async addEventListeners() {
+        // <script src="ft_transcendence/web/static/app/js/views/anim.js"></script>
+
+        async addEventListeners() {
 
         const inputs = document.querySelectorAll('.form-input')
         inputs.forEach(input => {
@@ -56,17 +59,30 @@ export class Login extends AbstractView {
                 if (input.value == '') {
                     input.style.transform = "translateY(-50%)"
                     input.nextElementSibling.style.transform = "translateY(-50%) scale(1)"
-                
+
                 } else {
                     input.style.transform = "translateY(-20%)"
                     input.nextElementSibling.style.transform = "translateY(-120%) scale(0.75)"
                 }
-        
+
             })
         })
 
         const form = document.getElementById('login-form')
         form.addEventListener('submit', this.handleSubmit)
+
+        //insert background animation script
+        // const canvas = document.querySelector("#background-canvas");
+        // const script = document.createElement('script');
+        // script.src = "static/scripts/anim/anim-log.js";
+        // canvas.insertAdjacentElement("afterend", script);
+        const script = document.createElement('script')
+        const canvas = document.querySelector('#background-canvas')
+        script.src = 'static/scripts/anim/anim-log.js'
+        script.type = 'application/javascript';
+        window.addEventListener('load', function() {
+            document.body.appendChild(script);
+        });
     }
 
     async handleSubmit(event) {
@@ -75,7 +91,7 @@ export class Login extends AbstractView {
         const username = document.getElementById("username").value
         const password = document.getElementById("password").value
         const csrfToken = getCSRFToken()
-        
+
         try {
             const response = await fetch("/api/user/login/", {
                 method: 'POST',
@@ -85,7 +101,7 @@ export class Login extends AbstractView {
                 },
                 body: JSON.stringify({username, password})
             })
-            
+
             if (response.ok) {
                 const data = await response.json()
                 localStorage.setItem('access', data.access)
@@ -102,7 +118,7 @@ export class Login extends AbstractView {
             } else {
                 console.log('error: Failed to fetch data')
             }
-                
+
         } catch (error) {
             console.log('error: ', error)
         }

@@ -1,4 +1,4 @@
-@import 'var.scss';
+@import 'var';
 
 body {
 	background-color: $main-color;
@@ -8,10 +8,28 @@ body {
 	}
 }
 
-h1, h2, h3, h4, h5, h6,
-p, a, li, span, button {
+h1 {
+	font-family: $main-font;
+	font-weight: 900;
+	font-size: 20px;
+	color: $sec-color;
+	text-align: center;
+}
+
+h2, h3, h4, h5, h6,
+p, a, li, span {
 	font-family: $main-font;
 	font-size: $def-font-size;
+	color: $sec-color;
+}
+
+label {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font-family: $main-font;
+	vertical-align: baseline;
 	color: $sec-color;
 }
 
@@ -48,4 +66,17 @@ p, a, li, span, button {
 	}
 }
 
+#background-canvas {
+	position: absolute;
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	z-index: -1;
+}
+
 @import 'form';
+@import 'nav';
+@import 'reset';
+@import 'utils';
