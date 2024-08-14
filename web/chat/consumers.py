@@ -107,13 +107,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if self.user.id not in user_ids:
             user_ids.append(self.users.id)
 
-        room = await database_sync_to_async(ChatRoom.create)(name=room_name, is_private=is_private, user_ids=user_ids)
-        
+        room, created = await database_sync_to_async(ChatRoom.objects.get_or_create)(
+            name=room_name,
+            is_private=is_private,
+        )
+
+        if created:
+            # Add the users to the room
+            for user_id in user_ids:
+                user = await database_sync_to_async(CustomUser.objects.get)(id=user_id)
+                await database_sync_to_async(room.users.add)(user)
+
+        # Add the user to the channel layer group for real-time messaging
         await self.channel_layer.group_add(
             f'chat_{room.id}',
             self.channel_name
         )
 
+        # Send a confirmation to the group that the room has been created or already exists
         await self.channel_layer.group_send(
             f'chat_{room.id}',
             {

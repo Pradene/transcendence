@@ -1,6 +1,16 @@
 @font-face {
-	font-family: 'Epilogue';
-	src: url('../../fonts/Epilogue-Regular.ttf') format('truetype');
+	font-family: "Epilogue";
+	src: url("../../fonts/Epilogue-Regular.ttf") format("truetype");
+	font-weight: 400;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: "Epilogue";
+	src: url("../../fonts/Epilogue-SemiBold.ttf") format("truetype");
+	font-weight: 700;
+	font-style: normal;
+
 }
 
 :root {
@@ -12,7 +22,7 @@
 	--main-color: #fafafa;
 	--secondary-color: #dbdbdb;
 
-	--main-font-family: Epilogue;
+	--main-font-family: "Epilogue";
 	--default-font-size: 12px;
 	
 	--content-width: 90%;

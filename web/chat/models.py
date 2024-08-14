@@ -24,6 +24,18 @@ class ChatRoom(models.Model):
         if not self.is_private:
             self.users.remove(user)
 
+    def get_last_message(self):
+        last_message = self.messages.order_by('-timestamp').first()
+        if last_message:
+            return last_message
+        return None
+    
+    def get_other_user(self, current_user):
+        if self.is_private:
+            usernames = self.name.split('_')
+            return usernames[1] if usernames[0] == current_user.username else usernames[0]
+        else:
+            return None
 
 class Message(models.Model):
     room = models.ForeignKey(ChatRoom, related_name='messages', on_delete=models.CASCADE)

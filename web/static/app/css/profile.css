@@ -1,0 +1,89 @@
+.grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 16px;
+    width: 100%;
+    margin: auto;
+}
+
+/* Each grid item */
+.grid > div {
+    display: flex;
+    flex-direction: column;
+
+    background-color: var(--secondary-bg-color);
+    border-radius: 12px;
+    padding: 18px 12px;
+
+    overflow: hidden;
+}
+
+.grid > div > h4 {
+    margin-bottom: 8px;
+}
+
+.grid > div > form {
+    margin-bottom: 8px;
+}
+
+.profile {
+    grid-column: span 8;
+    height: 96px;
+}
+
+#games {
+    grid-column: span 8;
+}
+
+.game_player {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: start;
+}
+
+.game_player > p {
+    margin-left: 12px;
+}
+
+.game_score {
+    size: 24px;
+}
+
+.game_opponent {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: end;
+}
+
+.game_opponent > p {
+    margin-right: 12px;
+}
+
+#requests {
+    grid-column: span 4;
+}
+
+#users {
+    grid-column: span 4;
+}
+
+#friends {
+    grid-column: span 8;
+}
+
+.list-container {
+    position: relative;
+    background: var(--main-bg-color);
+    border-radius: 8px;
+    height: 128px;
+}
+
+.list-container > div {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}

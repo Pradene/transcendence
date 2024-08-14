@@ -41,6 +41,8 @@ export class Chat extends AbstractView {
         
         try {
             const data = await apiRequest(url)
+            console.log(data)
+
             this.displayRooms(data)
             
         } catch (error) {
@@ -66,7 +68,7 @@ export class Chat extends AbstractView {
         el.classList.add('list__item')
         el.innerHTML = `
             <a href="/chat/${room.id}/" data-link>
-                <img class="profile-pic" alt="Profile Picture">
+                <img src="${room.picture}" class="profile-pic" alt="Profile Picture">
                 <div class="room-info">
                     <span class="name">${room.name}</span>
                     <span class="latest-message">${message}</span>

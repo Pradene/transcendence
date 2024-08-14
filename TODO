@@ -1,6 +1,3 @@
-- private chat room and public chat room
-  create private chat room when users become friends 
-
 - friends request with websockets
 
 - chat page display messages
@@ -8,8 +5,6 @@
 - profile page
   - make edit profile page
     change: username, pp, bio
-  
-  - see friends with a button
 
 done:
 - game (remote)

@@ -126,3 +126,34 @@ export async function checkLogin() {
         return false
     }
 }
+
+
+export function displayList(items, options) {
+    if (!items || !Array.isArray(items) || items.length === 0) {
+        return
+    }
+
+    const container = document.getElementById(options.containerId)
+    container.innerHTML = ''
+
+    items.forEach(item => {
+        const el = document.createElement("li")
+
+        // Use the provided renderer callback to generate the inner HTML for each list item
+        el.innerHTML = options.renderer(item)
+
+        // Attach event listeners for each action provided in options
+        if (options.actions && Array.isArray(options.actions)) {
+            options.actions.forEach(action => {
+                const button = el.querySelector(action.selector)
+                if (button) {
+                    button.addEventListener("click", async () => {
+                        await action.handler(item)
+                    })
+                }
+            })
+        }
+
+        container.appendChild(el)
+    })
+}

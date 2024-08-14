@@ -102,9 +102,7 @@ export class Signup extends AbstractView {
         container.innerHTML = ""
 
         const el = document.createElement('p')
-        el.innerHTML = `
-            ${error}
-        `
+        el.innerHTML = `${error}`
 
         container.appendChild(el)
     }

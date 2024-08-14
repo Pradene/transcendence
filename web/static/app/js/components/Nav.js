@@ -3,7 +3,7 @@ class NavComponent extends HTMLElement {
         this.innerHTML = `
             <nav>
 	        	<a href='/' data-link>
-	        		<h1>Pong</h1>
+	        		<h1 class="text-900">pong.</h1>
 	        	</a>
 	        	<div>
 	        		<a href='/chat/' data-link>

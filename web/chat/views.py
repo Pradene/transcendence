@@ -15,7 +15,7 @@ def roomsView(request):
     if request.method == "GET":
         try:
             rooms = ChatRoom.objects.filter(users=user)
-            serializer = ChatRoomSerializer(rooms, many=True)
+            serializer = ChatRoomSerializer(rooms, many=True, context={'request': request})
             return JsonResponse(serializer.data, safe=False, status=200)
 
         except Exception as e:
