@@ -1,40 +1,66 @@
 import { AbstractView } from "./AbstractView.js"
 import { Router } from "../Router.js"
 import { apiRequest, getURL, updateCSRFToken, displayList } from "../utils.js"
-import { WebSocketManager } from "../ChatWebSocket.js"
+import { WebSocketManager } from "../WebSocketManager.js"
 
 export class Profile extends AbstractView {
     constructor() {
         super()
+
+        this.profile = null
+        this.games = null
+
+        this.WebSocketMessageListener = (event) => this.WebSocketMessage(event)
+        this.searchUserListener = (event) => this.searchUser(event)
     }
 
     getHtml() {
         return `
         <nav-component></nav-component>
-        <div class="grid">
-            <div id="profile" class="profile"></div>
-            <div id="games">
+        <div id="profile">
+            <div id="profile__info"></div>
+            <div id="profile__dashboard">
+                <div>
+                    <div id="profile__dashboard__winrate">
+                        <div id="profile__dashboard__winrate__indicator"></div>
+                        <p>0%</p>
+                    </div>
+                    <div id="profile__dashboard__info__games">
+                        <p>0</p>
+                        <p>games</p>
+                    </div>
+                    <div id="profile__dashboard__info__wins">
+                        <p>0</p>
+                        <p>wins</p>
+                    </div>
+                    <div id="profile__dashboard__info__loses">
+                    <p>0</> 
+                        <p>loses</p>
+                    </div>
+                </div>
+            </div>
+            <div id="profile__games">
                 <h4 class="text-600">Game history</h4>
                 <div class="list-container">
-                    <div>
+                    <div class="hidden">
                         <p>No games yet, what are you waiting...</p>
                     </div>
                     <ul id="games-list" class="list"></ul>
                 </div>
             </div>
-            <div id="requests">
+            <div id="profile__requests">
                 <h4 class="text-600">Friend requests</h4>
                 <div class="list-container">
-                    <div>
+                    <div id="profile__requests__message" class="hidden">
                         <p>No one wants to be your friend...</p>
                     </div>
                     <ul id="requests-list" class="list"></ul>
                 </div>
             </div>
             <div id="users">
-                <form id="search-form">
-                    <input type="text" id="search-input" class="search-bar" placeholder="Add friends..." autocomplete=off></input>
-                    <button type="submit" id="search-submit" class="search-bar__button">Search</button>
+                <form id="search-user" class="search-bar">
+                    <input type="text" id="search-user-input" placeholder="Add friends..." autocomplete=off></input>
+                    <button type="submit" id="search-submit" class="button">Search</button>
                 </form>
                 <div class="list-container">
                     <div class="hidden">
@@ -56,17 +82,40 @@ export class Profile extends AbstractView {
         `
     }
 
-    addEventListeners() {
+    initView() {
         this.getUser()
         this.getGames()
         this.getFriends()
         this.getFriendRequests()
 
-        const search = document.getElementById("search-form")
-        search.addEventListener("submit", (event) => {
-            event.preventDefault()
-            this.searchUser()
-        })
+        this.addEventListeners()
+    }
+
+
+    addEventListeners() {
+        const search = document.getElementById("search-user")
+        search.addEventListener("submit", this.searchUserListener)
+
+        window.addEventListener('wsMessage', this.WebsocketMessageListener)
+    }
+    
+
+    removeEventListeners() {
+        const search = document.getElementById("search-user")
+        search.removeEventListener("submit", this.searchUserListener)
+        
+        window.removeEventListener('wsMessage', this.WebsocketMessageListener)
+    }
+
+
+    WebSocketMessage(event) {
+        const message = event.message
+        console.log("helo:", message)
+
+        if (message.action == "friend_request_received") {
+            console.log("friend request received")
+            this.displayFriendRequest(message.sender)
+        }
     }
 
 
@@ -75,18 +124,20 @@ export class Profile extends AbstractView {
             const url = getURL("api/users/")
             const profile = await apiRequest(url)
 
-            const container = document.getElementById("profile")
+            this.profile = profile
+
+            const container = document.getElementById("profile__info")
             container.innerHTML = `
-                <div class="flex-centered">
-                    <div class="flex">
-                        <div class="profile-picture profile-picture--large" style="margin-right: 32px;">
+                <div class="conatiner__flex--centered">
+                    <div class="container__flex">
+                        <div class="profile-picture profile-picture--large" style="margin-right: 32px">
                             <img src="${profile.picture}"></img>
                         </div>
                         <div>
                             <h2 class="text-900">${profile.username}</h2>
-                            <div class="flex" style="margin-top: 8px;">
+                            <div class="container__flex" style="margin-top: 8px">
                                 <a href="/profile/edit/" id="edit-profile" class="button" data-link>Edit profile</a>
-                                <button id="logout-button" class="button" style="margin-left: 6px;">
+                                <button id="logout-button" class="button" style="margin-left: 6px">
                                     <img src="/static/assets/power-off.svg" alt="Disconnect Icon">
                                     Disconnect
                                 </button>
@@ -107,16 +158,14 @@ export class Profile extends AbstractView {
 
     // Friends
     async getFriends() {
-        const url = getURL("api/users/friends/")
-
         try {
+            const url = getURL("api/users/friends/")
             const friends = await apiRequest(url)
             console.log("friends:", friends)
             
             const el = document.querySelector("#friends > div > div")
             if (friends.length === 0) {
                 el.classList.remove("hidden")
-                
                 return
             }
 
@@ -125,7 +174,7 @@ export class Profile extends AbstractView {
             const options = {
                 containerId: "friends-list",
                 renderer: (user) => `
-                    <div class="profile-picture" style="margin: 0px 12px;">
+                    <div class="profile-picture" style="margin: 0px 12px">
                         <img src="${user.picture}"></img>
                     </div>
                     <div class="info">
@@ -143,11 +192,21 @@ export class Profile extends AbstractView {
 
 
     async getGames() {
-        const url = getURL("api/games/")
-
         try {
-            const data = await apiRequest(url)
-            console.log("games:", data)
+            const url = getURL("api/games/")
+            const games = await apiRequest(url)
+
+            this.games = games
+
+            console.log("games:", games)
+
+            const el = document.querySelector("#profile__games > div > div")
+            if (games.length === 0) {
+                el.classList.remove("hidden")
+                return
+            }
+
+            el.classList.add("hidden")
 
             const options = {
                 containerId: "games-list",
@@ -168,7 +227,7 @@ export class Profile extends AbstractView {
                 `,
             }
 
-            displayList(data, options)
+            displayList(games, options)
 
         } catch (error) {
             console.log(error)
@@ -179,43 +238,70 @@ export class Profile extends AbstractView {
     // Friends Request //
 
     // Get all the friend requests
-    // maybe need to make it inside of consumer
     async getFriendRequests() {
         try {
             const url = getURL("api/users/friend-requests/")
             const requests = await apiRequest(url)
+            
             console.log("requests:", requests)
 
-            const options = {
-                containerId: "requests-list",
-                renderer: (request) => `
-                    <div class="profile-picture">
-                        <img src="${request.sender.picture}"></img>
-                    </div>
-                    <p class="info">${request.sender.username}</p>
-                    <button class="request-button">Accept</button>
-                `,
-                actions: [
-                    {
-                        selector: ".request-button",
-                        handler: async (request) => {
-                            console.log("request:", request)
-                            await this.acceptIncomingFriendRequest(request.sender.id)
-                        }
-                    },
-                ]
-            }
-
-            displayList(requests, options)
+            const container = document.getElementById("requests-list")
+            container.innerHTML = ''
+            
+            requests.forEach(request => {
+                this.displayFriendRequest(container, request.sender)
+            })
 
         } catch (error) {
             console.log(error)
         }
     }
 
+    displayFriendRequest(container, sender) {
+        const el = document.createElement("li")
+
+        // Use the provided renderer callback to generate the inner HTML for each list item
+        el.innerHTML = `
+            <div class="profile-picture">
+                <img src="${sender.picture}"></img>
+            </div>
+            <p class="info">${sender.username}</p>
+            <div class="flex">
+                <button class="button decline-button">Decline</button>
+                <button class="button accept-button">Accept</button>
+            </div>
+        `
+
+        container.appendChild(el)
+                
+        const acceptButton = el.querySelector(".accept-button")
+        acceptButton.addEventListener("click", async () => {
+            await this.acceptIncomingFriendRequest(sender.id)
+            el.remove()
+            checkAndDisplayEmptyMessage()
+        })
+        
+        const declineButton = el.querySelector(".decline-button")
+        declineButton.addEventListener("click", async () => {
+            await this.declineIncomingFriendRequest(sender.id)
+            el.remove()
+            checkAndDisplayEmptyMessage()
+        })
+        
+
+        const checkAndDisplayEmptyMessage = () => {
+            const emptyMessage = document.getElementById("profile__requests__message")
+            if (container.children.length === 0) {
+                emptyMessage.classList.remove("hidden")
+                
+            } else {
+                emptyMessage.classList.add("hidden")
+            }
+        }
+    }
+
 
     async acceptIncomingFriendRequest(id) {
-        console.log(`acccept friend request from ${id}`)
         const ws = WebSocketManager.get()
 
         await ws.sendMessage('friends', {
@@ -224,11 +310,22 @@ export class Profile extends AbstractView {
         })
     }
 
+    async declineIncomingFriendRequest(id) {
+        const ws = WebSocketManager.get()
+
+        await ws.sendMessage('friends', {
+            'type': 'friend_request_declined',
+            'sender': id
+        })
+    }
+
 
     // Searching users
-    async searchUser() {
+    async searchUser(event) {
+        event.preventDefault()
+
         try {
-            const query = document.getElementById("search-input").value
+            const query = document.getElementById("search-user-input").value
             const url = getURL(`api/users/search/?q=${query}`)
         
             const users = await apiRequest(url)
@@ -278,10 +375,10 @@ export class Profile extends AbstractView {
 
     // Logout
     async logout() {
-        const url = getURL(`api/users/logout/`)
-        const refresh = localStorage.getItem("refresh")
-
         try {
+            const url = getURL(`api/users/logout/`)
+            const refresh = localStorage.getItem("refresh")
+
             await apiRequest(
                 url,
                 "POST",
@@ -297,7 +394,8 @@ export class Profile extends AbstractView {
             
             await updateCSRFToken()
             
-            Router.get().navigate("/login/")
+            const router = Router.get()
+            router.navigate("/login/")
 
         } catch (error) {
             console.log(error)

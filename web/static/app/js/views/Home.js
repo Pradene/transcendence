@@ -35,7 +35,7 @@ export class Home extends AbstractView {
         `
     }
 
-    addEventListeners() {
+    initView() {
         const script = document.createElement('script')
         const appcontainer = document.querySelector('div#app')
         

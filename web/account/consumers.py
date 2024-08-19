@@ -6,10 +6,13 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 
 from .models import FriendRequest, CustomUser
+from .serializers import CustomUserSerializer
 
 class FriendsConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = self.scope["user"]
+
+        logging.info("try to connect to account websocket")
 
         if self.user.is_authenticated:
             await self.channel_layer.group_add(
@@ -18,6 +21,23 @@ class FriendsConsumer(AsyncWebsocketConsumer):
             )
 
             await self.accept()
+            
+            await self.channel_layer.group_send(
+                f'user_{self.user.id}',
+                {
+                    'type': 'connect_response',
+                    'message': 'you are connected to websocket'
+                }
+            )
+
+            logging.info("connected to account websocket")
+
+    async def connect_response(self, event):
+        message = event['message']
+
+        await self.send(text_data=json.dumps({
+            'message': message
+        }))
 
     async def disconnect(self, close_code):
         if self.user.is_authenticated:
@@ -30,6 +50,8 @@ class FriendsConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         data = json.loads(text_data)
         message_type = data['type']
+
+        logging.info(f'{message_type} received')
         
         if message_type == 'friend_request_accepted':
             await self.accept_friend_request(data)
@@ -57,21 +79,22 @@ class FriendsConsumer(AsyncWebsocketConsumer):
             )()
 
             if existing_request:
-                logging.info(f'Friend request already exists from {self.user.username} to {receiver.username}')
+                logging.info(f'Friend request already exists')
                 return  # Exit the function if the friend request already exists
 
 
             friend_request = await database_sync_to_async(FriendRequest.objects.create)(sender=self.user, receiver=receiver)
 
-            logging.info(f'friend request from {self.user.username} to {receiver.username}')
+            receiver_data = CustomUserSerializer(friend_request.receiver).data
+            sender_data = CustomUserSerializer(friend_request.sender).data
 
             await self.channel_layer.group_send(
                 f'user_{friend_request.sender.id}',
                 {
                     'type': 'friend_request_response',
                     'action': 'friend_request_sended',
-                    'receiver_id': self.user.id,
-                    'sender_id': friend_request.sender.id
+                    'receiver': receiver_data,
+                    'sender': sender_data
                 }
             )
 
@@ -79,9 +102,9 @@ class FriendsConsumer(AsyncWebsocketConsumer):
                 f'user_{friend_request.receiver.id}',
                 {
                     'type': 'friend_request_response',
-                    'action': 'friend_request_sended',
-                    'receiver_id': self.user.id,
-                    'sender_id': friend_request.sender.id
+                    'action': 'friend_request_received',
+                    'receiver': receiver_data,
+                    'sender': sender_data
                 }
             )
 
@@ -99,13 +122,16 @@ class FriendsConsumer(AsyncWebsocketConsumer):
 
             await database_sync_to_async(friend_request.accept)()
 
+            receiver_data = CustomUserSerializer(friend_request.receiver).data
+            sender_data = CustomUserSerializer(friend_request.sender).data
+
             await self.channel_layer.group_send(
                 f'user_{friend_request.sender.id}',
                 {
                     'type': 'friend_request_response',
                     'action': 'friend_request_accepted',
-                    'receiver_id': self.user.id,
-                    'sender_id': friend_request.sender.id
+                    'receiver': receiver_data,
+                    'sender': sender_data
                 }
             )
 
@@ -114,8 +140,8 @@ class FriendsConsumer(AsyncWebsocketConsumer):
                 {
                     'type': 'friend_request_response',
                     'action': 'friend_request_accepted',
-                    'receiver_id': self.user.id,
-                    'sender_id': friend_request.sender.id
+                    'receiver': receiver_data,
+                    'sender': sender_data
                 }
             )
 
@@ -147,6 +173,9 @@ class FriendsConsumer(AsyncWebsocketConsumer):
                 receiver_id=receiver_id
             )
 
+            receiver_data = CustomUserSerializer(friend_request.receiver).data
+            sender_data = CustomUserSerializer(friend_request.sender).data
+
             # Delete the friend request
             await database_sync_to_async(friend_request.delete)()
 
@@ -156,8 +185,8 @@ class FriendsConsumer(AsyncWebsocketConsumer):
                 {
                     'type': 'friend_request_response',
                     'action': 'friend_request_declined',
-                    'receiver_id': friend_request.receiver.id,
-                    'sender_id': friend_request.sender.id
+                    'receiver': receiver_data,
+                    'sender': sender_data
                 }
             )
 
@@ -166,8 +195,8 @@ class FriendsConsumer(AsyncWebsocketConsumer):
                 {
                     'type': 'friend_request_response',
                     'action': 'friend_request_declined',
-                    'receiver_id': friend_request.receiver.id,
-                    'sender_id': friend_request.sender.id
+                    'receiver': receiver_data,
+                    'sender': sender_data
                 }
             )
 
@@ -178,8 +207,12 @@ class FriendsConsumer(AsyncWebsocketConsumer):
 
 
     async def friend_request_response(self, data):
+        action = data['action']
+        receiver = data['receiver']
+        sender = data['sender']
+
         await self.send(text_data=json.dumps({
-            'action': data['action'],
-            'receiver_id': data['receiver_id'],
-            'sender_id': data['sender_id']
+            'action': action,
+            'receiver': receiver,
+            'sender': sender
         }))

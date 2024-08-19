@@ -21,7 +21,7 @@ export class ChatCreate extends AbstractView {
         `
     }
 
-    addEventListeners() {
+    initView() {
         this.getFriends()
         
         const input = document.getElementById('input')

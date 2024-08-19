@@ -3,11 +3,12 @@
 @import "utils.css";
 @import "nav.css";
 @import "profile.css";
-@import "list.css";
-@import "form.css";
+@import "registration.css";
+@import "chat.css";
+@import "chatroom.css";
 
 body {
-	background-color: var(--main-bg-color);
+	background-color: var(--primary-color);
 	
 	font-family: "Epilogue";
 	font-weight: 400;
@@ -17,7 +18,7 @@ h1, h2, h3, h4, h5, h6,
 p, a, li, span, button {
 	font-family: var(--main-font-family);
 	font-size: var(--default-font-size);
-	color: var(--main-color);
+	color: var(--text-color);
 }
 
 #app {

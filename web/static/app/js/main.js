@@ -6,7 +6,7 @@ import { ChatRoom } from './views/ChatRoom.js'
 import { Profile } from './views/Profile.js'
 import { Login } from './views/Login.js'
 import { Signup } from "./views/Signup.js"
-import { WebSocketManager } from "./ChatWebSocket.js"
+import { WebSocketManager } from "./WebSocketManager.js"
 
 import './components/Nav.js'
 import { initCSRFToken } from "./utils.js"

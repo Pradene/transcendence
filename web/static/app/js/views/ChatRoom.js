@@ -1,44 +1,59 @@
 import { AbstractView } from "./AbstractView.js"
 import { getURL, apiRequest } from "../utils.js"
-import { WebSocketManager } from "../ChatWebSocket.js"
+import { WebSocketManager } from "../WebSocketManager.js"
 
 export class ChatRoom extends AbstractView {
     constructor() {
         super()
 
-        this.sendMessageListener = (event) => {
-            event.preventDefault()
-            this.sendMessage()
-        }
+        this.sendMessageListener = (event) => this.sendMessage(event)
         
-        this.receiveMessageListener = (event) => this.receiveMessage(event.detail)
+        this.WebsocketMessageListener = (event) => this.WebsocketMessage(event.detail)
     }
 
     getHtml() {
         return `
-        <nav-component></nav-component>
-        <div id="chatroom">
-            <div id="messages"></div>
-            <div id="message-form-container">
-                <form id="message-form">
-                    <input type="text" id="message-input" placeholder="Message..." autocomplete=off></input>
-                    <button type="submit" id="message-submit">Send</button>
+            <nav-component></nav-component>
+            <div id="chatroom">
+                <div id="chatroom__messages"></div>
+                <form id="chatroom__form">
+                    <label class="search-bar">
+                        <input type="text" placeholder="Write a message..." autocomplete=off></input>
+                    </label>
+                    <button type="submit" class="button" style="margin-left: 12px;">Send</button>
                 </form>
             </div>
-        </div>
         `
     }
 
+    initView() {
+        this.getMessages() 
+        
+        this.addEventListeners()
+    }
+    
     addEventListeners() {
-        this.getMessages()
-        
-        const form = document.getElementById('message-form')
-        
-        form.removeEventListener('submit', this.sendMessageListener)
+        const form = document.getElementById('chatroom__form')
         form.addEventListener('submit', this.sendMessageListener)
         
-        document.removeEventListener('wsMessage', this.receiveMessageListener)
-        document.addEventListener('wsMessage', this.receiveMessageListener)
+        window.addEventListener('wsMessage', this.WebsocketMessageListener)
+    }
+
+    removeEventListeners() {
+        const form = document.getElementById('chatroom__form')
+        form.removeEventListener('submit', this.sendMessageListener)
+
+        window.removeEventListener('wsMessage', this.WebsocketMessageListener)
+    }
+
+
+    WebsocketMessage(event) {
+        const message = event.message
+        console.log("chatroom message", message)
+
+        if (message.action == "message" && message.room == this.getRoomID()) {
+            this.displayMessage(message)
+        }
     }
 
 
@@ -47,18 +62,23 @@ export class ChatRoom extends AbstractView {
         const url = getURL(`api/chat/rooms/${roomID}/`)
 
         try {
-            const data = await apiRequest(url)
-            console.log(data)
-            this.displayMessages(data)
-    
+            const messages = await apiRequest(url)
+            console.log(messages)
+
+            messages.forEach(message => {
+                this.displayMessage(message)
+            })
+
         } catch (error) {
             console.log(error)
         }
     }
 
 
-    async sendMessage() {
-        const input = document.getElementById('message-input')
+    async sendMessage(event) {
+        event.preventDefault()
+
+        const input = document.querySelector('#chatroom__form input')
         const value = input.value
         const roomID = this.getRoomID()
 
@@ -74,24 +94,6 @@ export class ChatRoom extends AbstractView {
         }
     }
 
-
-    receiveMessage(data) {
-        const message = data.message
-        console.log(message)
-
-        if (message.action == "message"
-        && message.room == this.getRoomID()) {
-            this.displayMessage(message)
-        }
-    }
-
-
-    displayMessages(messages) {
-        if (!messages)
-            return
-
-        messages.forEach(message => this.displayMessage(message))
-    }
     
     displayMessage(message) {
         if (!message)
@@ -99,11 +101,13 @@ export class ChatRoom extends AbstractView {
 
         const username = message.user
         const content = message.content
-        
-        const container = document.getElementById('messages')
+
+        const container = document.getElementById('chatroom__messages')
 
         const el = document.createElement('div')
-        el.classList.add('message')
+        el.classList.add('chatroom__message')
+        el.classList.add('sender')
+
         el.innerHTML = `
             <div>
                 <h5>${username}</h5>

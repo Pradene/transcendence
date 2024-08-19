@@ -12,10 +12,14 @@ export class AbstractView {
 
     getHtml() {}
 
+    initView() {}
+
     addEventListeners() {}
+
+    removeEventListeners() {}
 
     render(container) {
         container.innerHTML = this.getHtml()
-        this.addEventListeners()
+        this.initView()
     }
 }

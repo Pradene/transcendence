@@ -7,6 +7,7 @@ from channels.db import database_sync_to_async
 from account.models import CustomUser
 from .models import ChatRoom, Message
 from .serializers import ChatRoomSerializer
+from .utils.elapsed_time import elapsed_time
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -71,17 +72,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             room = await database_sync_to_async(ChatRoom.objects.get)(id=room_id)
 
-            await self.save_message(room, self.user, content)
-
-            logging.info(f'{self.user.username}')
+            message = await self.save_message(room, self.user, content)
+            message_time = elapsed_time(message.timestamp)
 
             await self.channel_layer.group_send(
                 f'chat_{room.id}',
                 {
                     'type': 'message_response',
-                    'room': room.id,
-                    'user': self.user.username,
-                    'content': content
+                    'room': message.room.id,
+                    'user': message.user.username,
+                    'content': message.content,
+                    'elapsed_time': message_time
                 }
             )
 
@@ -95,7 +96,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'action': 'message',
             'room': data['room'],
             'user': data['user'],
-            'content': data['content']
+            'content': data['content'],
+            'elapsed_time': data['elapsed_time']
         }))
 
 
@@ -218,3 +220,5 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def save_message(self, room, user, message):
         message = Message.objects.create(room=room, user=user, content=message)
         message.save()
+
+        return message

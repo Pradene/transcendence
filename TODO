@@ -1,10 +1,12 @@
-- friends request with websockets
-
 - chat page display messages
 
 - profile page
   - make edit profile page
     change: username, pp, bio
+
+- profile page for all users
+
+- messages pagination
 
 done:
 - game (remote)

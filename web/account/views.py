@@ -64,39 +64,39 @@ def getFriendRequestsView(request):
     return JsonResponse(serializer.data, safe=False, status=200)
 
 
-@jwt_required
-@require_POST
-def sendFriendRequestView(request, user_id):
-    sender = request.user
-    receiver = CustomUser.objects.get(id=user_id)
+# @jwt_required
+# @require_POST
+# def sendFriendRequestView(request, user_id):
+#     sender = request.user
+#     receiver = CustomUser.objects.get(id=user_id)
 
-    if sender == receiver:
-        return JsonResponse({"error": "You cannot send to yourself"}, status=400)
+#     if sender == receiver:
+#         return JsonResponse({"error": "You cannot send to yourself"}, status=400)
 
-    if FriendRequest.objects.filter(sender=sender, receiver=receiver):
-        return JsonResponse({"error": "A friend request alreay exists"}, status=400)
+#     if FriendRequest.objects.filter(sender=sender, receiver=receiver):
+#         return JsonResponse({"error": "A friend request alreay exists"}, status=400)
     
-    elif FriendRequest.objects.filter(sender=receiver, receiver=sender):
-        return JsonResponse({"error": "A friend request alreay exists"}, status=400)
+#     elif FriendRequest.objects.filter(sender=receiver, receiver=sender):
+#         return JsonResponse({"error": "A friend request alreay exists"}, status=400)
     
-    else:
-        friend_request = FriendRequest.objects.create(sender=sender, receiver=receiver)
-        serializer = FriendRequestSerializer(friend_request)
-        return JsonResponse(serializer.data, safe=False, status=200)
+#     else:
+#         friend_request = FriendRequest.objects.create(sender=sender, receiver=receiver)
+#         serializer = FriendRequestSerializer(friend_request)
+#         return JsonResponse(serializer.data, safe=False, status=200)
 
 
-@jwt_required
-@require_POST
-def acceptFriendRequestView(request, user_id):
-    receiver = request.user
-    try:
-        sender = CustomUser.objects.get(id=user_id)
-        friend_request = FriendRequest.objects.get(receiver=receiver, sender=sender)
-        friend_request.accept()
-        return JsonResponse({"message": "friend request accepted"}, status=200)
+# @jwt_required
+# @require_POST
+# def acceptFriendRequestView(request, user_id):
+#     receiver = request.user
+#     try:
+#         sender = CustomUser.objects.get(id=user_id)
+#         friend_request = FriendRequest.objects.get(receiver=receiver, sender=sender)
+#         friend_request.accept()
+#         return JsonResponse({"message": "friend request accepted"}, status=200)
         
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=400)
+#     except Exception as e:
+#         return JsonResponse({"error": str(e)}, status=400)
 
 
 # Registration

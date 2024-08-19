@@ -128,6 +128,14 @@ export async function checkLogin() {
 }
 
 
+export function truncateString(string, maxLength) {
+    if (string.length > maxLength)
+        return string.substring(0, maxLength) + "..."
+
+    return string
+}
+
+
 export function displayList(items, options) {
     if (!items || !Array.isArray(items) || items.length === 0) {
         return
@@ -141,6 +149,7 @@ export function displayList(items, options) {
 
         // Use the provided renderer callback to generate the inner HTML for each list item
         el.innerHTML = options.renderer(item)
+        container.appendChild(el)
 
         // Attach event listeners for each action provided in options
         if (options.actions && Array.isArray(options.actions)) {
@@ -153,7 +162,5 @@ export function displayList(items, options) {
                 }
             })
         }
-
-        container.appendChild(el)
     })
 }

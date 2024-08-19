@@ -8,6 +8,8 @@ export class Router {
         this.routes = routes
         this.container = container
         
+        this.currentView = null
+        
         Router.instance = this
     }
 
@@ -38,6 +40,11 @@ export class Router {
         if (matchedRoute) {
             const view = matchedRoute.route.view
 
+            if (this.currentView && typeof this.currentView.removeEventListeners === "function") {
+                console.log("remove event listeners")
+                this.currentView.removeEventListeners()
+            }
+
             // return login if the user isn't logged in
             if (view.isProtected() && !isAuthenticated) {
                 this.navigate('/login/')
@@ -46,6 +53,7 @@ export class Router {
             } else {
                 this.container.innerHTML = ''
                 view.render(this.container)
+                this.currentView = view
             }
         }
     }

@@ -12,8 +12,8 @@ urlpatterns = [
     path('friends/', views.getFriendsView),
 
     path('friend-requests/', views.getFriendRequestsView),
-    path('friend-requests/<int:user_id>/', views.sendFriendRequestView),
-    path('friend-requests/<int:user_id>/accept/', views.acceptFriendRequestView),
+    # path('friend-requests/<int:user_id>/', views.sendFriendRequestView),
+    # path('friend-requests/<int:user_id>/accept/', views.acceptFriendRequestView),
     # path('friend-requests/<int:user_id>/decline/', views.declineFriendRequestView)
 
     path('search/', views.searchUsersView),
