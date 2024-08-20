@@ -28,3 +28,44 @@ p, a, li, span, button {
 	margin-left: auto;
 	margin-right: auto;
 }
+
+.grid {
+	display: grid;
+	grid-template-columns: repeat(8, 1fr);
+
+	overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    height: 90vh;
+	width: 100%;
+
+	border-radius: 18px;
+}
+
+.grid > .grid__item {
+	background: var(--secondary-color);
+
+	border-radius: 18px;
+}
+
+.grid > .grid__item > .top {
+	padding: 12px;
+
+    border-radius: 18px;
+    box-shadow: 0px 4px 12px var(--primary-color);
+    background: var(--secondary-color);
+}
+
+.grid > .grid__item > .main {
+	flex: 1;
+}
+
+
+.grid > .grid__item > .bottom {
+	padding: 12px;
+
+    border-radius: 18px;
+    box-shadow: 0px -4px 12px var(--primary-color);
+    background: var(--secondary-color);
+}

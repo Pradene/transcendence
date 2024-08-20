@@ -2,7 +2,6 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, Permis
 from django.conf import settings
 from django.db import models
 
-
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, password=None, **extra_fields):
         """
@@ -94,6 +93,12 @@ class FriendRequest(models.Model):
 
     def decline(self):
         self.delete()
+
+
+class Block(models.Model):
+    blocker = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="blockeds", on_delete=models.CASCADE)
+    blocked = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="blockers", on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
 
 
 class BlackListedToken(models.Model):

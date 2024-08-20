@@ -41,7 +41,6 @@ export class Router {
             const view = matchedRoute.route.view
 
             if (this.currentView && typeof this.currentView.removeEventListeners === "function") {
-                console.log("remove event listeners")
                 this.currentView.removeEventListeners()
             }
 

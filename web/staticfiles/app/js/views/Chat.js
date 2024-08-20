@@ -12,14 +12,16 @@ export class Chat extends AbstractView {
     getHtml() {
         return `
             <nav-component></nav-component>
-            <div class="chat">
-                <div class="chat__search">
-                    <label class="search-bar">
-                        <input type="text" id="input" class="search-bar" placeholder="Search" autocomplete="off"></input>
-                    </label>
-                </div>
-                <div>
-                    <ul id="chat__rooms"></ul>
+            <div class="grid">
+                <div id="chat" class="grid__item">
+                    <div class="top">
+                        <label class="search-bar">
+                            <input type="text" id="input" class="search-bar" placeholder="Search" autocomplete="off"></input>
+                        </label>
+                    </div>
+                    <div class="main">
+                        <ul id="chat__rooms"></ul>
+                    </div>
                 </div>
             </div>
         `
@@ -65,8 +67,10 @@ export class Chat extends AbstractView {
         if (!room)
             return
 
-        const room_message = truncateString(room.last_message.content, 20)
-        const message = (room.last_message ? room_message : "Send a message...")
+        const message = (room.last_message ? 
+            truncateString(room.last_message.content, 20) : 
+            "Send a message..."
+        )
         
         const el = document.createElement("li")
         el.classList.add("chat__room")

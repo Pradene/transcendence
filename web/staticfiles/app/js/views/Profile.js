@@ -10,8 +10,8 @@ export class Profile extends AbstractView {
         this.profile = null
         this.games = null
 
-        this.WebSocketMessageListener = (event) => this.WebSocketMessage(event)
         this.searchUserListener = (event) => this.searchUser(event)
+        this.WebSocketMessageListener = (event) => this.WebSocketMessage(event.detail)
     }
 
     getHtml() {
@@ -96,7 +96,7 @@ export class Profile extends AbstractView {
         const search = document.getElementById("search-user")
         search.addEventListener("submit", this.searchUserListener)
 
-        window.addEventListener('wsMessage', this.WebsocketMessageListener)
+        window.addEventListener('wsMessage', this.WebSocketMessageListener)
     }
     
 
@@ -104,17 +104,16 @@ export class Profile extends AbstractView {
         const search = document.getElementById("search-user")
         search.removeEventListener("submit", this.searchUserListener)
         
-        window.removeEventListener('wsMessage', this.WebsocketMessageListener)
+        window.removeEventListener('wsMessage', this.WebSocketMessageListener)
     }
 
 
     WebSocketMessage(event) {
         const message = event.message
-        console.log("helo:", message)
 
         if (message.action == "friend_request_received") {
-            console.log("friend request received")
-            this.displayFriendRequest(message.sender)
+            const container = document.getElementById("requests-list")
+            this.displayFriendRequest(container, message.sender)
         }
     }
 
@@ -258,6 +257,8 @@ export class Profile extends AbstractView {
     }
 
     displayFriendRequest(container, sender) {
+        console.log(sender)
+
         const el = document.createElement("li")
 
         // Use the provided renderer callback to generate the inner HTML for each list item

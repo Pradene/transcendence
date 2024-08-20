@@ -1,20 +1,4 @@
-.chat {
-    overflow: hidden;
-
-    height: 90vh;
-
-    border-radius: 18px;
-    background: var(--secondary-color);
-}
-
-.chat__search {
-    padding: 12px;
-    margin-bottom: 8px;
-
-    border-radius: 0px 0px 18px 18px;
-    box-shadow: 0px 4px 12px var(--primary-color);
-    background: var(--secondary-color);
-}
+.chat
 
 .chat__room a {
     display: flex;

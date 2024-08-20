@@ -21,23 +21,7 @@ class FriendsConsumer(AsyncWebsocketConsumer):
             )
 
             await self.accept()
-            
-            await self.channel_layer.group_send(
-                f'user_{self.user.id}',
-                {
-                    'type': 'connect_response',
-                    'message': 'you are connected to websocket'
-                }
-            )
 
-            logging.info("connected to account websocket")
-
-    async def connect_response(self, event):
-        message = event['message']
-
-        await self.send(text_data=json.dumps({
-            'message': message
-        }))
 
     async def disconnect(self, close_code):
         if self.user.is_authenticated:

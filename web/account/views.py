@@ -8,12 +8,12 @@ from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 
-from .models import CustomUser, BlackListedToken, FriendList, FriendRequest
-from .utils import create_access_token, create_refresh_token, decode_token
-from .serializers import FriendRequestSerializer, CustomUserSerializer
 from config import settings
 from config.decorators import jwt_required
 
+from .models import CustomUser, BlackListedToken, FriendList, FriendRequest
+from .serializers import FriendRequestSerializer, CustomUserSerializer
+from .utils.token import create_access_token, create_refresh_token, decode_token
 
 @jwt_required
 @require_GET

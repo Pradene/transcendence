@@ -4,10 +4,10 @@ export class WebSocketManager {
     constructor() {
         if (WebSocketManager.instance) return WebSocketManager.instance
 
+        WebSocketManager.instance = this
+        
         this.sockets = {}
         this.pendingMessages = {} // Queue messages until the socket is open
-
-        WebSocketManager.instance = this
 
         this.reconnectAllSockets()
     }
@@ -16,12 +16,15 @@ export class WebSocketManager {
         const socket = new WebSocket(url)
 
         socket.onopen = (event) => {
-            console.log('WebSocket connection established')
             this.flushPendingMessages(type)
+            
+            console.log('WebSocket connection established')
         }
 
         socket.onmessage = (event) => {
             this.handleMessage(event)
+        
+            console.log("WebSocket message")
         }
 
         socket.onclose = (event) => {

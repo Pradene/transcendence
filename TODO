@@ -1,4 +1,4 @@
-- chat page display messages
+- check if a friend request between user already exists or if they are already friends
 
 - profile page
   - make edit profile page
@@ -6,7 +6,7 @@
 
 - profile page for all users
 
-- messages pagination
+- messages, friends pagination
 
 done:
 - game (remote)
