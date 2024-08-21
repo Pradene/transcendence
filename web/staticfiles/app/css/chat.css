@@ -1,24 +1,6 @@
-.chat
-
-.chat__room a {
-    display: flex;
-    align-items: center;
-
-    border-radius: 12px;
-    background: var(--secondary-color);
-
-    padding: 12px;
-    margin: 0px 6px;
-}
-
-.chat__room a:hover {
-    background: var(--third-color);
-    transition: background 0.2s;
-}
-
-.chat__room__info {
-    flex: 1;
-    margin-left: 16px;
+#chat {
+    grid-column: span 8;
+    grid-row: span 8;
 }
 
 .chat__room__name {

@@ -1,52 +1,41 @@
 #profile {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 16px;
-    width: 100%;
-    margin: auto;
+    grid-column: 1 / 5;
+    grid-row: 1 / 2;
 }
 
-/* Each grid item */
-#profile > div {
-    display: flex;
-    flex-direction: column;
-
-    padding: 10px 0px;
-
-    overflow: hidden;
+#friends {
+    grid-column: 1 / 5;
+    grid-row: 2 / 4;
 }
 
-#profile__info {
-    grid-column: span 8;
-    height: 96px;
+#requests {
+    grid-column: 1 / 5;
+    grid-row: 4 / 6;
 }
 
-#profile__dashboard {
-    grid-column: span 8;
-    height: 200px;
+#users {
+    grid-column: 1 / 5;
+    grid-row: 6 / 9;
 }
 
-#profile__dashboard > div {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+#stats {
+    grid-column: 5 / 9;
+    grid-row: 1 / 5;
 }
 
-#profile__dashboard__winrate {
+#games {
+    grid-column: 5 / 9;
+    grid-row: 5 / 9;
+}
+
+#stats__winrate {
     height: 150px;
     width: 150px;
 
     position: relative;
 }
 
-#profile__dashboard__winrate p {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -40%);
-}
-
-#profile__dashboard__winrate__indicator {
+#stats__winrate > div {
     --win-rate: 0;
     width: inherit;
     height: inherit;
@@ -60,71 +49,13 @@
     -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 0) 60%, black 61%);
 }
 
-#profile__dashboard__winrate p {
-    font-family: "Epilogue";
-    font-weight: 600;
-    font-size: 24px;
-}
-
-#profile__dashboard__info {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-#profile__games {
-    grid-column: span 8;
-}
-
-.game_player {
-    display: flex;
-    flex: 1;
-    align-items: center;
-    justify-content: start;
-}
-
-.game_player > p {
-    margin-left: 12px;
-}
-
-.game_score {
-    size: 24px;
-}
-
-.game_opponent {
-    display: flex;
-    flex: 1;
-    align-items: center;
-    justify-content: end;
-}
-
-.game_opponent > p {
-    margin-right: 12px;
-}
-
-#profile__requests {
-    grid-column: span 4;
-}
-
-#users {
-    grid-column: span 4;
-}
-
-#friends {
-    grid-column: span 8;
-}
-
-.list-container {
-    position: relative;
-    background: var(--main-bg-color);
-    border-radius: 8px;
-    height: 128px;
-}
-
-.list-container > div {
+#stats__winrate > p {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
+    transform: translate(-50%, -40%);
+
+    font-family: "Epilogue";
+    font-weight: 600;
+    font-size: 24px;
 }

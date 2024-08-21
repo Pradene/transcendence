@@ -5,6 +5,7 @@ from account.models import CustomUser
 
 class ChatRoom(models.Model):
     name = models.CharField(max_length=255)
+    picture = models.ImageField(upload_to='room_pictures/', default="room_pictures/default.png", blank=True, null=True)
     is_private =  models.BooleanField(default=True)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="rooms")
     

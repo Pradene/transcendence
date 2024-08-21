@@ -9,6 +9,8 @@ from config.decorators import jwt_required
 from .models import ChatRoom, Message
 from .serializers import ChatRoomSerializer, MessageSerializer
 
+from .utils.elapsed_time import elapsed_time
+
 @jwt_required
 def roomsView(request):
     user = request.user
@@ -50,9 +52,40 @@ def roomView(request, room_id):
     )
 
     messages = Message.objects.filter(room=room).order_by('timestamp')
-    serializer = MessageSerializer(messages, many=True)
+    messages_data = [{
+        'user_id': message.user.id,
+        'username': message.user.username,
+        'picture': message.user.picture.url if message.user.picture else None,
+        'content': message.content,
+        'timestamp': elapsed_time(message.timestamp)
+    } for message in messages]
 
-    return JsonResponse(serializer.data, safe=False, status=200)
+    users = room.users.all()
+    users_data = [{
+        'id': user.id,
+        'username': user.username,
+        'profile_picture': user.picture.url if user.picture else None,
+    } for user in users]
+
+    if room.is_private:
+        other_user = room.users.exclude(id=user.id).first()
+        if not other_user:
+            return JsonResponse({'error': 'no other user found in this room'}, status=400)
+        room_name = other_user.username
+        room_picture = user.picture.url if user.picture else None
+
+    else:
+        room_name = room.name
+        room_picture = room.picture
+
+    data = {
+        'room_name': room_name,
+        'room_picture': room_picture,
+        'users': users_data,
+        'messages': messages_data
+    }
+    
+    return JsonResponse(data, status=200)
 
 
 @jwt_required

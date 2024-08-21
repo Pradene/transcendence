@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {path: '/chat/:id/', view: new ChatRoom()},
         {path: '/login/', view: new Login()},
         {path: '/signup/', view: new Signup()},
-        {path: '/profile/', view: new Profile()},
+        {path: '/user/:id/', view: new Profile()},
     ])
 
     router.init()

@@ -1,7 +1,21 @@
 import { Router } from "./Router.js"
+// import { jwt_decode } from "jwt-decode"
 
 export function getURL(url) {
     return "https://" + location.hostname + ":" + location.port + "/" + url
+}
+
+export function getUserID() {
+    // const token = localStorage.getItem("access")
+
+    // if (token) {
+    //     console.log(token)
+    //     const decodedToken = jwt_decode(token)
+    //     console.log("decode", decodedToken)
+    //     return decodedToken.user_id
+    // }
+
+    return localStorage.getItem("user_id")
 }
 
 // CSRF Tokens utils
@@ -133,34 +147,4 @@ export function truncateString(string, maxLength) {
         return string.substring(0, maxLength) + "..."
 
     return string
-}
-
-
-export function displayList(items, options) {
-    if (!items || !Array.isArray(items) || items.length === 0) {
-        return
-    }
-
-    const container = document.getElementById(options.containerId)
-    container.innerHTML = ''
-
-    items.forEach(item => {
-        const el = document.createElement("li")
-
-        // Use the provided renderer callback to generate the inner HTML for each list item
-        el.innerHTML = options.renderer(item)
-        container.appendChild(el)
-
-        // Attach event listeners for each action provided in options
-        if (options.actions && Array.isArray(options.actions)) {
-            options.actions.forEach(action => {
-                const button = el.querySelector(action.selector)
-                if (button) {
-                    button.addEventListener("click", async () => {
-                        await action.handler(item)
-                    })
-                }
-            })
-        }
-    })
 }

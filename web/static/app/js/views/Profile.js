@@ -18,14 +18,14 @@ export class Profile extends AbstractView {
         <div class="grid">
             <div id="profile" class="grid__item center">
                 <div class="container__flex">
-                    <div id="profile-picture" class="profile-picture profile-picture--large" style="margin-left: 16px;">
+                    <div id="profile-picture" class="profile-picture profile-picture--large ml__12">
                         <img></img>
                     </div>
-                    <div style="margin-left: 16px;">
+                    <div class="ml__12">
                         <h2 id="username" class="text-900"></h2>
-                        <div class="container__flex" style="margin-top: 8px">
+                        <div class="container__flex mt__8">
                             <a href="/profile/edit/" id="edit-profile" class="button" data-link>Edit profile</a>
-                            <button id="logout-button" class="button" style="margin-left: 6px">
+                            <button id="logout-button" class="button ml__8">
                                 <img src="/static/assets/power-off.svg" alt="Disconnect Icon">
                             </button>
                         </div>
@@ -56,26 +56,34 @@ export class Profile extends AbstractView {
                 <div class="top">
                     <h4 class="text-600">Game history</h4>
                 </div>
-                <ul id="games__list" class="main list"></ul>
+                <div class="main">
+                    <ul id="games__list" class="list"></ul>
+                </div>
             </div>
             <div id="requests" class="grid__item">
                 <div class="top">
                     <h4 class="text-600">Friend requests</h4>
                 </div>
-                <ul id="requests__list" class="main list"></ul>
+                <div class="main">
+                    <ul id="requests__list" class="list"></ul>
+                </div>
             </div>
             <div id="users" class="grid__item">
                 <form id="search-user" class="top search-bar">
                     <input type="text" id="search-user-input" placeholder="Add friends..." autocomplete=off></input>
                     <button type="submit" id="search-submit" class="button">Search</button>
                 </form>
-                <ul id="users__list" class="main list"></ul>
+                <div class="main">
+                    <ul id="users__list" class="list"></ul>
+                </div>
             </div>
             <div id="friends" class="grid__item">
                 <div class="top">
                     <h4 class="text-600">Friends</h4>
                 </div>
-                <ul id="friends__list" class="main list"></ul>
+                <div class="main">
+                    <ul id="friends__list" class="list"></ul>
+                </div>
             </div>
         </div>
         `
@@ -165,7 +173,7 @@ export class Profile extends AbstractView {
             <div class="profile-picture">
                 <img src="${friend.picture}"></img>
             </div>
-            <div class="main">
+            <div class="main ml__12">
                 <p>${friend.username}</p>
             </div>
         `
@@ -192,19 +200,20 @@ export class Profile extends AbstractView {
 
     displayGame(container, game) {
         const el = document.createElement("li")
+        el.classList.add("list__item")
 
         el.innerHTML = `
-            <div class="game_player">
-                <div class="profile-picture">
+            <div class="container__flex start">
+                <div class="profile-picture mr__12">
                     <img src="${game.player.picture}"></img>
                 </div>
-                <p class="info">${game.player.username}</p>
+                <p>${game.player.username}</p>
             </div>
-            <div class="game_score">${game.player_score} VS ${game.opponent_score}</div>
-            <div class="game_opponent">
-                <p class="info">${game.opponent.username}</p>
-                <div class="profile-picture">
-                    <img src="${game.opponent.picture}" class="pp"></img>
+            <div>${game.player_score} VS ${game.opponent_score}</div>
+            <div class="container__flex end">
+                <p>${game.opponent.username}</p>
+                <div class="profile-picture ml__12">
+                    <img src="${game.opponent.picture}"></img>
                 </div>
             </div>
         `
@@ -240,10 +249,10 @@ export class Profile extends AbstractView {
             <div class="profile-picture">
                 <img src="${sender.picture}"></img>
             </div>
-            <p class="info">${sender.username}</p>
+            <p class="ml__12">${sender.username}</p>
             <div class="flex">
                 <button class="button decline-button">Decline</button>
-                <button class="button accept-button">Accept</button>
+                <button class="button accept-button ml__8">Accept</button>
             </div>
         `
 
@@ -315,7 +324,7 @@ export class Profile extends AbstractView {
         `
 
         const button = el.querySelector(".add__button")
-        button.addEventListener("click", async (user) => {
+        button.addEventListener("click", async () => {
             await this.sendFriendRequest(user.id)
         })
 

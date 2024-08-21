@@ -1,27 +1,35 @@
 import { AbstractView } from "./AbstractView.js"
-import { getURL, apiRequest } from "../utils.js"
+import { getURL, apiRequest, getUserID } from "../utils.js"
 import { WebSocketManager } from "../WebSocketManager.js"
 
 export class ChatRoom extends AbstractView {
     constructor() {
         super()
 
+        this.lastSender = null
+
         this.sendMessageListener = (event) => this.sendMessage(event)
-        
         this.WebsocketMessageListener = (event) => this.WebsocketMessage(event.detail)
     }
 
     getHtml() {
         return `
             <nav-component></nav-component>
-            <div id="chatroom">
-                <div id="chatroom__messages"></div>
-                <form id="chatroom__form">
-                    <label class="search-bar">
-                        <input type="text" placeholder="Write a message..." autocomplete=off></input>
-                    </label>
-                    <button type="submit" class="button" style="margin-left: 12px;">Send</button>
-                </form>
+            <div class="grid">
+                <div id="chatroom" class="grid__item">
+                    <div class="top">
+                        <div id="chatroom__info"></div>
+                    </div>
+                    <div class="main">
+                        <div id="chatroom__messages" class="list"></div>
+                    </div>
+                    <form id="chatroom__form" class="bottom">
+                        <label class="search-bar">
+                            <input type="text" placeholder="Write a message..." autocomplete=off></input>
+                        </label>
+                        <button type="submit" class="button ml__12">Send</button>
+                    </form>
+                </div>
             </div>
         `
     }
@@ -33,26 +41,49 @@ export class ChatRoom extends AbstractView {
     }
     
     addEventListeners() {
-        const form = document.getElementById('chatroom__form')
-        form.addEventListener('submit', this.sendMessageListener)
+        const form = document.getElementById("chatroom__form")
+        form.addEventListener("submit", this.sendMessageListener)
         
-        window.addEventListener('wsMessage', this.WebsocketMessageListener)
+        window.addEventListener("wsMessage", this.WebsocketMessageListener)
     }
 
     removeEventListeners() {
-        const form = document.getElementById('chatroom__form')
-        form.removeEventListener('submit', this.sendMessageListener)
+        this.lastSender = null
 
-        window.removeEventListener('wsMessage', this.WebsocketMessageListener)
+        const form = document.getElementById("chatroom__form")
+        form.removeEventListener("submit", this.sendMessageListener)
+
+        window.removeEventListener("wsMessage", this.WebsocketMessageListener)
     }
 
 
     WebsocketMessage(event) {
         const message = event.message
-        console.log("chatroom message", message)
+        console.log(message)
 
-        if (message.action == "message" && message.room == this.getRoomID()) {
-            this.displayMessage(message)
+        if (message.action == "message" && message.room_id == this.getRoomID()) {
+            const container = document.getElementById("chatroom__messages")
+            this.displayMessage(container, message)
+        }
+    }
+
+
+    async sendMessage(event) {
+        event.preventDefault()
+
+        const input = document.querySelector("#chatroom__form input")
+        const value = input.value
+        const roomID = this.getRoomID()
+
+        if (input.value != "") {
+            const ws = WebSocketManager.get()
+            await ws.sendMessage("chat", {
+                type: "message",
+                room: roomID,
+                content: value
+            })
+
+            input.value = ""
         }
     }
 
@@ -62,11 +93,16 @@ export class ChatRoom extends AbstractView {
         const url = getURL(`api/chat/rooms/${roomID}/`)
 
         try {
-            const messages = await apiRequest(url)
-            console.log(messages)
+            const data = await apiRequest(url)
+            console.log(data)
 
-            messages.forEach(message => {
-                this.displayMessage(message)
+            // this.displayRoomInfo(data.room_name, data.room_picture)
+            const roomName = document.getElementById("chatroom__info")
+            roomName.textContent = data.room_name
+
+            const container = document.getElementById("chatroom__messages")
+            data.messages.forEach(message => {
+                this.displayMessage(container, message)
             })
 
         } catch (error) {
@@ -74,53 +110,53 @@ export class ChatRoom extends AbstractView {
         }
     }
 
-
-    async sendMessage(event) {
-        event.preventDefault()
-
-        const input = document.querySelector('#chatroom__form input')
-        const value = input.value
-        const roomID = this.getRoomID()
-
-        if (input.value != '') {
-            const ws = WebSocketManager.get()
-            await ws.sendMessage('chat', {
-                type: 'message',
-                room: roomID,
-                content: value
-            })
-
-            input.value = ''
-        }
-    }
-
     
-    displayMessage(message) {
+    displayMessage(container, message) {
         if (!message)
             return
 
-        const username = message.user
-        const content = message.content
+        if (this.lastSender === message.username) {
+            const messageContainer = Array.from(
+                document.querySelectorAll(".message__container")
+            ).pop().querySelector("div:last-child")
 
-        const container = document.getElementById('chatroom__messages')
+            const el = document.createElement("div")
+            el.classList.add("message")
+            el.innerHTML = `
+                <p>${message.content}</p>
+                <span>${message.timestamp}</span>
+            `
 
-        const el = document.createElement('div')
-        el.classList.add('chatroom__message')
-        el.classList.add('sender')
+            messageContainer.appendChild(el)
 
-        el.innerHTML = `
-            <div>
-                <h5>${username}</h5>
-                <p>${content}</p>
-            </div>
-        `
+        } else {
+            const el = document.createElement("div")
+            el.classList.add("message__container")
+            
+            if (message.user_id == getUserID())
+                el.classList.add("right")
+            
+            el.innerHTML = `
+                <div class="profile-picture">
+                    <img src="${message.picture}"></img>
+                </div>
+                <div>
+                    <div class="message">
+                        <p>${message.content}</p>
+                        <span>${message.timestamp}</span>
+                    </div>
+                </div>
+            `
 
-        container.appendChild(el)
+            container.appendChild(el)
+        }
+
         container.scrollTop = container.scrollHeight
+        this.lastSender = message.username
     }
 
 
     getRoomID() {
-        return location.pathname.split('/')[2]
+        return location.pathname.split("/")[2]
     }
 }

@@ -125,3 +125,28 @@ button img {
     font-size: 16px;
     font-weight: 400;
 }
+
+/* MARGIN */
+.ml__8 {
+    margin-left: 8px;
+}
+
+.ml__12 {
+    margin-left: 12px;
+}
+
+.mr__8 {
+    margin-right: 8px;
+}
+
+.mr__12 {
+    margin-right: 12px;
+}
+
+.mt__8 {
+    margin-top: 8px;
+}
+
+.mt__12 {
+    margin-top: 12px;
+}

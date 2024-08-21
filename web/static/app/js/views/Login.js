@@ -1,6 +1,6 @@
 import { AbstractView } from "./AbstractView.js"
 import { Router } from "../Router.js"
-import { getURL, apiRequest, updateCSRFToken } from "../utils.js"
+import { getURL, apiRequest, updateCSRFToken, getUserID } from "../utils.js"
 import { WebSocketManager } from "../WebSocketManager.js"
 
 export class Login extends AbstractView {
@@ -82,6 +82,7 @@ export class Login extends AbstractView {
 
             localStorage.setItem('access', data.access)
             localStorage.setItem('refresh', data.refresh)
+            localStorage.setItem('user_id', data.user_id)
             
             const ws = WebSocketManager.get()
             ws.connect('wss://' + location.hostname + ':' + location.port + '/ws/chat/', 'chat')

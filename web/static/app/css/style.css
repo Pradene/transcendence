@@ -15,7 +15,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6,
-p, a, li, span, button {
+p, a, ul, li, div, span, button {
 	font-family: var(--main-font-family);
 	font-size: var(--default-font-size);
 	color: var(--text-color);
@@ -29,11 +29,11 @@ p, a, li, span, button {
 	margin-right: auto;
 }
 
+/* GRID */
 .grid {
 	display: grid;
 	grid-template-columns: repeat(8, 1fr);
 	grid-template-rows: repeat(8, 1fr);
-
 	gap: 12px;
 
 	overflow: hidden;
@@ -70,8 +70,7 @@ p, a, li, span, button {
 
 .grid > .grid__item > .main {
 	flex: 1;
-
-	padding: 4px 0px;
+	overflow: hidden;
 }
 
 
@@ -84,6 +83,7 @@ p, a, li, span, button {
     background: var(--secondary-color);
 }
 
+/* LIST */
 .list {
 	height: 100%;
 	overflow-y: scroll;
@@ -121,10 +121,12 @@ p, a, li, span, button {
 	flex: 1;
 }
 
-.list__item > div + .main {
-	margin-left: 12px;
+.list__item > .end {
+	flex: 1;
+	justify-content: end;
 }
 
-.list__item > .main + div {
-	margin-left: 12px;
+.list__item > .start {
+	flex: 1;
+	justify-content: start;
 }

@@ -41,7 +41,7 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=32, unique=True)
-    picture = models.ImageField(upload_to="profile-pictures/", default="profile-pictures/default.png", blank=True, null=True)
+    picture = models.ImageField(upload_to="profile_pictures/", default="profile_pictures/default.png", blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)

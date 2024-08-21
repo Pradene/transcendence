@@ -151,7 +151,7 @@ def loginView(request):
         try:
             access_token = create_access_token(user)
             refresh_token = create_refresh_token(user)
-            return JsonResponse({"access": access_token, "refresh": refresh_token}, status=200)
+            return JsonResponse({"user_id": user.id, "access": access_token, "refresh": refresh_token}, status=200)
         
         except Exception as token_error:
             return JsonResponse({"error": str(token_error)}, status=400)

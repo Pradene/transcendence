@@ -68,17 +68,18 @@ export class Chat extends AbstractView {
             return
 
         const message = (room.last_message ? 
-            truncateString(room.last_message.content, 20) : 
+            truncateString(room.last_message.content, 48) :
             "Send a message..."
         )
         
         const el = document.createElement("li")
+        el.classList.add("chat__room")
         el.innerHTML = `
             <a class="list__item clickable" href="/chat/${room.id}/" data-room-id="${room.id}" data-link>
                 <div class="profile-picture">
                     <img src="${room.picture}" alt="Profile Picture">
                 </div>
-                <div class="main">
+                <div class="main ml__12">
                     <span class="chat__room__name">${room.name}</span>
                     <span class="chat__room__message">${message}</span>
                 </div>
@@ -104,15 +105,12 @@ export class Chat extends AbstractView {
     }
 
     receiveMessage(event) {
-        console.log(event)
-        
         const message = event.message
+        
         if (message && message.action === "message") {
             const room = document.querySelector(`[data-room-id="${message.room}"]`)
-            console.log(room)
             
             const last_message = room.querySelector(".chat__room__message")
-            console.log(last_message)
             last_message.textContent = truncateString(message.content, 20)
         }
     }

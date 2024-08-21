@@ -73,16 +73,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
             room = await database_sync_to_async(ChatRoom.objects.get)(id=room_id)
 
             message = await self.save_message(room, self.user, content)
-            message_time = elapsed_time(message.timestamp)
 
             await self.channel_layer.group_send(
                 f'chat_{room.id}',
                 {
                     'type': 'message_response',
-                    'room': message.room.id,
-                    'user': message.user.username,
+                    'room_id': message.room.id,
+                    'user_id': message.user.id,
+                    'username': message.user.username,
+                    'picture': message.user.picture.url if message.user.picture else None,
                     'content': message.content,
-                    'elapsed_time': message_time
+                    'timestamp': elapsed_time(message.timestamp)
                 }
             )
 
@@ -94,10 +95,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def message_response(self, data):
         await self.send(text_data=json.dumps({
             'action': 'message',
-            'room': data['room'],
-            'user': data['user'],
+            'room_id': data['room_id'],
+            'user_id': data['user_id'],
+            'username': data['username'],
+            'picture': data['picture'],
             'content': data['content'],
-            'elapsed_time': data['elapsed_time']
+            'timestamp': data['timestamp']
         }))
 
 

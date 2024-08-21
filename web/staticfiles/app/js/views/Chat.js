@@ -16,11 +16,11 @@ export class Chat extends AbstractView {
                 <div id="chat" class="grid__item">
                     <div class="top">
                         <label class="search-bar">
-                            <input type="text" id="input" class="search-bar" placeholder="Search" autocomplete="off"></input>
+                            <input id="input" class="search-bar" type="text" placeholder="Search" autocomplete="off"></input>
                         </label>
                     </div>
                     <div class="main">
-                        <ul id="chat__rooms"></ul>
+                        <ul id="chat__rooms" class="list"></ul>
                     </div>
                 </div>
             </div>
@@ -68,18 +68,18 @@ export class Chat extends AbstractView {
             return
 
         const message = (room.last_message ? 
-            truncateString(room.last_message.content, 20) : 
+            truncateString(room.last_message.content, 48) :
             "Send a message..."
         )
         
         const el = document.createElement("li")
         el.classList.add("chat__room")
         el.innerHTML = `
-            <a href="/chat/${room.id}/" data-room-id="${room.id}" data-link>
+            <a class="list__item clickable" href="/chat/${room.id}/" data-room-id="${room.id}" data-link>
                 <div class="profile-picture">
-                    <img src="${room.picture}" class="profile-pic" alt="Profile Picture">
+                    <img src="${room.picture}" alt="Profile Picture">
                 </div>
-                <div class="chat__room__info">
+                <div class="main ml__12">
                     <span class="chat__room__name">${room.name}</span>
                     <span class="chat__room__message">${message}</span>
                 </div>
@@ -105,15 +105,12 @@ export class Chat extends AbstractView {
     }
 
     receiveMessage(event) {
-        console.log(event)
-        
         const message = event.message
+        
         if (message && message.action === "message") {
             const room = document.querySelector(`[data-room-id="${message.room}"]`)
-            console.log(room)
             
             const last_message = room.querySelector(".chat__room__message")
-            console.log(last_message)
             last_message.textContent = truncateString(message.content, 20)
         }
     }

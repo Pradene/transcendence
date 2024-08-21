@@ -1,7 +1,21 @@
 import { Router } from "./Router.js"
+// import { jwt_decode } from "jwt-decode"
 
 export function getURL(url) {
     return "https://" + location.hostname + ":" + location.port + "/" + url
+}
+
+export function getUserID() {
+    // const token = localStorage.getItem("access")
+
+    // if (token) {
+    //     console.log(token)
+    //     const decodedToken = jwt_decode(token)
+    //     console.log("decode", decodedToken)
+    //     return decodedToken.user_id
+    // }
+
+    return localStorage.getItem("user_id")
 }
 
 // CSRF Tokens utils

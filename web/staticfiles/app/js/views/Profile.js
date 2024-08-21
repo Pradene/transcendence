@@ -1,15 +1,13 @@
 import { AbstractView } from "./AbstractView.js"
 import { Router } from "../Router.js"
-import { apiRequest, getURL, updateCSRFToken, displayList } from "../utils.js"
+import { apiRequest, getURL, updateCSRFToken } from "../utils.js"
 import { WebSocketManager } from "../WebSocketManager.js"
 
 export class Profile extends AbstractView {
     constructor() {
         super()
 
-        this.profile = null
-        this.games = null
-
+        this.logoutListener = () => this.logout()
         this.searchUserListener = (event) => this.searchUser(event)
         this.WebSocketMessageListener = (event) => this.WebSocketMessage(event.detail)
     }
@@ -17,65 +15,74 @@ export class Profile extends AbstractView {
     getHtml() {
         return `
         <nav-component></nav-component>
-        <div id="profile">
-            <div id="profile__info"></div>
-            <div id="profile__dashboard">
-                <div>
-                    <div id="profile__dashboard__winrate">
-                        <div id="profile__dashboard__winrate__indicator"></div>
+        <div class="grid">
+            <div id="profile" class="grid__item center">
+                <div class="container__flex">
+                    <div id="profile-picture" class="profile-picture profile-picture--large ml__12">
+                        <img></img>
+                    </div>
+                    <div class="ml__12">
+                        <h2 id="username" class="text-900"></h2>
+                        <div class="container__flex mt__8">
+                            <a href="/profile/edit/" id="edit-profile" class="button" data-link>Edit profile</a>
+                            <button id="logout-button" class="button ml__8">
+                                <img src="/static/assets/power-off.svg" alt="Disconnect Icon">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="stats" class="grid__item">
+                <div class="main">
+                    <div id="stats__winrate">
+                        <div></div>
                         <p>0%</p>
                     </div>
-                    <div id="profile__dashboard__info__games">
+                    <div id="stats__info__games">
                         <p>0</p>
                         <p>games</p>
                     </div>
-                    <div id="profile__dashboard__info__wins">
+                    <div id="stats__info__wins">
                         <p>0</p>
                         <p>wins</p>
                     </div>
-                    <div id="profile__dashboard__info__loses">
+                    <div id="stats__info__loses">
                     <p>0</> 
                         <p>loses</p>
                     </div>
                 </div>
             </div>
-            <div id="profile__games">
-                <h4 class="text-600">Game history</h4>
-                <div class="list-container">
-                    <div class="hidden">
-                        <p>No games yet, what are you waiting...</p>
-                    </div>
-                    <ul id="games-list" class="list"></ul>
+            <div id="games" class="grid__item">
+                <div class="top">
+                    <h4 class="text-600">Game history</h4>
+                </div>
+                <div class="main">
+                    <ul id="games__list" class="list"></ul>
                 </div>
             </div>
-            <div id="profile__requests">
-                <h4 class="text-600">Friend requests</h4>
-                <div class="list-container">
-                    <div id="profile__requests__message" class="hidden">
-                        <p>No one wants to be your friend...</p>
-                    </div>
-                    <ul id="requests-list" class="list"></ul>
+            <div id="requests" class="grid__item">
+                <div class="top">
+                    <h4 class="text-600">Friend requests</h4>
+                </div>
+                <div class="main">
+                    <ul id="requests__list" class="list"></ul>
                 </div>
             </div>
-            <div id="users">
-                <form id="search-user" class="search-bar">
+            <div id="users" class="grid__item">
+                <form id="search-user" class="top search-bar">
                     <input type="text" id="search-user-input" placeholder="Add friends..." autocomplete=off></input>
                     <button type="submit" id="search-submit" class="button">Search</button>
                 </form>
-                <div class="list-container">
-                    <div class="hidden">
-                        <p>User not found</p>
-                    </div>
-                    <ul id="users-list" class="list"></ul>
+                <div class="main">
+                    <ul id="users__list" class="list"></ul>
                 </div>
             </div>
-            <div id="friends">
-                <h4 class="text-600">Friends</h4>
-                <div class="list-container">
-                    <div>
-                        <p>No friends, do you feel alone?</p>
-                    </div>
-                    <ul id="friends-list" class="list"></ul>
+            <div id="friends" class="grid__item">
+                <div class="top">
+                    <h4 class="text-600">Friends</h4>
+                </div>
+                <div class="main">
+                    <ul id="friends__list" class="list"></ul>
                 </div>
             </div>
         </div>
@@ -93,6 +100,9 @@ export class Profile extends AbstractView {
 
 
     addEventListeners() {
+        const button = document.getElementById("logout-button")
+        button.addEventListener("click", this.logoutListener)
+
         const search = document.getElementById("search-user")
         search.addEventListener("submit", this.searchUserListener)
 
@@ -101,6 +111,9 @@ export class Profile extends AbstractView {
     
 
     removeEventListeners() {
+        const button = document.getElementById("logout-button")
+        button.removeEventListener("click", this.logoutListener)
+
         const search = document.getElementById("search-user")
         search.removeEventListener("submit", this.searchUserListener)
         
@@ -122,32 +135,12 @@ export class Profile extends AbstractView {
         try {
             const url = getURL("api/users/")
             const profile = await apiRequest(url)
-
-            this.profile = profile
-
-            const container = document.getElementById("profile__info")
-            container.innerHTML = `
-                <div class="conatiner__flex--centered">
-                    <div class="container__flex">
-                        <div class="profile-picture profile-picture--large" style="margin-right: 32px">
-                            <img src="${profile.picture}"></img>
-                        </div>
-                        <div>
-                            <h2 class="text-900">${profile.username}</h2>
-                            <div class="container__flex" style="margin-top: 8px">
-                                <a href="/profile/edit/" id="edit-profile" class="button" data-link>Edit profile</a>
-                                <button id="logout-button" class="button" style="margin-left: 6px">
-                                    <img src="/static/assets/power-off.svg" alt="Disconnect Icon">
-                                    Disconnect
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `
             
-            const button = document.getElementById("logout-button")
-            button.addEventListener("click", () => this.logout())
+            const profilePicture = document.querySelector("#profile-picture img")
+            profilePicture.src = profile.picture
+
+            const username = document.getElementById("username")
+            username.textContent = profile.username
         
         } catch (error) {
             console.log(error)
@@ -161,32 +154,31 @@ export class Profile extends AbstractView {
             const url = getURL("api/users/friends/")
             const friends = await apiRequest(url)
             console.log("friends:", friends)
-            
-            const el = document.querySelector("#friends > div > div")
-            if (friends.length === 0) {
-                el.classList.remove("hidden")
-                return
-            }
 
-            el.classList.add("hidden")
-
-            const options = {
-                containerId: "friends-list",
-                renderer: (user) => `
-                    <div class="profile-picture" style="margin: 0px 12px">
-                        <img src="${user.picture}"></img>
-                    </div>
-                    <div class="info">
-                        <p>${user.username}</p>
-                    </div>
-                `,
-            }
-
-            displayList(friends, options)
+            const container = document.getElementById("friends__list")
+            friends.forEach(friend => {
+                this.displayFriend(container, friend)
+            })
 
         } catch (error) {
             console.log(error)
         }
+    }
+
+    displayFriend(container, friend) {
+        const el = document.createElement("li")
+        el.classList.add("list__item")
+
+        el.innerHTML = `
+            <div class="profile-picture">
+                <img src="${friend.picture}"></img>
+            </div>
+            <div class="main ml__12">
+                <p>${friend.username}</p>
+            </div>
+        `
+
+        container.appendChild(el)
     }
 
 
@@ -194,43 +186,39 @@ export class Profile extends AbstractView {
         try {
             const url = getURL("api/games/")
             const games = await apiRequest(url)
-
-            this.games = games
-
             console.log("games:", games)
 
-            const el = document.querySelector("#profile__games > div > div")
-            if (games.length === 0) {
-                el.classList.remove("hidden")
-                return
-            }
-
-            el.classList.add("hidden")
-
-            const options = {
-                containerId: "games-list",
-                renderer: (game) => `
-                    <div class="game_player">
-                        <div class="profile-picture">
-                            <img src="${game.player.picture}"></img>
-                        </div>
-                        <p class="info">${game.player.username}</p>
-                    </div>
-                    <div class="game_score">${game.player_score} VS ${game.opponent_score}</div>
-                    <div class="game_opponent">
-                        <p class="info">${game.opponent.username}</p>
-                        <div class="profile-picture">
-                            <img src="${game.opponent.picture}" class="pp"></img>
-                        </div>
-                    </div>
-                `,
-            }
-
-            displayList(games, options)
+            const container = document.getElementById("games__list")
+            games.forEach(game => {
+                this.displayGame(container, game)
+            })
 
         } catch (error) {
             console.log(error)
         }
+    }
+
+    displayGame(container, game) {
+        const el = document.createElement("li")
+        el.classList.add("list__item")
+
+        el.innerHTML = `
+            <div class="container__flex start">
+                <div class="profile-picture mr__12">
+                    <img src="${game.player.picture}"></img>
+                </div>
+                <p>${game.player.username}</p>
+            </div>
+            <div>${game.player_score} VS ${game.opponent_score}</div>
+            <div class="container__flex end">
+                <p>${game.opponent.username}</p>
+                <div class="profile-picture ml__12">
+                    <img src="${game.opponent.picture}"></img>
+                </div>
+            </div>
+        `
+
+        container.appendChild(el)
     }
 
 
@@ -241,12 +229,9 @@ export class Profile extends AbstractView {
         try {
             const url = getURL("api/users/friend-requests/")
             const requests = await apiRequest(url)
-            
             console.log("requests:", requests)
 
-            const container = document.getElementById("requests-list")
-            container.innerHTML = ''
-            
+            const container = document.getElementById("requests__list")            
             requests.forEach(request => {
                 this.displayFriendRequest(container, request.sender)
             })
@@ -257,8 +242,6 @@ export class Profile extends AbstractView {
     }
 
     displayFriendRequest(container, sender) {
-        console.log(sender)
-
         const el = document.createElement("li")
 
         // Use the provided renderer callback to generate the inner HTML for each list item
@@ -266,10 +249,10 @@ export class Profile extends AbstractView {
             <div class="profile-picture">
                 <img src="${sender.picture}"></img>
             </div>
-            <p class="info">${sender.username}</p>
+            <p class="ml__12">${sender.username}</p>
             <div class="flex">
                 <button class="button decline-button">Decline</button>
-                <button class="button accept-button">Accept</button>
+                <button class="button accept-button ml__8">Accept</button>
             </div>
         `
 
@@ -279,26 +262,13 @@ export class Profile extends AbstractView {
         acceptButton.addEventListener("click", async () => {
             await this.acceptIncomingFriendRequest(sender.id)
             el.remove()
-            checkAndDisplayEmptyMessage()
         })
         
         const declineButton = el.querySelector(".decline-button")
         declineButton.addEventListener("click", async () => {
             await this.declineIncomingFriendRequest(sender.id)
             el.remove()
-            checkAndDisplayEmptyMessage()
         })
-        
-
-        const checkAndDisplayEmptyMessage = () => {
-            const emptyMessage = document.getElementById("profile__requests__message")
-            if (container.children.length === 0) {
-                emptyMessage.classList.remove("hidden")
-                
-            } else {
-                emptyMessage.classList.add("hidden")
-            }
-        }
     }
 
 
@@ -328,38 +298,37 @@ export class Profile extends AbstractView {
         try {
             const query = document.getElementById("search-user-input").value
             const url = getURL(`api/users/search/?q=${query}`)
-        
             const users = await apiRequest(url)
-            if (users.length === 0) {
-                return 
-            }
-
             console.log("users:", users)
 
-            const options = {
-                containerId: "users-list",
-                renderer: (user) => `
-                    <div class="profile-picture">
-                        <img src="${user.picture}"></img>
-                    </div>
-                    <p class="info">${user.username}</p>
-                    <button class="button add-button">Add</button>
-                `,
-                actions: [
-                    {
-                        selector: ".add-button",
-                        handler: async (user) => {
-                            await this.sendFriendRequest(user.id)
-                        }
-                    },
-                ]
-            }
-
-            displayList(users, options)
+            const container = document.getElementById("users__list")
+            users.forEach(user => {
+                this.displayUser(container, user)
+            })
 
         } catch (error) {
             console.log(error)
         }
+    }
+
+    displayUser(container, user) {
+        const el = document.createElement("li")
+        el.classList.add("list__item")
+        
+        el.innerHTML = `
+            <div class="profile-picture">
+                <img src="${user.picture}"></img>
+            </div>
+            <p class="main">${user.username}</p>
+            <button class="button add__button">Add</button>
+        `
+
+        const button = el.querySelector(".add__button")
+        button.addEventListener("click", async () => {
+            await this.sendFriendRequest(user.id)
+        })
+
+        container.appendChild(el)
     }
 
 
