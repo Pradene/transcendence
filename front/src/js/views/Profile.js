@@ -93,7 +93,7 @@ export class Profile extends AbstractView {
         this.getUser()
         this.getGames()
         this.getFriends()
-        // this.getFriendRequests()
+        this.getFriendRequests()
 
         this.addEventListeners()
     }
@@ -145,10 +145,6 @@ export class Profile extends AbstractView {
         } catch (error) {
             console.log(error)
         }
-    }
-
-    displayUser(user) {
-
     }
 
 
@@ -247,14 +243,15 @@ export class Profile extends AbstractView {
 
     displayFriendRequest(container, sender) {
         const el = document.createElement("li")
+        el.classList.add("list__item")
 
         // Use the provided renderer callback to generate the inner HTML for each list item
         el.innerHTML = `
             <div class="profile-picture">
                 <img src="${sender.picture}"></img>
             </div>
-            <p class="ml__12">${sender.username}</p>
-            <div class="flex">
+            <p class="main ml__12">${sender.username}</p>
+            <div class="container__flex">
                 <button class="button decline-button">Decline</button>
                 <button class="button accept-button ml__8">Accept</button>
             </div>
@@ -329,6 +326,7 @@ export class Profile extends AbstractView {
 
         const button = el.querySelector(".add__button")
         button.addEventListener("click", async () => {
+            console.log("send friend request")
             await this.sendFriendRequest(user.id)
         })
 

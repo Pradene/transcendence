@@ -1,11 +1,12 @@
 import json
 import logging
 
+from django.db.models import Q
 from django.http import JsonResponse
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 
-from .models import FriendRequest, CustomUser
+from .models import FriendList, FriendRequest, CustomUser
 from .serializers import CustomUserSerializer
 
 class FriendsConsumer(AsyncWebsocketConsumer):
@@ -48,17 +49,31 @@ class FriendsConsumer(AsyncWebsocketConsumer):
 
 
     async def send_friend_request(self, data):
-        receiver_id = data.get('receiver')
-        logging.info(f'receiver: {receiver_id}')
-        
         try:
-            receiver = await database_sync_to_async(CustomUser.objects.get)(id=receiver_id)
+            receiver_id = data['receiver']
+            if self.user.id == receiver_id:
+                logging.info(f'You cannot send a friend request to yourself')
+                return
+
+            receiver = await database_sync_to_async(
+                CustomUser.objects.get)(id=receiver_id)
+
+            friend_list, created = await database_sync_to_async(
+                FriendList.objects.get_or_create)(
+                    user=self.user
+            )
+
+            is_friend = await database_sync_to_async(friend_list.is_friend)(receiver)
+
+            if is_friend:
+                logging.info(f'Users are already friends')
+                return
 
             # Check if a friend request already exists before creating it
             existing_request = await database_sync_to_async(
                 FriendRequest.objects.filter(
-                    sender=self.user,
-                    receiver=receiver
+                    Q(sender=self.user, receiver=receiver) |
+                    Q(sender=receiver, receiver=self.user)
                 ).exists
             )()
 
