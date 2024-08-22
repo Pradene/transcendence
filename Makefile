@@ -13,8 +13,9 @@ ${NAME}: build_scripts
 	HOST_HOSTNAME=$(HOST_HOSTNAME) docker compose up
 
 build_scripts:
-	npm i
-	npm run build -w web/static/scripts/pong
+	echo hello
+# npm i
+# npm run build -w front/src/scripts/pong
 
 up:
 	docker compose up -d
