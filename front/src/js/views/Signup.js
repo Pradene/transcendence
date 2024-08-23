@@ -46,23 +46,28 @@ export class Signup extends AbstractView {
     }
 
     initView() {
-        const inputs = document.querySelectorAll(".registration__form__label input")
-        
-        inputs.forEach(input => {
-            input.addEventListener("input", function () {
-                if (input.value == "") {
-                    input.style.transform = "translateY(-50%)"
-                    input.nextElementSibling.style.transform = "translateY(-50%) scale(1)"
-                
-                } else {
-                    input.style.transform = "translateY(-20%)"
-                    input.nextElementSibling.style.transform = "translateY(-120%) scale(0.75)"
-                }
-            })
-        })
+        this.addEventListeners(
+            document,
+            "input",
+            (event) => this.inputAnimation(event.target),
+            ".registration__form__label input"
+        )
 
         const form = document.getElementById("signup__form")
-        form.addEventListener("submit", (event) => this.handleSubmit(event))
+        this.addEventListeners(
+            form,
+            "submit",
+            (event) => this.handleSubmit(event)
+        )
+    }
+
+    inputAnimation(input) {
+        if (input.value == "") {
+            input.parentElement.classList.remove("active")
+            
+        } else {
+            input.parentElement.classList.add("active")
+        }
     }
 
     async handleSubmit(event) {

@@ -75,6 +75,18 @@ class FriendList(models.Model):
 
     def is_friend(self, user):
         return user in self.friends.all()
+
+    def get_friend_status(self, user):
+        if user == self.user:
+            return 'self'
+        elif self.is_friend(user):
+            return 'friend'
+        elif FriendRequest.objects.filter(sender=self.user, receiver=user).exists():
+            return 'request_sent'
+        elif FriendRequest.objects.filter(sender=user, receiver=self.user).exists():
+            return 'request_received'
+        else:
+            return 'none'
         
 
 class FriendRequest(models.Model):

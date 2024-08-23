@@ -8,13 +8,12 @@ from channels.db import database_sync_to_async
 
 from .models import FriendList, FriendRequest, CustomUser
 from .serializers import CustomUserSerializer
+from .utils.serializers import serialize_user
 
 class FriendsConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = self.scope["user"]
-
-        logging.info("try to connect to account websocket")
-
+        
         if self.user.is_authenticated:
             await self.channel_layer.group_add(
                 f"user_{self.user.id}",
@@ -84,8 +83,11 @@ class FriendsConsumer(AsyncWebsocketConsumer):
 
             friend_request = await database_sync_to_async(FriendRequest.objects.create)(sender=self.user, receiver=receiver)
 
-            receiver_data = CustomUserSerializer(friend_request.receiver).data
-            sender_data = CustomUserSerializer(friend_request.sender).data
+            sender_data = serialize_user(friend_request.sender)
+            receiver_data = serialize_user(friend_request.receiver)
+
+            # receiver_data = CustomUserSerializer(friend_request.receiver).data
+            # sender_data = CustomUserSerializer(friend_request.sender).data
 
             await self.channel_layer.group_send(
                 f'user_{friend_request.sender.id}',

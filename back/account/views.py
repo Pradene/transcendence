@@ -15,6 +15,8 @@ from .models import CustomUser, BlackListedToken, FriendList, FriendRequest
 from .serializers import FriendRequestSerializer, CustomUserSerializer
 from .utils.token import create_access_token, create_refresh_token, decode_token
 
+from .utils.serializers import serialize_user
+
 @jwt_required
 @require_GET
 def userView(request, user_id=None):
@@ -26,8 +28,9 @@ def userView(request, user_id=None):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
-    serializer = CustomUserSerializer(user)
-    return JsonResponse(serializer.data, safe=False, status=200)
+    logging.info(f'{user.username} : {request.user.username}')
+    user_data = serialize_user(user, request.user)
+    return JsonResponse(user_data, status=200)
 
 
 # Search
@@ -158,7 +161,18 @@ def loginView(request):
         try:
             access_token = create_access_token(user)
             refresh_token = create_refresh_token(user)
-            return JsonResponse({"user_id": user.id, "access": access_token, "refresh": refresh_token}, status=200)
+            response = JsonResponse({"user_id": user.id}, status=200)
+            response.set_cookie(
+                "access_token", access_token,
+                httponly=True, secure=True,
+                samesite="Lax", max_age=300
+            )
+            response.set_cookie(
+                "refresh_token", refresh_token,
+                httponly=True, secure=True,
+                samesite="Lax", max_age=3600
+            )
+            return response
         
         except Exception as token_error:
             return JsonResponse({"error": str(token_error)}, status=400)
@@ -175,10 +189,10 @@ def loginView(request):
 @require_POST
 def checkLoginView(request):
     try:
-        data = json.loads(request.body)
-
-        refresh = data.get("refresh")
+        refresh = request.COOKIES.get("refresh_token")
         user_id = decode_token(refresh)
+
+        logging.info(f'check token for {user_id}')
 
         user = CustomUser.objects.get(id=user_id)
         if user.is_authenticated:
@@ -192,8 +206,7 @@ def checkLoginView(request):
 
 @require_POST
 def refreshTokenView(request):
-    data = json.loads(request.body)
-    token = data.get("refresh")
+    token = request.COOKIES.get("refresh_token")
 
     if BlackListedToken.objects.filter(token=token).exists():
         return JsonResponse({"error": "Invalid token"}, status=400)
@@ -204,7 +217,13 @@ def refreshTokenView(request):
         try:
             user = CustomUser.objects.get(id=user_id)
             access_token = create_access_token(user)
-            return JsonResponse({"access": access_token}, status=200)
+            response = JsonResponse({}, status=200)
+            response.set_cookie(
+                "access_token", access_token,
+                httponly=True, secure=True,
+                samesite="Lax", max_age=300
+            )
+            return response
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
     else:
@@ -215,10 +234,7 @@ def refreshTokenView(request):
 @require_POST
 def logoutView(request):
     try:
-        data = json.loads(request.body)
-
-        refresh_token = data.get("refresh")
-        
+        refresh_token = request.COOKIES.get("refresh_token")
         token = BlackListedToken.objects.create(token=refresh_token)
 
         logout(request)

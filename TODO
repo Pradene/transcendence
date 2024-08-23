@@ -2,6 +2,8 @@
 
 - install jwt-decode and use it to decode token and change link inside nav to use getUserID
 
+- room creation real time response
+
 - profile page
   - make edit profile page
     change: username, pp, bio

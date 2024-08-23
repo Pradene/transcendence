@@ -4,9 +4,6 @@ import { AbstractView } from "./AbstractView.js"
 export class Chat extends AbstractView {
     constructor() {
         super()
-
-        this.handleSearchListener = (event) => this.handleSearch(event)
-        this.receiveMessageListener = (event) => this.receiveMessage(event.detail)
     }
 
     getHtml() {
@@ -30,27 +27,16 @@ export class Chat extends AbstractView {
     initView() {
         this.getRooms()
 
-        this.addEventListeners()
-    }
-    
-    addEventListeners() {
         const input = document.getElementById("input")
-        input.addEventListener("keyup", this.handleSearchListener)
-
-        window.addEventListener("wsMessage", this.receiveMessageListener)
+        this.addEventListeners(input, "keyup", (event) => this.handleSearch(event))
+        
+        this.addEventListeners(window, "wsMessage", (event) => this.receiveMessage(event.detail))
     }
-    
-    removeEventListeners() {
-        const input = document.getElementById("input")
-        input.removeEventListener("keyup", this.handleSearchListener)
 
-        window.removeEventListener("wsMessage", this.receiveMessageListener)
-    }
 
     async getRooms() {
         try {
             const url = getURL("api/chat/rooms/")
-            
             const rooms = await apiRequest(url)
             console.log("rooms:", rooms)
 

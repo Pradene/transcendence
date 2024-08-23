@@ -37,30 +37,35 @@ export class Login extends AbstractView {
                 <a data-link>Forgot password?</a>
             </div>
             <div style="margin-top: 36px;">
-                <a href='/signup/' data-link>Sign up</a>
+                <a href="/signup/" data-link>Sign up</a>
             </div>
         </div>
         `
     }
 
-    initView() {
-        const inputs = document.querySelectorAll('.registration__form__label input')
-        inputs.forEach(input => {
-            input.addEventListener('input', function () {
-                if (input.value == '') {
-                    input.style.transform = "translateY(-50%)"
-                    input.nextElementSibling.style.transform = "translateY(-50%) scale(1)"
-                
-                } else {
-                    input.style.transform = "translateY(-20%)"
-                    input.nextElementSibling.style.transform = "translateY(-120%) scale(0.75)"
-                }
-        
-            })
-        })
+    initView() {        
+        this.addEventListeners(
+            document,
+            "input",
+            (event) => this.inputAnimation(event.target),
+            ".registration__form__label input"
+        )
 
-        const form = document.getElementById('login__form')
-        form.addEventListener('submit', (event) => this.handleSubmit(event))
+        const form = document.getElementById("login__form")
+        this.addEventListeners(
+            form,
+            "submit",
+            (event) => this.handleSubmit(event)
+        )
+    }
+
+    inputAnimation(input) {
+        if (input.value == "") {
+            input.parentElement.classList.remove("active")
+            
+        } else {
+            input.parentElement.classList.add("active")
+        }
     }
 
     async handleSubmit(event) {
@@ -80,15 +85,15 @@ export class Login extends AbstractView {
                 }
             )
 
-            localStorage.setItem('access', data.access)
-            localStorage.setItem('refresh', data.refresh)
-            localStorage.setItem('user_id', data.user_id)
+            console.log(data)
+
+            localStorage.setItem("user_id", data.user_id)
             
             const ws = WebSocketManager.get()
-            ws.connect('wss://' + location.hostname + ':' + location.port + '/ws/chat/', 'chat')
-            ws.connect('wss://' + location.hostname + ':' + location.port + '/ws/friends/', 'friends')
+            ws.connect("wss://" + location.hostname + ":" + location.port + "/ws/chat/", "chat")
+            ws.connect("wss://" + location.hostname + ":" + location.port + "/ws/friends/", "friends")
 
-            Router.get().navigate('/')
+            Router.get().navigate("/")
                 
         } catch (e) {
             username.value = ""
@@ -103,7 +108,7 @@ export class Login extends AbstractView {
         container.classList.remove("hidden")
         container.innerHTML = ""
 
-        const el = document.createElement('p')
+        const el = document.createElement("p")
         el.innerHTML = `
             ${error}
         `

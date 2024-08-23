@@ -10,7 +10,6 @@ import { WebSocketManager } from "./WebSocketManager.js"
 
 import './components/Nav.js'
 
-
 document.addEventListener('DOMContentLoaded', () => {
 
     const app = document.getElementById('app')

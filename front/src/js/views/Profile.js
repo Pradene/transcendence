@@ -6,10 +6,6 @@ import { WebSocketManager } from "../WebSocketManager.js"
 export class Profile extends AbstractView {
     constructor() {
         super()
-
-        this.logoutListener = () => this.logout()
-        this.searchUserListener = (event) => this.searchUser(event)
-        this.WebSocketMessageListener = (event) => this.WebSocketMessage(event.detail)
     }
 
     getHtml() {
@@ -23,12 +19,7 @@ export class Profile extends AbstractView {
                     </div>
                     <div class="ml__12">
                         <h2 id="username" class="text-900"></h2>
-                        <div class="container__flex mt__8">
-                            <a href="/profile/edit/" id="edit-profile" class="button" data-link>Edit profile</a>
-                            <button id="logout-button" class="button ml__8">
-                                <img src="/src/assets/power-off.svg" alt="Disconnect Icon">
-                            </button>
-                        </div>
+                        <div id="profile__buttons" class="container__flex mt__8"></div>
                     </div>
                 </div>
             </div>
@@ -95,37 +86,18 @@ export class Profile extends AbstractView {
         this.getFriends()
         this.getFriendRequests()
 
-        this.addEventListeners()
-    }
-
-
-    addEventListeners() {
-        const button = document.getElementById("logout-button")
-        button.addEventListener("click", this.logoutListener)
-
         const search = document.getElementById("search-user")
-        search.addEventListener("submit", this.searchUserListener)
-
-        window.addEventListener('wsMessage', this.WebSocketMessageListener)
-    }
-    
-
-    removeEventListeners() {
-        const button = document.getElementById("logout-button")
-        button.removeEventListener("click", this.logoutListener)
-
-        const search = document.getElementById("search-user")
-        search.removeEventListener("submit", this.searchUserListener)
-        
-        window.removeEventListener('wsMessage', this.WebSocketMessageListener)
+        this.addEventListeners(search, "submit", (event) => this.searchUser(event))
+        this.addEventListeners(window, "wsMessage", (event) => this.WebSocketMessage(event.detail))
     }
 
 
     WebSocketMessage(event) {
+        console.log("WebSocket event", event)
         const message = event.message
 
         if (message.action == "friend_request_received") {
-            const container = document.getElementById("requests-list")
+            const container = document.getElementById("requests__list")
             this.displayFriendRequest(container, message.sender)
         }
     }
@@ -134,16 +106,44 @@ export class Profile extends AbstractView {
     async getUser() {
         try {
             const url = getURL(`api/users/${this.getID()}/`)
-            const profile = await apiRequest(url)
+            const user = await apiRequest(url)
+            console.log("user", user)
             
-            const profilePicture = document.querySelector("#profile-picture img")
-            profilePicture.src = profile.picture
-
-            const username = document.getElementById("username")
-            username.textContent = profile.username
+            this.displayProfile(user)
         
         } catch (error) {
             console.log(error)
+        }
+    }
+
+    displayProfile(user) {
+        const profilePicture = document.querySelector("#profile-picture img")
+        profilePicture.src = user.picture
+        
+        const username = document.getElementById("username")
+        username.textContent = user.username
+        
+        const container = document.getElementById("profile__buttons")
+        if (user.relation === "self") {
+            container.innerHTML = `
+                <a class="button" href="/profile/edit/" data-link>Edit profile</a>
+            `
+        } else if (user.relation === "friend") {
+            container.innerHTML = `
+                <button class="button">Remove friend</button>
+            `
+        } else if (user.relation === "request_received") {
+                container.innerHTML = `
+                    <button class="button">Accept request</button>
+                `
+        } else if (user.relation === "request_sent") {
+            container.innerHTML = `
+                <button class="button">Remove request</button>
+            `
+        } else {
+            container.innerHTML = `
+                <button class="button" onclick="handleSendRequest(${user.id})">Add friend</button>
+            `
         }
     }
 
@@ -303,6 +303,7 @@ export class Profile extends AbstractView {
             console.log("users:", users)
 
             const container = document.getElementById("users__list")
+            container.innerHTML = ""
             users.forEach(user => {
                 this.displayUser(container, user)
             })
@@ -317,9 +318,9 @@ export class Profile extends AbstractView {
         el.classList.add("list__item")
         
         el.innerHTML = `
-            <div class="profile-picture">
+            <a href="/user/${user.id}/" class="profile-picture">
                 <img src="${user.picture}"></img>
-            </div>
+            </a>
             <p class="main">${user.username}</p>
             <button class="button add__button">Add</button>
         `
@@ -356,9 +357,8 @@ export class Profile extends AbstractView {
                 "POST",
                 {refresh: refresh}
             )
-
-            localStorage.removeItem("access")
-            localStorage.removeItem("refresh")
+            
+            localStorage.removeItem("user_id")
             
             const ws = WebSocketManager.get()
             ws.disconnect('chat')

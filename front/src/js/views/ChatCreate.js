@@ -24,14 +24,12 @@ export class ChatCreate extends AbstractView {
     initView() {
         this.getFriends()
         
-        const input = document.getElementById('input')
-        input.addEventListener('keyup', (event) => {
-            this.handleSearch(event)
-        })
+        const input = document.getElementById("input")
+        this.addEventListener(input, "keyup", (event) => this.handleSearch(event))
     }
 
     async getFriends() {
-        const url = getURL('api/users/friends/')
+        const url = getURL("api/users/friends/")
 
         try {
             const data = await apiRequest(url)
@@ -45,32 +43,30 @@ export class ChatCreate extends AbstractView {
     handleSearch(event) {
         const query = event.target.value
         
-        const users = document.querySelectorAll('.user')
+        const users = document.querySelectorAll(".user")
         for (let user of users) {
-            const name = user.querySelector('p').textContent
+            const name = user.querySelector("p").textContent
             
             if (query && !name.includes(query)) {
-                user.classList.add('hidden')
+                user.classList.add("hidden")
             
             } else {
-                user.classList.remove('hidden')
+                user.classList.remove("hidden")
             }
         }
     }
 
     displayFriends(friends) {
-        const container = document.getElementById('friends')
-        container.innerHTML = ''
+        const container = document.getElementById("friends")
+        container.innerHTML = ""
         
         friends.forEach(friend => {
-            const el = document.createElement('li')
-            el.classList.add('user')
+            const el = document.createElement("li")
+            el.classList.add("user")
             el.innerHTML = `
                 <p>${friend.username}</p>
                 <button></button>
             `
-
-
 
             container.appendChild(el)
         })

@@ -7,9 +7,6 @@ export class ChatRoom extends AbstractView {
         super()
 
         this.lastSender = null
-
-        this.sendMessageListener = (event) => this.sendMessage(event)
-        this.WebsocketMessageListener = (event) => this.WebsocketMessage(event.detail)
     }
 
     getHtml() {
@@ -35,29 +32,18 @@ export class ChatRoom extends AbstractView {
     }
 
     initView() {
-        this.getMessages() 
-        
-        this.addEventListeners()
-    }
-    
-    addEventListeners() {
-        const form = document.getElementById("chatroom__form")
-        form.addEventListener("submit", this.sendMessageListener)
-        
-        window.addEventListener("wsMessage", this.WebsocketMessageListener)
-    }
-
-    removeEventListeners() {
         this.lastSender = null
 
-        const form = document.getElementById("chatroom__form")
-        form.removeEventListener("submit", this.sendMessageListener)
+        this.getMessages()
 
-        window.removeEventListener("wsMessage", this.WebsocketMessageListener)
+        const form = document.getElementById("chatroom__form")
+        this.addEventListeners(form, "submit", (event) => this.sendMessage(event))
+        
+        this.addEventListeners(window, "wsMessage", (event) => this.WebsocketMessage(event.detail))
     }
 
-
     WebsocketMessage(event) {
+        console.log(event)
         const message = event.message
 
         if (message.action == "message" && message.room_id == this.getID()) {
@@ -88,10 +74,9 @@ export class ChatRoom extends AbstractView {
 
 
     async getMessages() {
-        const roomID = this.getID()
-        const url = getURL(`api/chat/rooms/${roomID}/`)
-
         try {
+            const roomID = this.getID()
+            const url = getURL(`api/chat/rooms/${roomID}/`)
             const data = await apiRequest(url)
             console.log(data)
 

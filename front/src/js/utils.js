@@ -45,19 +45,24 @@ export async function getCSRFToken() {
 // Requests to server utils
 
 export async function apiRequest(url, method = "GET", body = null) {
-    const access = localStorage.getItem("access")
-    const csrfToken = await getCSRFToken()
-
+    
     try {
         let headers = new Headers()
 
         headers.append("Content-type", "application/json")
-        if (csrfToken)  headers.append("X-CSRFToken", csrfToken)
-        if (access)     headers.append("Authorization", `Bearer ${access}`)
+        
+        // const access = localStorage.getItem("access")
+        // if (access) headers.append("Authorization", `Bearer ${access}`)
+        
+        if (method != "GET") {
+            const csrfToken = await getCSRFToken()
+            if (csrfToken) headers.append("X-CSRFToken", csrfToken)
+        }
 
         const options = {
             method: method.toUpperCase(),
-            headers: headers
+            headers: headers,
+            credentials: "include"
         }
 
         if (body) {
@@ -71,10 +76,10 @@ export async function apiRequest(url, method = "GET", body = null) {
             return data
 
         } else {
-            console.log(data.error)
             if (response.status == 401) {
-                await refreshToken()
-                return await apiRequest(url, method, body)
+                const refreshed = await refreshToken()
+                if (refreshed)
+                    return await apiRequest(url, method, body)
 
             } else {
                 throw new Error(data.error)
@@ -88,37 +93,30 @@ export async function apiRequest(url, method = "GET", body = null) {
 
 async function refreshToken() {
     const url = getURL("api/users/refresh-token/")
-
-    const refresh = localStorage.getItem("refresh")
-    if (!refresh) throw new Error("not connected")
     
     try {
         const data = await apiRequest(
             url,
-            "POST",
-            {refresh: refresh}
+            "POST"
         )
 
-        localStorage.setItem("access", data.access)
+        return true
 
     } catch (e) {
-        localStorage.removeItem("refresh")
-        localStorage.removeItem("access")
+        const router = Router.get()
+        router.navigate("/login/")
         
-        Router.get().navigate("/login/")
+        return false
     }
 }
 
 
-export async function checkLogin() {
-    const url = getURL("api/users/check-login/")
-    const refresh = localStorage.getItem("refresh")
-
+export async function checkLogin() {    
     try {
+        const url = getURL("api/users/check-login/")
         const data = await apiRequest(
             url,
-            "POST",
-            {refresh: refresh}
+            "POST"
         )
         
         return data.authenticated

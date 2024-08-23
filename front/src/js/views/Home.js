@@ -39,7 +39,7 @@ export class Home extends AbstractView {
         const script = document.createElement('script')
         const appcontainer = document.querySelector('div#app')
         
-        script.src = 'static/scripts/pong/dist/main.js'
+        script.src = '/src/scripts/pong/dist/main.js'
         
         appcontainer.appendChild(script)
     }

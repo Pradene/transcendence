@@ -4,10 +4,9 @@ from account.models import CustomUser
 
 def jwt_required(view_func):
     def _wrapped_view(request, *args, **kwargs):
-        token = request.headers.get('Authorization')
+        token = request.COOKIES.get('access_token')
         
-        if token is not None and token.startswith('Bearer '):
-            token = token.split(' ')[1]
+        if token is not None:
             user_id = decode_token(token)
             
             if user_id:
