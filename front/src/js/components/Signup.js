@@ -12,6 +12,7 @@ export class Signup extends TemplateComponent {
         const form = this.getRef("form")
         form.addEventListener("submit", async (event) => {
             await this.handleSubmit(event)
+			console.log("reeeeee")
         })
 
         form.addEventListener("input", (event) => {
@@ -22,11 +23,12 @@ export class Signup extends TemplateComponent {
     async handleSubmit(event) {
         event.preventDefault()
 
-        try {
-            const username = this.getRef("username")
-            const password = this.getRef("password")
-            const passwordConfirmation = this.getRef("passwordConfirmation")
+		const username = this.getRef("username")
+		const password = this.getRef("password")
+		const passwordConfirmation = this.getRef("passwordConfirmation")
 
+		
+        try {
             const url = getURL("api/users/signup/")
         
             const data = await apiRequest(
@@ -50,6 +52,8 @@ export class Signup extends TemplateComponent {
             username.classList.remove("active")
             password.classList.remove("active")
             passwordConfirmation.classList.remove("active")
+
+			console.log(e)
             
             this.displayErrors(e.message)
         }

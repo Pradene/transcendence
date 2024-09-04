@@ -18,6 +18,12 @@ up:
 down:
 	docker compose down
 
-re: down
+clean:
+	-docker volume rm transcendence_database
+	-docker volume rm transcendence_ssl_certs
 	-docker container prune -f
+	-docker rmi $(docker images)
+
+
+re: down clean
 	${MAKE} ${NAME}
