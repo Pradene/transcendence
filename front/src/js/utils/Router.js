@@ -34,8 +34,6 @@ export class Router {
     }
 
     async handleRoute() {
-        const isAuthenticated = await checkLogin()
-
         const location = window.location.pathname
         const matchedRoute = this.matchRoute(location)
         if (matchedRoute) {
@@ -46,6 +44,7 @@ export class Router {
                 // this.currentView.unmount()
             // }
             
+            const isAuthenticated = await checkLogin()
             if (isProtected && !isAuthenticated) {
                 // return to login page if the user isn't logged in
                 this.navigate('/login/')
@@ -53,13 +52,13 @@ export class Router {
             } else {
                 // render the view
                 const view = new View()
-                const app = document.getElementById("app")
-                const component = await view.render(app)
-                requestAnimationFrame(() => {
-                    app.replaceChildren(component)
-                })
-
                 this.currentView = view
+                
+                const component = await view.render()
+                const app = document.getElementById("app")
+                
+                app.replaceChildren(component)
+
             }
         }
     }

@@ -2,6 +2,8 @@ import { isHtmlTag } from "./HtmlTags.js"
 import { TemplatesRegistry, TemplatesDirectory } from "./Templates.js"
 
 export class TemplateComponent {
+    static instance = null
+
     // Not initialize this class, use derived class
     constructor() {
         this.container = null
@@ -41,7 +43,9 @@ export class TemplateComponent {
     }
 
     async parseTemplate() {
-        if (this.container !== null) return this.container
+        if (this.container) {
+            return this.container
+        }
 
         const template = await this.loadTemplate()
         if (!template) return null
@@ -51,9 +55,11 @@ export class TemplateComponent {
 
         const node = this.removeWhitespaceNodes(doc.documentElement)
 
-        const container = document.createDocumentFragment()
+        const container = document.createElement("div")
         await this.parseNode(container, node)
+
         this.container = container
+        return this.container
     }
 
     async parseNode(container, node) {
@@ -77,8 +83,8 @@ export class TemplateComponent {
             }
 
             // Process child nodes recursively
-            Array.from(node.childNodes).forEach(childNode => {
-                this.parseNode(element, childNode)
+            Array.from(node.childNodes).forEach(async (childNode) => {
+                await this.parseNode(element, childNode)
             })
 
             container.appendChild(element)
@@ -88,7 +94,7 @@ export class TemplateComponent {
             if (ComponentClass) {
                 const placeholder = document.createElement("div")
                 container.appendChild(placeholder)
-
+                
                 const componentInstance = new ComponentClass()
                 const component = await componentInstance.render()
 
@@ -110,7 +116,6 @@ export class TemplateComponent {
 
     async render() {
         await this.parseTemplate()
-
         await this.componentDidMount()
         
         return this.container

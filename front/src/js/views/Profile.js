@@ -3,7 +3,7 @@ import { apiRequest, getURL } from "../utils/utils.js"
 import { WebSocketManager } from "../utils/WebSocketManager.js"
 import { Page } from "../utils/Component.js"
 import { Nav } from "../components/Nav.js"
-import { FriendButton } from "../components/FriendButton.js"
+import { FriendButton } from "../components/ProfileButton.js"
 import { createElement } from "../utils/createElement.js"
 import { ListComponent } from "../components/List.js"
 
@@ -314,47 +314,6 @@ return content
         })
 
         return friendItem
-    }
-
-
-    async getGames() {
-        try {
-            const id = this.getID()
-            const url = getURL("api/games/")
-            return apiRequest(url)
-                .then(response => {
-                    return response
-                })
-                .catch(error => {
-                    throw error
-                })
-
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-    displayGame(container, game) {
-        const el = document.createElement("li")
-        el.classList.add("list__item")
-
-        el.innerHTML = `
-            <div class="container__flex start">
-                <div class="profile-picture mr__12">
-                    <img src="${game.player.picture}"></img>
-                </div>
-                <p>${game.player.username}</p>
-            </div>
-            <div>${game.player_score} VS ${game.opponent_score}</div>
-            <div class="container__flex end">
-                <p>${game.opponent.username}</p>
-                <div class="profile-picture ml__12">
-                    <img src="${game.opponent.picture}"></img>
-                </div>
-            </div>
-        `
-
-        container.appendChild(el)
     }
 
 

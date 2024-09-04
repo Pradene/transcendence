@@ -224,7 +224,7 @@ def refreshTokenView(request):
             response = JsonResponse({}, status=200)
             response.set_cookie(
                 "access_token", access_token,
-                httponly=True, secure=True,
+                httponly=False, secure=True,
                 samesite="Lax", max_age=300
             )
             return response

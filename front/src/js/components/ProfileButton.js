@@ -1,16 +1,38 @@
-import { createElement } from "../utils/createElement.js"
+import { Router } from "../utils/Router.js"
 import { TemplateComponent } from "../utils/TemplateComponent.js"
+import { registerTemplates } from "../utils/Templates.js"
 import { WebSocketManager } from "../utils/WebSocketManager.js"
 
-export class FriendButton extends TemplateComponent {
+export class ProfileButton extends TemplateComponent {
     constructor() {
         super()
+
+        this.state = {}
     }
 
-    initState() {
+    async render(status) {
+        await this.parseTemplate()
+        await this.componentDidMount(status)
+
+        return this.container
+    }
+
+    async componentDidMount(status) {
+        this.initState(status)
+
+        const button = this.getRef("button")
+        button.textContent = this.state.label
+
+        button.addEventListener("click", () => this.handleClick())
+    }
+
+    initState(status) {
         let initialState
 
-        switch (this.props.status) {
+        switch (status) {
+            case 'self':
+                initialState = { currentState: 'self', label: 'Edit profile' }
+                break
             case 'friend':
                 initialState = { currentState: 'friend', label: 'Remove friend' }
                 break
@@ -29,28 +51,12 @@ export class FriendButton extends TemplateComponent {
         this.state = initialState
     }
 
-    create() {
-        this.initState()
-
-        const button = createElement("button", {
-            attributes: { id: "friend__button" },
-            classes: ["button"],
-            textContent: this.state.label
-        })
-
-        return button
-    }
-
-    componentDidMount() {
-        this.addEventListeners(
-            this.element,
-            "click",
-            () => this.handleClick()
-        )
-    }
-
     handleClick() {
         switch (this.state.currentState) {
+            case 'self':
+                const router = Router.get()
+                router.navigate("/edit/")
+                break
             case 'friend':
                 // Handle unfriending
                 this.setState({ currentState: 'none', label: 'Add friend' })
@@ -118,3 +124,5 @@ export class FriendButton extends TemplateComponent {
         })
     }
 }
+
+registerTemplates("ProfileButton", ProfileButton)

@@ -13,7 +13,6 @@ export function getUserID() {
         return decoded.user
     
     } catch (e) {
-        console.log(e)
         return null
     }
 }
@@ -98,9 +97,6 @@ async function refreshToken() {
         return true
 
     } catch (e) {
-        const router = Router.get()
-        router.navigate("/login/")
-        
         return false
     }
 }
@@ -125,8 +121,9 @@ export async function checkLogin() {
             return true
 
         } else {
-            // return await refreshToken()
-            return false
+            console.log("refresh")
+            const value = await refreshToken()
+            return value
         }
 
     } catch (error) {
