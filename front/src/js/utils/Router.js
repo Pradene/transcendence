@@ -1,16 +1,16 @@
 import { checkLogin } from "./utils.js"
 
 export class Router {
-    constructor(container, routes = []) {
+    constructor(routes = []) {
         if (Router.instance)
             return Router.instance
 
-        this.routes = routes
-        this.container = container
+        Router.instance = this
         
         this.currentView = null
-        
-        Router.instance = this
+        this.routes = routes
+
+        this.init()
     }
 
     init() {
@@ -24,12 +24,13 @@ export class Router {
         this.handleRoute()
     }
 
-    navigate(path) {
-        if (!path.endsWith("/"))
+    async navigate(path) {
+        if (!path.endsWith("/")) {
             path += "/"
+        }
 
         history.pushState(null, null, path)
-        this.handleRoute()
+        await this.handleRoute()
     }
 
     async handleRoute() {
@@ -38,20 +39,26 @@ export class Router {
         const location = window.location.pathname
         const matchedRoute = this.matchRoute(location)
         if (matchedRoute) {
-            const view = matchedRoute.route.view
-
-            if (this.currentView && typeof this.currentView.removeEventListeners === "function") {
-                this.currentView.removeEventListeners()
-            }
-
-            // return login if the user isn't logged in
-            if (view.isProtected() && !isAuthenticated) {
+            const View = matchedRoute.route.view
+            const isProtected = matchedRoute.route.protected
+            
+            // if (this.currentView && typeof this.currentView.unmount === "function") {
+                // this.currentView.unmount()
+            // }
+            
+            if (isProtected && !isAuthenticated) {
+                // return to login page if the user isn't logged in
                 this.navigate('/login/')
-
-            // render the view
+                
             } else {
-                this.container.innerHTML = ''
-                view.render(this.container)
+                // render the view
+                const view = new View()
+                const app = document.getElementById("app")
+                const component = await view.render(app)
+                requestAnimationFrame(() => {
+                    app.replaceChildren(component)
+                })
+
                 this.currentView = view
             }
         }

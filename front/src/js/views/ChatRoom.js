@@ -1,19 +1,44 @@
-import { AbstractView } from "./AbstractView.js"
-import { getURL, apiRequest, getUserID } from "../utils.js"
-import { WebSocketManager } from "../WebSocketManager.js"
+import { getURL, apiRequest, getUserID } from "../utils/utils.js"
+import { WebSocketManager } from "../utils/WebSocketManager.js"
+import { Page } from "../utils/Component.js"
+import { Nav } from "../components/Nav.js"
 
-export class ChatRoom extends AbstractView {
-    constructor() {
-        super()
+export class ChatRoom extends Page {
+    constructor(container, props = {}) {
+        super(container, props)
 
         this.lastSender = null
     }
 
-    getHtml() {
+    fetchData(callback) {
+        const messagesPromise = this.getMessages()
+
+        Promise.all([messagesPromise])
+            .then(([messages]) => {
+                this.messages = messages
+
+                console.log(messages)
+
+                if (typeof callback === "function") {
+                    callback()
+                }
+            })
+            .catch(error => {
+                console.error("Error in fetchData:", error)
+            })
+    }
+
+    create() {
+        const content = document.createDocumentFragment()
+
+        new Nav(content)
+        
+        return content
+
         return `
             <nav-component></nav-component>
             <div class="grid">
-                <div id="chatroom" class="grid__item">
+                <div id="chatroom" class="grid-item">
                     <div class="top">
                         <div id="chatroom__info"></div>
                     </div>
@@ -31,15 +56,19 @@ export class ChatRoom extends AbstractView {
         `
     }
 
-    initView() {
-        this.lastSender = null
-
-        this.getMessages()
-
-        const form = document.getElementById("chatroom__form")
-        this.addEventListeners(form, "submit", (event) => this.sendMessage(event))
+    componentDidMount() {
+        const form = this.element.querySelector("#chatroom__form")
+        this.addEventListeners(
+            form,
+            "submit",
+            (event) => this.sendMessage(event)
+        )
         
-        this.addEventListeners(window, "wsMessage", (event) => this.WebsocketMessage(event.detail))
+        this.addEventListeners(
+            window,
+            "wsMessage",
+            (event) => this.WebsocketMessage(event.detail)
+        )
     }
 
     WebsocketMessage(event) {
@@ -73,22 +102,17 @@ export class ChatRoom extends AbstractView {
     }
 
 
-    async getMessages() {
+    getMessages() {
         try {
             const roomID = this.getID()
             const url = getURL(`api/chat/rooms/${roomID}/`)
-            const data = await apiRequest(url)
-            console.log(data)
-
-            // this.displayRoomInfo(data.room_name, data.room_picture)
-            const roomName = document.getElementById("chatroom__info")
-            roomName.textContent = data.room_name
-
-            const container = document.getElementById("chatroom__messages")
-            data.messages.forEach(message => {
-                this.displayMessage(container, message)
-            })
-
+            return apiRequest(url)
+                .then(response => {
+                    return response
+                })
+                .catch(error => {
+                    throw error
+                })
         } catch (error) {
             console.log(error)
         }

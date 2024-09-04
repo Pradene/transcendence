@@ -8,14 +8,9 @@ endif
 
 all: ${NAME}
 
-${NAME}: build_scripts
+${NAME}:
 	HOST_HOSTNAME=$(HOST_HOSTNAME) docker compose build --parallel
 	HOST_HOSTNAME=$(HOST_HOSTNAME) docker compose up
-
-build_scripts:
-	echo hello
-# npm i
-# npm run build -w front/src/scripts/pong
 
 up:
 	docker compose up -d

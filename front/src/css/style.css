@@ -6,6 +6,7 @@
 @import "registration.css";
 @import "chat.css";
 @import "chatroom.css";
+@import "search.css";
 
 body {
 	background-color: var(--primary-color);
@@ -44,7 +45,7 @@ p, a, ul, li, div, span, button {
 	border-radius: 18px;
 }
 
-.grid > .grid__item {
+.grid > .grid-item {
 	overflow: hidden;
 
 	background: var(--secondary-color);
@@ -55,11 +56,11 @@ p, a, ul, li, div, span, button {
     flex-direction: column;
 }
 
-.grid > .grid__item.center {
+.grid > .grid-item.center {
 	justify-content: center;
 }
 
-.grid > .grid__item > .top {
+.grid > .grid-item > .top {
 	z-index: 1;
 	padding: 12px;
 	
@@ -68,13 +69,13 @@ p, a, ul, li, div, span, button {
     background: var(--secondary-color);
 }
 
-.grid > .grid__item > .main {
+.grid > .grid-item > .main {
 	flex: 1;
 	overflow: hidden;
 }
 
 
-.grid > .grid__item > .bottom {
+.grid > .grid-item > .bottom {
 	z-index: 1;
 	padding: 12px;
 

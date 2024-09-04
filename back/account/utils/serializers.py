@@ -4,10 +4,7 @@ import logging
 from account.models import FriendList
 
 def serialize_user(user, requesting_user=None):
-    """Convert a User object to a JSON-serializable dictionary including relationship status."""
-    
-    logging.info(f'serialize data')
-    
+    """Convert a User object to a JSON-serializable dictionary including relationship status."""    
     user_data = {
         'id': user.id,
         'username': user.username,
@@ -17,11 +14,9 @@ def serialize_user(user, requesting_user=None):
     if requesting_user is not None:
         try:
             friend_list, created = FriendList.objects.get_or_create(user=requesting_user)
-            logging.info('friend found')
-            user_data['relation'] = friend_list.get_friend_status(user)
-            logging.info(f"{user_data['relation']}")
+            user_data['status'] = friend_list.get_friend_status(user)
         except:
-            user_data['relation'] = 'none'
+            user_data['status'] = 'none'
 
     return user_data
 

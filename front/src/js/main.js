@@ -1,33 +1,29 @@
-import { Router } from "./Router.js"
-import { Home } from './views/Home.js'
-import { Chat } from './views/Chat.js'
-import { ChatCreate } from "./views/ChatCreate.js"
-import { ChatRoom } from './views/ChatRoom.js'
-import { Profile } from './views/Profile.js'
-import { Login } from './views/Login.js'
-import { Signup } from "./views/Signup.js"
-import { WebSocketManager } from "./WebSocketManager.js"
+import { WebSocketManager } from "./utils/WebSocketManager.js"
+import { Router } from "./utils/Router.js"
 
-import './components/Nav.js'
+import { Home } from "./components/Home.js"
+import { Login } from "./components/Login.js"
+import { Signup } from "./components/Signup.js"
+import { Chat } from "./components/Chat.js"
+import { Search } from "./components/Search.js"
+import { Profile } from "./components/Profile.js"
+
+import { NavComponent } from "./components/NavComponent.js"
+
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    const app = document.getElementById('app')
-
-    const wsManager = new WebSocketManager()
-    window.wsManager = wsManager
+    new WebSocketManager()
     
-    const router = new Router(app, [
-        {path: '/', view: new Home()},
-        {path: '/chat/', view: new Chat()},
-        {path: '/chat/create-room/', view: new ChatCreate()},
-        {path: '/chat/:id/', view: new ChatRoom()},
-        {path: '/login/', view: new Login()},
-        {path: '/signup/', view: new Signup()},
-        {path: '/user/:id/', view: new Profile()},
+    const router = new Router([
+        // {path: '/chat/:id/', view: ChatRoom, protected: True},
+        {path: '/', view: Home, protected: true},
+        {path: '/chat/', view: Chat, protected: true},
+        {path: '/users/', view: Search, protected: true},
+        {path: '/users/:id/', view: Profile, protected: true},
+        {path: '/login/', view: Login, protected: false},
+        {path: '/signup/', view: Signup, protected: false},
     ])
-
-    router.init()
 
     document.body.addEventListener('click', (event) => {        
         const link = isDataLink(event.target)
