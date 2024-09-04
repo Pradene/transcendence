@@ -1,29 +1,28 @@
 import { Router } from "./Router.js"
-// import { jwt_decode } from "jwt-decode"
+import jwt from "jsonwebtoken"
 
 export function getURL(url) {
     return "https://" + location.hostname + ":" + location.port + "/" + url
 }
 
 export function getUserID() {
-    // const token = localStorage.getItem("access")
+    try {
+        const token = getCookie("access_token")
+        const decoded = jwt.decode(token)
 
-    // if (token) {
-    //     console.log(token)
-    //     const decodedToken = jwt_decode(token)
-    //     console.log("decode", decodedToken)
-    //     return decodedToken.user_id
-    // }
-
-    return localStorage.getItem("user_id")
+        return decoded.user
+    
+    } catch (e) {
+        console.log(e)
+        return null
+    }
 }
 
 // CSRF Tokens utils
 
 export async function getCSRFToken() {
-    const url = getURL("api/csrf-token/")
-    
     try {
+        const url = getURL("api/csrf-token/")
         const response = await fetch(url)
     
         if (response.ok) {
@@ -31,11 +30,11 @@ export async function getCSRFToken() {
             const token = data.token
 
             return token
-        
+
         } else {
             throw new Error(`Failed to fetch data: ${response.status}`)
         }
-        
+
     } catch (e) {
         throw e
     }
@@ -43,16 +42,12 @@ export async function getCSRFToken() {
 
 
 // Requests to server utils
-
 export async function apiRequest(url, method = "GET", body = null) {
     
     try {
         let headers = new Headers()
 
         headers.append("Content-type", "application/json")
-        
-        // const access = localStorage.getItem("access")
-        // if (access) headers.append("Authorization", `Bearer ${access}`)
         
         if (method != "GET") {
             const csrfToken = await getCSRFToken()
@@ -110,18 +105,32 @@ async function refreshToken() {
     }
 }
 
+function getCookie(name) {
+    const value = `; ${document.cookie}`
+    const parts = value.split(`; ${name}=`)
+    if (parts.length === 2)
+        return parts.pop().split(';').shift()
+    else
+        throw new Error("Cookie not found")
+}
 
-export async function checkLogin() {    
+export async function checkLogin() {
     try {
-        const url = getURL("api/users/check-login/")
-        const data = await apiRequest(
-            url,
-            "POST"
-        )
+        const token = getCookie("access_token")
+        const decoded = jwt.decode(token)
         
-        return data.authenticated
-        
-    } catch (e) {
+        const current = Date.now() / 1000
+
+        if (decoded.exp > current) {
+            return true
+
+        } else {
+            // return await refreshToken()
+            return false
+        }
+
+    } catch (error) {
+        console.log(error)
         return false
     }
 }

@@ -37,11 +37,15 @@ class FriendsConsumer(AsyncWebsocketConsumer):
 
         logging.info(f'{message_type} received')
         
-        if message_type == 'friend_request_accepted':
-            await self.accept_friend_request(data)
 
-        elif message_type == 'friend_request_sended':
+        if message_type == 'friend_request_sended':
             await self.send_friend_request(data)
+        
+        elif message_type == "friend_request_cancelled":
+            await self.cancel_friend_request(data)
+
+        elif message_type == 'friend_request_accepted':
+            await self.accept_friend_request(data)
 
         elif message_type == 'friend_request_declined':
             await self.decline_friend_request(data)
@@ -113,6 +117,21 @@ class FriendsConsumer(AsyncWebsocketConsumer):
             logging.info(f'error: {e}')
 
 
+    async def cancel_friend_request(self, data):
+        receiver_id = data.get('receiver')
+
+        try:
+            receiver = await database_sync_to_async(CustomUser.objects.get)(id=receiver_id)
+            friend_request = await database_sync_to_async(FriendRequest.objects.get)(sender=self.user, receiver=receiver)
+
+            await database_sync_to_async(friend_request.cancel)()
+
+            logging.info(f'friend request cancelled')
+
+        except Exception as e:
+            logging.info(f'error: {e}')
+
+
     async def accept_friend_request(self, data):
         sender_id = data.get('sender')
         logging.info(f'friend request from {sender_id} accepted')
@@ -165,7 +184,7 @@ class FriendsConsumer(AsyncWebsocketConsumer):
 
     async def decline_friend_request(self, data):
         sender_id = data.get('sender')
-        receiver_id = data.get('receiver')  # Assuming you also pass receiver_id for validation
+        receiver_id = data.get('receiver')
 
         try:
             # Retrieve the friend request

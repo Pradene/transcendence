@@ -1,47 +1,107 @@
-import { getURL, apiRequest, truncateString } from "../utils.js"
-import { AbstractView } from "./AbstractView.js"
+import { Nav } from "../components/NavComponent.js"
+import { Page } from "../utils/Component.js"
+import { getURL, apiRequest, truncateString } from "../utils/utils.js"
+import { createElement } from "../utils/createElement.js"
 
-export class Chat extends AbstractView {
-    constructor() {
-        super()
+export class Chat extends Page {
+    constructor(container, props = {}) {
+        super(container, props)
     }
 
-    getHtml() {
-        return `
-            <nav-component></nav-component>
-            <div class="grid">
-                <div id="chat" class="grid__item">
-                    <div class="top">
-                        <label class="search-bar">
-                            <input id="input" class="search-bar" type="text" placeholder="Search" autocomplete="off"></input>
-                        </label>
-                    </div>
-                    <div class="main">
-                        <ul id="chat__rooms" class="list"></ul>
-                    </div>
-                </div>
-            </div>
-        `
+    fetchData(callback) {
+        const roomsPromise = this.getRooms()
+
+        Promise.all([roomsPromise])
+            .then(([rooms]) => {
+                this.rooms = rooms
+
+                if (typeof callback === "function") {
+                    callback()
+                }
+            })
+            .catch(error => {
+                console.error("Error in fetchData:", error)
+            })
     }
 
-    initView() {
-        this.getRooms()
+    create() {
+        const content = createElement("div")
 
-        const input = document.getElementById("input")
-        this.addEventListeners(input, "keyup", (event) => this.handleSearch(event))
+        // Nav
+        const nav = new Nav(content)
+
+        // Main content container
+        const grid = document.createElement("div")
+        grid.className = "grid"
+        content.appendChild(grid)
+
+        // Main content
+        const chat = document.createElement("div")
+        chat.id = "chat"
+        chat.className = "grid-item"
+        grid.appendChild(chat)
+
+        // Search Bar
+        const searchBarContainer = document.createElement("div")
+        searchBarContainer.className = "top"
+        chat.appendChild(searchBarContainer)
+
+        const searchBar = document.createElement("label")
+        searchBar.className = "search-bar"
+        searchBarContainer.appendChild(searchBar)
+
+        const searchBarInput = document.createElement("input")
+        searchBarInput.required = true
+        searchBarInput.autocomplete = "off"
+        searchBarInput.type = "text"
+        searchBarInput.id = "input"
+        searchBarInput.placeholder = "Search a Conversation..."
+        searchBar.appendChild(searchBarInput)
+
+        // Chat rooms
+        const chatRoomsContainer = document.createElement("div")
+        chatRoomsContainer.className = "main"
+        chat.appendChild(chatRoomsContainer)
+
+        const chatRooms = document.createElement("ul")
+        chatRooms.id = "chat__rooms"
+        chatRooms.className = "list"
+        chatRoomsContainer.appendChild(chatRooms)
+
+        this.rooms.forEach(room => {
+            console.log(room)
+            this.displayRoom(chatRooms, room)
+        })
+
+        return content
+    }
+
+    componentDidMount() {
+        const input = this.element.querySelector("input")
+        this.addEventListeners(
+            input,
+            "keyup",
+            (event) => this.handleSearch(event)
+        )
         
-        this.addEventListeners(window, "wsMessage", (event) => this.receiveMessage(event.detail))
+        this.addEventListeners(
+            window,
+            "wsMessage",
+            (event) => this.receiveMessage(event.detail)
+        )
     }
 
 
-    async getRooms() {
+    getRooms() {
         try {
             const url = getURL("api/chat/rooms/")
-            const rooms = await apiRequest(url)
-            console.log("rooms:", rooms)
-
-            const container = document.getElementById("chat__rooms")
-            rooms.forEach(room => this.displayRoom(container, room))
+            return apiRequest(url)
+                .then(response => {
+                    return response
+                })
+                .catch(error => {
+                    throw error
+                })
             
         } catch (error) {
             console.log(error)
@@ -57,22 +117,46 @@ export class Chat extends AbstractView {
             truncateString(room.last_message.content, 48) :
             "Send a message..."
         )
-        
-        const el = document.createElement("li")
-        el.classList.add("chat__room")
-        el.innerHTML = `
-            <a class="list__item clickable" href="/chat/${room.id}/" data-room-id="${room.id}" data-link>
-                <div class="profile-picture">
-                    <img src="${room.picture}" alt="Profile Picture">
-                </div>
-                <div class="main ml__12">
-                    <span class="chat__room__name">${room.name}</span>
-                    <span class="chat__room__message">${message}</span>
-                </div>
-            </a>
-        `
-        
-        container.appendChild(el)
+
+        // Chat Room
+        const chatRoom = document.createElement("li")
+        chatRoom.className = "chat__room"
+        container.appendChild(chatRoom)
+
+        // Link
+        const chatRoomLink = document.createElement("a")
+        chatRoomLink.href = `/chat/${room.id}/`
+        chatRoomLink.className = "list__item clickable"
+        chatRoomLink.dataset.link = ""
+        chatRoomLink.dataset.roomId = `${room.id}`
+        chatRoom.appendChild(chatRoomLink)
+
+        // Picture
+        const chatRoomPictureContainer = document.createElement("div")
+        chatRoomPictureContainer.className = "profile-picture"
+        chatRoomLink.appendChild(chatRoomPictureContainer)
+
+        const chatRoomPicture = document.createElement("img")
+        chatRoomPicture.src = `${room.picture}`
+        chatRoomPicture.alt = "Profile Picture"
+        chatRoomPictureContainer.appendChild(chatRoomPicture)
+
+        // Info
+        const chatRoomInfo = document.createElement("div")
+        chatRoomInfo.className = "main ml__12"
+        chatRoomLink.appendChild(chatRoomInfo)
+
+        // Name
+        const chatRoomName = document.createElement("span")
+        chatRoomName.className = "chat__room__name"
+        chatRoomName.textContent = room.name
+        chatRoomInfo.appendChild(chatRoomName)
+
+        // Message
+        const chatRoomMessage = document.createElement("span")
+        chatRoomMessage.className = "chat__room__message"
+        chatRoomMessage.textContent = message
+        chatRoomInfo.appendChild(chatRoomMessage)
     }
     
 
@@ -94,14 +178,15 @@ export class Chat extends AbstractView {
         const message = event.message
         
         if (message && message.action === "message") {
-            const room = document.querySelector(`[data-room-id="${message.room}"]`)
+            const chatRooms = document.getElementById("chat__rooms")
+            const chatRoom = chatRooms.querySelector(`[data-room-id="${message.room}"]`)
             
-            const last_message = room.querySelector(".chat__room__message")
-            last_message.textContent = truncateString(message.content, 20)
-        }
-    }
+            const chatRoomMessage = chatRoom.querySelector(".chat__room__message")
+            chatRoomMessage.textContent = truncateString(message.content, 48)
 
-    sortRoomsByTimestamp() {
-        const rooms = document.querySelectorAll(".chat__room")
+            // Modify thhe position of the room 
+            // to become the first element of the list
+            chatRooms.insertBefore(chatRoom, chatRooms.firstChild)
+        }
     }
 }

@@ -116,21 +116,21 @@ def signupView(request):
         data = json.loads(request.body)
         
         username = data.get("username")
-        password1 = data.get("password1")
-        password2 = data.get("password2")
+        password = data.get("password")
+        password_confirmation = data.get("password_confirmation")
 
         if not username:
             return JsonResponse({"error": "This field is required."}, status=400)
         elif CustomUser.objects.filter(username=username).exists():
             return JsonResponse({"error": "A user with that username already exists."}, status=400)
 
-        if password1 != password2:
+        if password != password_confirmation:
             return JsonResponse({"error": "The password doesn't match."}, status=400)
         # elif len(password1) < 8:
             # return JsonResponse({"error": "Password must be at least 8 characters long."}, status=400)
 
         try:
-            user = CustomUser.objects.create_user(username=username, password=password1)
+            user = CustomUser.objects.create_user(username=username, password=password)
             return JsonResponse({}, status=200)
         
         except Exception as e:
@@ -161,17 +161,20 @@ def loginView(request):
         try:
             access_token = create_access_token(user)
             refresh_token = create_refresh_token(user)
-            response = JsonResponse({"user_id": user.id}, status=200)
+            response = JsonResponse({}, status=200)
+
             response.set_cookie(
                 "access_token", access_token,
-                httponly=True, secure=True,
+                httponly=False, secure=True,
                 samesite="Lax", max_age=300
             )
+
             response.set_cookie(
                 "refresh_token", refresh_token,
                 httponly=True, secure=True,
                 samesite="Lax", max_age=3600
             )
+
             return response
         
         except Exception as token_error:
@@ -189,10 +192,11 @@ def loginView(request):
 @require_POST
 def checkLoginView(request):
     try:
-        refresh = request.COOKIES.get("refresh_token")
-        user_id = decode_token(refresh)
+        token = request.COOKIES.get("refresh_token")
+        if BlackListedToken.objects.filter(token=token).exists():
+            return JsonResponse({"authenticated": False}, status=200)
 
-        logging.info(f'check token for {user_id}')
+        user_id = decode_token(token)
 
         user = CustomUser.objects.get(id=user_id)
         if user.is_authenticated:

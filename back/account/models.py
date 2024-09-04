@@ -106,6 +106,9 @@ class FriendRequest(models.Model):
     def decline(self):
         self.delete()
 
+    def cancel(self):
+        self.delete()
+
 
 class Block(models.Model):
     blocker = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="blockeds", on_delete=models.CASCADE)

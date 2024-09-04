@@ -1,4 +1,17 @@
 services:
+  front:
+    container_name: front
+    image: front
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    networks:
+      - transcendence
+    volumes:
+      - $FRONT_VOLUME:/app
+
   back:
     container_name: back
     image: back
@@ -47,6 +60,7 @@ services:
       - ssl_certs:/etc/ssl
     depends_on:
       - back
+      - front
 
 networks:
   transcendence:

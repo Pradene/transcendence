@@ -5,10 +5,10 @@
 /* CONTAINER */
 
 .container {
-    width: 100%;
+    width: auto;
 }
 
-.container__fullpage {
+.container-fp {
     width: 100%;
     height: 100vh;
 
@@ -18,12 +18,12 @@
     align-items: center;
 }
 
-.container__flex {
+.container-flex {
     display: flex;
     align-items: center;
 }
 
-.container__flex--centered {
+.container-flex-center {
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -79,11 +79,6 @@
     transition: background 0.2s;
 }
 
-button img {
-    width: 18px;
-    height: 18px;
-}
-
 
 /* PROFILE */
 .profile-picture {
@@ -111,42 +106,17 @@ button img {
 }
 
 /* TEXT */
-.text-900 {
+.text-xl {
     font-size: 24px;
     font-weight: 700;
 }
 
-.text-700 {
+.text-l {
     font-size: 18px;
     font-weight: 400;
 }
 
-.text-600 {
+.text-m {
     font-size: 16px;
     font-weight: 400;
-}
-
-/* MARGIN */
-.ml__8 {
-    margin-left: 8px;
-}
-
-.ml__12 {
-    margin-left: 12px;
-}
-
-.mr__8 {
-    margin-right: 8px;
-}
-
-.mr__12 {
-    margin-right: 12px;
-}
-
-.mt__8 {
-    margin-top: 8px;
-}
-
-.mt__12 {
-    margin-top: 12px;
 }

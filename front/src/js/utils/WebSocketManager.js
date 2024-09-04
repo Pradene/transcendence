@@ -2,7 +2,8 @@ import { checkLogin } from "./utils.js"
 
 export class WebSocketManager {
     constructor() {
-        if (WebSocketManager.instance) return WebSocketManager.instance
+        if (WebSocketManager.instance)
+            return WebSocketManager.instance
 
         WebSocketManager.instance = this
         
@@ -10,6 +11,10 @@ export class WebSocketManager {
         this.pendingMessages = {} // Queue messages until the socket is open
 
         this.reconnectAllSockets()
+    }
+
+    static get() {
+        return WebSocketManager.instance ? WebSocketManager.instance : new WebSocketManager()
     }
 
     connect(url, type) {
@@ -85,10 +90,6 @@ export class WebSocketManager {
         } catch (error) {
             console.log(error)
         }
-    }
-
-    static get() {
-        return WebSocketManager.instance ? WebSocketManager.instance : new WebSocketManager()
     }
 
     saveConnection(type, url) {

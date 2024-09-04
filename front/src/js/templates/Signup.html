@@ -1,0 +1,21 @@
+<div class="container-fp">
+    <form ref="form" action="POST" class="registration-form">
+        <div ref="error" class="registration-form-error hidden"></div>
+        <label>
+            <input ref="username" id="username" type="text" autocomplete="off" required="True" />
+            <span>Username</span>
+        </label>
+        <label>
+            <input ref="password" id="password" type="password" autocomplete="off" required="True" />
+            <span>Password</span>
+        </label>
+        <label>
+            <input ref="passwordConfirmation" id="password-confirmation" type="password" autocomplete="off" required="True" />
+            <span>Password confirmation</span>
+        </label>
+        <button type="submit">Sign up</button>
+    </form>
+    <div>
+        <a href="/login/" data-link="">Login</a>
+    </div>
+</div>
