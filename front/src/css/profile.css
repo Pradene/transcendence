@@ -1,0 +1,61 @@
+#profile {
+    grid-column: 1 / 5;
+    grid-row: 1 / 2;
+}
+
+#friends {
+    grid-column: 1 / 5;
+    grid-row: 2 / 4;
+}
+
+#requests {
+    grid-column: 1 / 5;
+    grid-row: 4 / 6;
+}
+
+#users {
+    grid-column: 1 / 5;
+    grid-row: 6 / 9;
+}
+
+#stats {
+    grid-column: 5 / 9;
+    grid-row: 1 / 5;
+}
+
+#games {
+    grid-column: 5 / 9;
+    grid-row: 5 / 9;
+}
+
+#stats__winrate {
+    height: 150px;
+    width: 150px;
+
+    position: relative;
+}
+
+#stats__winrate > div {
+    --win-rate: 0;
+    width: inherit;
+    height: inherit;
+    border-radius: 50%;
+    background: conic-gradient(
+        var(--fifth-color) 0deg,
+        var(--fifth-color) calc(var(--win-rate) * 3.6deg),
+        var(--forth-color) calc(var(--win-rate) * 3.6deg)
+    );
+    mask-image: radial-gradient(circle, rgba(0, 0, 0, 0) 60%, black 61%);
+    -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 0) 60%, black 61%);
+}
+
+#stats__winrate > p {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -40%);
+
+    font-family: "Epilogue";
+    font-weight: 600;
+    font-size: 24px;
+}

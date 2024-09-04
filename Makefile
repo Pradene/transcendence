@@ -1,4 +1,4 @@
-NAME			:= Transcendance
+NAME			:= Transcendence
 DOCKER_FLAGS 	:= --build
 HOST_HOSTNAME	:= $(shell hostname)
 
@@ -13,8 +13,9 @@ ${NAME}: build_scripts
 	HOST_HOSTNAME=$(HOST_HOSTNAME) docker compose up
 
 build_scripts:
-	npm i
-	npm run build -w web/static/scripts/pong
+	echo hello
+# npm i
+# npm run build -w front/src/scripts/pong
 
 up:
 	docker compose up -d
@@ -22,8 +23,6 @@ up:
 down:
 	docker compose down
 
-re:
+re: down
 	-docker container prune -f
-	-docker volume prune -f
-	-docker volume rm transcendance_database
 	${MAKE} ${NAME}

@@ -1,0 +1,90 @@
+/* FORM */
+
+.registration__form {
+	display: block;
+	width: 80%;
+	max-width: 350px;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 36px 0px;
+}
+
+.registration__form__error {
+	text-align: center;
+	padding: 18px;
+	border-radius: 2px;
+	background-color: var(--error-color);
+}
+
+.registration__form__field {
+	overflow: hidden;
+	display: block;
+	position: relative;
+	box-sizing: border-box;
+	border-bottom: 1px solid var(--forth-color);
+	margin-bottom: 12px;
+}
+
+.registration__form__label {
+	position: relative;
+	display: block;
+	height: 36px;
+	padding: 6px 0px;
+	background: transparent;
+	font-family: var(--main-font-family);
+}
+
+.registration__form__label input {
+	position: absolute;
+	border: none;
+	outline: none;
+	top: 50%;
+	height: 24px;
+	width: 100%;
+	background: transparent;
+	color: var(--text-color);
+	font-family: var(--main-font-family);
+	transform-origin: left;
+	transform: translateY(-50%);
+	transition: transform ease-in-out .1s;
+}
+
+.registration__form__label.active input {
+	transform: translateY(-20%);
+}
+
+.registration__form__label span {
+	position: absolute;
+	top: 55%;
+	left: 3px;
+	z-index: 1;
+	color: var(--text-color);
+	transform-origin: left;
+	transform: translateY(-50%) scale(1);
+	transition: transform ease-in-out .1s;
+}
+
+.registration__form__label.active span {
+	transform: translateY(-120%) scale(0.75);
+}
+
+
+.registration__form button {
+	border: none;
+	outline: none;
+	width: 100%;
+	padding: 12px 0px;
+	
+	background: var(--fifth-color);
+	
+	font-size: 12px;
+	font-family: var(--main-font-family);
+	color: var(--text-color);
+
+	cursor: pointer;
+}
+
+.registration__form button:hover {
+	background: var(--fifth-color-dark);
+	transition: background 0.2s;
+}

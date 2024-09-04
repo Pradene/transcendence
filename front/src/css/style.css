@@ -1,0 +1,132 @@
+@import "reset.css";
+@import "var.css";
+@import "utils.css";
+@import "nav.css";
+@import "profile.css";
+@import "registration.css";
+@import "chat.css";
+@import "chatroom.css";
+
+body {
+	background-color: var(--primary-color);
+	
+	font-family: "Epilogue";
+	font-weight: 400;
+}
+
+h1, h2, h3, h4, h5, h6,
+p, a, ul, li, div, span, button {
+	font-family: var(--main-font-family);
+	font-size: var(--default-font-size);
+	color: var(--text-color);
+}
+
+#app {
+	width: 100%;
+	max-width: 800px;
+
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* GRID */
+.grid {
+	display: grid;
+	grid-template-columns: repeat(8, 1fr);
+	grid-template-rows: repeat(8, 1fr);
+	gap: 12px;
+
+	overflow: hidden;
+
+    height: 90vh;
+	width: 100%;
+
+	border-radius: 18px;
+}
+
+.grid > .grid__item {
+	overflow: hidden;
+
+	background: var(--secondary-color);
+
+	border-radius: 18px;
+
+	display: flex;
+    flex-direction: column;
+}
+
+.grid > .grid__item.center {
+	justify-content: center;
+}
+
+.grid > .grid__item > .top {
+	z-index: 1;
+	padding: 12px;
+	
+    border-radius: 18px;
+    box-shadow: 0px 4px 4px var(--primary-color);
+    background: var(--secondary-color);
+}
+
+.grid > .grid__item > .main {
+	flex: 1;
+	overflow: hidden;
+}
+
+
+.grid > .grid__item > .bottom {
+	z-index: 1;
+	padding: 12px;
+
+    border-radius: 18px;
+    box-shadow: 0px -4px 4px var(--primary-color);
+    background: var(--secondary-color);
+}
+
+/* LIST */
+.list {
+	height: 100%;
+	overflow-y: scroll;
+	
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+}
+
+.list::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+}
+
+.list__item {
+	display: flex;
+	align-items: center;
+
+	padding: 8px 12px;
+	margin: 0px 6px;
+}
+
+.list__item.clickable {
+	border-radius: 12px;
+    background: var(--secondary-color);
+
+	cursor: pointer;
+
+	transition: background 0.2s;
+}
+
+.list__item.clickable:hover {
+	background: var(--third-color);
+}
+
+.list__item > .main {
+	flex: 1;
+}
+
+.list__item > .end {
+	flex: 1;
+	justify-content: end;
+}
+
+.list__item > .start {
+	flex: 1;
+	justify-content: start;
+}
