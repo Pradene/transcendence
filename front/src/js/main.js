@@ -7,6 +7,7 @@ import { Signup } from "./components/Signup.js"
 import { Chat } from "./components/Chat.js"
 import { Search } from "./components/Search.js"
 import { Profile } from "./components/Profile.js"
+import { OTP } from "./components/OTP.js"
 
 import { NavComponent } from "./components/NavComponent.js"
 
@@ -23,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {path: '/users/:id/', view: Profile, protected: true},
         {path: '/login/', view: Login, protected: false},
         {path: '/signup/', view: Signup, protected: false},
+        {path: '/verify-otp/', view: OTP, protected: false},
     ])
 
     document.body.addEventListener('click', (event) => {        

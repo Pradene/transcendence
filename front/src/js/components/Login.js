@@ -36,14 +36,14 @@ export class Login extends TemplateComponent {
                     password: password.value
                 }
             )
-            
-            const ws = WebSocketManager.get()
-            ws.connect("wss://" + location.hostname + ":" + location.port + "/ws/chat/", "chat")
-            ws.connect("wss://" + location.hostname + ":" + location.port + "/ws/friends/", "friends")
+
+            // const ws = WebSocketManager.get()
+            // ws.connect("wss://" + location.hostname + ":" + location.port + "/ws/chat/", "chat")
+            // ws.connect("wss://" + location.hostname + ":" + location.port + "/ws/friends/", "friends")
 
             const router = Router.get()
-            router.navigate("/")
-                
+            router.navigate("/verify-otp/")
+
         } catch (e) {
             username.value = ""
             password.value = ""
