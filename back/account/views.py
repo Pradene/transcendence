@@ -18,7 +18,7 @@ from .serializers import FriendRequestSerializer, CustomUserSerializer
 from .utils.token import create_access_token, create_refresh_token, decode_token
 
 from .utils.serializers import serialize_user
-from .utils.otp import send_otp_code
+from .utils.otp import send_otp_code, validate_otp
 
 
 @jwt_required
@@ -100,6 +100,14 @@ def signupView(request):
 			# return JsonResponse({"error": "Password must be at least 8 characters long."}, status=400)
 
 		try:
+			subject = "Account creation confirmation"
+			message = f"Dear {username},\n\nYour accounthas been created.\n\nThank you!\n\nIf you're not the one that create this account please contact us at pong.point42@gmail.com"
+			from_email = settings.DEFAULT_FROM_EMAIL
+			recipient_list = [email]
+			ret = send_mail(subject, message, from_email, recipient_list)
+			logging.info(ret)
+			if ret == 0:
+				return JsonResponse({"error": "Invalid email"}, status=400)
 			user = CustomUser.objects.create_user(email=email, username=username, password=password)
 			return JsonResponse({}, status=200)
 		
@@ -142,7 +150,6 @@ def loginView(request):
 	except Exception as e:
 		return JsonResponse({"error": str(e)}, status=400)
 
-
 @require_POST
 def check2FA(request):
 	try:
@@ -150,10 +157,10 @@ def check2FA(request):
 		if user_id is None:
 			return JsonResponse({"error": "Access denied. Please login first."}, status=403)
 		
-		data = request.body
-		otp_code = data.get('otp_code')
-		user = request.user
-		
+		data = json.loads(request.body)
+		otp_code = data.get('code')
+		user = CustomUser.objects.get(id=user_id)
+
 		if validate_otp(user, otp_code):
 			login(request, user)
 			

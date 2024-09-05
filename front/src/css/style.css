@@ -7,6 +7,7 @@
 @import "chat.css";
 @import "chatroom.css";
 @import "search.css";
+@import "OTP.css";
 
 body {
 	background-color: var(--primary-color);

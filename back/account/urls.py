@@ -7,7 +7,7 @@ urlpatterns = [
     path('logout/', views.logoutView),
     path('check-login/', views.checkLoginView),
     path('refresh-token/', views.refreshTokenView),
-
+	path('verify-otp/', views.check2FA),
 
     path('friend-requests/', views.getFriendRequestsView),
     # path('friend-requests/<int:user_id>/', views.sendFriendRequestView),
