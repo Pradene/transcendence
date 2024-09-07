@@ -18,6 +18,25 @@ module.exports = {
       "process": require.resolve("process/browser"),
     }
   },
+  module: {
+    rules: [
+      {
+        test: /\.scss$/, // Add rule to handle .scss files
+        use: [
+          'style-loader', // Injects styles into DOM
+          'css-loader',   // Translates CSS into CommonJS
+          'sass-loader'   // Compiles Sass to CSS
+        ],
+      },
+      {
+        test: /\.css$/, // Rule to handle .css files (Bootstrap)
+        use: [
+          'style-loader',
+          'css-loader'
+        ],
+      },
+    ],
+  },
   plugins: [
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],

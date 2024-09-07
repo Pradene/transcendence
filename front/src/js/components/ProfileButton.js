@@ -1,6 +1,7 @@
 import { Router } from "../utils/Router.js"
 import { TemplateComponent } from "../utils/TemplateComponent.js"
 import { registerTemplates } from "../utils/Templates.js"
+import { getUserID } from "../utils/utils.js"
 import { WebSocketManager } from "../utils/WebSocketManager.js"
 
 export class ProfileButton extends TemplateComponent {
@@ -54,8 +55,9 @@ export class ProfileButton extends TemplateComponent {
     handleClick() {
         switch (this.state.currentState) {
             case 'self':
+                const id = getUserID()
                 const router = Router.get()
-                router.navigate("/edit/")
+                router.navigate(`/users/${id}/edit/`)
                 break
             case 'friend':
                 // Handle unfriending

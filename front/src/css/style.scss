@@ -1,1 +1,142 @@
-@import "game";
+@font-face {
+    font-family: "Epilogue";
+	src: url("../fonts/Epilogue-Regular.ttf") format("truetype");
+	font-weight: 400;
+	font-style: normal;
+}
+
+@font-face {
+    font-family: "Epilogue";
+	src: url("../fonts/Epilogue-SemiBold.ttf") format("truetype");
+	font-weight: 600;
+	font-style: normal;
+}
+
+@font-face {
+    font-family: "Epilogue";
+	src: url("../fonts/Epilogue-Bold.ttf") format("truetype");
+	font-weight: 700;
+	font-style: normal;
+}
+
+// :root {
+// 	--error-color: #ae3636;
+
+// 	--primary-color: #1e2124;
+// 	--secondary-color: #282b30;
+// 	--third-color: #36393e;
+// 	--forth-color: #424549;
+// 	--fifth-color: #4486c9;
+// 	--fifth-color-dark: #2362a0;
+
+// 	--text-color: #fafafa;
+// 	--text-color-light: #fafafa95;
+// 	--text-color-dark: #181818;
+// }
+
+// Fonts
+// $font-family-sans-serif: "Epilogue", sans-serif;
+
+
+// Color theme
+$primary: #4486c9;
+$primary-dark: #2362a0;
+$dark: #1e2124;
+
+$body-bg: #1e2124;
+$body-color: white;
+
+$primary: #3498db; // Example: a shade of blue
+
+// Define grey variations based on the primary color
+$grey-light: #f4f4f4; // Light grey
+$grey: #e0e0e0;       // Grey
+$grey-dark: #b0b0b0;  // Dark grey
+
+// Override Bootstrap's default grey variables if necessary
+$gray-100: $grey-light;
+$gray-200: $grey;
+$gray-300: $grey-dark;
+$gray-400: darken($grey-dark, 10%);
+$gray-500: darken($grey-dark, 20%);
+$gray-600: darken($grey-dark, 30%);
+$gray-700: darken($grey-dark, 40%);
+$gray-800: darken($grey-dark, 50%);
+$gray-900: darken($grey-dark, 60%);
+
+@import "../../node_modules/bootstrap/scss/bootstrap";
+
+@import "list";
+
+#app {
+    margin: 0 auto;
+    width: 800px;
+}
+
+a {
+    color: white;
+    text-decoration: none;
+}
+
+.box-container {
+    margin: 0 auto;
+
+    background: #36393e;
+    border-radius: 18px;
+    padding: 12px;
+    overflow: hidden;
+}
+
+.container-xxs {
+    width: 100%;
+    max-width: 350px;
+}
+
+.form-container {
+    display: flex;
+    align-items: center;
+    background: #1e2124;
+}
+
+.form-control {
+    border: none;
+}
+
+.form-control:focus {
+    box-shadow: none;
+}
+
+.bg-gray-800 {
+    background: $gray-800;
+}
+
+.profile-picture {
+    height: 32px;
+    width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 50%;
+    border: 1px solid red;
+}
+
+.profile-picture-large {
+    height: 64px;
+    width: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 50%;
+    border: 2px solid red;
+}
+
+.profile-picture-large img,
+.profile-picture img {
+    background: none;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}

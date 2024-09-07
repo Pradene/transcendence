@@ -26,6 +26,7 @@ export class Login extends TemplateComponent {
         try {
             const username = this.getRef("username")
             const password = this.getRef("password")
+            const rememberMe = this.getRef("remember-me")
             const url = getURL("api/users/login/")
         
             const data = await apiRequest(
@@ -33,7 +34,8 @@ export class Login extends TemplateComponent {
                 "POST",
                 {
                     username: username.value,
-                    password: password.value
+                    password: password.value,
+                    remember_me: rememberMe.value
                 }
             )
             

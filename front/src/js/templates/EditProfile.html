@@ -1,0 +1,24 @@
+<div>
+    <NavComponent></NavComponent>
+    <div class="container">
+        <form ref="form" action="POST" class="edit-form grid__items">
+            <div ref="error" class="hidden"></div>
+            <div>
+                <div class="profile-picture-large">
+                    <img ref="picturePreview" alt="Profile picture" />
+                </div>
+                <label for="file-upload" class="button">Import a picture</label>
+                <input ref="pictureInput" id="file-upload" type="file" />
+            </div>
+            <div>
+                <label></label>
+                <input ref="username" id="username" type="text" autocomplete="off" required="True" />
+            </div>
+            <div>
+                <label></label>
+                <input ref="password" id="password" type="password" autocomplete="off" required="True" />
+            </div>
+            <button type="submit" class="button">Login</button>
+        </form>
+    </div>
+</div>

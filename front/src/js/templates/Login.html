@@ -1,20 +1,24 @@
-<div class="container-fp">
-    <form ref="form" action="POST" class="registration-form">
-        <div ref="error" class="registration-form-error hidden"></div>
-        <label>
-            <input ref="username" id="username" type="text" autocomplete="off" required="True" />
-            <span>Username</span>
-        </label>
-        <label>
-            <input ref="password" id="password" type="password" autocomplete="off" required="True" />
-            <span>Password</span>
-        </label>
-        <button type="submit">Login</button>
-    </form>
-    <div>
-        <a href="/">Forgot password?</a>
+<div class="min-vh-100 d-flex flex-column justify-content-center">
+    <div class="container-xxs box-container px-4 py-4">
+        <div class="mb-4">
+            <h2 class="mb-0">Hello,</h2>
+            <p>We are happy to see you</p>
+        </div>
+        <form ref="form" action="POST">
+            <div ref="error" class="hidden"></div>
+            <input ref="username" class="form-control mb-3" placeholder="Username" type="text" autocomplete="off" required="True" />
+            <input ref="password" class="form-control mb-2" placeholder="Password" type="password" autocomplete="off" required="True" />
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center">
+                    <input ref="remember-me" id="remember-me" type="checkbox" />
+                    <label for="remember-me" class="mx-1">Remember me</label>
+                </div>
+                <a href="/" data-link="">Forgot password?</a>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
     </div>
-    <div>
+    <div class="container-xxs box-container text-center py-3 mt-4">
         <a href="/signup/" data-link="">Sign up</a>
     </div>
 </div>

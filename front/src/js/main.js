@@ -7,25 +7,28 @@ import { Signup } from "./components/Signup.js"
 import { Chat } from "./components/Chat.js"
 import { Search } from "./components/Search.js"
 import { Profile } from "./components/Profile.js"
+import { EditProfile } from "./components/EditProfile.js"
 
 import { NavComponent } from "./components/NavComponent.js"
 
+import "../css/style.scss"
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
 
     new WebSocketManager()
     
     const router = new Router([
-        // {path: '/chat/:id/', view: ChatRoom, protected: True},
-        {path: '/', view: Home, protected: true},
-        {path: '/chat/', view: Chat, protected: true},
-        {path: '/users/', view: Search, protected: true},
-        {path: '/users/:id/', view: Profile, protected: true},
-        {path: '/login/', view: Login, protected: false},
-        {path: '/signup/', view: Signup, protected: false},
+        // {path: "/chat/:id/", view: ChatRoom, protected: True},
+        {path: "/", view: Home, protected: true},
+        {path: "/chat/", view: Chat, protected: true},
+        {path: "/users/", view: Search, protected: true},
+        {path: "/users/:id/", view: Profile, protected: true},
+        {path: "/users/:id/edit/", view: EditProfile, protected: true},
+        {path: "/login/", view: Login, protected: false},
+        {path: "/signup/", view: Signup, protected: false},
     ])
 
-    document.body.addEventListener('click', (event) => {        
+    document.body.addEventListener("click", (event) => {        
         const link = isDataLink(event.target)
         if (link) {
             event.preventDefault()
@@ -37,8 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
 const isDataLink = (elem) => {
     let match = null
 
-    while (elem && elem.nodeName.toLowerCase() != 'body') {
-        if (elem.matches('[data-link]')) {
+    while (elem && elem.nodeName.toLowerCase() != "body") {
+        if (elem.matches("[data-link]")) {
             match = elem.href
             break
         }

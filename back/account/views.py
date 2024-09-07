@@ -4,7 +4,7 @@ import datetime
 import logging
 
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.http import require_http_methods, require_POST, require_GET
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 
@@ -18,24 +18,48 @@ from .utils.token import create_access_token, create_refresh_token, decode_token
 from .utils.serializers import serialize_user
 
 @jwt_required
-@require_GET
+@require_http_methods(["GET", "PUT"])
 def userView(request, user_id=None):
-    if user_id is None:
-        user = request.user
-    else:
-        try:
-            user = CustomUser.objects.get(id=user_id)
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
+    if request.method == "GET":
+        if user_id is None:
+            user = request.user
+        else:
+            try:
+                user = CustomUser.objects.get(id=user_id)
+            except Exception as e:
+                return JsonResponse({"error": str(e)}, status=400)
 
-    logging.info(f'{user.username} : {request.user.username}')
-    user_data = serialize_user(user, request.user)
-    return JsonResponse(user_data, status=200)
+        user_data = serialize_user(user, request.user)
+        return JsonResponse(user_data, status=200)
+
+    elif request.method == "PUT":
+        try:
+            # Parse JSON request body
+            data = json.loads(request.body)
+
+            # Get user from database
+            user = CustomUser.objects.get(id=request.user.id)
+
+            # Update user profile
+            user.username = data.get('username', user.username)
+            user.bio = data.get('bio', user.bio)  # Update only if provided
+            if (picture in request.FILES):
+                user.picture = request.FILES['picture']
+            
+            user.save()
+            
+            return JsonResponse({'message': 'Profile updated successfully'}, status=200)
+    
+        except CustomUser.DoesNotExist:
+            return JsonResponse({'error': 'Profile does not exist'}, status=404)
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
 
 
 # Search
 @jwt_required
-@require_GET
+@require_http_methods(["GET"])
 def searchUsersView(request):
     query = request.GET.get("q", "")
     if query:
@@ -49,7 +73,7 @@ def searchUsersView(request):
 
 #Friend Requests
 @jwt_required
-@require_GET
+@require_http_methods(["GET"])
 def getFriendsView(request, user_id=None):
     if user_id is None:
         user = request.user
@@ -66,51 +90,16 @@ def getFriendsView(request, user_id=None):
 
 
 @jwt_required
-@require_GET
+@require_http_methods(["GET"])
 def getFriendRequestsView(request):
     user = request.user
     friend_requests = FriendRequest.objects.filter(receiver=user)
     serializer = FriendRequestSerializer(friend_requests, many=True)
     return JsonResponse(serializer.data, safe=False, status=200)
-
-
-# @jwt_required
-# @require_POST
-# def sendFriendRequestView(request, user_id):
-#     sender = request.user
-#     receiver = CustomUser.objects.get(id=user_id)
-
-#     if sender == receiver:
-#         return JsonResponse({"error": "You cannot send to yourself"}, status=400)
-
-#     if FriendRequest.objects.filter(sender=sender, receiver=receiver):
-#         return JsonResponse({"error": "A friend request alreay exists"}, status=400)
     
-#     elif FriendRequest.objects.filter(sender=receiver, receiver=sender):
-#         return JsonResponse({"error": "A friend request alreay exists"}, status=400)
-    
-#     else:
-#         friend_request = FriendRequest.objects.create(sender=sender, receiver=receiver)
-#         serializer = FriendRequestSerializer(friend_request)
-#         return JsonResponse(serializer.data, safe=False, status=200)
-
-
-# @jwt_required
-# @require_POST
-# def acceptFriendRequestView(request, user_id):
-#     receiver = request.user
-#     try:
-#         sender = CustomUser.objects.get(id=user_id)
-#         friend_request = FriendRequest.objects.get(receiver=receiver, sender=sender)
-#         friend_request.accept()
-#         return JsonResponse({"message": "friend request accepted"}, status=200)
-        
-#     except Exception as e:
-#         return JsonResponse({"error": str(e)}, status=400)
-
 
 # Registration
-@require_POST
+@require_http_methods(["POST"])
 def signupView(request):
     try:
         data = json.loads(request.body)
@@ -140,13 +129,14 @@ def signupView(request):
         return JsonResponse({"error": "Invalid JSON"}, status=400)
 
 
-@require_POST
+@require_http_methods(["POST"])
 def loginView(request):
     try:
         data = json.loads(request.body)
 
         username = data.get("username")
         password = data.get("password")
+        remember_me = data.get("remember_me", False)
 
         try:
             user = authenticate(request, username=username, password=password)
@@ -159,20 +149,20 @@ def loginView(request):
         login(request, user)
 
         try:
-            access_token = create_access_token(user)
-            refresh_token = create_refresh_token(user)
+            access_token, access_exp = create_access_token(user)
+            refresh_token, refresh_exp = create_refresh_token(user, remember_me)
             response = JsonResponse({}, status=200)
 
             response.set_cookie(
                 "access_token", access_token,
                 httponly=False, secure=True,
-                samesite="Lax", max_age=300
+                samesite="Lax", max_age=access_exp
             )
 
             response.set_cookie(
                 "refresh_token", refresh_token,
                 httponly=True, secure=True,
-                samesite="Lax", max_age=3600
+                samesite="Lax", max_age=refresh_exp
             )
 
             return response
@@ -189,7 +179,7 @@ def loginView(request):
 
 
 @csrf_exempt
-@require_POST
+@require_http_methods(["POST"])
 def checkLoginView(request):
     try:
         token = request.COOKIES.get("refresh_token")
@@ -208,7 +198,7 @@ def checkLoginView(request):
         return JsonResponse({"error": str(e)}, status=400)
 
 
-@require_POST
+@require_http_methods(["POST"])
 def refreshTokenView(request):
     token = request.COOKIES.get("refresh_token")
 
@@ -220,28 +210,34 @@ def refreshTokenView(request):
     if user_id is not None:
         try:
             user = CustomUser.objects.get(id=user_id)
-            access_token = create_access_token(user)
+            access_token, access_exp = create_access_token(user)
+
             response = JsonResponse({}, status=200)
+            
             response.set_cookie(
                 "access_token", access_token,
                 httponly=False, secure=True,
-                samesite="Lax", max_age=300
+                samesite="Lax", max_age=access_exp
             )
+            
             return response
+        
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
+    
     else:
         return JsonResponse({"error": "Invalid token"}, status=400)
 
 
 @jwt_required
-@require_POST
+@require_http_methods(["POST"])
 def logoutView(request):
     try:
         refresh_token = request.COOKIES.get("refresh_token")
         token = BlackListedToken.objects.create(token=refresh_token)
 
         logout(request)
+
         return JsonResponse({}, status=200)
 
     except Exception as e:

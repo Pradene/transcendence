@@ -18,15 +18,22 @@
   },
   "homepage": "https://github.com/Pradene/transcendence#readme",
   "dependencies": {
+    "bootstrap": "^5.3.3",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.0",
     "jsonwebtoken": "^9.0.2",
     "process": "^0.11.10",
     "stream-browserify": "^3.0.0",
+    "three": "^0.168.0",
     "util": "^0.12.5",
     "vm-browserify": "^1.1.2"
   },
   "devDependencies": {
+    "css-loader": "^6.7.3",
+    "sass": "^1.78.0",
+    "sass-loader": "^13.3.2",
+    "style-loader": "^3.3.3",
+    "typescript": "^5.5.4",
     "webpack": "^5.94.0",
     "webpack-cli": "^5.1.4"
   }

@@ -6,26 +6,36 @@ from datetime import datetime, timedelta
 from account.models import CustomUser
 
 def create_access_token(user):
+    exp = timedelta(minutes=5)
+
     try:
         payload = {
-            'exp': datetime.utcnow() + timedelta(minutes=1),
+            'exp': datetime.utcnow() + exp,
             'iat': datetime.utcnow(),
             'user': user.id
         }
-        return jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+
+        token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+        return token, exp
 
     except Exception as e:
         return e
 
 
-def create_refresh_token(user):
+def create_refresh_token(user, remember_me=False):
+    exp = timedelta(days=1)
+    if remember_me:
+        exp = timedelta(days=7)
+
     try:
         payload = {
-            'exp': datetime.utcnow() + timedelta(days=1),
+            'exp': datetime.utcnow() + exp,
             'iat': datetime.utcnow(),
             'user': user.id
         }
-        return jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+
+        token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+        return token, exp
 
     except Exception as e:
         return e
