@@ -7,18 +7,17 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST, require_GET
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
+from django.core import serializers
 
 from config import settings
 from config.decorators import jwt_required
 
 from .models import CustomUser, BlackListedToken, FriendList, FriendRequest
-from .serializers import FriendRequestSerializer, CustomUserSerializer
 from .utils.token import create_access_token, create_refresh_token, decode_token
 
-from .utils.serializers import serialize_user
 
 @jwt_required
-@require_http_methods(["GET", "PUT"])
+@require_http_methods(["GET", "POST"])
 def userView(request, user_id=None):
     if request.method == "GET":
         if user_id is None:
@@ -29,22 +28,30 @@ def userView(request, user_id=None):
             except Exception as e:
                 return JsonResponse({"error": str(e)}, status=400)
 
-        user_data = serialize_user(user, request.user)
-        return JsonResponse(user_data, status=200)
+        data = user.toJSON(user)
+        return JsonResponse(data, safe=False, status=200)
 
-    elif request.method == "PUT":
+    elif request.method == "POST":
+        logging.info("POST")
         try:
-            # Parse JSON request body
-            data = json.loads(request.body)
-
-            # Get user from database
-            user = CustomUser.objects.get(id=request.user.id)
+            user = request.user
 
             # Update user profile
-            user.username = data.get('username', user.username)
-            user.bio = data.get('bio', user.bio)  # Update only if provided
-            if (picture in request.FILES):
-                user.picture = request.FILES['picture']
+            username = request.POST.get('username', user.username)
+            bio = request.POST.get('bio', user.bio)
+            email = request.POST.get('email', user.email)
+
+            if 'picture' in request.FILES:
+                picture = request.FILES['picture']
+            else:
+                picture = user.picture
+            
+            user.username = username
+            user.email = email
+            user.bio = bio
+            user.picture = picture
+
+            logging.info(f'{username} : {bio} : {email}')
             
             user.save()
             
@@ -61,13 +68,17 @@ def userView(request, user_id=None):
 @jwt_required
 @require_http_methods(["GET"])
 def searchUsersView(request):
-    query = request.GET.get("q", "")
-    if query:
-        users = CustomUser.objects.filter(username__icontains=query)
-        serializer = CustomUserSerializer(users, many=True)
-        return JsonResponse(serializer.data, safe=False, status=200)
+    try:
+        query = request.GET.get("q", "")
+        if query:
+            users = CustomUser.objects.filter(username__icontains=query)
+            data = [user.toJSON() for user in users]
+            return JsonResponse(data, safe=False, status=200)
+
+        return JsonResponse({"error": "User not found"}, status=400)
     
-    return JsonResponse({"error": "User not found"}, status=400)
+    except Exception as e:
+        return JsonResponse({}, status=400)
 
 
 
@@ -85,17 +96,20 @@ def getFriendsView(request, user_id=None):
 
     friend_list, created = FriendList.objects.get_or_create(user=user)
     friends = friend_list.friends.all()
-    serializer = CustomUserSerializer(friends, many=True)
+    data = [friend.toJSON() for friend in friends]
     return JsonResponse(serializer.data, safe=False, status=200)
 
 
 @jwt_required
 @require_http_methods(["GET"])
 def getFriendRequestsView(request):
-    user = request.user
-    friend_requests = FriendRequest.objects.filter(receiver=user)
-    serializer = FriendRequestSerializer(friend_requests, many=True)
-    return JsonResponse(serializer.data, safe=False, status=200)
+    try:
+        user = request.user
+        requests = FriendRequest.objects.filter(receiver=user)
+        data = [request.toJSON() for request in requests]
+        return JsonResponse(data, safe=False, status=200)
+    except Exception as e:
+        return JsonResponse({}, status=400)
     
 
 # Registration

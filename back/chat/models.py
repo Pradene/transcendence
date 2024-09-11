@@ -9,6 +9,39 @@ class ChatRoom(models.Model):
     is_private =  models.BooleanField(default=True)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="rooms")
     
+    def toJSON(self, request):
+        requesting_user = request.user
+
+        # Get other user (for private rooms)
+        def get_name():
+            return self.get_other_user(requesting_user)
+
+        # Get last message
+        def get_last_message():
+            last_message = self.get_last_message()
+            if last_message:
+                return last_message.toJSON()
+            return None
+
+        # Get picture (for private rooms and public rooms)
+        def get_picture():
+            if self.is_private:
+                other_user = CustomUser.objects.get(username=self.get_other_user(requesting_user))
+                return other_user.picture.url if other_user.picture else 'profile-pictures/default.png'
+            else:
+                last_message = self.get_last_message()
+                if last_message:
+                    return last_message.user.picture.url if last_message.user.picture else 'profile-pictures/default.png'
+                return 'profile-pictures/default.png'
+
+        return {
+            'id': self.id,
+            'name': get_name(),
+            'users': [user.toJSON() for user in self.users.all()],
+            'last_message': get_last_message(),
+            'picture': get_picture(),
+        }
+
     @classmethod
     def create(cls, name, is_private=True, user_ids=None):
         room = cls.objects.create(name=name, is_private=is_private)
@@ -38,6 +71,7 @@ class ChatRoom(models.Model):
         else:
             return None
 
+
 class Message(models.Model):
     room = models.ForeignKey(ChatRoom, related_name='messages', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -46,3 +80,11 @@ class Message(models.Model):
 
     def __str__(self):
         return self.content
+
+    def toJSON(self):
+        return {
+            'id': self.id,
+            'user': self.user.username if self.user else None,
+            'content': self.content,
+            'timestamp': self.timestamp.isoformat(),
+        }

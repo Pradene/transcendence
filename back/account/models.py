@@ -42,6 +42,7 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=32, unique=True)
     picture = models.ImageField(upload_to="profile_pictures/", default="profile_pictures/default.png", blank=True, null=True)
+    email = models.EmailField(null=True)
     bio = models.TextField(blank=True, null=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -53,6 +54,23 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
+
+    def toJSON(self, requesting_user=None):
+        data = {
+            'id': self.id,
+            'username': self.username,
+            'picture': self.picture.url if self.picture else None,
+            'is_active': self.is_active,
+        }
+
+        if requesting_user is not None:
+            try:
+                friend_list, created = FriendList.objects.get_or_create(user=self)
+                data['status'] = friend_list.get_friend_status(requesting_user)
+            except Exception as e:
+                data['status'] = 'none'
+
+        return data
 
 
 class FriendList(models.Model):
@@ -93,6 +111,12 @@ class FriendRequest(models.Model):
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sender")
     receiver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="receiver")
     timestamp = models.DateTimeField(auto_now_add=True)
+
+    def toJSON(self):
+        return {
+            'sender': self.sender.toJSON(),
+            'receiver': self.receiver.toJSON()
+        }
 
     def accept(self):
         sender_friend_list, created = FriendList.objects.get_or_create(user=self.sender)

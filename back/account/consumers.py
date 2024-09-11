@@ -7,8 +7,6 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 
 from .models import FriendList, FriendRequest, CustomUser
-from .serializers import CustomUserSerializer
-from .utils.serializers import serialize_user
 
 class FriendsConsumer(AsyncWebsocketConsumer):
     async def connect(self):

@@ -74,6 +74,8 @@ export async function apiRequest(url, method = "GET", body = null) {
                 const refreshed = await refreshToken()
                 if (refreshed)
                     return await apiRequest(url, method, body)
+                else
+                    throw new Error("Couldn't refresh access token")
 
             } else {
                 throw new Error(data.error)

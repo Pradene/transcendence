@@ -1,33 +1,12 @@
-- check if a friend request between user already exists or if they are already friends
-
-- install jwt-decode and use it to decode token and change link inside nav to use getUserID
-
 - room creation real time response
 
 - profile page
   - make edit profile page
     change: username, pp, bio
 
-- profile page for all users
-
 - messages, friends pagination
 
-done:
-- game (remote)
-- tournament
-- registration
-- matchmaking ?
-- https
+- remove rest framework
 
-modules done:
-- django backend (1)
-- db (1/2)
-- user management (1)
-- remote players (1)
-- game customization (1/2)
-- live chat (1)
+- notifications maybe for invitation
 
-x 3D (1)
-
-- server side pong (1)
-- 
