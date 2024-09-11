@@ -7,8 +7,6 @@ from django.shortcuts import get_object_or_404
 from config.decorators import jwt_required
 
 from .models import ChatRoom, Message
-from .serializers import ChatRoomSerializer, MessageSerializer
-
 from .utils.elapsed_time import elapsed_time
 
 @jwt_required
@@ -17,8 +15,8 @@ def roomsView(request):
     if request.method == "GET":
         try:
             rooms = ChatRoom.objects.filter(users=user)
-            serializer = ChatRoomSerializer(rooms, many=True, context={'request': request})
-            return JsonResponse(serializer.data, safe=False, status=200)
+            data = [room.toJSON() for room in rooms]
+            return JsonResponse(data, safe=False, status=200)
 
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
@@ -37,8 +35,8 @@ def roomsView(request):
             room.users.set(users)
             room.save()
 
-            serializer = ChatRoomSerializer(room)
-            return JsonResponse(serializer.data, safe=False, status=200)
+            data = room.toJSON()
+            return JsonResponse(data, safe=False, status=200)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
@@ -95,7 +93,7 @@ def searchRoomsView(request):
     query = request.GET.get('q', '')
     if query:
         rooms = ChatRoom.objects.filter(users=user, name__icontains=query)
-        serializer = ChatRoomSerializer(rooms, many=True)
-        return JsonResponse(serializer.data, safe=False, status=200)
+        data = [room.toJSON() for room in rooms]
+        return JsonResponse(data, safe=False, status=200)
     
     return JsonResponse({}, status=400)

@@ -6,7 +6,6 @@ from channels.db import database_sync_to_async
 
 from account.models import CustomUser
 from .models import ChatRoom, Message
-from .serializers import ChatRoomSerializer
 from .utils.elapsed_time import elapsed_time
 
 class ChatConsumer(AsyncWebsocketConsumer):
