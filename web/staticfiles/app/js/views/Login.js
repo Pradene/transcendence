@@ -79,6 +79,7 @@ export class Login extends AbstractView {
         const script = document.createElement('script')
         const canvas = document.querySelector('#background-canvas')
         script.src = 'static/scripts/anim/anim-log.js'
+        script.type = 'application/javascript';
         window.addEventListener('load', function() {
             document.body.appendChild(script);
         });

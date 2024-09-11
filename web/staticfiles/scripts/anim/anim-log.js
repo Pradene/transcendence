@@ -1,5 +1,3 @@
-console.log("Script is running");
-
 const canvas = document.getElementById('#background-canvas');
 const ctx = canvas.getContext('2d');
 
@@ -40,7 +38,8 @@ function update() {
 update();
 
 
-window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-});
+// window.addEventListener('resize', () => {
+//     canvas.width = window.innerWidth;
+//     canvas.height = window.innerHeight;
+// });
+

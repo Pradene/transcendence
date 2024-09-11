@@ -19,6 +19,8 @@ function drawCircle() {
     ctx.closePath();
 }
 
+
+
 function update() {
     drawCircle();
 
