@@ -21,4 +21,7 @@ urlpatterns = [
     
     path('', views.userView),
     path('<int:user_id>/', views.userView),
+
+	path('ft_auth/', views.ft_auth),
+	path('ft_auth/callback/', views.ft_auth_callback),
 ]

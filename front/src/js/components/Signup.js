@@ -63,6 +63,7 @@ export class Signup extends TemplateComponent {
         }
     }
 
+
     displayErrors(error) {
         const container = this.getRef("error")
         container.classList.remove("hidden")

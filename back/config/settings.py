@@ -1,6 +1,8 @@
 import os
 import logging
 
+from corsheaders.defaults import default_methods, default_headers
+
 from pathlib import Path
 from django.core.management.utils import get_random_secret_key
 
@@ -30,7 +32,8 @@ INSTALLED_APPS = [
     'channels',
     'account',
     'chat',
-    'game'
+    'game',
+	'requests_oauthlib'
 ]
 
 MIDDLEWARE = [
@@ -55,6 +58,7 @@ CSRF_TRUSTED_ORIGINS = [
     f'https://{os.getenv("HOST_HOSTNAME")}:5000',
     f'http://{os.getenv("HOST_HOSTNAME")}',
     f'http://{os.getenv("HOST_HOSTNAME")}:3000',
+	'https://api.intra.42.fr'
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -62,6 +66,17 @@ CORS_ALLOWED_ORIGINS = [
     f'https://{os.getenv("HOST_HOSTNAME")}:5000',
     f'http://{os.getenv("HOST_HOSTNAME")}',
     f'http://{os.getenv("HOST_HOSTNAME")}:3000',
+	'https://api.intra.42.fr'
+]
+
+CORS_ALLOW_METHODS = [
+    *default_methods,
+    "FETCH",
+]
+
+CORS_ALLOW_HEADERS = [
+    *default_headers,
+    "Access-Control-Allow-Origin",
 ]
 
 logging.log(logging.INFO, f"CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}\n")
@@ -146,3 +161,5 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = 'pong.point42@gmail.com'
+FT_API_SECRET = os.getenv('42_API_SECRET')
+FT_API_UID = os.getenv('42_API_UID')

@@ -18,6 +18,11 @@ export class Login extends TemplateComponent {
         form.addEventListener("input", (event) => {
             this.inputAnimation(event.target)
         })
+
+		const OAuthButton = this.getRef("ft_auth")
+		OAuthButton.addEventListener("click", async (event) => {
+			await this.handle_ft_auth(event)
+		})
     }
 
     async handleSubmit(event) {
@@ -54,6 +59,25 @@ export class Login extends TemplateComponent {
             this.displayErrors(e.message)
         }
     }
+
+	async handle_ft_auth(event)
+	{
+		event.preventDefault()
+		console.log('ma bite')
+		
+		try {
+			const url = getURL('api/users/ft_auth/')
+			const response = await fetch(url, )
+
+			console.log(data)
+			
+			const router = Router.get()
+			router.navigate(url)
+		
+		} catch (e) {
+			console.log(e)
+		}
+	}
 
     displayErrors(error) {
         const container = this.getRef("error")

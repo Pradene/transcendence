@@ -3,7 +3,10 @@ import jwt
 import datetime
 import logging
 import pyotp
+import os
+import requests
 
+from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth import authenticate, login, logout
@@ -19,6 +22,9 @@ from .utils.token import create_access_token, create_refresh_token, decode_token
 
 from .utils.serializers import serialize_user
 from .utils.otp import send_otp_code, validate_otp
+
+from requests_oauthlib import OAuth2Session
+from urllib.parse import urlencode
 
 
 @jwt_required
@@ -117,6 +123,68 @@ def signupView(request):
 	except json.JSONDecodeError:
 		return JsonResponse({"error": "Invalid JSON"}, status=400)
 
+
+@csrf_exempt
+def ft_auth(request):
+	try:
+		uid = settings.FT_API_UID
+		secret = settings.FT_API_SECRET
+		auth_url = "https://api.intra.42.fr/oauth/authorize"
+		token_url = "https://api.intra.42.fr/oauth/token"
+		user_info_url = "https://api.intra.42.fr/v2/me"
+		# redirect_url = f'https://{os.getenv("HOST_HOSTNAME")}:5000/'
+		redirect_url = f'https://{os.getenv("HOST_HOSTNAME")}:5000/api/users/ft_auth/callback'
+
+		params = {
+			'client_id': uid,
+			'redirect_uri': redirect_url,
+			'response_type': 'code',
+			'scope': 'public'
+		}
+
+		url = f'{auth_url}?{urlencode(params)}'
+		url2 = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-bc386ef41c2ae26b94c65fa8cf574d0fa8e9a17e32114d97254bec759cfb6664&redirect_uri=https%3A%2F%2Fmade-f0ar3s1%3A5000&response_type=code'
+
+		logging.info(f'url: {url}')
+	
+		return redirect(url2)
+	
+	except Exception as e:
+		logging.info(f'error: {e}')
+
+
+def ft_auth_callback(request):
+	logging.info("callback function called")
+
+	code = request.GET.get("code")
+	if code not in request.GET:
+		return JsonResponse({'error': 'No code in callback request.'}, status=400)
+
+	uid = settings.FT_API_UID
+	secret = settings.FT_API_SECRET
+	auth_url = "https://api.intra.42.fr/oauth/authorize"
+	token_url = "https://api.intra.42.fr/oauth/token"
+	user_info_url = "https://api.intra.42.fr/v2/me"
+	redirect_url = f'https://{os.getenv("HOST_HOSTNAME")}:5000/api/users/ft_auth/callback'
+	# redirect_url = f'https://{os.getenv("HOST_HOSTNAME")}:5000/'
+
+	data = {
+		"token": token_url,
+		"client_id": uid,
+		"client_secret": secret,
+		"code": request.GET('code'),
+		"include_client_id": True
+	}
+	
+	response = request.post(token_url, data=data)
+	if response.status_code != 200:
+		return JsonResponse({'error': 'Failed to obtain token'}, status=500)
+	
+	token_data = response.json()
+
+	logging.info(f'token: {token_data}')
+	
+	return redirect(redirect_url)
 
 @require_POST
 def loginView(request):
