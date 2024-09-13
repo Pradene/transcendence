@@ -10,7 +10,7 @@ services:
     networks:
       - transcendence
     volumes:
-      - $FRONT_VOLUME:/app
+      - ./front:/app
 
   back:
     container_name: back
@@ -25,7 +25,7 @@ services:
     networks:
       - transcendence
     volumes:
-      - $DJANGO_VOLUME:/app
+      - ./back:/app
     depends_on:
       - db
 
@@ -55,8 +55,8 @@ services:
     networks:
       - transcendence
     volumes:
-      - $FRONT_VOLUME:/usr/share/nginx/app
-      - $MEDIA_VOLUME:/usr/share/nginx/media
+      - ./front:/usr/share/nginx/app
+      - ./back/media:/usr/share/nginx/media
       - ssl_certs:/etc/ssl
     depends_on:
       - back

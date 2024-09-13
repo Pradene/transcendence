@@ -50,17 +50,21 @@ ALLOWED_HOSTS = [
 # Set session expiration to 1 day (adjust as needed)
 CSRF_COOKIE_AGE = 86400
 CSRF_TRUSTED_ORIGINS = [
+    f'https://localhost:5000',
+    f'http://localhost:5000',
     f'https://{os.getenv("HOST_HOSTNAME")}',
-    f'https://{os.getenv("HOST_HOSTNAME")}:5000',
     f'http://{os.getenv("HOST_HOSTNAME")}',
-    f'http://{os.getenv("HOST_HOSTNAME")}:3000',
+    f'https://{os.getenv("HOST_HOSTNAME")}:5000',
+    f'http://{os.getenv("HOST_HOSTNAME")}:5000',
 ]
 
 CORS_ALLOWED_ORIGINS = [
+    f'https://localhost:5000',
+    f'http://localhost:5000',
     f'https://{os.getenv("HOST_HOSTNAME")}',
-    f'https://{os.getenv("HOST_HOSTNAME")}:5000',
     f'http://{os.getenv("HOST_HOSTNAME")}',
-    f'http://{os.getenv("HOST_HOSTNAME")}:3000',
+    f'https://{os.getenv("HOST_HOSTNAME")}:5000',
+    f'http://{os.getenv("HOST_HOSTNAME")}:5000',
 ]
 
 logging.log(logging.INFO, f"CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}\n")

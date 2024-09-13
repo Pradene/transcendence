@@ -32,7 +32,6 @@ def userView(request, user_id=None):
         return JsonResponse(data, safe=False, status=200)
 
     elif request.method == "POST":
-        logging.info("POST")
         try:
             user = request.user
 
@@ -45,13 +44,14 @@ def userView(request, user_id=None):
                 picture = request.FILES['picture']
             else:
                 picture = user.picture
+
+            if CustomUser.objects.exclude(id=user.id).filter(username=username).exists():
+                return JsonResponse({'error': 'Username is already taken'}, status=400)
             
             user.username = username
             user.email = email
             user.bio = bio
             user.picture = picture
-
-            logging.info(f'{username} : {bio} : {email}')
             
             user.save()
             

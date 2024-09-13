@@ -60,6 +60,10 @@ export class Router {
                 app.replaceChildren(component)
 
             }
+
+        } else {
+            console.log("doesn't match any route")
+            this.navigate('/')
         }
     }
 
