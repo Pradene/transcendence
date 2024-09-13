@@ -8,6 +8,7 @@ import { Chat } from "./components/Chat.js"
 import { Search } from "./components/Search.js"
 import { Profile } from "./components/Profile.js"
 import { EditProfile } from "./components/EditProfile.js"
+import { OTP } from "./components/OTP.js"
 
 import { NavComponent } from "./components/NavComponent.js"
 
@@ -18,14 +19,15 @@ document.addEventListener("DOMContentLoaded", () => {
     new WebSocketManager()
     
     const router = new Router([
-        // {path: "/chat/:id/", view: ChatRoom, protected: True},
-        {path: "/", view: Home, protected: true},
-        {path: "/chat/", view: Chat, protected: true},
-        {path: "/users/", view: Search, protected: true},
-        {path: "/users/:id/", view: Profile, protected: true},
+        {path: '/', view: Home, protected: true},
+        {path: '/chat/', view: Chat, protected: true},
+        // {path: '/chat/:id/', view: ChatRoom, protected: true},
+        {path: '/users/', view: Search, protected: true},
+        {path: '/users/:id/', view: Profile, protected: true},
         {path: "/users/:id/edit/", view: EditProfile, protected: true},
-        {path: "/login/", view: Login, protected: false},
-        {path: "/signup/", view: Signup, protected: false},
+        {path: '/login/', view: Login, protected: false},
+        {path: '/signup/', view: Signup, protected: false},
+        {path: '/verify-otp/', view: OTP, protected: false},
     ])
 
     document.body.addEventListener("click", (event) => {        

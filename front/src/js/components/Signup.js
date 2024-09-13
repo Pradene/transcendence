@@ -23,6 +23,7 @@ export class Signup extends TemplateComponent {
     async handleSubmit(event) {
         event.preventDefault()
 
+		const email = this.getRef("email")
 		const username = this.getRef("username")
 		const password = this.getRef("password")
 		const passwordConfirmation = this.getRef("passwordConfirmation")
@@ -31,20 +32,27 @@ export class Signup extends TemplateComponent {
         try {
             const url = getURL("api/users/signup/")
         
-            const data = await apiRequest(url, "POST", {
-                username: username.value,
-                password: password.value,
-                password_confirmation: passwordConfirmation.value
-            })
+            const data = await apiRequest(
+                url,
+                "POST",
+                {
+					email: email.value,
+                    username: username.value,
+                    password: password.value,
+                    password_confirmation: passwordConfirmation.value
+                }
+            )
 
             const router = Router.get()
             await router.navigate("/login/")
                 
         } catch (e) {
+            email.value = ""
             username.value = ""
             password.value = ""
             passwordConfirmation.value = ""
             
+            email.classList.remove("active")
             username.classList.remove("active")
             password.classList.remove("active")
             passwordConfirmation.classList.remove("active")

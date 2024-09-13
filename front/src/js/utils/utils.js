@@ -115,7 +115,9 @@ function getCookie(name) {
 export async function checkLogin() {
     try {
         const token = getCookie("access_token")
+        console.log(token)
         const decoded = jwt.decode(token)
+        console.log(decoded)
         
         const current = Date.now() / 1000
 

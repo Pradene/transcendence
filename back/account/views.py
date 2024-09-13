@@ -2,83 +2,87 @@ import json
 import jwt
 import datetime
 import logging
+import pyotp
 
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST, require_GET
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 from django.core import serializers
+from django.core.mail import send_mail
 
 from config import settings
 from config.decorators import jwt_required
 
 from .models import CustomUser, BlackListedToken, FriendList, FriendRequest
+
 from .utils.token import create_access_token, create_refresh_token, decode_token
+from .utils.otp import send_otp_code, validate_otp
 
 
 @jwt_required
 @require_http_methods(["GET", "POST"])
 def userView(request, user_id=None):
-    if request.method == "GET":
-        if user_id is None:
-            user = request.user
-        else:
-            try:
-                user = CustomUser.objects.get(id=user_id)
-            except Exception as e:
-                return JsonResponse({"error": str(e)}, status=400)
+	if request.method == "GET":
+		if user_id is None:
+			user = request.user
+		else:
+			try:
+				user = CustomUser.objects.get(id=user_id)
+			except Exception as e:
+				return JsonResponse({"error": str(e)}, status=400)
 
-        data = user.toJSON(user)
-        return JsonResponse(data, safe=False, status=200)
+		data = user.toJSON(user)
+		return JsonResponse(data, safe=False, status=200)
 
-    elif request.method == "POST":
-        try:
-            user = request.user
+	elif request.method == "POST":
+		try:
+			user = request.user
 
-            # Update user profile
-            username = request.POST.get('username', user.username)
-            bio = request.POST.get('bio', user.bio)
-            email = request.POST.get('email', user.email)
+			# Update user profile
+			username = request.POST.get('username', user.username)
+			bio = request.POST.get('bio', user.bio)
+			email = request.POST.get('email', user.email)
 
-            if 'picture' in request.FILES:
-                picture = request.FILES['picture']
-            else:
-                picture = user.picture
+			if 'picture' in request.FILES:
+				picture = request.FILES['picture']
+			else:
+				picture = user.picture
 
-            if CustomUser.objects.exclude(id=user.id).filter(username=username).exists():
-                return JsonResponse({'error': 'Username is already taken'}, status=400)
-            
-            user.username = username
-            user.email = email
-            user.bio = bio
-            user.picture = picture
-            
-            user.save()
-            
-            return JsonResponse({'message': 'Profile updated successfully'}, status=200)
-    
-        except CustomUser.DoesNotExist:
-            return JsonResponse({'error': 'Profile does not exist'}, status=404)
+			if CustomUser.objects.exclude(id=user.id).filter(username=username).exists():
+				return JsonResponse({'error': 'Username is already taken'}, status=400)
+			
+			user.username = username
+			user.email = email
+			user.bio = bio
+			user.picture = picture
+			
+			user.save()
+			
+			return JsonResponse({'message': 'Profile updated successfully'}, status=200)
+	
+		except CustomUser.DoesNotExist:
+			return JsonResponse({'error': 'Profile does not exist'}, status=404)
 
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+		except Exception as e:
+			return JsonResponse({'error': str(e)}, status=400)
 
 
 # Search
 @jwt_required
 @require_http_methods(["GET"])
 def searchUsersView(request):
-    try:
-        query = request.GET.get("q", "")
-        if query:
-            users = CustomUser.objects.filter(username__icontains=query)
-            data = [user.toJSON() for user in users]
-            return JsonResponse(data, safe=False, status=200)
+	try:
+		query = request.GET.get("q", "")
+		if query:
+			users = CustomUser.objects.filter(username__icontains=query)
+			data = [user.toJSON() for user in users]
+			return JsonResponse(data, safe=False, status=200)
 
-        return JsonResponse({"error": "User not found"}, status=400)
-    
-    except Exception as e:
-        return JsonResponse({}, status=400)
+		return JsonResponse({"error": "User not found"}, status=400)
+	
+	except Exception as e:
+		return JsonResponse({}, status=400)
 
 
 
@@ -86,173 +90,185 @@ def searchUsersView(request):
 @jwt_required
 @require_http_methods(["GET"])
 def getFriendsView(request, user_id=None):
-    if user_id is None:
-        user = request.user
-    else:
-        try:
-            user = CustomUser.objects.get(id=user_id)
-        except:
-            return JsonResponse({"error": str(e)}, status=400)
+	if user_id is None:
+		user = request.user
+	else:
+		try:
+			user = CustomUser.objects.get(id=user_id)
+		except:
+			return JsonResponse({"error": str(e)}, status=400)
 
-    friend_list, created = FriendList.objects.get_or_create(user=user)
-    friends = friend_list.friends.all()
-    data = [friend.toJSON() for friend in friends]
-    return JsonResponse(serializer.data, safe=False, status=200)
+	friend_list, created = FriendList.objects.get_or_create(user=user)
+	friends = friend_list.friends.all()
+	data = [friend.toJSON() for friend in friends]
+	return JsonResponse(serializer.data, safe=False, status=200)
 
 
 @jwt_required
 @require_http_methods(["GET"])
 def getFriendRequestsView(request):
-    try:
-        user = request.user
-        requests = FriendRequest.objects.filter(receiver=user)
-        data = [request.toJSON() for request in requests]
-        return JsonResponse(data, safe=False, status=200)
-    except Exception as e:
-        return JsonResponse({}, status=400)
-    
+	try:
+		user = request.user
+		requests = FriendRequest.objects.filter(receiver=user)
+		data = [request.toJSON() for request in requests]
+		return JsonResponse(data, safe=False, status=200)
+	except Exception as e:
+		return JsonResponse({}, status=400)
+	
 
 # Registration
 @require_http_methods(["POST"])
 def signupView(request):
-    try:
-        data = json.loads(request.body)
-        
-        username = data.get("username")
-        password = data.get("password")
-        password_confirmation = data.get("password_confirmation")
+	try:
+		data = json.loads(request.body)
+		
+		email = data.get("email")
+		username = data.get("username")
+		password = data.get("password")
+		password_confirmation = data.get("password_confirmation")
 
-        if not username:
-            return JsonResponse({"error": "This field is required."}, status=400)
-        elif CustomUser.objects.filter(username=username).exists():
-            return JsonResponse({"error": "A user with that username already exists."}, status=400)
+		if not username or not email or not password:
+			return JsonResponse({"error": "This field is required."}, status=400)
+		elif CustomUser.objects.filter(username=username).exists():
+			return JsonResponse({"error": "A user with that username already exists."}, status=400)
 
-        if password != password_confirmation:
-            return JsonResponse({"error": "The password doesn't match."}, status=400)
-        # elif len(password1) < 8:
-            # return JsonResponse({"error": "Password must be at least 8 characters long."}, status=400)
+		if password != password_confirmation:
+			return JsonResponse({"error": "The password doesn't match."}, status=400)
+		# elif len(password1) < 8:
+			# return JsonResponse({"error": "Password must be at least 8 characters long."}, status=400)
 
-        try:
-            user = CustomUser.objects.create_user(username=username, password=password)
-            return JsonResponse({}, status=200)
-        
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
+		try:
+			subject = "Account creation confirmation"
+			message = f"Dear {username},\n\nYour accounthas been created.\n\nThank you!\n\nIf you're not the one that create this account please contact us at pong.point42@gmail.com"
+			from_email = settings.DEFAULT_FROM_EMAIL
+			recipient_list = [email]
+			ret = send_mail(subject, message, from_email, recipient_list)
+			logging.info(ret)
+			if ret == 0:
+				return JsonResponse({"error": "Invalid email"}, status=400)
+			user = CustomUser.objects.create_user(email=email, username=username, password=password)
+			return JsonResponse({}, status=200)
+		
+		except Exception as e:
+			return JsonResponse({"error": str(e)}, status=400)
 
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Invalid JSON"}, status=400)
+	except json.JSONDecodeError:
+		return JsonResponse({"error": "Invalid JSON"}, status=400)
 
 
 @require_http_methods(["POST"])
 def loginView(request):
-    try:
-        data = json.loads(request.body)
+	try:
+		data = json.loads(request.body)
 
-        username = data.get("username")
-        password = data.get("password")
-        remember_me = data.get("remember_me", False)
+		username = data.get("username")
+		password = data.get("password")
+		remember_me = data.get("remember_me", False)
 
-        try:
-            user = authenticate(request, username=username, password=password)
-            if user is None:
-                return JsonResponse({"error": "Login failed"}, status=400)
+		try:
+			user = authenticate(request, username=username, password=password)
+			if user is None:
+				return JsonResponse({"error": "Login failed"}, status=400)
 
-        except Exception as auth_error:
-            return JsonResponse({"error": str(auth_error)}, status=400)
+		except Exception as e:
+			return JsonResponse({"error": str(e)}, status=400)
 
-        login(request, user)
+		try:
+			request.session['pre_2fa_user_id'] = user.id
+			send_otp_code(user)
 
-        try:
-            access_token, access_exp = create_access_token(user)
-            refresh_token, refresh_exp = create_refresh_token(user, remember_me)
-            response = JsonResponse({}, status=200)
+			return JsonResponse({}, status=200)
+		
+		except Exception as token_error:
+			return JsonResponse({"error": str(token_error)}, status=400)
 
-            response.set_cookie(
-                "access_token", access_token,
-                httponly=False, secure=True,
-                samesite="Lax", max_age=access_exp
-            )
-
-            response.set_cookie(
-                "refresh_token", refresh_token,
-                httponly=True, secure=True,
-                samesite="Lax", max_age=refresh_exp
-            )
-
-            return response
-        
-        except Exception as token_error:
-            return JsonResponse({"error": str(token_error)}, status=400)
-
-    
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Invalid JSON"}, status=400)
-    
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=400)
+	
+	except json.JSONDecodeError:
+		return JsonResponse({"error": "Invalid JSON"}, status=400)
+	
+	except Exception as e:
+		return JsonResponse({"error": str(e)}, status=400)
 
 
-@csrf_exempt
 @require_http_methods(["POST"])
-def checkLoginView(request):
-    try:
-        token = request.COOKIES.get("refresh_token")
-        if BlackListedToken.objects.filter(token=token).exists():
-            return JsonResponse({"authenticated": False}, status=200)
+def check2FA(request):
+	try:
+		user_id = request.session.get('pre_2fa_user_id')
+		if user_id is None:
+			return JsonResponse({"error": "Access denied. Please login first."}, status=403)
+		
+		data = json.loads(request.body)
+		otp_code = data.get('code')
+		user = CustomUser.objects.get(id=user_id)
 
-        user_id = decode_token(token)
+		if validate_otp(user, otp_code):
+			login(request, user)
+			
+			access_token, access_exp = create_access_token(user)
+			refresh_token, refresh_exp = create_refresh_token(user)
+			response = JsonResponse({}, status=200)
 
-        user = CustomUser.objects.get(id=user_id)
-        if user.is_authenticated:
-            return JsonResponse({"authenticated": True}, status=200)
-        else:
-            return JsonResponse({"authenticated": False}, status=200)
+			response.set_cookie(
+				"access_token", access_token,
+				httponly=False, secure=True,
+				samesite="Lax", max_age=access_exp
+			)
 
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=400)
+			response.set_cookie(
+				"refresh_token", refresh_token,
+				httponly=True, secure=True,
+				samesite="Lax", max_age=refresh_exp
+			)
+
+			return response
+		
+		else:
+			return JsonResponse({}, status=400)
+	
+	except Exception as e:
+		return JsonResponse({"error": str(e)}, status=400)
 
 
 @require_http_methods(["POST"])
 def refreshTokenView(request):
-    token = request.COOKIES.get("refresh_token")
+	token = request.COOKIES.get("refresh_token")
 
-    if BlackListedToken.objects.filter(token=token).exists():
-        return JsonResponse({"error": "Invalid token"}, status=400)
+	if BlackListedToken.objects.filter(token=token).exists():
+		return JsonResponse({"error": "Invalid token"}, status=400)
 
-    user_id = decode_token(token)
+	user_id = decode_token(token)
 
-    if user_id is not None:
-        try:
-            user = CustomUser.objects.get(id=user_id)
-            access_token, access_exp = create_access_token(user)
+	if user_id is not None:
+		try:
+			user = CustomUser.objects.get(id=user_id)
+			access_token, access_exp = create_access_token(user)
 
-            response = JsonResponse({}, status=200)
-            
-            response.set_cookie(
-                "access_token", access_token,
-                httponly=False, secure=True,
-                samesite="Lax", max_age=access_exp
-            )
-            
-            return response
-        
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
-    
-    else:
-        return JsonResponse({"error": "Invalid token"}, status=400)
+			response = JsonResponse({}, status=200)
+			
+			response.set_cookie(
+				"access_token", access_token,
+				httponly=False, secure=True,
+				samesite="Lax", max_age=access_exp
+			)
+			
+			return response
+		
+		except Exception as e:
+			return JsonResponse({"error": str(e)}, status=400)
+	
+	else:
+		return JsonResponse({"error": "Invalid token"}, status=400)
 
 
 @jwt_required
 @require_http_methods(["POST"])
 def logoutView(request):
-    try:
-        refresh_token = request.COOKIES.get("refresh_token")
-        token = BlackListedToken.objects.create(token=refresh_token)
+	try:
+		refresh_token = request.COOKIES.get("refresh_token")
+		token = BlackListedToken.objects.create(token=refresh_token)
 
-        logout(request)
+		logout(request)
+		return JsonResponse({}, status=200)
 
-        return JsonResponse({}, status=200)
-
-    except Exception as e:
-        JsonResponse({"error": "Invalid token"}, status=400)
+	except Exception as e:
+		JsonResponse({"error": "Invalid token"}, status=400)
