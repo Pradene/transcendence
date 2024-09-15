@@ -1,14 +1,16 @@
-<div class="container-fp">
-    <form ref="form" id="otp-form" action="POST">
-		<label for="input" ref="label">
-			<span class="otp-box"></span>
-			<span class="otp-box"></span>
-			<span class="otp-box"></span>
-			<span class="otp-box"></span>
-			<span class="otp-box"></span>
-			<span class="otp-box"></span>
-		</label>
-        <input class="secret-input" ref="input" id="input" type="text" maxlength="6" autocomplete="one-time-code" required="True" />
-		<button class="button" type="submit">Login</button>
-    </form>
+<div class="min-vh-100 d-flex flex-column align-items-center justify-content-center">
+	<div class="container-xxs">
+		<form ref="form" class="d-flex flex-column" action="POST">
+			<label for="input" ref="label" class="d-flex mb-3">
+				<span class="otp-box"></span>
+				<span class="otp-box"></span>
+				<span class="otp-box"></span>
+				<span class="otp-box"></span>
+				<span class="otp-box"></span>
+				<span class="otp-box"></span>
+			</label>
+			<input class="secret-input" ref="input" id="input" type="text" maxlength="6" autocomplete="one-time-code" required="True" />
+			<button class="btn btn-primary" type="submit">Login</button>
+		</form>
+	</div>
 </div>
