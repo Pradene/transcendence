@@ -50,7 +50,6 @@ ALLOWED_HOSTS = [
     f'{os.getenv("HOST_HOSTNAME")}',
     f'localhost',
 	'api.intra.42.fr'
-
 ]
 
 # Set session expiration to 1 day (adjust as needed)
@@ -74,19 +73,6 @@ CORS_ALLOWED_ORIGINS = [
     f'http://{os.getenv("HOST_HOSTNAME")}:5000',
 	'https://api.intra.42.fr'
 ]
-
-CORS_ALLOW_METHODS = [
-    *default_methods,
-    "FETCH",
-]
-
-CORS_ALLOW_HEADERS = [
-    *default_headers,
-    "Access-Control-Allow-Origin",
-]
-
-logging.log(logging.INFO, f"CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}\n")
-logging.log(logging.INFO, f"CORS_ALLOWED_ORIGINS: {CORS_ALLOWED_ORIGINS}\n")
 
 ROOT_URLCONF = 'config.urls'
 

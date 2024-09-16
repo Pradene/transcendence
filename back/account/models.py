@@ -16,9 +16,10 @@ class CustomUserManager(BaseUserManager):
             **extra_fields
         )
 
-        user.set_password(password)
-        user.save(using=self._db)
+        if password is not None:
+            user.set_password(password)
         
+        user.save(using=self._db)
         return user
 
     def create_superuser(self, username, password=None, **extra_fields):
@@ -48,6 +49,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     otp_secret = models.CharField(blank=True, null=True)
+    api_42_id = models.CharField(max_length=255, unique=True, null=True, blank=True)
 
     objects = CustomUserManager()
 

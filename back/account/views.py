@@ -177,31 +177,31 @@ def ft_auth(request):
 		}
 
 		url = f'{auth_url}?{urlencode(params)}'
-		return JsonResponse({'url': url})
+		return JsonResponse({'url': url}, status=200)
 	
 	except Exception as e:
 		logging.info(f'error: {e}')
 
-
 def ft_auth_callback(request):
 	code = request.GET.get('code', '')
-	if code is None :
+	if code is None:
 		return JsonResponse({'error': 'No code from api'}, status=400)
 
 	uid = settings.FT_API_UID
 	secret = settings.FT_API_SECRET
-	token_url = "https://api.intra.42.fr/oauth/token"
 	redirect_uri = f'https://{os.getenv("HOST_HOSTNAME")}:5000/api/users/ft_auth/callback/'
 
 	data = {
-		"grant_type": 'authorization_code',
-		'client_secret': secret,
 		"client_id": uid,
+		'client_secret': secret,
+		"grant_type": 'authorization_code',
 		"code": code,
 		'redirect_uri': redirect_uri
 	}
 	
+	token_url = "https://api.intra.42.fr/oauth/token"
 	response = requests.post(token_url, data=data)
+
 	if response.status_code != 200:
 		logging.info(f'Error response from token request: {response.status_code} = {response.text}')
 		return JsonResponse({'error': 'Failed to obtain token'}, status=400)
@@ -209,21 +209,46 @@ def ft_auth_callback(request):
 	token_data = response.json()
 	logging.info(f'token: {token_data}')
 
+	access_token = token_data.get("access_token")
+	headers = {
+		"Authorization": f"Bearer {access_token}"
+	}
+
+	user_response = requests.get("https://api.intra.42.fr/v2/me", headers=headers)
+	user_info = user_response.json()
+
+	api_42_id = user_info.get("id")
+	if CustomUser.objects.filter(api_42_id=api_42_id).exists():
+		user = CustomUser.objects.get(api_42_id=api_42_id)
+	else:
+		user = CustomUser.objects.create_user(
+			username=user_info.get("login"),
+			password=None,
+			email=user_info.get("email"),
+			api_42_id=api_42_id
+		)
+
+	at, at_created = create_access_token(user)
+	rt, rt_created = create_refresh_token(user)
+
+	logging.info(f'{at} : {rt}')
+
 	response = HttpResponseRedirect(f'https://{os.getenv("HOST_HOSTNAME")}:5000/')
 
-	# response.set_cookie(
-	# 	"access_token", access_token,
-	# 	httponly=False, secure=True,
-	# 	samesite="Lax", max_age=300
-	# )
+	response.set_cookie(
+		"access_token", at,
+		httponly=False, secure=True,
+		samesite="Lax", max_age=300
+	)
 	
-	# response.set_cookie(
-	# 	"refresh_token", refresh_token,
-	# 	httponly=True, secure=True,
-	# 	samesite="Lax", max_age=3600
-	# )
+	response.set_cookie(
+		"refresh_token", rt,
+		httponly=True, secure=True,
+		samesite="Lax", max_age=3600
+	)
 
 	return response
+
 
 @require_http_methods(["POST"])
 def loginView(request):
