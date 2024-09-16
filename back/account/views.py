@@ -3,12 +3,15 @@ import jwt
 import datetime
 import logging
 import pyotp
+import os
+import requests
 
+from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST, require_GET
 from django.contrib.auth import authenticate, login, logout
-from django.http import JsonResponse
 from django.core import serializers
+from django.http import JsonResponse, HttpResponseRedirect
 from django.core.mail import send_mail
 
 from config import settings
@@ -18,6 +21,9 @@ from .models import CustomUser, BlackListedToken, FriendList, FriendRequest
 
 from .utils.token import create_access_token, create_refresh_token, decode_token
 from .utils.otp import send_otp_code, validate_otp
+
+from requests_oauthlib import OAuth2Session
+from urllib.parse import urlencode
 
 
 @jwt_required
@@ -155,6 +161,69 @@ def signupView(request):
 	except json.JSONDecodeError:
 		return JsonResponse({"error": "Invalid JSON"}, status=400)
 
+
+def ft_auth(request):
+	try:
+		uid = settings.FT_API_UID
+		auth_url = "https://api.intra.42.fr/oauth/authorize"
+		redirect_uri = f'https://{os.getenv("HOST_HOSTNAME")}:5000/api/users/ft_auth/callback/'
+
+		params = {
+			'grant_type': 'client_credentials',
+			'client_id': uid,
+			'redirect_uri': redirect_uri,
+			'response_type': 'code',
+			'scope': 'public'
+		}
+
+		url = f'{auth_url}?{urlencode(params)}'
+		return JsonResponse({'url': url})
+	
+	except Exception as e:
+		logging.info(f'error: {e}')
+
+
+def ft_auth_callback(request):
+	code = request.GET.get('code', '')
+	if code is None :
+		return JsonResponse({'error': 'No code from api'}, status=400)
+
+	uid = settings.FT_API_UID
+	secret = settings.FT_API_SECRET
+	token_url = "https://api.intra.42.fr/oauth/token"
+	redirect_uri = f'https://{os.getenv("HOST_HOSTNAME")}:5000/api/users/ft_auth/callback/'
+
+	data = {
+		"grant_type": 'authorization_code',
+		'client_secret': secret,
+		"client_id": uid,
+		"code": code,
+		'redirect_uri': redirect_uri
+	}
+	
+	response = requests.post(token_url, data=data)
+	if response.status_code != 200:
+		logging.info(f'Error response from token request: {response.status_code} = {response.text}')
+		return JsonResponse({'error': 'Failed to obtain token'}, status=400)
+	
+	token_data = response.json()
+	logging.info(f'token: {token_data}')
+
+	response = HttpResponseRedirect(f'https://{os.getenv("HOST_HOSTNAME")}:5000/')
+
+	# response.set_cookie(
+	# 	"access_token", access_token,
+	# 	httponly=False, secure=True,
+	# 	samesite="Lax", max_age=300
+	# )
+	
+	# response.set_cookie(
+	# 	"refresh_token", refresh_token,
+	# 	httponly=True, secure=True,
+	# 	samesite="Lax", max_age=3600
+	# )
+
+	return response
 
 @require_http_methods(["POST"])
 def loginView(request):

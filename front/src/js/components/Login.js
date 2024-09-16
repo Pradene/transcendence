@@ -1,6 +1,6 @@
 import { TemplateComponent } from "../utils/TemplateComponent.js"
 import { WebSocketManager } from "../utils/WebSocketManager.js"
-import { getURL, apiRequest } from "../utils/utils.js"
+import { getURL, apiRequest, getCSRFToken } from "../utils/utils.js"
 import { registerTemplates } from "../utils/Templates.js"
 import { Router } from "../utils/Router.js"
 
@@ -12,15 +12,20 @@ export class Login extends TemplateComponent {
     async componentDidMount() {
         const form = this.getRef("form")
         form.addEventListener("submit", async (event) => {
-            await this.handleSubmit(event)
+            await this.submitLoginRequest(event)
         })
 
         form.addEventListener("input", (event) => {
             this.inputAnimation(event.target)
         })
+
+		const OAuthButton = this.getRef("ft_auth")
+		OAuthButton.addEventListener("click", async (event) => {
+			await this.submit42LoginRequest(event)
+		})
     }
 
-    async handleSubmit(event) {
+    async submitLoginRequest(event) {
         event.preventDefault()
 
         try {
@@ -39,10 +44,6 @@ export class Login extends TemplateComponent {
                 }
             )
 
-            // const ws = WebSocketManager.get()
-            // ws.connect("wss://" + location.hostname + ":" + location.port + "/ws/chat/", "chat")
-            // ws.connect("wss://" + location.hostname + ":" + location.port + "/ws/friends/", "friends")
-
             const router = Router.get()
             router.navigate("/verify-otp/")
 
@@ -56,6 +57,34 @@ export class Login extends TemplateComponent {
             this.displayErrors(e.message)
         }
     }
+
+	async submit42LoginRequest()
+	{
+		try {
+			const token = await getCSRFToken()
+			const url = getURL('api/users/ft_auth/')
+			
+			const response = await fetch(url, {
+				method: "POST",
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': token
+				}
+			})
+
+			const data = await response.json()
+
+            if (data.url) {
+                window.location.href = data.url
+
+            } else {
+                throw new Error("Couldn't find the API")
+            }
+		
+		} catch (e) {
+			console.log(e)
+		}
+	}
 
     displayErrors(error) {
         const container = this.getRef("error")

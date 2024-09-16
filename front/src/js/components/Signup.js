@@ -1,7 +1,6 @@
 import { TemplateComponent } from "../utils/TemplateComponent.js"
 import { getURL, apiRequest } from "../utils/utils.js"
 import { Router } from "../utils/Router.js"
-import { registerTemplates } from "../utils/Templates.js"
 
 export class Signup extends TemplateComponent {
     constructor() {
@@ -11,8 +10,7 @@ export class Signup extends TemplateComponent {
     async componentDidMount() {
         const form = this.getRef("form")
         form.addEventListener("submit", async (event) => {
-            await this.handleSubmit(event)
-			console.log("reeeeee")
+            await this.submitSignupRequest(event)
         })
 
         form.addEventListener("input", (event) => {
@@ -20,7 +18,7 @@ export class Signup extends TemplateComponent {
         })
     }
 
-    async handleSubmit(event) {
+    async submitSignupRequest(event) {
         event.preventDefault()
 
 		const email = this.getRef("email")
@@ -63,6 +61,7 @@ export class Signup extends TemplateComponent {
         }
     }
 
+
     displayErrors(error) {
         const container = this.getRef("error")
         container.classList.remove("hidden")
@@ -81,5 +80,3 @@ export class Signup extends TemplateComponent {
         }
     }
 }
-
-registerTemplates("Signup", Signup)
