@@ -10,3 +10,9 @@
 
 - notifications maybe for invitation
 
+        const script = document.createElement('script')
+        const canvas = document.querySelector('#background-canvas')
+        script.src = 'static/scripts/anim/movingball.js'
+        window.addEventListener('load', function() {
+            document.body.appendChild(script);
+        });
