@@ -43,9 +43,9 @@ def userView(request, user_id=None):
 
 	elif request.method == "POST":
 		try:
+			# Update user profile
 			user = request.user
 
-			# Update user profile
 			username = request.POST.get('username', user.username)
 			bio = request.POST.get('bio', user.bio)
 			email = request.POST.get('email', user.email)
@@ -182,6 +182,32 @@ def ft_auth(request):
 	except Exception as e:
 		logging.info(f'error: {e}')
 
+
+def login_42user(token):
+	headers = {
+		"Authorization": f"Bearer {token}"
+	}
+
+	response = requests.get("https://api.intra.42.fr/v2/me", headers=headers)
+	data = response.json()
+
+	id = data.get("id")
+	login = data.get("login")
+	email = data.get("email")
+
+	if CustomUser.objects.filter(api_42_id=id).exists():
+		user = CustomUser.objects.get(api_42_id=id)
+	else:
+		user = CustomUser.objects.create_user(
+			username=login,
+			password=None,
+			email=email,
+			api_42_id=id
+		)
+
+	return user
+
+
 def ft_auth_callback(request):
 	code = request.GET.get('code', '')
 	if code is None:
@@ -207,31 +233,12 @@ def ft_auth_callback(request):
 		return JsonResponse({'error': 'Failed to obtain token'}, status=400)
 	
 	token_data = response.json()
-	logging.info(f'token: {token_data}')
-
 	access_token = token_data.get("access_token")
-	headers = {
-		"Authorization": f"Bearer {access_token}"
-	}
 
-	user_response = requests.get("https://api.intra.42.fr/v2/me", headers=headers)
-	user_info = user_response.json()
-
-	api_42_id = user_info.get("id")
-	if CustomUser.objects.filter(api_42_id=api_42_id).exists():
-		user = CustomUser.objects.get(api_42_id=api_42_id)
-	else:
-		user = CustomUser.objects.create_user(
-			username=user_info.get("login"),
-			password=None,
-			email=user_info.get("email"),
-			api_42_id=api_42_id
-		)
+	user = login_42user(access_token)
 
 	at, at_created = create_access_token(user)
 	rt, rt_created = create_refresh_token(user)
-
-	logging.info(f'{at} : {rt}')
 
 	response = HttpResponseRedirect(f'https://{os.getenv("HOST_HOSTNAME")}:5000/')
 
@@ -336,7 +343,6 @@ def refreshTokenView(request):
 		try:
 			user = CustomUser.objects.get(id=user_id)
 			access_token, access_exp = create_access_token(user)
-
 			response = JsonResponse({}, status=200)
 			
 			response.set_cookie(
