@@ -48,7 +48,9 @@ MIDDLEWARE = [
 ]
 
 ALLOWED_HOSTS = [
-    f'{os.getenv("HOST_HOSTNAME")}'
+    f'{os.getenv("HOST_HOSTNAME")}',
+	'api.intra.42.fr'
+
 ]
 
 # Set session expiration to 1 day (adjust as needed)

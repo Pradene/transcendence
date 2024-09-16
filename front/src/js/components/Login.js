@@ -1,6 +1,6 @@
 import { TemplateComponent } from "../utils/TemplateComponent.js"
 import { WebSocketManager } from "../utils/WebSocketManager.js"
-import { getURL, apiRequest } from "../utils/utils.js"
+import { getURL, apiRequest, getCSRFToken } from "../utils/utils.js"
 import { registerTemplates } from "../utils/Templates.js"
 import { Router } from "../utils/Router.js"
 
@@ -66,13 +66,25 @@ export class Login extends TemplateComponent {
 		console.log('ma bite')
 		
 		try {
+			const token = await getCSRFToken()
 			const url = getURL('api/users/ft_auth/')
-			const response = await fetch(url, )
+			
+			const response = await fetch(url, {
+				method: "GET",
+				// mode: "no-cors",
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': token
+				}
+			})
 
+			const data = await response.json()
+
+			window.location.href = data.url
 			console.log(data)
 			
-			const router = Router.get()
-			router.navigate(url)
+			/* const router = Router.get()
+			router.navigate(url) */
 		
 		} catch (e) {
 			console.log(e)
