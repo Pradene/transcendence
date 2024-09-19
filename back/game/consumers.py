@@ -9,6 +9,7 @@ from game.response import Response
 from game.gameutils.PlayerInterface import PlayerInterface
 from game.gameutils.Game import Game
 from game.gameutils.Tournament import Tournament
+from game.gameutils.Matchmaking import matchmaker
 
 
 # This is a global variable that is used to check if the module has been initialised
@@ -38,7 +39,6 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
         self.__interface: PlayerInterface = PlayerInterface('p1', self.updateClient, self.__deleteCurrentGame)
-        self.__currentGame: Union[Game, Tournament, None] = None
         self.__user = None
 
         if not MODULE_INITIALIZED:
@@ -68,23 +68,23 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
     async def receive(self, text_data=None, bytes_data=None, **kwargs):
         """Handle incoming messages from the client"""
 
+        logging.info(f"Received message from {self.__interface.getName()}: {text_data}")
+
         try:
             data = json.loads(text_data)
+            method = data["method"]
         except json.JSONDecodeError:
+            logging.error(f"Invalid JSON data received from {self.__interface.getName()}")
             return
-        method = data["method"]
-        if not method:
+        except KeyError:
+            logging.error(f"Invalid JSON data received from {self.__interface.getName()}")
             return
 
         match method:
             case "get_games":
                 await self.getGames()
-            case "create_game":
-                await self.createGame(data)
-            case "create_tournament":
-                await self.createTournament(data)
-            case "join_game":
-                await self.joinGame(data)
+            case "join_queue":
+                await self.join_queue(data)
             case "update_player":
                 await self.updatePlayer(data)
 
@@ -93,9 +93,9 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
         logging.log(logging.INFO, f"User {self.__interface.getName()} disconnecting...")
         if self.isInGame():
-            logging.log(logging.INFO, f"User {self.__interface.getName()} is in game {self.__currentGame.getGameid()}, quitting")
-            await self.__currentGame.quit()
-            logging.log(logging.INFO, f"User {self.__interface.getName()} has quit the game {self.__currentGame.getGameid()}")
+            logging.log(logging.INFO, f"User {self.__interface.getName()} is in game {self.__interface.current_game.getGameid()}, quitting")
+            await self.__interface.current_game.quit()
+            logging.log(logging.INFO, f"User {self.__interface.getName()} has quit the game {self.__interface.current_game.getGameid()}")
 
         for user in GameConsumer.USERS:
             if user == self:
@@ -106,7 +106,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
     def isInGame(self) -> bool:
         """Check if the user is in a game"""
 
-        return self.__currentGame is not None and self.__currentGame.isFinished() is not True
+        return self.__interface.current_game is not None and self.__interface.current_game.isFinished() is not True
 
     async def getGames(self):
         """Send a list of all games to the client"""
@@ -128,101 +128,37 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
         await self.send_json(gameData)
 
-    async def joinGame(self, data):
-        """Add the player to the game"""
+    async def join_queue(self, data: dict):
+        """Join the game or tournament queue"""
 
-        from game.gameutils.GameManager import GameManager
-
-        # check request format
-        gameid: str = ""
-        try:
-            gameid = data["data"]["gameid"]
-        except KeyError:
-            response = GameConsumerResponse(method="join_game", status=False, reason=Response.INVALIDREQUEST)
-            await self.send_json(response.toJSON())
-            return
-
-        # Check if the user can join a game
-        manager: GameManager = GameManager.getInstance()
-        username = self.__interface.getName()
-        if username == "":
-            response = GameConsumerResponse(method="join_game", status=False, reason=Response.INVALIDUSERNAME)
-            await self.send_json(response.toJSON())
-            return
-        elif self.isInGame():
-            response = GameConsumerResponse(method="join_game", status=False, reason=Response.ALREADYINGAME)
-            await self.send_json(response.toJSON())
-            return
-
-        try:
-            # join the game
-            self.__currentGame = manager.getGameOrTournament(gameid)
-            await self.__currentGame.join(self.__interface)
-
-            # if game is not a tournament, start it
-            try:
-                manager.getGame(gameid)
-                self.__currentGame.start()
-            except KeyError:
-                pass
-
-            # update game list for all users
-            await GameConsumer.onGameChange()
-        except KeyError:
-            response = GameConsumerResponse(method="join_game", status=False, reason=Response.NOSUCHGAME)
-            await self.send_json(response.toJSON())
-        except RuntimeError as error:
-            response = GameConsumerResponse(method="join_game", status=False, reason=str(error))
-            await self.send_json(response.toJSON())
-
-    async def createGame(self, data):
-        """Create a new game and add the player to it"""
-
-        from game.gameutils.GameManager import GameManager
-
-        if self.__interface.getName() == "":
-            response = GameConsumerResponse(method="create_game", status=False, reason=Response.INVALIDUSERNAME)
-            await self.send_json(response.toJSON())
-            return
-        elif self.isInGame():
-            response = GameConsumerResponse(method="create_game", status=False, reason=Response.ALREADYINGAME)
-            await self.send_json(response.toJSON())
-            return
-
-        manager: GameManager = GameManager.getInstance()
-        self.__currentGame = await manager.createGame(self.__interface)
-        await self.__currentGame.update()
-
-    async def createTournament(self, data):
-        """Create a new tournament and add the player to it"""
-
-        from game.gameutils.GameManager import GameManager
-
-        # Check if the user can join a game
         if self.isInGame():
-            response = GameConsumerResponse(method="create_tournament", status=False, reason=Response.ALREADYINGAME)
+            response = GameConsumerResponse(method="join_queue", status=False, reason=Response.ALREADYINGAME)
             await self.send_json(response.toJSON())
             return
 
-        # Check request format
         try:
-            manager: GameManager = GameManager.getInstance()
-            self.__currentGame = manager.createTournament(self.__interface)
-            await self.__currentGame.join(self.__interface) # required to trigger the update method
+            queue_type = data['data']['mode']
 
-            for user in GameConsumer.USERS:
-                await user.getGames()
-        except KeyError:
-            response = GameConsumerResponse(method="create_tournament", status=False, reason=Response.INVALIDREQUEST)
+            # Join the queue or raise an exception if the queue type is invalid
+            if queue_type == 'game':
+                await matchmaker.join_game_queue(self.__interface)
+            elif queue_type == 'tournament':
+                await matchmaker.join_tournament_queue(self.__interface)
+            else:
+                raise ValueError("Invalid queue type")
+
+            # Send a success response
+            response = GameConsumerResponse(method="join_queue", status=True)
             await self.send_json(response.toJSON())
-            return
-        except RuntimeError:
-            response = GameConsumerResponse(method="create_tournament", status=False, reason=Response.GAMEFULL)
+        except KeyError as e:
+            response = GameConsumerResponse(method="join_queue", status=False, reason="Invalid request")
+        except ValueError as e:
+            response = GameConsumerResponse(method="join_queue", status=False, reason=str(e))
             await self.send_json(response.toJSON())
 
     def __deleteCurrentGame(self):
-        logging.log(logging.INFO, f"User {self.__interface.getName()} left the game {self.__currentGame.getGameid()}")
-        self.__currentGame = None
+        logging.log(logging.INFO, f"User {self.__interface.getName()} left the game {self.__interface.current_game.getGameid()}")
+        self.__interface.current_game = None
 
     async def updatePlayer(self, data) -> None:
         """Update player movement"""

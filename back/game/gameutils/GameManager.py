@@ -146,6 +146,7 @@ class GameManager:
         if GameManager.__instance is None:
             logging.log(logging.INFO, "Creating GameManager instance")
             GameManager.__instance = GameManager()
+            logging.info("GameManager instance created")
         return GameManager.__instance
 
     @staticmethod

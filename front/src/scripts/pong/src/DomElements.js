@@ -1,7 +1,6 @@
 import { GameSocket } from "./GameSocket";
-let CREATEGAMEBUTTON = document.querySelector("div.game-container button.create-game");
-let CREATETOURNAMENTBUTTON = document.querySelector("div.game-container button.create-tournament");
-let REFRESHBUTTON = document.querySelector("div.game-container button.refresh-room");
+let JOINGAMEQUEUEBUTTON = document.querySelector("div.game-container button.create-game");
+let JOINTOURNAMENTQUEUEBUTTON = document.querySelector("div.game-container button.create-tournament");
 let AVAILABLEGAMECONTAINER = document.querySelector("div.game-container div.available-game");
 let AVAILABLETOURNAMENTCONTAINER = document.querySelector("div.game-container div.available-tournament");
 let GAMECONTAINER = document.querySelector("div.game-container div.game");
@@ -9,9 +8,8 @@ let USERSCONTAINER = document.querySelector("div.game-container div.user-list");
 const FIRST_LINK = document.querySelectorAll("nav div a[data-link]");
 const HOME_LINK = document.querySelector("nav > a");
 function regenerateButtons() {
-    CREATEGAMEBUTTON = document.querySelector("div.game-container button.create-game");
-    CREATETOURNAMENTBUTTON = document.querySelector("div.game-container button.create-tournament");
-    REFRESHBUTTON = document.querySelector("div.game-container button.refresh-room");
+    JOINGAMEQUEUEBUTTON = document.querySelector("div.game-container button.create-game");
+    JOINTOURNAMENTQUEUEBUTTON = document.querySelector("div.game-container button.create-tournament");
     AVAILABLEGAMECONTAINER = document.querySelector("div.game-container div.available-game");
     AVAILABLETOURNAMENTCONTAINER = document.querySelector("div.game-container div.available-tournament");
     GAMECONTAINER = document.querySelector("div.game-container div.game");
@@ -22,15 +20,11 @@ function regenerateButtons() {
  */
 async function createGameButtonCallback() {
     let gs = await GameSocket.get();
-    gs.requestNewGame();
-}
-async function refreshButtonCallback() {
-    let gs = await GameSocket.get();
-    gs.requestGames();
+    gs.requestJoinGameQueue();
 }
 async function createTournamentButtonCallback() {
     let gs = await GameSocket.get();
-    gs.requestNewTournament();
+    gs.requestJoinTournamentQueue();
 }
 /**
  * Activate a button
@@ -51,12 +45,10 @@ function deactivateButton(button) {
  */
 function activateButtons() {
     regenerateButtons();
-    CREATEGAMEBUTTON.addEventListener("click", createGameButtonCallback);
-    CREATETOURNAMENTBUTTON.addEventListener("click", createTournamentButtonCallback);
-    REFRESHBUTTON.addEventListener("click", refreshButtonCallback);
-    activateButton(CREATEGAMEBUTTON);
-    activateButton(CREATETOURNAMENTBUTTON);
-    activateButton(REFRESHBUTTON);
+    JOINGAMEQUEUEBUTTON.addEventListener("click", createGameButtonCallback);
+    JOINTOURNAMENTQUEUEBUTTON.addEventListener("click", createTournamentButtonCallback);
+    activateButton(JOINGAMEQUEUEBUTTON);
+    activateButton(JOINTOURNAMENTQUEUEBUTTON);
     // Close the socket when the user navigates away
     FIRST_LINK.forEach((link) => {
         link.addEventListener("click", async (event) => {
@@ -73,9 +65,7 @@ function activateButtons() {
  * Disable buttons, should be called on lost connection //TODO call it
  */
 function deactivateButtons() {
-    CREATEGAMEBUTTON.removeEventListener("click", createGameButtonCallback);
-    REFRESHBUTTON.removeEventListener("click", refreshButtonCallback);
-    deactivateButton(CREATEGAMEBUTTON);
-    deactivateButton(REFRESHBUTTON);
+    JOINGAMEQUEUEBUTTON.removeEventListener("click", createGameButtonCallback);
+    deactivateButton(JOINGAMEQUEUEBUTTON);
 }
 export { activateButtons, deactivateButtons, AVAILABLEGAMECONTAINER, AVAILABLETOURNAMENTCONTAINER, GAMECONTAINER, USERSCONTAINER };

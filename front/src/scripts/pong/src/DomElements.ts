@@ -1,8 +1,7 @@
 import {GameSocket} from "./GameSocket";
 
-let CREATEGAMEBUTTON: HTMLButtonElement          = document.querySelector<HTMLButtonElement>("div.game-container button.create-game")!;
-let CREATETOURNAMENTBUTTON: HTMLButtonElement    = document.querySelector<HTMLButtonElement>("div.game-container button.create-tournament")!;
-let REFRESHBUTTON: HTMLButtonElement             = document.querySelector<HTMLButtonElement>("div.game-container button.refresh-room")!;
+let JOINGAMEQUEUEBUTTON: HTMLButtonElement          = document.querySelector<HTMLButtonElement>("div.game-container button.create-game")!;
+let JOINTOURNAMENTQUEUEBUTTON: HTMLButtonElement    = document.querySelector<HTMLButtonElement>("div.game-container button.create-tournament")!;
 let AVAILABLEGAMECONTAINER: HTMLDivElement       = document.querySelector<HTMLDivElement>("div.game-container div.available-game")!;
 let AVAILABLETOURNAMENTCONTAINER: HTMLDivElement = document.querySelector<HTMLDivElement>("div.game-container div.available-tournament")!;
 let GAMECONTAINER: HTMLDivElement                = document.querySelector<HTMLDivElement>("div.game-container div.game")!;
@@ -12,9 +11,8 @@ const FIRST_LINK: NodeListOf<HTMLAnchorElement> = document.querySelectorAll<HTML
 const HOME_LINK: HTMLAnchorElement              = document.querySelector<HTMLAnchorElement>("nav > a")!;
 
 function regenerateButtons(): void {
-    CREATEGAMEBUTTON             = document.querySelector<HTMLButtonElement>("div.game-container button.create-game")!;
-    CREATETOURNAMENTBUTTON       = document.querySelector<HTMLButtonElement>("div.game-container button.create-tournament")!;
-    REFRESHBUTTON                = document.querySelector<HTMLButtonElement>("div.game-container button.refresh-room")!;
+    JOINGAMEQUEUEBUTTON             = document.querySelector<HTMLButtonElement>("div.game-container button.create-game")!;
+    JOINTOURNAMENTQUEUEBUTTON       = document.querySelector<HTMLButtonElement>("div.game-container button.create-tournament")!;
     AVAILABLEGAMECONTAINER       = document.querySelector<HTMLDivElement>("div.game-container div.available-game")!;
     AVAILABLETOURNAMENTCONTAINER = document.querySelector<HTMLDivElement>("div.game-container div.available-tournament")!;
     GAMECONTAINER                = document.querySelector<HTMLDivElement>("div.game-container div.game")!;
@@ -26,17 +24,12 @@ function regenerateButtons(): void {
  */
 async function createGameButtonCallback(): Promise<void> {
     let gs: GameSocket = await GameSocket.get();
-    gs.requestNewGame();
-}
-
-async function refreshButtonCallback(): Promise<void> {
-    let gs: GameSocket = await GameSocket.get();
-    gs.requestGames();
+    gs.requestJoinGameQueue();
 }
 
 async function createTournamentButtonCallback(): Promise<void> {
     let gs: GameSocket = await GameSocket.get();
-    gs.requestNewTournament();
+    gs.requestJoinTournamentQueue();
 }
 
 /**
@@ -60,12 +53,10 @@ function deactivateButton(button: HTMLButtonElement): void {
  */
 function activateButtons(): void {
     regenerateButtons();
-    CREATEGAMEBUTTON.addEventListener("click", createGameButtonCallback);
-    CREATETOURNAMENTBUTTON.addEventListener("click", createTournamentButtonCallback);
-    REFRESHBUTTON.addEventListener("click", refreshButtonCallback);
-    activateButton(CREATEGAMEBUTTON);
-    activateButton(CREATETOURNAMENTBUTTON);
-    activateButton(REFRESHBUTTON);
+    JOINGAMEQUEUEBUTTON.addEventListener("click", createGameButtonCallback);
+    JOINTOURNAMENTQUEUEBUTTON.addEventListener("click", createTournamentButtonCallback);
+    activateButton(JOINGAMEQUEUEBUTTON);
+    activateButton(JOINTOURNAMENTQUEUEBUTTON);
 
     // Close the socket when the user navigates away
     FIRST_LINK.forEach((link) => {
@@ -85,10 +76,8 @@ function activateButtons(): void {
  * Disable buttons, should be called on lost connection //TODO call it
  */
 function deactivateButtons(): void {
-    CREATEGAMEBUTTON.removeEventListener("click", createGameButtonCallback);
-    REFRESHBUTTON.removeEventListener("click", refreshButtonCallback);
-    deactivateButton(CREATEGAMEBUTTON);
-    deactivateButton(REFRESHBUTTON);
+    JOINGAMEQUEUEBUTTON.removeEventListener("click", createGameButtonCallback);
+    deactivateButton(JOINGAMEQUEUEBUTTON);
 }
 
 export {

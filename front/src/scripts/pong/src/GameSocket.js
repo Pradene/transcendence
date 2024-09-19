@@ -1,6 +1,5 @@
 import { Pong } from "./Pong";
-import { activateButtons, AVAILABLEGAMECONTAINER, AVAILABLETOURNAMENTCONTAINER, USERSCONTAINER } from "./DomElements";
-import { GAME_MODE } from "./Defines";
+import { activateButtons, USERSCONTAINER } from "./DomElements";
 const hosturl = "wss://" + location.hostname + ":" + location.port + "/ws/game/";
 class GameSocket {
     constructor(socket) {
@@ -33,15 +32,6 @@ class GameSocket {
         }
         return GameSocket.#GameSocket;
     }
-    /**
-     * Request the server to send all currently running games.
-     */
-    requestGames() {
-        let request = {
-            method: "get_games"
-        };
-        this.send(request);
-    }
     processGetUsers(response) {
         USERSCONTAINER.innerHTML = "<h2>Users:</h2>";
         response.data.users.forEach((element) => {
@@ -50,109 +40,34 @@ class GameSocket {
             USERSCONTAINER.appendChild(user);
         });
     }
-    processGetGames(response) {
-        let games = response.data.games;
-        let tournaments = response.data.tournaments;
-        // clean containers
-        AVAILABLEGAMECONTAINER.innerHTML = "";
-        AVAILABLETOURNAMENTCONTAINER.innerHTML = "";
-        // insert elements
-        games.forEach(element => {
-            this.processOneGame(element.creator, element.player_count, element.is_full);
-        });
-        tournaments.forEach(element => {
-            this.processOneTournament(element.creator, element.player_count, element.is_full);
-        });
-    }
-    processOneGame(creator, player_count, is_full) {
-        let game_container = document.createElement("div");
-        let creator_element = document.createElement("span");
-        let player_count_element = document.createElement("span");
-        let join_button = document.createElement("button");
-        game_container.classList.add("room");
-        creator_element.classList.add("gameid");
-        player_count_element.classList.add("player-count");
-        creator_element.textContent = creator;
-        player_count_element.textContent = player_count + "/2";
-        join_button.textContent = "Join";
-        join_button.addEventListener("click", () => {
-            let request = {
-                method: "join_game",
-                data: {
-                    gameid: creator
-                }
-            };
-            this.send(request);
-        });
-        join_button.disabled = is_full;
-        game_container.appendChild(creator_element);
-        game_container.appendChild(player_count_element);
-        game_container.appendChild(join_button);
-        AVAILABLEGAMECONTAINER.appendChild(game_container);
-    }
-    processOneTournament(creator, player_count, is_full) {
-        let tournament_container = document.createElement("div");
-        let creator_element = document.createElement("span");
-        let player_count_element = document.createElement("span");
-        let join_button = document.createElement("button");
-        tournament_container.classList.add("room");
-        creator_element.classList.add("gameid");
-        player_count_element.classList.add("player-count");
-        creator_element.textContent = creator;
-        player_count_element.textContent = player_count + "/4";
-        join_button.textContent = "Join";
-        join_button.addEventListener("click", () => {
-            let request = {
-                method: "join_game",
-                data: {
-                    gameid: creator
-                }
-            };
-            this.send(request);
-        });
-        join_button.disabled = is_full;
-        tournament_container.appendChild(creator_element);
-        tournament_container.appendChild(player_count_element);
-        tournament_container.appendChild(join_button);
-        AVAILABLETOURNAMENTCONTAINER.appendChild(tournament_container);
-    }
     /**
      * Request the server to create a new game instance.
      */
-    requestNewGame() {
+    requestJoinGameQueue() {
         console.log("Requesting new game");
         if (this._currentGame) {
             console.error("Already in a game");
             return;
         }
         let request = {
-            method: "create_game",
+            method: "join_queue",
             data: {
-                mode: GAME_MODE.NONE
+                mode: "game"
             }
         };
         this.send(request);
     }
-    requestNewTournament() {
+    requestJoinTournamentQueue() {
         if (this._currentGame) {
             return;
         }
         let request = {
-            method: "create_tournament",
+            method: "join_queue",
             data: {
-                mode: GAME_MODE.NONE
+                mode: "tournament"
             }
         };
         this.send(request);
-    }
-    /**
-     * Create a new game
-     * @param response
-     */
-    createNewGame(response) {
-        if (!response.status) {
-            console.error("Could not create new game: ", response.reason);
-        }
     }
     /**
      * Send a request to the server
@@ -177,14 +92,14 @@ class GameSocket {
         }
         //here global events
         switch (response.method) {
-            case "get_games":
-                gs.processGetGames(response);
-                break;
             case "get_users":
                 gs.processGetUsers(response);
                 break;
-            case "create_game":
-                gs.createNewGame(response);
+            case "join_queue":
+                let joinResponse = response;
+                if (!joinResponse.status) {
+                    alert("Error: " + joinResponse.reason);
+                }
                 break;
             case "update_game":
                 if (!gs._currentGame)
