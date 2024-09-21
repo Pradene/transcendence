@@ -82,7 +82,7 @@ class Game(AbstractGame):
             await self.update()
             ctime = time.time()
             if ctime - last_frame < TIME_TO_SLEEP:
-                logging.info(f"Sleeping for {TIME_TO_SLEEP - (ctime - last_frame)}")
+                # logging.info(f"Sleeping for {TIME_TO_SLEEP - (ctime - last_frame)}")
                 await asyncio.sleep(TIME_TO_SLEEP - (ctime - last_frame))
             last_frame = ctime
 
