@@ -68,7 +68,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
     async def receive(self, text_data=None, bytes_data=None, **kwargs):
         """Handle incoming messages from the client"""
 
-        logging.info(f"Received message from {self.__interface.getName()}: {text_data}")
+        # logging.info(f"Received message from {self.__interface.getName()}: {text_data}")
 
         try:
             data = json.loads(text_data)
