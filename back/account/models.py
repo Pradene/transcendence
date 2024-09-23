@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
 from django.conf import settings
 from django.db import models
@@ -45,7 +47,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     picture = models.ImageField(upload_to="profile_pictures/", default="profile_pictures/default.png", blank=True, null=True)
     email = models.EmailField(null=True)
     bio = models.TextField(blank=True, null=True)
-    email = models.EmailField(max_length=254)
+    email = models.EmailField(max_length=255)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     otp_secret = models.CharField(blank=True, null=True)
@@ -63,14 +65,15 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         data = {
             'id': self.id,
             'username': self.username,
+            'email': self.email,
             'picture': self.picture.url if self.picture else None,
             'is_active': self.is_active,
         }
 
         if requesting_user is not None:
             try:
-                friend_list, created = FriendList.objects.get_or_create(user=self)
-                data['status'] = friend_list.get_friend_status(requesting_user)
+                friend_list, created = FriendList.objects.get_or_create(user=requesting_user)
+                data['status'] = friend_list.get_friend_status(self)
             except Exception as e:
                 data['status'] = 'none'
 

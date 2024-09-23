@@ -1,27 +1,29 @@
-input[type=number] {
-	-moz-appearance: textfield;
-}
-
-#otp-form {
-	display: flex;
-	flex-direction: column;
+.otp-label {
+    margin: auto;
+    display: flex;
+    gap: 4px;
 }
 
 .otp-box {
-	display: inline-block;
-	width: 2.5rem;
-	height: 4rem;
-	margin: 0.5rem;
+	display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 30px;
+	height: 40px;
 	border-radius: 0.5rem;
-	background: var(--fifth-color);
+    background: red;
+}
+
+.otp-box.active {
+    background: blue;
 }
 
 .secret-input {
-	background-color: var(--second-color);
-	outline: none;
+	background: blue;
+    outline: none;
 	border: none;
-	color: var(--second-color);
-	width: 0;
-	height: 0;
-	caret: hidden;
+	width: 0px;
+	height: 0px;
+    caret: hidden;
 }

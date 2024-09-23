@@ -1,15 +1,13 @@
-<div>
-    <NavComponent></NavComponent>
-    <div class="w-100">
-        <div class="w-100 d-flex justify-content-between align-items-center bg-gray-800 rounded p-2 mb-2">
-            <p class="my-0" style="margin-left: 1rem;">Conversation</p>
-            <label class="form-container rounded px-3">
-                <img src="/assets/search.svg" width="16" height="16" />
-                <input ref="input" class="form-control" placeholder="Search..." type="text" required="True" autocomplete="off" />
-            </label>
-        </div>
-        <div class="rounded bg-gray-800" style="min-height: 80vh;">
-            <ul ref="rooms" class="list-group scrollable px-2"></ul>
-        </div>
+<nav-component></nav-component>
+<div class="w-100">
+    <div class="w-100 d-flex justify-content-between align-items-center bg-gray-800 rounded p-2 mb-2">
+        <p class="my-0" style="margin-left: 1rem;">Conversation</p>
+        <label class="form-container rounded px-3">
+            <img src="/assets/search.svg" width="16" height="16" />
+            <input ref="input" class="form-control" placeholder="Search..." type="text" required="True" autocomplete="off" />
+        </label>
+    </div>
+    <div class="rounded bg-gray-800" style="min-height: 80vh;">
+        <ul ref="rooms" class="list-group scrollable px-2"></ul>
     </div>
 </div>

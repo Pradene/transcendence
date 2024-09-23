@@ -1,12 +1,5 @@
 - room creation real time response
-
-- profile page
-  - make edit profile page
-    change: username, pp, bio
-
 - messages, friends pagination
-
-- remove rest framework
-
 - notifications maybe for invitation
-
+- nginx redirection from http to https
+- edit profile problem

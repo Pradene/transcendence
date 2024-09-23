@@ -38,7 +38,7 @@ def userView(request, user_id=None):
 			except Exception as e:
 				return JsonResponse({"error": str(e)}, status=400)
 
-		data = user.toJSON(user)
+		data = user.toJSON(request.user)
 		return JsonResponse(data, safe=False, status=200)
 
 	elif request.method == "POST":
@@ -49,6 +49,8 @@ def userView(request, user_id=None):
 			username = request.POST.get('username', user.username)
 			bio = request.POST.get('bio', user.bio)
 			email = request.POST.get('email', user.email)
+
+			logging.info(f'{username} : {email}')
 
 			if 'picture' in request.FILES:
 				picture = request.FILES['picture']
@@ -184,28 +186,31 @@ def ft_auth(request):
 
 
 def login_42user(token):
-	headers = {
-		"Authorization": f"Bearer {token}"
-	}
+	try:
+		headers = {
+			"Authorization": f"Bearer {token}"
+		}
 
-	response = requests.get("https://api.intra.42.fr/v2/me", headers=headers)
-	data = response.json()
+		response = requests.get("https://api.intra.42.fr/v2/me", headers=headers)
+		data = response.json()
 
-	id = data.get("id")
-	login = data.get("login")
-	email = data.get("email")
+		id = data.get("id")
+		login = data.get("login")
+		email = data.get("email")
 
-	if CustomUser.objects.filter(api_42_id=id).exists():
-		user = CustomUser.objects.get(api_42_id=id)
-	else:
-		user = CustomUser.objects.create_user(
-			username=login,
-			password=None,
-			email=email,
-			api_42_id=id
-		)
+		if CustomUser.objects.filter(api_42_id=id).exists():
+			user = CustomUser.objects.get(api_42_id=id)
+		else:
+			user = CustomUser.objects.create_user(
+				username=login,
+				password=None,
+				email=email,
+				api_42_id=id
+			)
 
-	return user
+		return user
+	except Exception as e:
+		logging.info(f'error: {e}')
 
 
 def ft_auth_callback(request):
@@ -236,22 +241,23 @@ def ft_auth_callback(request):
 	access_token = token_data.get("access_token")
 
 	user = login_42user(access_token)
+	login(request, user)
 
-	at, at_created = create_access_token(user)
-	rt, rt_created = create_refresh_token(user)
+	at, access_exp = create_access_token(user)
+	rt, refresh_exp = create_refresh_token(user)
 
 	response = HttpResponseRedirect(f'https://{os.getenv("HOST_HOSTNAME")}:5000/')
 
 	response.set_cookie(
 		"access_token", at,
 		httponly=False, secure=True,
-		samesite="Lax", max_age=300
+		samesite="Lax", max_age=access_exp
 	)
 	
 	response.set_cookie(
 		"refresh_token", rt,
 		httponly=True, secure=True,
-		samesite="Lax", max_age=3600
+		samesite="Lax", max_age=refresh_exp
 	)
 
 	return response
@@ -334,6 +340,9 @@ def check2FA(request):
 def refreshTokenView(request):
 	token = request.COOKIES.get("refresh_token")
 
+	if token is None:
+		return JsonResponse({"error": "Invalid token"}, status=400)
+
 	if BlackListedToken.objects.filter(token=token).exists():
 		return JsonResponse({"error": "Invalid token"}, status=400)
 
@@ -344,13 +353,13 @@ def refreshTokenView(request):
 			user = CustomUser.objects.get(id=user_id)
 			access_token, access_exp = create_access_token(user)
 			response = JsonResponse({}, status=200)
-			
+
 			response.set_cookie(
 				"access_token", access_token,
 				httponly=False, secure=True,
 				samesite="Lax", max_age=access_exp
 			)
-			
+
 			return response
 		
 		except Exception as e:
@@ -368,7 +377,12 @@ def logoutView(request):
 		token = BlackListedToken.objects.create(token=refresh_token)
 
 		logout(request)
-		return JsonResponse({}, status=200)
+
+		response = JsonResponse({}, status=200)
+		response.delete_cookie("access_token")
+		response.delete_cookie("refresh_token")
+
+		return response
 
 	except Exception as e:
 		JsonResponse({"error": "Invalid token"}, status=400)

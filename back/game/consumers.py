@@ -53,6 +53,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         if not self.__user.is_authenticated:
             await self.close()
             return
+
         elif self.__user.username in [user.getUsername() for user in GameConsumer.USERS]:
             await self.close()
             return
@@ -80,6 +81,10 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             logging.error(f"Invalid JSON data received from {self.__interface.getName()}")
             return
 
+        method = data["method"]
+        if not method:
+            return
+
         match method:
             case "get_games":
                 await self.getGames()
@@ -100,13 +105,16 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         for user in GameConsumer.USERS:
             if user == self:
                 GameConsumer.USERS.remove(user)
+
         logging.log(logging.INFO, f"User {self.__interface.getName()} has disconnected")
         await GameConsumer.onUserChange()
+
 
     def isInGame(self) -> bool:
         """Check if the user is in a game"""
 
         return self.__interface.current_game is not None and self.__interface.current_game.isFinished() is not True
+
 
     async def getGames(self):
         """Send a list of all games to the client"""
@@ -118,10 +126,12 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
         await self.send_json(response.toJSON())
 
+
     async def send_json(self, data):
         """Send JSON data to the client and log it to the console"""
 
         await super().send_json(data)
+
 
     async def updateClient(self, gameData: dict):
         """Send updated game data to the client"""
@@ -156,9 +166,11 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             response = GameConsumerResponse(method="join_queue", status=False, reason=str(e))
             await self.send_json(response.toJSON())
 
+
     def __deleteCurrentGame(self):
         logging.log(logging.INFO, f"User {self.__interface.getName()} left the game {self.__interface.current_game.getGameid()}")
         self.__interface.current_game = None
+
 
     async def updatePlayer(self, data) -> None:
         """Update player movement"""
@@ -182,11 +194,13 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             await self.send_json(response.toJSON())
             return
 
+
     @staticmethod
     async def onGameChange():
         """Update the game list for all users"""
         for user in GameConsumer.USERS:
             await user.getGames()
+
 
     @staticmethod
     async def onUserChange():
@@ -198,13 +212,41 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         for user in GameConsumer.USERS:
             await user.updateUserList(userlist)
 
+
     async def updateUserList(self, userlist: List[str]):
         """Send the updated user list to the client"""
 
         response: GameConsumerResponse = GameConsumerResponse(method="get_users", status=True, data={"users": userlist})
         await self.send_json(response.toJSON())
 
+
     def getUsername(self) -> str:
         """Return the username of the user"""
 
         return self.__user.username
+
+
+class GameMatchmakingConsumer(AsyncJsonWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add(
+            f'matchmaking_pool',
+            self.channel_name
+        )
+
+        await self.accept()
+
+    async def disconnect(self):
+        await self.channel_layer.group_discard(
+            f'matchmaking_pool',
+            self.channel_name
+        )
+
+    async def receive(self, text_data):
+        data = json.loads(text_data)
+        await self.channel_layer.group_send(
+            f'matchmaking_pool',
+            {
+                'type': 'match_found',
+                'message': 'Match found'
+            }
+        )

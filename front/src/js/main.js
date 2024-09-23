@@ -1,16 +1,19 @@
 import { WebSocketManager } from "./utils/WebSocketManager.js"
 import { Router } from "./utils/Router.js"
 
-import { Home } from "./components/Home.js"
-import { Login } from "./components/Login.js"
-import { Signup } from "./components/Signup.js"
-import { Chat } from "./components/Chat.js"
-import { Search } from "./components/Search.js"
-import { Profile } from "./components/Profile.js"
-import { EditProfile } from "./components/EditProfile.js"
-import { OTP } from "./components/OTP.js"
+import { Home } from "./pages/Home.js"
+import { Login } from "./pages/Login.js"
+import { OTP } from "./pages/OTP.js"
+import { Signup } from "./pages/Signup.js"
+import { Chat } from "./pages/Chat.js"
+import { ChatRoom } from "./pages/ChatRoom.js"
+import { Search } from "./pages/Search.js"
+import { Profile } from "./pages/Profile.js"
+import { EditProfile } from "./pages/EditProfile.js"
 
-import { NavComponent } from "./components/NavComponent.js"
+import "../js/components/Nav.js"
+import "../js/components/LogoutButton.js"
+import "../js/components/FriendButton.js"
 
 import "../css/style.scss"
 
@@ -19,15 +22,15 @@ document.addEventListener("DOMContentLoaded", () => {
     new WebSocketManager()
     
     const router = new Router([
-        {path: '/', view: Home, protected: true},
-        {path: '/chat/', view: Chat, protected: true},
-        // {path: '/chat/:id/', view: ChatRoom, protected: true},
-        {path: '/users/', view: Search, protected: true},
-        {path: '/users/:id/', view: Profile, protected: true},
-        {path: "/users/:id/edit/", view: EditProfile, protected: true},
-        {path: '/login/', view: Login, protected: false},
-        {path: '/signup/', view: Signup, protected: false},
-        {path: '/verify-otp/', view: OTP, protected: false},
+        {path: '/', view: new Home(), protected: true},
+        {path: '/chat/', view: new Chat(), protected: true},
+        {path: '/chat/:id/', view: new ChatRoom(), protected: true},
+        {path: '/users/', view: new Search(), protected: true},
+        {path: '/users/:id/', view: new Profile(), protected: true},
+        {path: "/users/:id/edit/", view: new EditProfile(), protected: true},
+        {path: '/login/', view: new Login(), protected: false},
+        {path: '/signup/', view: new Signup(), protected: false},
+        {path: '/verify-otp/', view: new OTP(), protected: false},
     ])
 
     document.body.addEventListener("click", (event) => {        

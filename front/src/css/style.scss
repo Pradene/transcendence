@@ -67,6 +67,13 @@ $gray-900: darken($grey-dark, 60%);
 @import "../../node_modules/bootstrap/scss/bootstrap";
 
 @import "list";
+@import "nav";
+@import "OTP";
+@import "chatroom";
+
+.hidden {
+    display: none;
+}
 
 #app {
     margin: 0 auto;
@@ -139,27 +146,4 @@ a {
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
-}
-
-input[type=number] {
-	-moz-appearance: textfield;
-}
-
-.otp-box {
-	// display: inline-block;
-	width: 2.5rem;
-	height: 4rem;
-	margin: 0.5rem;
-	border-radius: 0.5rem;
-	background: red;
-}
-
-.secret-input {
-	background-color: var(--second-color);
-	outline: none;
-	border: none;
-	color: var(--second-color);
-	width: 0;
-	height: 0;
-	caret: hidden;
 }

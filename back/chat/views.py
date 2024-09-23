@@ -15,7 +15,7 @@ def roomsView(request):
     if request.method == "GET":
         try:
             rooms = ChatRoom.objects.filter(users=user)
-            data = [room.toJSON() for room in rooms]
+            data = [room.toJSON(user) for room in rooms]
             return JsonResponse(data, safe=False, status=200)
 
         except Exception as e:
@@ -35,7 +35,7 @@ def roomsView(request):
             room.users.set(users)
             room.save()
 
-            data = room.toJSON()
+            data = room.toJSON(user)
             return JsonResponse(data, safe=False, status=200)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
@@ -93,7 +93,7 @@ def searchRoomsView(request):
     query = request.GET.get('q', '')
     if query:
         rooms = ChatRoom.objects.filter(users=user, name__icontains=query)
-        data = [room.toJSON() for room in rooms]
+        data = [room.toJSON(user) for room in rooms]
         return JsonResponse(data, safe=False, status=200)
     
     return JsonResponse({}, status=400)

@@ -10,24 +10,25 @@ nav {
 
     padding: 12px 18px;
     margin: 12px 0px;
-}
-
-nav div {
-	display: flex;
-}
-
-nav div a {
-	text-decoration: none;
-    margin-left: 18px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    cursor: pointer;
-	font-size: 16px;
-}
-
-nav div a img {
-    width: 16px;
-    height: 16px;
-	pointer-events: none;
+    
+    div {
+        display: flex;
+        align-items: center;
+        
+        a {
+            text-decoration: none;
+            margin-left: 18px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            font-size: 16px;
+            
+            img {
+                width: 16px;
+                height: 16px;
+                pointer-events: none;
+            }
+        }
+    }
 }

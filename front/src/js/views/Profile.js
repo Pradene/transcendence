@@ -378,8 +378,6 @@ return content
                 "POST"
             )
             
-            localStorage.removeItem("user_id")
-            
             const ws = WebSocketManager.get()
             ws.disconnect('chat')
             ws.disconnect('friends')

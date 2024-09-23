@@ -40,9 +40,10 @@ export class Router {
             const View = matchedRoute.route.view
             const isProtected = matchedRoute.route.protected
             
-            // if (this.currentView && typeof this.currentView.unmount === "function") {
-                // this.currentView.unmount()
-            // }
+            if (this.currentView && typeof this.currentView.unmount === "function") {
+                console.log( this.currentView.unmount)
+                this.currentView.unmount()
+            }
             
             const isAuthenticated = await checkLogin()
             if (isProtected && !isAuthenticated) {
@@ -51,14 +52,8 @@ export class Router {
                 
             } else {
                 // render the view
-                const view = new View()
-                this.currentView = view
-                
-                const component = await view.render()
-                const app = document.getElementById("app")
-                
-                app.replaceChildren(component)
-
+                this.currentView = View
+                View.render()
             }
 
         } else {

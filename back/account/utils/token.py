@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from account.models import CustomUser
 
 def create_access_token(user):
-    exp = timedelta(minutes=5)
+    exp = timedelta(minutes=1)
 
     try:
         payload = {
