@@ -9,23 +9,23 @@ class DuelManager:
     def __init__(self):
         self.duels: typing.List[typing.Tuple[str, str, bool]] = []
 
-    def invite(self, challenger: ChatConsumer, challenged: ChatConsumer):
+    def invite(self, challenger: str, challenged: str):
         for duel in self.duels:
-            if duel[0] == challenger.user or duel[1] == challenged.user:
+            if duel[0] == challenger or duel[1] == challenged:
                 return
-            elif duel[0] == challenged.user or duel[1] == challenged.user:
+            elif duel[0] == challenged or duel[1] == challenged:
                 return
 
-        duel += (challenger.user, challenged.user, False)
+        duel += (challenger, challenged, False)
 
-    def accept(self, challenged: ChatConsumer):
+    def accept(self, challenged: str):
         for duel in self.duels:
-            if duel[1] == challenged.user:
+            if duel[1] == challenged:
                 duel[2] = True
 
-    def decline(self, challenged: ChatConsumer):
+    def decline(self, challenged: str):
         for duel in self.duels:
-            if duel[1] == challenged.user:
+            if duel[1] == challenged:
                 self.duels.remove(duel)
 
     def have_active_duel(self, player: str) -> bool:
