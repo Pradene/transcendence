@@ -65,8 +65,28 @@ class ChatConsumer(AsyncWebsocketConsumer):
         
         elif message_type == 'quit_room':
             await self.quit_room(data)
-        
 
+        elif message_type == 'request_duel':
+            await self.request_duel(data)
+
+        elif message_type == 'accept_duel':
+            await self.accep_duel(data)
+
+        elif message_type == 'refuse_duel':
+            await self.refuse_duel(data)
+
+    async def request_duel(self, data: dict):
+        try:
+            DUELMANAGER.invite(self.user, data['opponent'])
+        except KeyError as e:
+            logging.error(str(e))
+            return
+
+    async def accept_duel(self, data: dict):
+        pass
+
+    async def refuse_duel(self, data):
+        pass
 
     async def message(self, data):
         content = data['content']
