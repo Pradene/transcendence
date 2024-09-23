@@ -142,6 +142,11 @@ class Game(AbstractGame):
             }
         }
 
+        #reverse position so that each player sees itself at right side
+        dic2["data"]["current_player"]["position"][0] = P1_POSITION[0]
+        dic2["data"]["opponent"]["position"][0] = P2_POSITION[0]
+        dic2["data"]["ball"][0] = SCREEN_WIDTH - dic2["data"]["ball"][0]
+
         if timer is not None:
             dic1["data"]["timer"] = timer
             dic2["data"]["timer"] = timer
