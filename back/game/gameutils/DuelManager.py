@@ -28,7 +28,7 @@ class DuelManager:
             if duel[1] == challenged.user:
                 self.duels.remove(duel)
 
-    def haveActiveDuel(self, player: str) -> bool:
+    def have_active_duel(self, player: str) -> bool:
         for duel in self.duels:
             if duel[0] == player or duel[1] == player:
                 return duel[2]

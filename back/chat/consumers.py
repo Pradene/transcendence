@@ -1,3 +1,4 @@
+import typing
 import json
 import logging
 
@@ -7,6 +8,9 @@ from channels.db import database_sync_to_async
 from account.models import CustomUser
 from .models import ChatRoom, Message
 from .utils.elapsed_time import elapsed_time
+
+if typing.TYPE_CHECKING:
+    from game.gameutils.DuelManager import DUELMANAGER
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
