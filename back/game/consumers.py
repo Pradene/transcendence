@@ -2,6 +2,7 @@ import logging
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from typing import Union, List
+import typing
 import json
 
 from game.response import Response
@@ -10,7 +11,7 @@ from game.gameutils.PlayerInterface import PlayerInterface
 from game.gameutils.Game import Game
 from game.gameutils.Tournament import Tournament
 from game.gameutils.Matchmaking import matchmaker
-
+from game.gameutils.DuelManager import DUELMANAGER
 
 # This is a global variable that is used to check if the module has been initialised
 MODULE_INITIALIZED: bool = False
@@ -64,6 +65,10 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         await self.accept()
         await self.getGames()
         await self.onUserChange()
+
+        if DUELMANAGER.have_active_duel(self.__user):
+            #TODO: Start a new game
+            pass
 
     async def receive(self, text_data=None, bytes_data=None, **kwargs):
         """Handle incoming messages from the client"""
