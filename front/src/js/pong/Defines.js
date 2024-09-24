@@ -3,6 +3,7 @@ export const PADDLE_HEIGHT = 64;
 export const BALL_RADIUS = 4;
 export const CANVAS_WIDTH = 800;
 export const CANVAS_HEIGHT = 600;
+export const THREE_RATIO = 60;
 
 export var GAME_MODE;
 (function (GAME_MODE) {

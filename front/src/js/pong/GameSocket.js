@@ -5,8 +5,6 @@ import { GAME_MODE } from "./Defines.js";
 const hosturl = "wss://" + location.hostname + ":" + location.port + "/ws/game/";
 
 export class GameSocket {
-    _websocket;
-    _currentGame;
     static #GameSocket = null;
 
     constructor(socket) {
@@ -154,7 +152,7 @@ export class GameSocket {
      */
     async redirectMessages(event) {
         let response = JSON.parse(event.data);
-        console.log("Received message", response);
+        // console.log("Received message", response);
         
         if (!response.status) {
             alert("Error: " + response.reason);
