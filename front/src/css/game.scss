@@ -1,53 +1,80 @@
-div.game-container {
+
+.main-content {
+
   display: flex;
-  flex-direction: column;
-
+  justify-content: center;
+  align-items: flex-start;
   width: 100%;
-  max-width: 800px;
-  margin: auto;
 
-  .game-container-header {
-    display: flex;
-    justify-content: space-between;
-    flex-direction: row;
-    width: 100%;
-    min-width: 100%;
-
-    button {
-      padding: 1.5rem;
-      margin: 1rem;
-      border: 1px solid #ffffff;
-      border-radius: 3px;
-      background-color: grey;
-
-      &.active {
-        background-color: green;
-      }
-    }
-  }
-
-  .container {
-    display: flex;
-    flex-direction: row;
-
-    .user-list {
-      width: auto;
+  div.game-container {
       display: flex;
-      flex-direction: column ;
-    }
+      flex-direction: column;
 
-    .game {
-      display: flex;
-      width: 800px;
-      min-width: 800px;
-      border: 1px solid white;
+      width: 100%;
+      max-width: 1000px;
+      margin: auto;
 
-      canvas {
-        align-self: center;
-
+      .game-container-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
         min-width: 100%;
-        max-width: 100%;
-        aspect-ratio: 800 / 600;
+
+        button {
+          // padding: 1.5rem;
+          // margin: 1rem;
+          // border: 1px solid #ffffff;
+          // border-radius: 3px;
+          // background-color: red;
+          text-decoration: none;
+          padding: 4px;
+          font-family: $main-font;
+          font-size: 0.8em;
+          color: $sec-color;
+          background-color: black;
+          border-radius: 22px;
+          -webkit-border-radius: 22px;
+          -moz-border-radius: 22px;
+          border: 3px solid var(--fifth-color);
+          &.active {
+            background-color: green;
+          }
+        }
+    }
+
+    .container {
+      height: calc(100vh - 200px);
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      margin-top: 10px;
+
+      .user-list {
+        flex: 0 0 20%;
+        padding: 10px;
+        background-color: lightgray;
+        overflow-y: auto;
+        visibility: visible;
+        border-right: 1px solid #ccc;
+      }
+
+      .game {
+        flex-grow: 1;
+        border: 1px solid white;
+        display: block;
+        justify-content: center;
+        align-items: center;
+
+        canvas {
+          align-self: center;
+          min-width: 100%;
+          max-width: 100%;
+          aspect-ratio: 800 / 600;
+        }
+      }
+      * {
+        box-sizing: border-box;
       }
     }
   }

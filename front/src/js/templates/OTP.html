@@ -1,14 +1,15 @@
 <div class="container-fp">
     <form ref="form" id="otp-form" action="POST">
-		<label for="input" ref="label">
+		<div class="otp-box-container">
 			<span class="otp-box"></span>
 			<span class="otp-box"></span>
 			<span class="otp-box"></span>
 			<span class="otp-box"></span>
 			<span class="otp-box"></span>
 			<span class="otp-box"></span>
-		</label>
-        <input class="secret-input" ref="input" id="input" type="text" maxlength="6" autocomplete="one-time-code" required="True" />
-		<button class="button" type="submit">Login</button>
+		</div>
+		<input class="secret-input" ref="input" placeholder="Enter your code" type="text" maxlength="6" autocomplete="one-time-code" required="True" />
+		<button type="submit" class="btn btn-primary w-100">Login</button>
     </form>
 </div>
+

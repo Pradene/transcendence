@@ -2,26 +2,140 @@ input[type=number] {
 	-moz-appearance: textfield;
 }
 
+.container-fp {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
 #otp-form {
 	display: flex;
 	flex-direction: column;
+	align-items: center;
+	justify-content:center;
+}
+
+.otp-box-container {
+	display: flex;
+	margin-bottom: 20px;
 }
 
 .otp-box {
-	display: inline-block;
+	display: flex;
 	width: 2.5rem;
 	height: 4rem;
 	margin: 0.5rem;
 	border-radius: 0.5rem;
 	background: var(--fifth-color);
+	justify-content: center;
+	align-items: center;
+	font-size: 1.5rem;
+	color: rgb(255, 255, 255);
 }
+
 
 .secret-input {
 	background-color: var(--second-color);
 	outline: none;
 	border: none;
 	color: var(--second-color);
-	width: 0;
-	height: 0;
-	caret: hidden;
+	width: 300px;
+	height: 2rem;
+	text-align: center;
+	font-size: 14px;
+	margin-bottom: 20px;
+}
+
+.otp-button {
+	background-color:var(--fifth-color);
+	border-radius:8px;
+	display:block;
+	cursor:pointer;
+	font-family:Arial;
+	font-size:15px;
+	padding:13px 45px;
+	text-decoration:none;
+	border: none;
+/* 	transition: background-color 0.3s; */
+	margin-top: 20px;
+}
+
+/* .otp-button:hover {
+	background-color:#408c99;
+} */
+
+.otp-button:active {
+	position:relative;
+	top:1px;
+}
+
+.navbar {
+    margin-bottom: 20px;
+}
+
+body .container-fluid .row .sidebar {
+    padding: 15px;
+    min-height: 100vh;
+    background-color: transparent !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.1) !important;
+    position: sticky;
+    top: 0;
+}
+
+body .container-fluid .row .sidebar .list-group-item {
+    background-color: transparent !important;
+    border: none !important;
+    color: black !important;
+}
+
+
+body .container-fluid .row .panel-config {
+    padding: 10px;
+	background-color: transparent !important;
+	min-height: 100vh;
+}
+
+.form-check-input {
+    margin-right: 10px;
+}
+
+.form-check-label {
+    color: white;
+}
+
+.create-game, .create-tournament, .refresh-room {
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.375rem;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+    text-decoration: none;
+    color: white;
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    width: 100%;
+    margin-right: 0.5rem;
+}
+
+.create-game:hover, .create-tournament:hover, .refresh-room:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+.create-game:active, .create-tournament:active, .refresh-room:active {
+    background-color: #0a58ca;
+    border-color: #0a53be;
+}
+
+.create-game:disabled, .create-tournament:disabled, .refresh-room:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
 }

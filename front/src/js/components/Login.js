@@ -4,6 +4,12 @@ import { getURL, apiRequest } from "../utils/utils.js"
 import { registerTemplates } from "../utils/Templates.js"
 import { Router } from "../utils/Router.js"
 
+function clearPage() {
+    const dynamic = document.getElementById('dynamic-elements')
+    if (dynamic)
+            dynamic.innerHTML = ''
+}
+
 export class Login extends TemplateComponent {
     constructor() {
         super()
@@ -11,6 +17,7 @@ export class Login extends TemplateComponent {
     }
 
     async componentDidMount() {
+        clearPage()
         const form = this.getRef("form")
         form.addEventListener("submit", async (event) => {
             await this.handleSubmit(event)
@@ -22,19 +29,14 @@ export class Login extends TemplateComponent {
         this.addBouncingBall()
     }
 
-    componentWillUnmount() {
-    console.log("Cleaning up...")
-    const ball = document.getElementById('ball')
-    const score = document.getElementById('score')
-    if (ball)
-        ball.remove()
-    if (score)
-        score.remove()
-    if (this.animationFrameId)
-        cancelAnimationFrame(this.animationFrameId)
-    }
-
     addBouncingBall() {
+        let dynamic = document.getElementById('dynamic-elements')
+
+    if (!dynamic) {
+        dynamic = document.createElement('div')
+        dynamic.id = 'dynamic-elements'
+        document.body.appendChild(dynamic)
+    }
 
         const ball = document.createElement('div')
         ball.id = 'ball'
@@ -45,21 +47,29 @@ export class Login extends TemplateComponent {
         ball.style.borderRadius = '50%'
         ball.style.zIndex = '-1'
 
+        const title = document.createElement('div')
+        title.style.position = 'fixed'
+        title.style.color = 'white'
+        title.style.fontSize = '24px'
+        title.style.top = '5px'
+        title.style.left = '50%'
+        title.style.transform = 'translateX(-50%)'
+        title.innerHTML = 'Pong'
 
         const score = document.createElement('div')
         score.style.position = 'fixed'
         score.style.color = 'white'
         score.style.fontSize = '24px'
-        score.style.top = '10px'
+        score.style.top = '35px'
         score.style.left = '50%'
         score.style.transform = 'translateX(-50%)'
 
+        dynamic.appendChild(ball)
+        dynamic.appendChild(title)
+        dynamic.appendChild(score)
 
         let left = 0
         let right = 0
-
-        document.body.appendChild(ball)
-        document.body.appendChild(score)
 
         let posX = window.innerWidth / 2
         let posY = window.innerHeight / 2

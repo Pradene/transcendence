@@ -3,12 +3,19 @@ import { TemplateComponent } from "../utils/TemplateComponent.js"
 import { registerTemplates } from "../utils/Templates"
 import { apiRequest, getURL } from "../utils/utils"
 
+function clearPage() {
+	const dynamic = document.getElementById('dynamic-elements')
+	if (dynamic)
+			dynamic.innerHTML = ''
+}
+
 export class OTP extends TemplateComponent {
 	constructor() {
 		super()
 	}
 
 	async componentDidMount() {
+		clearPage()
 		const input = this.getRef("input")
 		input.addEventListener("input", (e) => {
 			this.displayCode(e)
@@ -19,7 +26,7 @@ export class OTP extends TemplateComponent {
 			await this.handleSubmit(e)
 		})
 	}
-	
+
 	async handleSubmit(e) {
 		e.preventDefault()
 
@@ -30,7 +37,7 @@ export class OTP extends TemplateComponent {
 				throw new Error("Incomplete code")
 
 			console.log(input.value)
-			
+
 			const url = getURL("api/users/verify-otp/")
 			const data = await apiRequest(url, "POST", {
 				code: input.value
@@ -40,7 +47,7 @@ export class OTP extends TemplateComponent {
 
 			const router = Router.get()
 			router.navigate("/")
-		
+
 		} catch (e) {
 			console.log(e)
 		}
@@ -55,7 +62,7 @@ export class OTP extends TemplateComponent {
 
 		} else if (event.data != null) {
 			target.value = target.value.substring(0, target.value.length - 1)
-		
+
 		} else if (event.data == null) {
 			label.children[target.value.length].textContent = ""
 		}

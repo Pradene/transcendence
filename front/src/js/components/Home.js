@@ -8,3 +8,10 @@ export class Home extends TemplateComponent {
 }
 
 registerTemplates("Home", Home)
+
+window.addEventListener('load', () => {
+    const container = document.querySelector('.container');
+    container.style.display = 'none';
+    container.offsetHeight;
+    container.style.display = 'flex';
+});

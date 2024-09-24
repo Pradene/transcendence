@@ -1,25 +1,77 @@
-<div>
+<!-- <div>
     <NavComponent></NavComponent>
-    <div class="game-container">
-	    <div class="game-container-header">
-	    	<button class="create-game">Create Game</button>
-	    	<button class="create-tournament">Create Tournament</button>
-	    	<button class="refresh-room">Refresh Room</button>
-	    	<div class="settings">
-	    	    <input type="radio" name="none" id="none" />
-	    	    <input type="radio" name="storm" id="storm" />
-	    	    <input type="radio" name="wind" id="wind" />
-	    	    <input type="radio" name="geo" id="geo" />
-	    	</div>
-	    </div>
-	    <div class="container">
-	        <div class="user-list"></div>
-	        <div class="game"></div>
-	    </div>
-	    <div class="available-games">
-	    	<div class="available-game"></div>
-	    	<div class="available-tournament"></div>
-	    </div>
+	<div class="main-content">
+		<div class="flex-shrink-0 p-3" style="width: 280px;">
+			<a href="/" class="d-flex align-items-center pb-3 mb-3 link-body-emphasis text-decoration-none border-bottom"></a>
+			<div class="user-list">
+			</div>
+		</div>
+		<div class="b-example-divider b-example-vr"></div>
+		<div class="game-container">
+			<div class="container">
+				<div class="user-list"></div>
+				<div class="game"></div>
+			</div>
+			<div class="game-container-header">
+				<button class="create-game">Create Game</button>
+				<button class="create-tournament">Create Tournament</button>
+				<button class="refresh-room">Refresh Room</button>
+				<div class="settings">
+					<input type="radio" name="none" id="none" />
+					<input type="radio" name="storm" id="storm" />
+					<input type="radio" name="wind" id="wind" />
+					<input type="radio" name="geo" id="geo" />
+				</div>
+			</div>
+			<div class="available-games">
+				<div class="available-game"></div>
+				<div class="available-tournament"></div>
+			</div>
+		</div>
 	</div>
 	<script src="/src/scripts/pong/dist/main.js"></script>
+</div> -->
+
+<div class="container-fluid">
+	<NavComponent></NavComponent>
+	<div class="row">
+		<div class="col-md-2 sidebar bg-light">
+			<h5>Online</h5>
+			<div class="user-list"></div>
+		</div>
+
+		<div class="col-md-10 panel-config bg-white">
+				<div class="d-flex my-3">
+                    <button type="button" class="create-game">Create Game</button>
+                    <button type="button" class="create-tournament">Create Tournament</button>
+                    <button type="button" class="refresh-room">Refresh Room</button>
+                </div>
+			</div>
+
+			<div class="form-group">
+				<div class="form-check">
+					<input class="form-check-input" type="radio" name="none" id="none">
+					<label class="form-check-label" for="option1">None</label>
+				</div>
+				<div class="form-check">
+					<input class="form-check-input" type="radio" name="storm" id="storm">
+					<label class="form-check-label" for="option2">Storm</label>
+				</div>
+				<div class="form-check">
+					<input class="form-check-input" type="radio" name="wind" id="wind">
+					<label class="form-check-label" for="option3">Wind</label>
+				</div>
+				<div class="form-check">
+					<input class="form-check-input" type="radio" name="geo" id="geo">
+					<label class="form-check-label" for="option4">Geo</label>
+				</div>
+			</div>
+			<div class="game"></div>
+			<div class="available-games">
+				<div class="available-game"></div>
+				<div class="available-tournament"></div>
+			</div>
+		</div>
+	</div>
 </div>
+
