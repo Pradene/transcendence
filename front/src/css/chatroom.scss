@@ -66,3 +66,25 @@
     color: var(--text-color-light);
     font-size: 10px;
 }
+
+div.list {
+
+    > div {
+        display: flex;
+        flex-direction: row;
+
+        > a.profile-picture {
+            align-self: center;
+        }
+
+        > div.message {
+            display: flex;
+            flex-direction: row;
+            flex-grow: 100;
+
+            > p {
+                flex-grow: 100;
+            }
+        }
+    }
+}
