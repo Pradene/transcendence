@@ -14,10 +14,6 @@ from config import settings
 from config.decorators import jwt_required
 
 from .models import CustomUser, FriendList, FriendRequest
-# from authenticate.models import BlackListedToken, OTP
-
-
-
 
 
 @jwt_required
@@ -43,8 +39,6 @@ def userView(request, user_id=None):
 			username = request.POST.get('username', user.username)
 			bio = request.POST.get('bio', user.bio)
 			email = request.POST.get('email', user.email)
-
-			logging.info(f'{username} : {email}')
 
 			if 'picture' in request.FILES:
 				picture = request.FILES['picture']
