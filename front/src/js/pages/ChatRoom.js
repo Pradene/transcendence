@@ -2,18 +2,28 @@ import { getURL, apiRequest, getConnectedUserID } from "../utils/utils.js"
 import { WebSocketManager } from "../utils/WebSocketManager.js"
 import { TemplateComponent } from "../utils/TemplateComponent.js"
 
+const buttonAcceptColor = "green"
+const buttonRefuseColor = "red"
+
 export class ChatRoom extends TemplateComponent {
     constructor() {
         super()
 
         this.sendMessageListener = async (e) => this.sendMessage(e) 
-        this.WebsocketMessageListener = (e) => this.WebsocketMessage(e.detail) 
+        this.WebsocketMessageListener = (e) => this.WebsocketMessage(e.detail)
+        this.sendDuelInviteListener = async (e) => this.sendDuelInvite(e)
+        this.acceptDuelListener = async (e) => this.acceptDuel(e)
+        this.refuseDuelListener = async (e) => this.refuseDuel(e)
     }
 
     unmount() {
         const form = this.getRef("form")
         form.addEventListener("submit", this.sendMessageListener)
         window.addEventListener("wsMessage", this.WebsocketMessageListener)
+
+        document.querySelector("button.duel-invite").removeEventListener("click", this.sendDuelInviteListener)
+        document.querySelector("button.duel-accept").removeEventListener("click", this.acceptDuelListener)
+        document.querySelector("button.duel-refuse").removeEventListener("click", this.refuseDuelListener)
     }
 
     async componentDidMount() {
@@ -22,18 +32,42 @@ export class ChatRoom extends TemplateComponent {
         const form = this.getRef("form")
         form.addEventListener("submit", this.sendMessageListener)
         window.addEventListener("wsMessage", this.WebsocketMessageListener)
+
+        document.querySelector("button.duel-invite").addEventListener("click", this.sendDuelInviteListener)
+        document.querySelector("button.duel-accept").addEventListener("click", this.acceptDuelListener)
+        document.querySelector("button.duel-refuse").addEventListener("click", this.refuseDuelListener)
     }
 
     WebsocketMessage(event) {
         console.log(event)
         const message = event.message
 
-        if (message.action == "message" && message.room_id == this.getRoomID()) {
+        if (message.room_id != this.getRoomID()) {
+            return
+        } else if (message.action == "message") {
             const container = this.getRef("messages")
             this.displayMessage(container, message)
+        } else if (message.action == "duel_request") {
+            this.processDuelRequest(message)
+        } else if (message.action == "duel_accept") {
+            window.location.href = `/`
+        } else if (message.action == "duel_refuse") {
+            //TODO: Display duel refuse
+        } else if (message.action == "duel_cancel") {
+            //TODO: Display duel cancel
         }
     }
 
+    processDuelRequest(message) {
+        const who = message.who
+        const userid = getConnectedUserID()
+
+        if (getConnectedUserID() != who)
+            return
+
+        document.querySelector("button.duel-accept").style.backgroundColor = buttonAcceptColor
+        document.querySelector("button.duel-refuse").style.backgroundColor = buttonRefuseColor
+    }
 
     async sendMessage(event) {
         event.preventDefault()
@@ -54,6 +88,38 @@ export class ChatRoom extends TemplateComponent {
         }
     }
 
+    async sendDuelInvite(event) {
+        event.preventDefault()
+
+        const roomID = this.getRoomID()
+        const ws = WebSocketManager.get()
+        await ws.sendMessage("chat", {
+            type: "request_duel",
+            room: roomID
+        })
+    }
+
+    async acceptDuel(event) {
+        event.preventDefault()
+
+        const roomID = this.getRoomID()
+        const ws = WebSocketManager.get()
+        await ws.sendMessage("chat", {
+            type: "accept_duel",
+            room: roomID
+        })
+    }
+
+    async refuseDuel(event) {
+        event.preventDefault()
+
+        const roomID = this.getRoomID()
+        const ws = WebSocketManager.get()
+        await ws.sendMessage("chat", {
+            type: "refuse_duel",
+            room: roomID
+        })
+    }
 
     async getMessages() {
         try {

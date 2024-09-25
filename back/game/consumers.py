@@ -1,5 +1,6 @@
 import logging
 
+from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from typing import Union, List
 import typing
@@ -12,6 +13,8 @@ from game.gameutils.Game import Game
 from game.gameutils.Tournament import Tournament
 from game.gameutils.Matchmaking import matchmaker
 from game.gameutils.DuelManager import DUELMANAGER
+from account.models import CustomUser
+from chat.models import ChatRoom
 
 # This is a global variable that is used to check if the module has been initialised
 MODULE_INITIALIZED: bool = False
@@ -67,9 +70,23 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         await self.getGames()
         await self.onUserChange()
 
+        from game.gameutils.DuelManager import DUELMANAGER
+
         if DUELMANAGER.have_active_duel(self.__user):
-            #TODO: Start a new game
-            pass
+            from game.gameutils.GameManager import GameManager
+            logging.info(f"User {self.__user} has an active duel, starting new game")
+
+            gamemanager: GameManager = GameManager.getInstance()
+            opponent = await database_sync_to_async(CustomUser.objects.get)(id=DUELMANAGER.get_opponent_id(self.__user.id))
+
+            if gamemanager.gameExists(opponent.username):
+                logging.info(f"Game with {opponent.username} already exists, joining")
+                self.__interface.current_game = gamemanager.getGame(opponent.username)
+                await self.__interface.current_game.join(self.__interface)
+                DUELMANAGER.remove_from_duels(self.__user.id)
+            else:
+                logging.info(f"Game with {opponent.username} does not exist, creating")
+                self.__interface.current_game = await gamemanager.createGame(self.__interface)
 
     async def receive(self, text_data=None, bytes_data=None, **kwargs):
         """Handle incoming messages from the client"""
