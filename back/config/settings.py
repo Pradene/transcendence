@@ -27,12 +27,14 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+	'requests_oauthlib',
     'corsheaders',
     'channels',
+
     'account',
+    'authentication',
     'chat',
     'game',
-	'requests_oauthlib'
 ]
 
 MIDDLEWARE = [

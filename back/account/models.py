@@ -1,12 +1,9 @@
 import logging
-import pyotp
 
-from datetime import datetime, timedelta
-
-from django.utils import timezone
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
 from django.conf import settings
 from django.db import models
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, password=None, **extra_fields):
@@ -148,55 +145,3 @@ class Block(models.Model):
     blocker = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="blockeds", on_delete=models.CASCADE)
     blocked = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="blockers", on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
-
-
-class BlackListedToken(models.Model):
-    token = models.CharField(max_length=255)
-    blacklisted_on = models.DateTimeField(auto_now_add=True)
-
-
-class OTP(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    secret = models.CharField(max_length=32, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField()
-
-    def has_expired(self):
-        logging.info(f'now: {timezone.now()}')
-        logging.info(f'expire at: {self.expires_at}')
-        return timezone.now() > self.expires_at
-
-    @classmethod
-    def generate(cls, user):
-        secret = pyotp.random_base32()
-        logging.info(f'secret: {secret}')
-        totp = pyotp.TOTP(secret, digits=6)
-        expires_at = timezone.now() + timedelta(minutes=10)
-        logging.info(f'expire at: {expires_at}')
-        instance = cls.objects.create(user=user, secret=secret, expires_at=expires_at)
-        logging.info(f'verified: {totp.verify(totp.now())}')
-        return totp.now()
-
-    @classmethod
-    def validate(cls, user, code):
-        logging.info(f'code: {code}')
-        instance = cls.objects.filter(user=user).last()
-
-        if not instance:
-            logging.info(f'otp code not found')
-            return False
-
-        if instance.has_expired():
-            logging.info(f'otp code expired')
-            instance.delete()
-            return False
-
-        totp = pyotp.TOTP(instance.secret, digits=6)
-        valid_window = 20 # make otp code valid for 10 minutes 20 * 30s = 10m
-        if not totp.verify(code, valid_window=valid_window):
-            logging.info(f'otp code not verified')
-            return False
-
-        instance.delete()
-
-        return True

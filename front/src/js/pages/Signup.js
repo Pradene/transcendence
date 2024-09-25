@@ -29,7 +29,7 @@ export class Signup extends TemplateComponent {
 
 		
         try {
-            const url = getURL("api/users/signup/")
+            const url = getURL("api/auth/signup/")
         
             const data = await apiRequest(
                 url,

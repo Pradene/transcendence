@@ -88,7 +88,7 @@ export async function apiRequest(url, method = "GET", body = null) {
 }
 
 async function refreshToken() {
-    const url = getURL("api/users/refresh-token/")
+    const url = getURL("api/auth/refresh-token/")
     
     try {
         const data = await apiRequest(

@@ -40,6 +40,7 @@ def create_refresh_token(user, remember_me=False):
     except Exception as e:
         return e
 
+
 def decode_token(token):
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms='HS256')
