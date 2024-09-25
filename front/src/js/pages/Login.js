@@ -30,12 +30,12 @@ export class Login extends TemplateComponent {
     async submitLoginRequest(event) {
         event.preventDefault()
 
-        try {
-            const username = this.getRef("username")
-            const password = this.getRef("password")
-            const rememberMe = this.getRef("remember-me")
-            const url = getURL("api/users/login/")
+        const username = this.getRef("username")
+        const password = this.getRef("password")
+        const rememberMe = this.getRef("remember-me")
+        const url = getURL("api/users/login/")
         
+        try {
             const data = await apiRequest(
                 url,
                 "POST",

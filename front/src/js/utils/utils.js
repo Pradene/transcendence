@@ -69,7 +69,6 @@ export async function apiRequest(url, method = "GET", body = null) {
             return data
 
         } else {
-            console.log("response from api request not ok")
             if (response.status == 401) {
                 console.log("error: need to refresh token")
                 const refreshed = await refreshToken()
@@ -125,8 +124,8 @@ function connectToWebsockets() {
 
 export async function checkLogin() {
     try {
-        const token = getCookie("access_token")
-        if (!token) {
+        const access = getCookie("access_token")
+        if (!access) {
             const value = await refreshToken()
             if (value)
                 connectToWebsockets()
@@ -134,7 +133,7 @@ export async function checkLogin() {
             return value
         }
 
-        const decoded = jwt.decode(token)        
+        const decoded = jwt.decode(access)     
         const current = Date.now() / 1000
 
         if (decoded.exp > current) {

@@ -46,6 +46,8 @@ export class OTP extends TemplateComponent {
 				code: input.value
 			})
 
+			console.log('navigate')
+
 			const router = Router.get()
 			router.navigate('/')
 		
@@ -97,5 +99,7 @@ export class OTP extends TemplateComponent {
 		Array.from(children).forEach(child => {
 			child.textContent = ''
 		})
+
+		children[0].classList.toggle('active')
 	}
 }

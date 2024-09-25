@@ -17,10 +17,10 @@ from django.core.mail import send_mail
 from config import settings
 from config.decorators import jwt_required
 
-from .models import CustomUser, BlackListedToken, FriendList, FriendRequest
+from .models import CustomUser, BlackListedToken, FriendList, FriendRequest, OTP
 
 from .utils.token import create_access_token, create_refresh_token, decode_token
-from .utils.otp import send_otp_code, validate_otp
+from .utils.otp import send_otp_code
 
 from requests_oauthlib import OAuth2Session
 from urllib.parse import urlencode
@@ -305,10 +305,10 @@ def check2FA(request):
 			return JsonResponse({"error": "Access denied. Please login first."}, status=403)
 		
 		data = json.loads(request.body)
-		otp_code = data.get('code')
+		code = data.get('code')
 		user = CustomUser.objects.get(id=user_id)
 
-		if validate_otp(user, otp_code):
+		if OTP.validate(user, code):
 			login(request, user)
 			
 			access_token, access_exp = create_access_token(user)
