@@ -17,9 +17,11 @@ class Ball {
         const height = boundingBox.max.y - boundingBox.min.y
         const depth = boundingBox.max.z - boundingBox.min.z
         
-        this._xOffset = -width / 2
-        this._yOffset = height / 2
-        this._zOffset = -depth / 2
+        const x = -width / 2
+        const y = -height / 2
+        const z = -depth / 2
+
+        geometry.translate(x, y, z)
 
         this._ball = new THREE.Mesh(geometry, material)
     }
@@ -33,9 +35,9 @@ class Ball {
     }
 
     setPositionFromArray(arr) {
-        const x = ((arr[0]) - CANVAS_WIDTH / 2) / THREE_RATIO + this._xOffset
-        const y = ((arr[1]) - CANVAS_HEIGHT / 2) / THREE_RATIO + this._yOffset
-        const z = (0) + this._zOffset
+        const x = ((arr[1]) - CANVAS_HEIGHT / 2) / THREE_RATIO
+        const y = (0)
+        const z = -((arr[0]) - CANVAS_WIDTH / 2) / THREE_RATIO
         
         this._ball.position.set(x, y, z)
     }

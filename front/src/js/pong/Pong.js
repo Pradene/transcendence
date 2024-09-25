@@ -6,7 +6,7 @@ import { CurrentPlayer, Player } from "./Player.js"
 import { Ball } from "./Ball.js"
 import { Position } from "./Utils.js"
 import { GameSocket } from "./GameSocket.js"
-import { CANVAS_HEIGHT, CANVAS_WIDTH } from "./Defines.js"
+import { CANVAS_HEIGHT, CANVAS_WIDTH, THREE_RATIO } from "./Defines.js"
 
 let font = null
 const loader = new FontLoader()
@@ -14,9 +14,10 @@ loader.load("/src/fonts/Epilogue_Bold.json", (f) => font = f)
 
 export class Pong {
     constructor(canvas) {
-        this._current_player = undefined
+        this._player = undefined
         this._opponent = undefined
         this._ball = undefined
+        this._timerMesh = undefined
         
         //set the canvas properties
         this._context = canvas.getContext("webgl2")
@@ -33,22 +34,20 @@ export class Pong {
         const far = 100
         const aspect = window.screen.width / window.screen.height
         this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
-        this._camera.position.set(0, 0, 10)
+        this._camera.position.set(0, 4, 10)
         this._camera.lookAt(0, 0, 0)
 
         this._ambientLight = new THREE.AmbientLight(0xffff00, 1)
         this._scene.add(this._ambientLight)
         
-        // this._ball = new Ball(new Position(0, 0))
         this._running = false
-        this._timerMesh = null
     }
 
     /**
      * Display the game
      */
     display() {
-        this._current_player?.display(this._scene)
+        this._player?.display(this._scene)
         this._opponent?.display(this._scene)
         this._ball.display(this._scene)
     }
@@ -62,6 +61,7 @@ export class Pong {
         
         this.removeTimer()
         
+        // Create geometry
         const geometry = new TextGeometry(timer, {
             font: font,
             size: 1,
@@ -74,15 +74,15 @@ export class Pong {
             bevelOffset: 0,
             bevelSegments: 5
         })
-        
+
+        // Center the geometry
         geometry.computeBoundingBox()
         const boundingBox = geometry.boundingBox
-        const textWidth = boundingBox.max.x - boundingBox.min.x
-        const textHeight = boundingBox.max.y - boundingBox.min.y
+        const center = new THREE.Vector3()
+        boundingBox.getCenter(center)
+        geometry.translate(-center.x, center.y, -center.z)
         
         this._timerMesh = new THREE.Mesh(geometry, material)
-        this._timerMesh.position.x = -textWidth / 2
-        this._timerMesh.position.y = -textHeight / 2
         
         this._scene.add(this._timerMesh)
     }
@@ -106,12 +106,29 @@ export class Pong {
         const gs = await GameSocket.get()
         gs.removeGame()
 
-        this._current_player?.stop()
+        this._player?.stop()
 
         this._renderer.dispose()
         this._scene = null
 
         this._canvas.classList.remove("active")
+    }
+
+    createGame() {
+        this._player = new CurrentPlayer("a name", new Position(0, 0))
+        this._opponent = new Player("another name", new Position(0, 0))
+        this._ball = new Ball(new Position(0, 0))
+        
+        const width = CANVAS_HEIGHT / THREE_RATIO
+        const height = 0.2
+        const depth = CANVAS_WIDTH / THREE_RATIO
+        
+        const geometry = new THREE.BoxGeometry(width, height, depth)
+        geometry.translate(0, -0.2, 0)
+        const material = new THREE.MeshBasicMaterial({color: 0x00ff00})
+
+        this._platform = new THREE.Mesh(geometry, material)
+        this._scene.add(this._platform)
     }
 
     /**
@@ -120,19 +137,17 @@ export class Pong {
      */
     update(response) {
         // Initialize player 
-        if (!this._current_player) {
-            this._current_player = new CurrentPlayer("a name", new Position(0, 0))
-            this._opponent = new Player("another name", new Position(0, 0))
-            this._ball = new Ball(new Position(0, 0))
+        if (!this._player) {
+            this.createGame()
         }
 
         if (response.data.status === "finished") {
             this.stop()
         }
         
-        this._current_player?.setPositionFromArray(response.data.current_player.position)
+        this._player?.setPositionFromArray(response.data.current_player.position)
         this._opponent?.setPositionFromArray(response.data.opponent.position)
-        this._current_player?.setScore(response.data.current_player.score)
+        this._player?.setScore(response.data.current_player.score)
         this._opponent?.setScore(response.data.opponent.score)
         this._ball?.setPositionFromArray(response.data.ball)
 
