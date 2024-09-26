@@ -1,6 +1,6 @@
 import { TemplateComponent } from "../utils/TemplateComponent.js"
 import { getURL, apiRequest, getConnectedUserID } from "../utils/utils.js"
-import { GameComponent } from "./GameComponent.js"
+import { Chart } from 'chart.js/auto'
 
 export class Profile extends TemplateComponent {
     constructor() {
@@ -12,6 +12,7 @@ export class Profile extends TemplateComponent {
     async componentDidMount() {
         await this.getUser()
         await this.getGames()
+        await this.getStats()
     }
 
     async getUser() {
@@ -20,8 +21,6 @@ export class Profile extends TemplateComponent {
             const url = getURL(`api/users/${id}/`)
             
             const user = await apiRequest(url)
-
-            console.log(user)
 
             const picture = this.getRef("profilePicture")
             const username = this.getRef("profileUsername")
@@ -59,20 +58,93 @@ export class Profile extends TemplateComponent {
 
     async getGames() {
         try {
-            // const id = this.getProfileID()
-            const url = getURL("api/games/")
+            const url = getURL("api/games/history/")
             const games = await apiRequest(url)
 
             const container = this.getRef("games")
             games.forEach(game => {
-                const Game = new GameComponent()
-                const component = Game.render(game)
-
-                container.appendChild(component)
+                const element = this.displayGame(game)
+                container.appendChild(element)
             })
             
         } catch (e) {
             return
         }
+    }
+
+    displayGame(game) {
+        const element = document.createElement('div')
+
+        const player = document.createElement('div')
+        const playerImgContainer = document.createElement('div')
+        const playerImg = document.createElement('img')
+        const playerUsername = document.createElement('p')
+        playerUsername.textContent = player.username
+        
+        const opponent = document.createElement('div')
+        const opponentImgContainer = document.createElement('div')
+        const opponentImg = document.createElement('img')
+        const opponentUsername = document.createElement('p')
+        opponentUsername.textContent = opponent.username
+
+        const score = document.createElement('div')
+        score.textContent = `${game.player_score} vs ${game.opponent_score}`
+
+        player.appendChild(playerUsername)
+        opponent.appendChild(opponentUsername)
+
+        element.appendChild(player)
+        element.appendChild(score)
+        element.appendChild(opponent)
+
+        return element
+    }
+
+    async getStats() {
+        try {
+            const url = getURL("api/games/stats/")
+            const data = await apiRequest(url)
+
+            this.displayStats(data)
+            
+        } catch (e) {
+            console.log(e)
+            return
+        }
+    }
+
+    displayStats(stats) {
+        const games = stats.total_games
+        const wins = stats.wins
+        const loses = stats.loses
+
+        const winrate = wins / games
+
+        const progress = document.getElementById('wins')
+        progress.style.strokeDashoffset = 198 * (1 - winrate)
+
+        this.animateWinrate(winrate * 100)
+    }
+
+    animateWinrate(winrate) {
+        const startValue = 0
+        const startTime = performance.now()
+        const winrateText = document.getElementById('winrate')
+        const time = 1000
+
+        function update() {
+            const currentTime = performance.now()
+            const elapsedTime =  currentTime - startTime
+            const progress = Math.min(elapsedTime / time, 1)
+
+            const currentValue = Math.floor(startValue + (winrate - startValue) * progress)
+            winrateText.textContent = `${currentValue}%`
+        
+            if (progress < 1) {
+                requestAnimationFrame(update)
+            }
+        }
+
+        update()
     }
 }

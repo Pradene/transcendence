@@ -21,6 +21,7 @@ export class ChatRoom extends TemplateComponent {
     unmount() {
         const form = this.getRef("form")
         form.addEventListener("submit", this.sendMessageListener)
+
         window.addEventListener("wsMessage", this.WebsocketMessageListener)
 
         document.querySelector("button.duel-invite").removeEventListener("click", this.sendDuelInviteListener)
@@ -33,6 +34,7 @@ export class ChatRoom extends TemplateComponent {
         
         const form = this.getRef("form")
         form.addEventListener("submit", this.sendMessageListener)
+        
         window.addEventListener("wsMessage", this.WebsocketMessageListener)
 
         document.querySelector("button.duel-invite").addEventListener("click", this.sendDuelInviteListener)

@@ -12,6 +12,7 @@ export class Chat extends TemplateComponent {
     unmount() {
         const input = this.getRef('input')
         input.removeEventListener('keyup', this.handleSearchListener)
+        
         window.removeEventListener('wsMessage', this.receiveMessageListener)
     }
 
@@ -20,6 +21,7 @@ export class Chat extends TemplateComponent {
 
         const input = this.getRef('input')
         input.addEventListener('keyup', this.handleSearchListener)
+
         window.addEventListener('wsMessage', this.receiveMessageListener)
     }
 

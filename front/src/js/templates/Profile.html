@@ -22,8 +22,12 @@
         <ul ref="games"></ul>
     </div>
     <div id="stats" class="grid-item">
-        <div class="top">
-            <h4 class="text-l">Stats</h4>
+        <div id="progress">
+            <svg viewbox="0 0 110 100">
+                <path id="loses" class="grey" d="M30,90 A40,40 0 1,1 80,90" fill='none' />
+                <path id="wins" class="blue" d="M30,90 A40,40 0 1,1 80,90" fill='none' />
+                <text id="winrate" fill="#ffffff" x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" style="font-size: 12px;">0%</text>
+            </svg>
         </div>
     </div>
 </div>
