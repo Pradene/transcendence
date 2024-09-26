@@ -1,6 +1,5 @@
 import { TemplateComponent } from "../utils/TemplateComponent.js"
 import { getURL, apiRequest, getConnectedUserID } from "../utils/utils.js"
-import { Chart } from 'chart.js/auto'
 
 export class Profile extends TemplateComponent {
     constructor() {
