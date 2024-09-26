@@ -23,7 +23,7 @@ class LogoutButton extends HTMLElement {
 
     async handleClick() {
         try {
-            const url = getURL("api/users/logout/")
+            const url = getURL("api/auth/logout/")
 
             await apiRequest(
                 url,

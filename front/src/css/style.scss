@@ -70,6 +70,8 @@ $gray-900: darken($grey-dark, 60%);
 @import "nav";
 @import "OTP";
 @import "chatroom";
+@import "home";
+
 
 .hidden {
     display: none;

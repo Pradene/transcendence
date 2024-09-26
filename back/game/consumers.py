@@ -119,6 +119,8 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
     async def disconnect(self, close_code):
         """Handle client disconnection"""
 
+        matchmaker.remove_from_queues(self.__interface)
+
         logging.log(logging.INFO, f"User {self.__interface.getName()} disconnecting...")
         if self.isInGame():
             logging.log(logging.INFO, f"User {self.__interface.getName()} is in game {self.__interface.current_game.getGameid()}, quitting")

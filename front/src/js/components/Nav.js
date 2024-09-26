@@ -12,10 +12,6 @@ class Nav extends HTMLElement {
     render() {
         const links = [
             {
-                href: '/notifications/',
-                img: '/assets/bell.svg'
-            },
-            {
                 href: '/users/',
                 img: '/assets/search.svg'
             },

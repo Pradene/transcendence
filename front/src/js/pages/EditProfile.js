@@ -81,7 +81,16 @@ export class EditProfile extends TemplateComponent {
             
             const id = this.getProfileID()
             const url = getURL(`api/users/${id}/`)
-            const data = await apiRequest(url, "POST", body)
+            const csrf = await getCSRFToken()
+            const data = await fetch(url, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    'X-CSRFToken': csrf
+                },
+                body: body
+            })
+            // const data = await apiRequest(url, "POST", body)
 
         } catch (e) {
             console.log(e)

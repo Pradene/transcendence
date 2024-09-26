@@ -30,12 +30,12 @@ export class Login extends TemplateComponent {
     async submitLoginRequest(event) {
         event.preventDefault()
 
-        try {
-            const username = this.getRef("username")
-            const password = this.getRef("password")
-            const rememberMe = this.getRef("remember-me")
-            const url = getURL("api/users/login/")
+        const username = this.getRef("username")
+        const password = this.getRef("password")
+        const rememberMe = this.getRef("remember-me")
+        const url = getURL("api/auth/login/")
         
+        try {
             const data = await apiRequest(
                 url,
                 "POST",
@@ -62,7 +62,7 @@ export class Login extends TemplateComponent {
 
     async submit42LoginRequest() {
         try {
-            const url = getURL("api/users/ft_auth/")
+            const url = getURL("api/auth/ft_auth/")
             const data = await apiRequest(url, "GET")
 
             if (data.url) {
