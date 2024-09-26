@@ -14,6 +14,8 @@ export class ChatRoom extends TemplateComponent {
         this.sendDuelInviteListener = async (e) => this.sendDuelInvite(e)
         this.acceptDuelListener = async (e) => this.acceptDuel(e)
         this.refuseDuelListener = async (e) => this.refuseDuel(e)
+
+        this.challengerid = 0
     }
 
     unmount() {
@@ -59,7 +61,8 @@ export class ChatRoom extends TemplateComponent {
     }
 
     processDuelRequest(message) {
-        const who = message.who
+        const who = message.challenged
+        this.challengerid = message.challenger
         const userid = getConnectedUserID()
 
         if (getConnectedUserID() != who)
@@ -94,7 +97,7 @@ export class ChatRoom extends TemplateComponent {
         const roomID = this.getRoomID()
         const ws = WebSocketManager.get()
         await ws.sendMessage("chat", {
-            type: "request_duel",
+            type: "duel_request",
             room: roomID
         })
     }
@@ -105,8 +108,9 @@ export class ChatRoom extends TemplateComponent {
         const roomID = this.getRoomID()
         const ws = WebSocketManager.get()
         await ws.sendMessage("chat", {
-            type: "accept_duel",
-            room: roomID
+            type: "duel_accept",
+            room: roomID,
+            challenger: this.challengerid
         })
     }
 
@@ -116,7 +120,7 @@ export class ChatRoom extends TemplateComponent {
         const roomID = this.getRoomID()
         const ws = WebSocketManager.get()
         await ws.sendMessage("chat", {
-            type: "refuse_duel",
+            type: "duel_refuse",
             room: roomID
         })
     }

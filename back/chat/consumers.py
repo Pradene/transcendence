@@ -72,13 +72,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         elif message_type == 'quit_room':
             await self.quit_room(data)
 
-        elif message_type == 'request_duel':
+        elif message_type == 'duel_request':
             await self.request_duel(data)
 
-        elif message_type == 'accept_duel':
+        elif message_type == 'duel_accept':
             await self.accept_duel(data)
 
-        elif message_type == 'refuse_duel':
+        elif message_type == 'duel_refuse':
             await self.refuse_duel(data)
 
     async def request_duel(self, data: dict):
@@ -114,14 +114,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def accept_duel(self, data: dict):
         try:
             from game.gameutils.DuelManager import DUELMANAGER
-            if not DUELMANAGER.have_active_duel(self.user.id):
+            if DUELMANAGER.have_active_duel(self.user.id):
+                logging.error("User does already have an active duel")
                 return
 
             roomid = data['room']
             challengerid = data['challenger']
 
-            DUELMANAGER.accept(self.user.id, challengerid)
+            if not DUELMANAGER.accept(self.user.id, challengerid):
+                logging.error("User tried to accept a duel that does not exist")
+                return
 
+            logging.log(logging.INFO, f"User {self.user} accepted the duel")
             await self.channel_layer.group_send(
                 f"chat_{roomid}",
                 {
