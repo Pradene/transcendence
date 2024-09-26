@@ -19,6 +19,7 @@ from chat.models import ChatRoom
 # This is a global variable that is used to check if the module has been initialised
 MODULE_INITIALIZED: bool = False
 
+
 class GameConsumerResponse:
     def __init__(self, method: str, status: bool, data: dict = {}, reason: str = ""):
         self.method = method
@@ -77,7 +78,8 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             logging.info(f"User {self.__user} has an active duel, starting new game")
 
             gamemanager: GameManager = GameManager.getInstance()
-            opponent = await database_sync_to_async(CustomUser.objects.get)(id=DUELMANAGER.get_opponent_id(self.__user.id))
+            opponent = await database_sync_to_async(CustomUser.objects.get)(
+                id=DUELMANAGER.get_opponent_id(self.__user.id))
 
             if gamemanager.gameExists(opponent.username):
                 logging.info(f"Game with {opponent.username} already exists, joining")
@@ -123,9 +125,11 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
         logging.log(logging.INFO, f"User {self.__interface.getName()} disconnecting...")
         if self.isInGame():
-            logging.log(logging.INFO, f"User {self.__interface.getName()} is in game {self.__interface.current_game.getGameid()}, quitting")
+            logging.log(logging.INFO,
+                        f"User {self.__interface.getName()} is in game {self.__interface.current_game.getGameid()}, quitting")
             await self.__interface.current_game.quit()
-            logging.log(logging.INFO, f"User {self.__interface.getName()} has quit the game {self.__interface.current_game.getGameid()}")
+            logging.log(logging.INFO,
+                        f"User {self.__interface.getName()} has quit the game {self.__interface.current_game.getGameid()}")
 
         for user in GameConsumer.USERS:
             if user == self:
@@ -134,12 +138,10 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         logging.log(logging.INFO, f"User {self.__interface.getName()} has disconnected")
         await GameConsumer.onUserChange()
 
-
     def isInGame(self) -> bool:
         """Check if the user is in a game"""
 
         return self.__interface.current_game is not None and self.__interface.current_game.isFinished() is not True
-
 
     async def getGames(self):
         """Send a list of all games to the client"""
@@ -151,12 +153,10 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
         await self.send_json(response.toJSON())
 
-
     async def send_json(self, data):
         """Send JSON data to the client and log it to the console"""
 
         await super().send_json(data)
-
 
     async def updateClient(self, gameData: dict):
         """Send updated game data to the client"""
@@ -185,17 +185,18 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             # Send a success response
             response = GameConsumerResponse(method="join_queue", status=True)
             await self.send_json(response.toJSON())
+
         except KeyError as e:
             response = GameConsumerResponse(method="join_queue", status=False, reason="Invalid request")
+
         except ValueError as e:
             response = GameConsumerResponse(method="join_queue", status=False, reason=str(e))
             await self.send_json(response.toJSON())
 
-
     def __deleteCurrentGame(self):
-        logging.log(logging.INFO, f"User {self.__interface.getName()} left the game {self.__interface.current_game.getGameid()}")
+        logging.log(logging.INFO,
+                    f"User {self.__interface.getName()} left the game {self.__interface.current_game.getGameid()}")
         self.__interface.current_game = None
-
 
     async def updatePlayer(self, data) -> None:
         """Update player movement"""
@@ -219,13 +220,11 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             await self.send_json(response.toJSON())
             return
 
-
     @staticmethod
     async def onGameChange():
         """Update the game list for all users"""
         for user in GameConsumer.USERS:
             await user.getGames()
-
 
     @staticmethod
     async def onUserChange():
@@ -237,13 +236,11 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         for user in GameConsumer.USERS:
             await user.updateUserList(userlist)
 
-
     async def updateUserList(self, userlist: List[str]):
         """Send the updated user list to the client"""
 
         response: GameConsumerResponse = GameConsumerResponse(method="get_users", status=True, data={"users": userlist})
         await self.send_json(response.toJSON())
-
 
     def getUsername(self) -> str:
         """Return the username of the user"""
@@ -271,7 +268,7 @@ class GameMatchmakingConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_send(
             f'matchmaking_pool',
             {
-                'type': 'match_found',
+                'type':    'match_found',
                 'message': 'Match found'
             }
         )

@@ -38,14 +38,27 @@ export class Home extends TemplateComponent {
                 // this._gameSocket.processGetUsers(response);
                 break;
             case "join_game":
+                this.hideQueueAnimation();
                 this._gameSocket.createNewGame(response);
                 break;
+            case "join_queue":
+                this.showQueueAnimation();
+                break;
             case "update_game":
+                this.hideQueueAnimation();
                 if (!this._gameSocket._currentGame)
                     this._gameSocket._currentGame = new Pong(gameContainer);
 
                 this._gameSocket._currentGame.update(response);
                 break;
         }
+    }
+
+    showQueueAnimation() {
+        document.querySelector("div.game-container-header div.waiting-for-players").style.visibility = "visible";
+    }
+
+    hideQueueAnimation() {
+        document.querySelector("div.game-container-header div.waiting-for-players").style.visibility = "hidden";
     }
 }

@@ -20,16 +20,16 @@ class DuelManager:
         logging.info(f"Player {challengerid} has invited {challengedid} to a duel.")
         logging.info(f"Current duels: {self.duels}")
 
-    def accept(self, challengedid: int, challengerid: int) -> bool:
+    def accept(self, user: int, opponent: int) -> bool:
         for duel in self.duels:
-            if challengedid in duel and challengerid in duel:
+            if user in duel and opponent in duel:
                 duel[2] = True
                 return True
         return False
 
     def decline(self, challengedid: int, challengerid: int):
         for duel in self.duels:
-            if duel[1] == challengedid and duel[0] == challengerid:
+            if challengedid in duel and challengerid in duel:
                 self.duels.remove(duel)
                 logging.info(f"Player {challengerid} and {challengedid} have declined the duel.")
 
@@ -43,12 +43,12 @@ class DuelManager:
     def remove_from_duels(self, playerid: int, onlynonactive: bool = False):
         if onlynonactive:
             for duel in self.duels:
-                if (duel[0] == playerid or duel[1] == playerid) and not duel[2]:
+                if playerid in duel and not duel[2]:
                     self.duels.remove(duel)
                     logging.info(f"Player {playerid} has been removed from duels.")
         else:
             for duel in self.duels:
-                if duel[0] == playerid or duel[1] == playerid:
+                if playerid in duel:
                     self.duels.remove(duel)
                     logging.info(f"Player {playerid} has been removed from duels.")
 
