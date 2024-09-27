@@ -11,7 +11,6 @@ class LogoutButton extends HTMLElement {
 
     connectedCallback() {
         this._button = document.createElement("button")
-        this._button.className = "btn btn-primary"
         this._button.textContent = "Disconnect"
 
         this._button.addEventListener("click", async () => {

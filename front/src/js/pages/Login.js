@@ -3,30 +3,28 @@ import { WebSocketManager } from "../utils/WebSocketManager.js"
 import { getURL, apiRequest, getCSRFToken } from "../utils/utils.js"
 import { Router } from "../utils/Router.js"
 
-function clearPage() {
-    const dynamic = document.getElementById('dynamic-elements')
-    if (dynamic)
-            dynamic.remove
-}
 
 export class Login extends TemplateComponent {
     constructor() {
         super()
-
+        
         this.submit42LoginRequestListener = async (e) => await this.submit42LoginRequest(e)
         this.submitLoginRequestListener = async (e) => await this.submitLoginRequest(e)
+    
+        this.ball = undefined
     }
-
+    
     unmount() {
         const form = this.getRef("form")
         form.removeEventListener("submit", this.submitLoginRequestListener)
-
+        
         const OAuthButton = this.getRef("ft_auth")
         OAuthButton.removeEventListener("click", this.submit42LoginRequestListener)
+        
+        this.ball.remove()
     }
 
     async componentDidMount() {
-        clearPage()
         const form = this.getRef("form")
         form.addEventListener("submit", this.submitLoginRequestListener)
 
@@ -36,13 +34,12 @@ export class Login extends TemplateComponent {
     }
 
     addBouncingBall() {
-        let dynamic = document.getElementById('dynamic-elements')
+        this.ball = document.getElementById('dynamic-elements')
 
-    if (!dynamic) {
-        dynamic = document.createElement('div')
-        dynamic.id = 'dynamic-elements'
-        document.body.appendChild(dynamic)
-    }
+        if (!this.ball) {
+            this.ball = document.createElement('div')
+            document.body.appendChild(this.ball)
+        }
 
         const ball = document.createElement('div')
         ball.id = 'ball'
@@ -70,9 +67,9 @@ export class Login extends TemplateComponent {
         score.style.left = '50%'
         score.style.transform = 'translateX(-50%)'
 
-        dynamic.appendChild(ball)
-        dynamic.appendChild(title)
-        dynamic.appendChild(score)
+        this.ball.appendChild(ball)
+        this.ball.appendChild(title)
+        this.ball.appendChild(score)
 
         let left = 0
         let right = 0
@@ -106,7 +103,6 @@ export class Login extends TemplateComponent {
         }
 
         moveBall()
-        this.animationFrameId = requestAnimationFrame(moveBall)
     }
 
     async submitLoginRequest(event) {

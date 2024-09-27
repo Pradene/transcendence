@@ -21,9 +21,9 @@ export class Profile extends TemplateComponent {
             
             const user = await apiRequest(url)
 
-            const picture = this.getRef("profilePicture")
-            const username = this.getRef("profileUsername")
-            const buttonContainer = this.getRef("profileButton")
+            const picture = document.getElementById("profile-picture")
+            const username = document.getElementById("username")
+            const buttonContainer = document.getElementById("profile-button")
 
             picture.src = user.picture
             username.textContent = user.username
@@ -36,7 +36,7 @@ export class Profile extends TemplateComponent {
                 editBtton.href = `/users/${getConnectedUserID()}/edit/`
                 editBtton.dataset.link = ""
                 editBtton.textContent = "Edit profile"
-                editBtton.className = "btn btn-primary"
+                editBtton.classList.add('button')
                 buttonContainer.appendChild(editBtton)
 
             } else {
@@ -60,7 +60,7 @@ export class Profile extends TemplateComponent {
             const url = getURL("api/games/history/")
             const games = await apiRequest(url)
 
-            const container = this.getRef("games")
+            const container = document.getElementById("games-history")
             games.forEach(game => {
                 const element = this.displayGame(game)
                 container.appendChild(element)
@@ -73,24 +73,36 @@ export class Profile extends TemplateComponent {
 
     displayGame(game) {
         const element = document.createElement('div')
+        element.classList.add('game')
 
         const player = document.createElement('div')
+        player.classList.add('player')
         const playerImgContainer = document.createElement('div')
+        playerImgContainer.classList.add('profile-picture')
         const playerImg = document.createElement('img')
+        playerImg.src = game.player.picture
         const playerUsername = document.createElement('p')
-        playerUsername.textContent = player.username
+        playerUsername.textContent = game.player.username
         
         const opponent = document.createElement('div')
+        opponent.classList.add('player', 'end')
         const opponentImgContainer = document.createElement('div')
+        opponentImgContainer.classList.add('profile-picture')
         const opponentImg = document.createElement('img')
+        opponentImg.src = game.opponent.picture
         const opponentUsername = document.createElement('p')
-        opponentUsername.textContent = opponent.username
+        opponentUsername.textContent = game.opponent.username
 
         const score = document.createElement('div')
         score.textContent = `${game.player_score} vs ${game.opponent_score}`
 
+        playerImgContainer.appendChild(playerImg)
+        player.appendChild(playerImgContainer)
         player.appendChild(playerUsername)
+
         opponent.appendChild(opponentUsername)
+        opponentImgContainer.appendChild(opponentImg)
+        opponent.appendChild(opponentImgContainer)
 
         element.appendChild(player)
         element.appendChild(score)
@@ -117,27 +129,38 @@ export class Profile extends TemplateComponent {
         const wins = stats.wins
         const loses = stats.loses
 
-        const winrate = wins / games
+        let winrate = 0
+        if (games !== 0) {
+            winrate = wins / games
+        }
 
-        const progress = document.getElementById('wins')
+        const progress = document.getElementById('winrate-wins')
         progress.style.strokeDashoffset = 198 * (1 - winrate)
+        
+        const winrateText = document.getElementById('winrate')
+        this.animateNumber(winrateText, winrate * 100, 1000)
 
-        this.animateWinrate(winrate * 100)
+        const gamesText = document.getElementById('games')
+        this.animateNumber(gamesText, games, 200)
+        
+        const winsText = document.getElementById('wins')
+        this.animateNumber(winsText, wins, 200)
+        
+        const losesText = document.getElementById('loses')
+        this.animateNumber(losesText, loses, 200)
     }
 
-    animateWinrate(winrate) {
+    animateNumber(element, value, time) {
         const startValue = 0
         const startTime = performance.now()
-        const winrateText = document.getElementById('winrate')
-        const time = 1000
 
         function update() {
             const currentTime = performance.now()
             const elapsedTime =  currentTime - startTime
             const progress = Math.min(elapsedTime / time, 1)
 
-            const currentValue = Math.floor(startValue + (winrate - startValue) * progress)
-            winrateText.textContent = `${currentValue}%`
+            const currentValue = Math.floor(startValue + (value - startValue) * progress)
+            element.textContent = currentValue
         
             if (progress < 1) {
                 requestAnimationFrame(update)

@@ -1,61 +1,106 @@
-#profile {
-    grid-column: 1 / 5;
-    grid-row: 1 / 3;
+.profile {
+    display: flex;
+    align-items: center;
+    background: var(--secondary-color);
+    padding: 24px;
+    margin-bottom: 24px;
+    border-radius: 12px;
+
+    .picture {
+        padding-right: 24px;
+
+        img {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+        }
+    }
+
+    .information {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+
+        .username {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+        
+        .level {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .progress-bar {
+            height: 12px;
+            width: 100%;
+            border-radius: 12px;
+            padding: 0px -2px;
+        }
+    }
 }
 
-#friends {
-    grid-column: 1 / 5;
-    grid-row: 3 / 9;
-}
+.games {
+    display: flex;
+    gap: 24px;
 
-#requests {
-    grid-column: 1 / 5;
-    grid-row: 4 / 6;
-}
+    .stats {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        padding: 24px;
+        border-radius: 12px;
+        background: var(--secondary-color);
+        
+        .winrate {
+            svg {
+                width: 200px;
+                margin: auto;
+                display: block;
+            }
+            
+            path {
+                stroke-linecap: round;
+                stroke-width: 8;
+                stroke: #e7e7e8;
+            }
 
-#users {
-    grid-column: 1 / 5;
-    grid-row: 6 / 9;
-}
+            path.wins {
+                stroke: var(--fifth-color);
+                stroke-width: 9;
+                stroke-dasharray: 198;
+                stroke-dashoffset: 198;
+                transition: all 1s ease-in-out;
+            }
+        }
+    }
 
-#stats {
-    grid-column: 5 / 9;
-    grid-row: 1 / 5;
-}
+    .history {
+        flex: 1;
+        border-radius: 12px;
+        padding: 24px;
+        background: var(--secondary-color);
 
-#games {
-    grid-column: 5 / 9;
-    grid-row: 5 / 9;
-}
+        .game {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
 
-#stats__winrate {
-    height: 150px;
-    width: 150px;
+            .player {
+                display: flex;
+                align-items: center;
+                flex: 1;
 
-    position: relative;
-}
-
-#stats__winrate > div {
-    --win-rate: 0;
-    width: inherit;
-    height: inherit;
-    border-radius: 50%;
-    background: conic-gradient(
-        var(--fifth-color) 0deg,
-        var(--fifth-color) calc(var(--win-rate) * 3.6deg),
-        var(--forth-color) calc(var(--win-rate) * 3.6deg)
-    );
-    mask-image: radial-gradient(circle, rgba(0, 0, 0, 0) 60%, black 61%);
-    -webkit-mask-image: radial-gradient(circle, rgba(0, 0, 0, 0) 60%, black 61%);
-}
-
-#stats__winrate > p {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -40%);
-
-    font-family: "Epilogue";
-    font-weight: 600;
-    font-size: 24px;
+                &.end {
+                    justify-content: end;
+                }
+                
+                .profile-picture {
+                    margin: 0px 6px;
+                }
+            }
+        }
+    }
 }

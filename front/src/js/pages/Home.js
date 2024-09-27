@@ -19,19 +19,19 @@ export class Home extends TemplateComponent {
             this.handleGameSocketMessage(e.detail.data)
         })
 
-        const createTournamentButton = document.querySelector("div.game-container button.create-tournament")
+        const createTournamentButton = document.querySelector("button.create-tournament")
         createTournamentButton.addEventListener("click", () => {
             this._gameSocket.requestJoinTournamentQueue()
         })
 
-        const createGameButton = document.querySelector("div.game-container button.create-game");
+        const createGameButton = document.querySelector("button.create-game");
         createGameButton.addEventListener("click", () => {
             this._gameSocket.requestJoinGameQueue()
         })
     }
 
     handleGameSocketMessage(response) {
-        const gameContainer = document.querySelector("div.game-container div.game canvas")
+        const gameContainer = document.querySelector("div.game canvas")
 
         switch (response.method) {
             case "get_users":

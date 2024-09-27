@@ -2,38 +2,36 @@ import { TemplateComponent } from "../utils/TemplateComponent.js"
 import { getURL, apiRequest } from "../utils/utils.js"
 import { Router } from "../utils/Router.js"
 
-function clearPage() {
-    const dynamic = document.getElementById('dynamic-elements')
-    if (dynamic)
-            dynamic.remove()
-}
-
 export class Signup extends TemplateComponent {
     constructor() {
         super()
-
+        
         this.handleSubmitListener = async (e) => await this.handleSubmit(e)
+        this.ball = undefined
     }
-
+    
     unmount() {
         const form = this.getRef("form")
         form.removeEventListener("submit", this.handleSubmitListener)
+        
+        this.ball.remove()
     }
 
     async componentDidMount() {
         const form = this.getRef("form")
         form.addEventListener("submit", this.handleSubmitListener)
+        
         this.addBouncingBall()
     }
 
     addBouncingBall() {
-        let dynamic = document.getElementById('dynamic-elements')
+        this.ball = document.getElementById('dynamic-elements')
 
-    if (!dynamic) {
-        dynamic = document.createElement('div')
-        dynamic.id = 'dynamic-elements'
-        document.body.appendChild(dynamic)
-    }
+        if (!this.ball) {
+            this.ball = document.createElement('div')
+            this.ball.id = 'dynamic-elements'
+            document.body.appendChild(this.ball)
+        }
 
         const ball = document.createElement('div')
         ball.id = 'ball'
@@ -61,9 +59,9 @@ export class Signup extends TemplateComponent {
         score.style.left = '50%'
         score.style.transform = 'translateX(-50%)'
 
-        dynamic.appendChild(ball)
-        dynamic.appendChild(title)
-        dynamic.appendChild(score)
+        this.ball.appendChild(ball)
+        this.ball.appendChild(title)
+        this.ball.appendChild(score)
 
         let left = 0
         let right = 0
@@ -97,7 +95,6 @@ export class Signup extends TemplateComponent {
         }
 
         moveBall()
-        this.animationFrameId = requestAnimationFrame(moveBall)
     }
 
     async handleSubmit(event) {
