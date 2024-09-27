@@ -69,6 +69,7 @@ $gray-900: darken($grey-dark, 60%);
 @import "list";
 @import "nav";
 @import "OTP";
+@import "game";
 @import "chatroom";
 @import "home";
 
@@ -80,11 +81,11 @@ $gray-900: darken($grey-dark, 60%);
         margin: auto;
         display: block;
     }
-      
+
     path {
         stroke-linecap: round;
     }
-    
+
     path.grey {
         stroke-width: 8;
         stroke: #e7e7e8;
