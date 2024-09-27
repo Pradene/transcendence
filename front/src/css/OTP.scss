@@ -12,15 +12,15 @@
     width: 30px;
 	height: 40px;
 	border-radius: 0.5rem;
-    background: red;
+    background: var(--forth-color);
 }
 
 .otp-box.active {
-    background: blue;
+    background: var(--third-color);
 }
 
 .secret-input {
-	background: blue;
+	background: var(--secondary-color);
     outline: none;
 	border: none;
 	width: 0px;

@@ -1,89 +1,71 @@
-#chatroom {
-    grid-column: span 8;
-    grid-row: span 8;
-}
-
-#chatroom__messages {
-    margin: 0px 12px;
-}
-
-#chatroom__form {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-#chatroom__form label {
-    flex: 1;
-}
-
-#chatroom__form label input {
+.chatroom {
+    position: relative;
     width: 100%;
-}
-
-.message__container {
-    display: flex;
-    align-items: end;
-
-    margin-bottom: 12px;
-}
-
-.message__container.right {
-    flex-direction: row-reverse;
-}
-
-.message__container.right > div:last-child {
-    display: flex;
-    flex-direction: column;
-    align-items: end;
-}
-
-.message {
-    display: block;
-
-    width: fit-content;
-    
-    max-width: 300px;
-
-    padding: 12px;
-    margin: 12px;
-    margin-bottom: 0px;
-    
+    height: 90vh;
     border-radius: 12px;
-    background: var(--forth-color);
-
-    word-wrap: break-word;
-}
-
-.message > span {
-    display: block;
-    width: 100%;
-
-    text-align: end;
-
-    margin-top: 6px;
+    background: var(--secondary-color);
     
-    color: var(--text-color-light);
-    font-size: 10px;
-}
+    .messages {
+        height: 100%;
+        width: 100%;
+        padding: 0px 12px;
+        overflow-y: scroll;
 
-div.list {
+        // hide scroll bar
+        scrollbar-width: none;
+        -ms-overflow-style: none;
 
-    > div {
-        display: flex;
-        flex-direction: row;
-
-        > a.profile-picture {
-            align-self: center;
+        &::-webkit-scrollbar {
+            display: none;
         }
 
-        > div.message {
+        .message {
             display: flex;
-            flex-direction: row;
-            flex-grow: 100;
+            margin-bottom: 12px;
 
-            > p {
-                flex-grow: 100;
+
+            &.right {
+                justify-content: end;
+                flex-direction: row-reverse;
+            }
+
+            .content {
+                margin: 0px 6px;
+                display: block;
+                width: fit-content;
+                max-width: 300px;
+                padding: 12px;
+                border-radius: 12px;
+                background: var(--forth-color);
+                word-wrap: break-word;
+
+                span {
+                    display: block;
+                    width: 100%;
+                    text-align: end;
+                    margin-top: 6px;            
+                    color: var(--text-color-light);
+                    font-size: 10px;
+                }
+            }
+
+        }
+    }
+
+    .form-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        display: flex;
+        padding: 6px;
+        background: var(--secondary-color);
+
+        .form {
+            display: flex;
+
+            input {
+                display: block;
+                width: 100%;
             }
         }
     }

@@ -24,9 +24,9 @@ export class ChatRoom extends TemplateComponent {
 
         window.addEventListener("wsMessage", this.WebsocketMessageListener)
 
-        document.querySelector("button.duel-invite").removeEventListener("click", this.sendDuelInviteListener)
-        document.querySelector("button.duel-accept").removeEventListener("click", this.acceptDuelListener)
-        document.querySelector("button.duel-refuse").removeEventListener("click", this.refuseDuelListener)
+        // document.querySelector("button.duel-invite").removeEventListener("click", this.sendDuelInviteListener)
+        // document.querySelector("button.duel-accept").removeEventListener("click", this.acceptDuelListener)
+        // document.querySelector("button.duel-refuse").removeEventListener("click", this.refuseDuelListener)
     }
 
     async componentDidMount() {
@@ -37,9 +37,9 @@ export class ChatRoom extends TemplateComponent {
         
         window.addEventListener("wsMessage", this.WebsocketMessageListener)
 
-        document.querySelector("button.duel-invite").addEventListener("click", this.sendDuelInviteListener)
-        document.querySelector("button.duel-accept").addEventListener("click", this.acceptDuelListener)
-        document.querySelector("button.duel-refuse").addEventListener("click", this.refuseDuelListener)
+        // document.querySelector("button.duel-invite").addEventListener("click", this.sendDuelInviteListener)
+        // document.querySelector("button.duel-accept").addEventListener("click", this.acceptDuelListener)
+        // document.querySelector("button.duel-refuse").addEventListener("click", this.refuseDuelListener)
     }
 
     WebsocketMessage(event) {
@@ -152,13 +152,13 @@ export class ChatRoom extends TemplateComponent {
             return
 
         const element = document.createElement("div")
+        element.classList.add('message')
         
-        if (message.user_id == getConnectedUserID())
+        if (message.user_id === getConnectedUserID())
             element.classList.add("right")
 
-
         const imgContainer = document.createElement('a')
-        imgContainer.href = `/users/${message.user_id}`
+        imgContainer.href = `/users/${message.user_id}/`
         imgContainer.className = 'profile-picture'
         imgContainer.dataset.link = ''
 
@@ -166,7 +166,7 @@ export class ChatRoom extends TemplateComponent {
         img.src = message.picture
         
         const messageContainer = document.createElement('div')
-        messageContainer.className = 'message'
+        messageContainer.className = 'content'
 
         const messageContent = document.createElement('p')
         messageContent.textContent = message.content
