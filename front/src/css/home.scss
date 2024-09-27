@@ -1,4 +1,5 @@
 $loader-height: 50px;
+$loader-width: 150px;
 $ball-size: 10px;
 $paddle-width: 3px;
 $paddle-height: 20px;
@@ -46,7 +47,7 @@ $animation-duration: 10s;
         //box-sizing: border-box;
         min-height: $loader-height;
         height: $loader-height;
-        width: 100%;
+        width: $loader-width;
 
         .animation-paddle {
             position: absolute;
