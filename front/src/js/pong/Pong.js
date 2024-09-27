@@ -23,6 +23,8 @@ export class Pong {
         this._context = canvas.getContext("webgl2")
         this._canvas = canvas
         this._canvas.classList.add("active")
+        this._canvas.width = window.screen.width
+        this._canvas.height = window.screen.height
 
         this._renderer = new THREE.WebGLRenderer({ antialias: true, canvas: this._canvas })
         this._renderer.setPixelRatio(window.devicePixelRatio)
