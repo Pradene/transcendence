@@ -15,7 +15,7 @@ class AbstractGame(ABC):
         self._finished: bool = False
         self._finishedLock: RLock = RLock()
 
-        logging.log(logging.INFO, f"Game {self.getGameid()} created")
+        logging.log(logging.INFO, f"[AbstractGame]: Game {self.getGameid()} created")
 
     @abstractmethod
     async def join(self, player: PlayerInterface) -> None:

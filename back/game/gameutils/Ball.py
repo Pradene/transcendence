@@ -5,21 +5,25 @@ from game.gameutils.defines import *
 
 import random
 import math
+import logging
 
 
 def genStartVector() -> IntVector:
     """Generates a random starting vector for the ball"""
 
+    logging.info("Generating new vector")
+
     angle = random.uniform(0, math.pi * 2)
-    while math.fabs(math.sin(angle)) > 0.75 or math.fabs(math.cos(angle)) > 0.75:
+    while math.fabs(math.sin(angle)) < 0.1 or math.fabs(math.sin(angle)) > 0.9:
         angle = random.uniform(0, math.pi)
 
-    sin = math.sin(angle) * 2 - 1
-    cos = math.cos(angle) * 2 - 1
+    sin = math.sin(angle)
+    cos = math.cos(angle)
     return IntVector([cos, sin])
 
 class Ball:
     def __init__(self):
+        logging.info("[Ball]: in ctor")
         self.__position: list[int] = BALL_BASE_POSITION.copy()
         self.__direction: IntVector = genStartVector()
         self.__speed: float = BALL_SPEED

@@ -25,6 +25,7 @@ class Matchmaking:
 
         # if enough players start a game and remove players from the queue
         if len(self.game_queue) >= 2:
+            logging.info(f"Enougth players in queue, creating a new game")
             players = [self.game_queue.pop(0), self.game_queue.pop(0)]
             random.shuffle(players)
 
@@ -36,6 +37,7 @@ class Matchmaking:
             game: Game = await game_manager.createGame(players[0])
             await game.join(players[1])
 
+            logging.info(f"Adding players to game")
             # register the new game as the current game for both players
             for player in players:
                 player.current_game = game
