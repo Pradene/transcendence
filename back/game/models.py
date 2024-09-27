@@ -13,6 +13,45 @@ class GameModel(models.Model):
 
     winner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='game_winner')
 
+    def toJSON(self, user):
+        def get_opponent():
+            if self.user1 == user:
+                return self.user2.toJSON()
+            elif self.user2 == user:
+                return self.user1.toJSON()
+            return None
+
+        def get_opponent_score():
+            if self.user1 == user:
+                return self.user2_score
+            elif self.user2 == user:
+                return self.user1_score
+            return None
+
+        def get_player():
+            if self.user1 == user:
+                return self.user1.toJSON()
+            elif self.user2 == user:
+                return self.user2.toJSON()
+            return None
+
+        def get_player_score():
+            if self.user1 == user:
+                return self.user1_score
+            elif self.user2 == user:
+                return self.user2_score
+            return None
+
+        return {
+            'id': self.id,
+            'player': get_player(),
+            'opponent': get_opponent(),
+            'player_score': get_player_score(),
+            'opponent_score': get_opponent_score(),
+            'winner': self.winner.toJSON(),
+        }
+
+
 
 class TournamentModel(models.Model):
     game1 = models.ForeignKey('GameModel', on_delete=models.CASCADE, related_name='game1')

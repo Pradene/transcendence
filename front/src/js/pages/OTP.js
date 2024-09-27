@@ -23,13 +23,13 @@ export class OTP extends TemplateComponent {
 	}
 
 	async componentDidMount() {
+		const form = this.getRef('form')
+		form.addEventListener('submit', this.handleSubmitListener)
+
 		const input = this.getRef('input')
 		input.addEventListener('input', this.displayCodeListener)
 		input.addEventListener('focus', this.animCodeListener)
 		input.addEventListener('blur', this.animCodeListener)
-
-		const form = this.getRef('form')
-		form.addEventListener('submit', this.handleSubmitListener)
 	}
 	
 	async handleSubmit(e) {
@@ -45,8 +45,6 @@ export class OTP extends TemplateComponent {
 			const data = await apiRequest(url, 'POST', {
 				code: input.value
 			})
-
-			console.log('navigate')
 
 			const router = Router.get()
 			router.navigate('/')
