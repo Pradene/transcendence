@@ -8,7 +8,6 @@
 
   div.game-container {
       display: flex;
-      flex-direction: column;
 
       width: 100%;
       max-width: 1000px;
@@ -17,31 +16,15 @@
       .game-container-header {
         display: flex;
         flex-direction: row;
-        justify-content: space-between;
-        width: 100%;
-        min-width: 100%;
+        gap: 1rem;
+        align-items: center;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
 
-        button {
-          // padding: 1.5rem;
-          // margin: 1rem;
-          // border: 1px solid #ffffff;
-          // border-radius: 3px;
-          // background-color: red;
-          text-decoration: none;
-          padding: 4px;
-          font-family: $main-font;
-          font-size: 0.8em;
-          color: $sec-color;
-          background-color: black;
-          border-radius: 22px;
-          -webkit-border-radius: 22px;
-          -moz-border-radius: 22px;
-          border: 3px solid var(--fifth-color);
-          &.active {
-            background-color: green;
-          }
-        }
+      }
     }
+  }
+
 
     .container {
       height: calc(100vh - 200px);
@@ -77,7 +60,6 @@
         box-sizing: border-box;
       }
     }
-  }
 
   .available-games {
     display: flex;
@@ -105,4 +87,3 @@
       }
     }
   }
-}
