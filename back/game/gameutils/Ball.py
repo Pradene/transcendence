@@ -11,10 +11,8 @@ import logging
 def genStartVector() -> IntVector:
     """Generates a random starting vector for the ball"""
 
-    logging.info("Generating new vector")
-
     angle = random.uniform(0, math.pi * 2)
-    while math.fabs(math.sin(angle)) < 0.1 or math.fabs(math.sin(angle)) > 0.9:
+    while math.fabs(math.sin(angle)) < 0.1 or math.fabs(math.sin(angle)) > 0.9 or math.fabs(math.cos(angle)) < 0.1 or math.fabs(math.cos(angle)) > 0.9:
         angle = random.uniform(0, math.pi)
 
     sin = math.sin(angle)
