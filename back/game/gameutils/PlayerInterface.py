@@ -1,3 +1,10 @@
+from __future__ import annotations
+import typing
+
+if typing.TYPE_CHECKING:
+    from game.gameutils.Game import Game
+    from game.gameutils.Tournament import Tournament
+
 import logging
 
 from typing import Callable, Union, List
@@ -14,6 +21,7 @@ class PlayerInterface:
         self.__joined: bool = False
         self.__ballspeed: int = 5 # the speed of the ball, is used to compute the by how much the paddle should move at each frame
         self.__points: int = 0
+        self.current_game: Union[Game | Tournament | None] = None
 
     def getName(self) -> str:
         """Returns the name of the player"""

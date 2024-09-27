@@ -371,14 +371,12 @@ return content
     // Logout
     async logout() {
         try {
-            const url = getURL(`api/users/logout/`)
+            const url = getURL(`api/auth/logout/`)
 
             await apiRequest(
                 url,
                 "POST"
             )
-            
-            localStorage.removeItem("user_id")
             
             const ws = WebSocketManager.get()
             ws.disconnect('chat')

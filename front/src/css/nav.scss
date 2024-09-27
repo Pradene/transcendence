@@ -9,6 +9,7 @@ nav {
     border-radius: 18px;
 
     padding: 12px 18px;
+<<<<<<< HEAD
     margin: 0 auto;
     position: relative;
 }
@@ -32,3 +33,28 @@ nav div a img {
     height: 16px;
 	pointer-events: none;
 }
+=======
+    margin: 12px 0px;
+    
+    div {
+        display: flex;
+        align-items: center;
+        
+        a {
+            text-decoration: none;
+            margin-left: 18px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            font-size: 16px;
+            
+            img {
+                width: 16px;
+                height: 16px;
+                pointer-events: none;
+            }
+        }
+    }
+}
+>>>>>>> main

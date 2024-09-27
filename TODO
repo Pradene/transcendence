@@ -1,18 +1,4 @@
 - room creation real time response
-
-- profile page
-  - make edit profile page
-    change: username, pp, bio
-
 - messages, friends pagination
-
-- remove rest framework
-
 - notifications maybe for invitation
-
-        const script = document.createElement('script')
-        const canvas = document.querySelector('#background-canvas')
-        script.src = 'static/scripts/anim/movingball.js'
-        window.addEventListener('load', function() {
-            document.body.appendChild(script);
-        });
+- possiblity to remove matchmaking in front end

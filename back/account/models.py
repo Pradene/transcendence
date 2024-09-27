@@ -1,6 +1,9 @@
+import logging
+
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
 from django.conf import settings
 from django.db import models
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, password=None, **extra_fields):
@@ -16,9 +19,10 @@ class CustomUserManager(BaseUserManager):
             **extra_fields
         )
 
-        user.set_password(password)
-        user.save(using=self._db)
+        if password is not None:
+            user.set_password(password)
         
+        user.save(using=self._db)
         return user
 
     def create_superuser(self, username, password=None, **extra_fields):
@@ -44,10 +48,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     picture = models.ImageField(upload_to="profile_pictures/", default="profile_pictures/default.png", blank=True, null=True)
     email = models.EmailField(null=True)
     bio = models.TextField(blank=True, null=True)
-    email = models.EmailField(max_length=254)
+    email = models.EmailField(max_length=255)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    otp_secret = models.CharField(blank=True, null=True)
+    api_42_id = models.CharField(max_length=255, unique=True, null=True, blank=True)
 
     objects = CustomUserManager()
 
@@ -61,14 +65,15 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         data = {
             'id': self.id,
             'username': self.username,
+            'email': self.email,
             'picture': self.picture.url if self.picture else None,
             'is_active': self.is_active,
         }
 
         if requesting_user is not None:
             try:
-                friend_list, created = FriendList.objects.get_or_create(user=self)
-                data['status'] = friend_list.get_friend_status(requesting_user)
+                friend_list, created = FriendList.objects.get_or_create(user=requesting_user)
+                data['status'] = friend_list.get_friend_status(self)
             except Exception as e:
                 data['status'] = 'none'
 
@@ -140,8 +145,3 @@ class Block(models.Model):
     blocker = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="blockeds", on_delete=models.CASCADE)
     blocked = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="blockers", on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
-
-
-class BlackListedToken(models.Model):
-    token = models.CharField(max_length=255)
-    blacklisted_on = models.DateTimeField(auto_now_add=True)

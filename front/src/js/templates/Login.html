@@ -1,10 +1,10 @@
-<div class="min-vh-100 d-flex flex-column justify-content-center">
+<div class="min-vh-100 d-flex flex-column align-items-center justify-content-center">
     <div class="container-xxs box-container px-4 py-4">
         <div class="mb-4">
             <h2 class="mb-0">Hello,</h2>
             <p>We are happy to see you</p>
         </div>
-        <form ref="form" action="POST">
+        <form ref="form" action="POST" class="mb-2">
             <div ref="error" class="hidden"></div>
             <input ref="username" class="form-control mb-3" placeholder="Username" type="text" autocomplete="off" required="True" />
             <input ref="password" class="form-control mb-2" placeholder="Password" type="password" autocomplete="off" required="True" />
@@ -17,8 +17,9 @@
             </div>
             <button type="submit" class="btn btn-primary w-100">Login</button>
         </form>
-    </div>
-    <div class="container-xxs box-container text-center py-3 mt-4">
-        <a href="/signup/" data-link="">Sign up</a>
+        <button class="btn btn-primary w-100 mb-3" ref="ft_auth" id="ft_auth">Login with 42</button>
+        <span class="d-flex justify-content-center">
+            <p>Doesn't have account yet? <a href="/signup/" data-link="">Sign up</a></p>
+        </span>
     </div>
 </div>

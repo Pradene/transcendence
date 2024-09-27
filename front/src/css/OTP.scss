@@ -1,0 +1,29 @@
+.otp-label {
+    margin: auto;
+    display: flex;
+    gap: 4px;
+}
+
+.otp-box {
+	display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 30px;
+	height: 40px;
+	border-radius: 0.5rem;
+    background: red;
+}
+
+.otp-box.active {
+    background: blue;
+}
+
+.secret-input {
+	background: blue;
+    outline: none;
+	border: none;
+	width: 0px;
+	height: 0px;
+    caret: hidden;
+}

@@ -1,6 +1,7 @@
 from django.http import JsonResponse
-from account.utils.token import decode_token
+
 from account.models import CustomUser
+from authentication.utils.token import decode_token
 
 def jwt_required(view_func):
     def _wrapped_view(request, *args, **kwargs):

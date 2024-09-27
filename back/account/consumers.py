@@ -7,6 +7,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 
 from .models import FriendList, FriendRequest, CustomUser
+from .utils.serializers import serialize_user
+
 
 class FriendsConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -19,6 +21,9 @@ class FriendsConsumer(AsyncWebsocketConsumer):
             )
 
             await self.accept()
+
+            logging.info(self.channel_layer)
+            logging.info(self.channel_layer.groups)
 
 
     async def disconnect(self, close_code):
@@ -33,8 +38,7 @@ class FriendsConsumer(AsyncWebsocketConsumer):
         data = json.loads(text_data)
         message_type = data['type']
 
-        logging.info(f'{message_type} received')
-        
+        logging.info(f'{message_type}')
 
         if message_type == 'friend_request_sended':
             await self.send_friend_request(data)
@@ -85,11 +89,11 @@ class FriendsConsumer(AsyncWebsocketConsumer):
 
             friend_request = await database_sync_to_async(FriendRequest.objects.create)(sender=self.user, receiver=receiver)
 
-            sender_data = serialize_user(friend_request.sender)
-            receiver_data = serialize_user(friend_request.receiver)
+            sender_data = friend_request.sender.toJSON()
+            receiver_data = friend_request.receiver.toJSON()
 
-            # receiver_data = CustomUserSerializer(friend_request.receiver).data
-            # sender_data = CustomUserSerializer(friend_request.sender).data
+            # receiver_data = friend_request.receiver.toJSON()
+            # sender_data = friend_request.sender.toJSON()
 
             await self.channel_layer.group_send(
                 f'user_{friend_request.sender.id}',
@@ -140,8 +144,8 @@ class FriendsConsumer(AsyncWebsocketConsumer):
 
             await database_sync_to_async(friend_request.accept)()
 
-            receiver_data = CustomUserSerializer(friend_request.receiver).data
-            sender_data = CustomUserSerializer(friend_request.sender).data
+            receiver_data = friend_request.receiver.toJSON()
+            sender_data = friend_request.sender.toJSON()
 
             await self.channel_layer.group_send(
                 f'user_{friend_request.sender.id}',
@@ -191,8 +195,8 @@ class FriendsConsumer(AsyncWebsocketConsumer):
                 receiver_id=receiver_id
             )
 
-            receiver_data = CustomUserSerializer(friend_request.receiver).data
-            sender_data = CustomUserSerializer(friend_request.sender).data
+            receiver_data = friend_request.receiver.toJSON()
+            sender_data = friend_request.sender.toJSON()
 
             # Delete the friend request
             await database_sync_to_async(friend_request.delete)()

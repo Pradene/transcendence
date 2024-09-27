@@ -9,8 +9,6 @@ export class WebSocketManager {
         
         this.sockets = {}
         this.pendingMessages = {} // Queue messages until the socket is open
-
-        this.reconnectAllSockets()
     }
 
     static get() {
@@ -18,6 +16,10 @@ export class WebSocketManager {
     }
 
     connect(url, type) {
+        if (this.sockets[type]) {
+            return
+        }
+        
         const socket = new WebSocket(url)
 
         socket.onopen = (event) => {
@@ -70,9 +72,11 @@ export class WebSocketManager {
     sendMessage(type, message) {
         try {
             const socket = this.sockets[type]
-            
+            console.log("socket")
+
             if (socket && socket.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify(message))
+                console.log("sending")
 
             } else {
                 this.queueMessage(type, message) // Queue the message if the socket isn't ready

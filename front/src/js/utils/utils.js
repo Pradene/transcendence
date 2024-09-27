@@ -1,11 +1,11 @@
-import { Router } from "./Router.js"
+import { WebSocketManager } from "./WebSocketManager.js"
 import jwt from "jsonwebtoken"
 
 export function getURL(url) {
     return "https://" + location.hostname + ":" + location.port + "/" + url
 }
 
-export function getUserID() {
+export function getConnectedUserID() {
     try {
         const token = getCookie("access_token")
         const decoded = jwt.decode(token)
@@ -18,7 +18,6 @@ export function getUserID() {
 }
 
 // CSRF Tokens utils
-
 export async function getCSRFToken() {
     try {
         const url = getURL("api/csrf-token/")
@@ -35,7 +34,7 @@ export async function getCSRFToken() {
         }
 
     } catch (e) {
-        throw e
+        console.log(e)
     }
 }
 
@@ -71,6 +70,7 @@ export async function apiRequest(url, method = "GET", body = null) {
 
         } else {
             if (response.status == 401) {
+                console.log("error: need to refresh token")
                 const refreshed = await refreshToken()
                 if (refreshed)
                     return await apiRequest(url, method, body)
@@ -88,7 +88,7 @@ export async function apiRequest(url, method = "GET", body = null) {
 }
 
 async function refreshToken() {
-    const url = getURL("api/users/refresh-token/")
+    const url = getURL("api/auth/refresh-token/")
     
     try {
         const data = await apiRequest(
@@ -108,30 +108,44 @@ function getCookie(name) {
     const parts = value.split(`; ${name}=`)
     if (parts.length === 2)
         return parts.pop().split(';').shift()
-    else
-        throw new Error("Cookie not found")
+    
+    return null
+}
+
+function connectToWebsockets() {
+    const ws = WebSocketManager.get()
+
+    const friendsURL = "wss://" + location.hostname + ":" + location.port + "/ws/friends/";
+    const chatURL = "wss://" + location.hostname + ":" + location.port + "/ws/chat/";
+    
+    ws.connect(friendsURL, "friends")
+    ws.connect(chatURL, "chat")
 }
 
 export async function checkLogin() {
     try {
-        const token = getCookie("access_token")
-        console.log(token)
-        const decoded = jwt.decode(token)
-        console.log(decoded)
-        
+        const access = getCookie("access_token")
+        if (!access) {
+            const value = await refreshToken()
+            if (value)
+                connectToWebsockets()
+
+            return value
+        }
+
+        const decoded = jwt.decode(access)     
         const current = Date.now() / 1000
 
         if (decoded.exp > current) {
+            connectToWebsockets()
             return true
 
         } else {
-            console.log("refresh")
             const value = await refreshToken()
             return value
         }
 
     } catch (error) {
-        console.log(error)
         return false
     }
 }

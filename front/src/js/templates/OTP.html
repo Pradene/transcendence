@@ -1,15 +1,23 @@
-<div class="container-fp">
-    <form ref="form" id="otp-form" action="POST">
-		<div class="otp-box-container">
-			<span class="otp-box"></span>
-			<span class="otp-box"></span>
-			<span class="otp-box"></span>
-			<span class="otp-box"></span>
-			<span class="otp-box"></span>
-			<span class="otp-box"></span>
+<div class="min-vh-100 d-flex flex-column align-items-center justify-content-center">
+	<div class="container-xxs box-container px-4 py-4">
+		<div>
+            <h2 class="mb-0">One more step,</h2>
+            <p class="mb-0">We sent you a One Time Password to the email you provided to sign up.</p>
+        </div>
+		<form ref="form" class="d-flex flex-column mb-2" action="POST">
+			<label for="input" ref="label" class="otp-label my-4">
+				<span class="otp-box"></span>
+				<span class="otp-box"></span>
+				<span class="otp-box"></span>
+				<span class="otp-box"></span>
+				<span class="otp-box"></span>
+				<span class="otp-box"></span>
+			</label>
+			<input class="secret-input mx-auto" ref="input" id="input" type="text" maxlength="6" autocomplete="one-time-code" required="True" />
+			<button class="btn btn-primary" type="submit">Login</button>
+		</form>
+		<div class="text-center">
+			<p>Didn't receive code? <a href="">Resend</a></p>
 		</div>
-		<input class="secret-input" ref="input" placeholder="Enter your code" type="text" maxlength="6" autocomplete="one-time-code" required="True" />
-		<button type="submit" class="btn btn-primary w-100">Login</button>
-    </form>
+	</div>
 </div>
-

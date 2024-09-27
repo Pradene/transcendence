@@ -67,6 +67,41 @@ $gray-900: darken($grey-dark, 60%);
 @import "../../node_modules/bootstrap/scss/bootstrap";
 
 @import "list";
+@import "nav";
+@import "OTP";
+@import "chatroom";
+@import "home";
+
+
+#progress {
+    svg {
+        height: 300px;
+        width: 300px;
+        margin: auto;
+        display: block;
+    }
+      
+    path {
+        stroke-linecap: round;
+    }
+    
+    path.grey {
+        stroke-width: 8;
+        stroke: #e7e7e8;
+    }
+
+    path.blue {
+        stroke: red;
+        stroke-width: 9;
+        stroke-dasharray: 198;
+        stroke-dashoffset: 198;
+        transition: all 1s ease-in-out;
+    }
+}
+
+.hidden {
+    display: none;
+}
 
 #app {
     margin: 0 auto;

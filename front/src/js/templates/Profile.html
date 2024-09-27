@@ -1,31 +1,33 @@
-<div>
-    <NavComponent></NavComponent>
-    <div class="container">
-        <div id="profile" class="d-flex">
-            <div class="profile-picture-large">
-                <img ref="profilePicture" alt="Profile picture" />
-            </div>
-            <div style="margin-left: 1rem;">
-                <h2 ref="profileUsername" class="m-0"></h2>
-                <div ref="profileButton"></div>
-            </div>
+<nav-component></nav-component>
+<div class="container">
+    <div id="profile" class="d-flex">
+        <div class="profile-picture-large">
+            <img src="/assets/default.png" ref="profilePicture" alt="Profile picture" />
         </div>
-        <div id="friends" class="grid-item">
-            <div class="top">
-                <h4 class="text-l">Friends</h4>
-            </div>
-            <ul ref="friends"></ul>
+        <div style="margin-left: 1rem;">
+            <h2 ref="profileUsername" class="m-0"></h2>
+            <div ref="profileButton"></div>
         </div>
-        <div id="games" class="grid-item">
-            <div class="top">
-                <h4 class="text-l">Games</h4>
-            </div>
-            <ul ref="games"></ul>
+    </div>
+    <div id="friends" class="grid-item">
+        <div class="top">
+            <h4 class="text-l">Friends</h4>
         </div>
-        <div id="stats" class="grid-item">
-            <div class="top">
-                <h4 class="text-l">Stats</h4>
-            </div>
+        <ul ref="friends"></ul>
+    </div>
+    <div id="games" class="grid-item">
+        <div class="top">
+            <h4 class="text-l">Games</h4>
+        </div>
+        <ul ref="games"></ul>
+    </div>
+    <div id="stats" class="grid-item">
+        <div id="progress">
+            <svg viewbox="0 0 110 100">
+                <path id="loses" class="grey" d="M30,90 A40,40 0 1,1 80,90" fill='none' />
+                <path id="wins" class="blue" d="M30,90 A40,40 0 1,1 80,90" fill='none' />
+                <text id="winrate" fill="#ffffff" x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" style="font-size: 12px;">0%</text>
+            </svg>
         </div>
     </div>
 </div>

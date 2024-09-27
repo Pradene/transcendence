@@ -6,5 +6,6 @@ from django.conf.urls.static import static
 from . import views
 
 urlpatterns = [
-    path('', views.gameHistory),
+    path('history/', views.gameHistory),
+    path('stats/', views.gameStats),
 ]

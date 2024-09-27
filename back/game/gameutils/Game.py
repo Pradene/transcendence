@@ -63,6 +63,7 @@ class Game(AbstractGame):
             await self.update(i + 1)
             time.sleep(1)
 
+        last_frame = time.time()
         while self.__p1 is not None and self.__p2 is not None and not self.isFinished():
             if self.__ball.isFinished():
                 self.__ball = Ball()
@@ -79,7 +80,11 @@ class Game(AbstractGame):
             self.__dataLock.release()
 
             await self.update()
-            await asyncio.sleep(TIME_TO_SLEEP)
+            ctime = time.time()
+            if ctime - last_frame < TIME_TO_SLEEP:
+                # logging.info(f"Sleeping for {TIME_TO_SLEEP - (ctime - last_frame)}")
+                await asyncio.sleep(TIME_TO_SLEEP - (ctime - last_frame))
+            last_frame = ctime
 
     async def update(self, timer: Union[int | None] = None) -> None:
         """Send game datas to clients, and delete the game if it's finished"""
@@ -136,6 +141,11 @@ class Game(AbstractGame):
                 "ball":           self.__ball.getPosition()
             }
         }
+
+        #reverse position so that each player sees itself at right side
+        dic2["data"]["current_player"]["position"][0] = P1_POSITION[0]
+        dic2["data"]["opponent"]["position"][0] = P2_POSITION[0]
+        dic2["data"]["ball"][0] = SCREEN_WIDTH - dic2["data"]["ball"][0]
 
         if timer is not None:
             dic1["data"]["timer"] = timer

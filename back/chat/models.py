@@ -9,8 +9,7 @@ class ChatRoom(models.Model):
     is_private =  models.BooleanField(default=True)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="rooms")
     
-    def toJSON(self, request):
-        requesting_user = request.user
+    def toJSON(self, requesting_user):
 
         # Get other user (for private rooms)
         def get_name():
