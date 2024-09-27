@@ -148,24 +148,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def refuse_duel(self, data):
         try:
             from game.gameutils.DuelManager import DUELMANAGER
-            if not DUELMANAGER.have_active_duel(self.user.id):
-                return
-
             roomid = data['room']
             challengerid = data['challenger']
 
-            DUELMANAGER.decline(self.user.id, challengerid)
+            if DUELMANAGER.have_duel_with(p1, challengerid):
+                DUELMANAGER.decline(self.user.id, challengerid)
 
-            await self.channel_layer.group_send(
-                f"chat_{roomid}",
-                {
-                    "type": "duel_response",
-                    "action": "duel_refuse",
-                    "challenger": challengerid,
-                    "challenged": self.user.id,
-                    "room_id": roomid
-                }
-            )
+                await self.channel_layer.group_send(
+                    f"chat_{roomid}",
+                    {
+                        "type": "duel_response",
+                        "action": "duel_refuse",
+                        "challenger": challengerid,
+                        "challenged": self.user.id,
+                        "room_id": roomid
+                    }
+                )
 
         except KeyError as e:
             logging.error("KeyError in refuse_duel")

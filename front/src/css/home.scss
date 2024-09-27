@@ -35,9 +35,20 @@ $animation-duration: 10s;
     .waiting-for-players {
         display: flex;
         flex-direction: row;
+        align-content: center;
+        justify-content: center;
+
         width: 100%;
 
         visibility: hidden;
+
+        > p {
+            margin: 0px 10px 0px 10px;
+        }
+
+        > * {
+            align-self: center;
+        }
     }
 
     .queue-animation {

@@ -34,8 +34,8 @@ class DuelManager:
                 logging.info(f"Player {challengerid} and {challengedid} have declined the duel.")
 
     def have_active_duel(self, playerid: int) -> bool:
-        logging.info(f"Checking if player {playerid} has an active duel.")
-        logging.info(f"Current duels: {self.duels}")
+        logging.info(f"[DuelManager]: Checking if player {playerid} has an active duel.")
+        logging.info(f"[DuelManager]: Current duels: {self.duels}")
         for duel in self.duels:
             if playerid in duel:
                 return duel[2]
@@ -58,6 +58,12 @@ class DuelManager:
                 return duel[1]
             elif duel[1] == playerid and duel[2]:
                 return duel[0]
+            
+    def have_duel_with(self, p1: int, p2: int):
+        for duel in self.duels:
+            if p1 in duel and p2 in duel:
+                return True
+        return False
 
 
 DUELMANAGER: DuelManager = DuelManager()
