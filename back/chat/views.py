@@ -1,4 +1,5 @@
 import json
+import logging
 
 from django.views.decorators.http import require_GET, require_POST
 from django.http import JsonResponse
@@ -19,19 +20,19 @@ def roomsView(request):
             return JsonResponse(data, safe=False, status=200)
 
         except Exception as e:
+            logging.info(e)
             return JsonResponse({'error': str(e)}, status=400)
     
     elif request.method == "POST":
         try:
             data = json.loads(request.body)
-            name = data.get("name")
             user_ids = data.get("user_ids", [])
             users = CustomUser.objects.filter(id__in=user_ids)
 
             if not users.exists():
                 return JsonResponse({"error": "At least one user must be specified"}, status=400)
 
-            room = ChatRoom.objects.create(name=name, is_private=False)
+            room = ChatRoom.objects.create(is_private=False)
             room.users.set(users)
             room.save()
 
@@ -69,15 +70,12 @@ def roomView(request, room_id):
         other_user = room.users.exclude(id=user.id).first()
         if not other_user:
             return JsonResponse({'error': 'no other user found in this room'}, status=400)
-        room_name = other_user.username
         room_picture = user.picture.url if user.picture else None
 
     else:
-        room_name = room.name
         room_picture = room.picture
 
     data = {
-        'room_name': room_name,
         'room_picture': room_picture,
         'users': users_data,
         'messages': messages_data
@@ -92,7 +90,7 @@ def searchRoomsView(request):
     user = request.user
     query = request.GET.get('q', '')
     if query:
-        rooms = ChatRoom.objects.filter(users=user, name__icontains=query)
+        rooms = ChatRoom.objects.filter(users=user)
         data = [room.toJSON(user) for room in rooms]
         return JsonResponse(data, safe=False, status=200)
     

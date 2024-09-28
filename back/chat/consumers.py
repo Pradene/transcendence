@@ -217,7 +217,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(data))
 
     async def create_room(self, data):
-        room_name = data.get('room_name')
+        logging.info(f'create room')
         is_private = data.get('is_private', True)
         user_ids = data.get('users', [])
 
@@ -225,7 +225,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             user_ids.append(self.users.id)
 
         room, created = await database_sync_to_async(ChatRoom.objects.get_or_create)(
-            name=room_name,
             is_private=is_private,
         )
 
@@ -235,6 +234,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 user = await database_sync_to_async(CustomUser.objects.get)(id=user_id)
                 await database_sync_to_async(room.users.add)(user)
 
+        logging.info(f'room created')
+        
         # Add the user to the channel layer group for real-time messaging
         await self.channel_layer.group_add(
             f'chat_{room.id}',
@@ -247,7 +248,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             {
                 'type': 'create_room_response',
                 'room_id': room.id,
-                'room_name': room.name,
                 'is_private': room.is_private
             }
         )
@@ -256,7 +256,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'action': 'room_created',
             'room_id': data['room_id'],
-            'room_name': data['room_name'],
             'is_private': data['is_private']
         }))
 

@@ -4,7 +4,6 @@ from django.db import models
 from account.models import CustomUser
 
 class ChatRoom(models.Model):
-    name = models.CharField(max_length=255)
     picture = models.ImageField(upload_to='room_pictures/', default="room_pictures/default.png", blank=True, null=True)
     is_private =  models.BooleanField(default=True)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="rooms")
@@ -42,8 +41,8 @@ class ChatRoom(models.Model):
         }
 
     @classmethod
-    def create(cls, name, is_private=True, user_ids=None):
-        room = cls.objects.create(name=name, is_private=is_private)
+    def create(cls, is_private=True, user_ids=None):
+        room = cls.objects.create(is_private=is_private)
         if user_ids:
             users = CustomUser.objects.filter(id__in=user_ids)
             room.users.add(*users)
@@ -65,8 +64,8 @@ class ChatRoom(models.Model):
     
     def get_other_user(self, current_user):
         if self.is_private:
-            usernames = self.name.split('_')
-            return usernames[1] if usernames[0] == current_user.username else usernames[0]
+            other_user = self.users.exclude(id=current_user.id).first()
+            return other_user.username
         else:
             return None
 

@@ -167,14 +167,10 @@ class FriendsConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-            usernames = sorted([friend_request.sender.username, friend_request.receiver.username])
-            room_name = f'{usernames[0]}_{usernames[1]}'
-
             await self.channel_layer.group_send(
                 'chat',  # Send to chat consumer room creation message
                 {
                     'type': 'create_room',
-                    'room_name': f'{room_name}',
                     'is_private': True,
                     'users': [friend_request.receiver.id, friend_request.sender.id]
                 }
