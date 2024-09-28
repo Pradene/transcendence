@@ -2,14 +2,16 @@
 <div class="chatroom">
     <div ref="messages" class="messages"></div>
     <div class="form-container">
-        <form ref="form" class="form">
-            <label class="search-bar">
-                <input ref="input" type="text" placeholder="Write a message..." autocomplete=off></input>
-            </label>
-            <button type="submit" class="button ml__12">Send</button>
-        </form>
-        <!-- <button class="duel-invite">Invite to duel</button>
-        <button class="duel-accept">Accept duel</button>
-        <button class="duel-refuse">Refuse duel</button> -->
+        <div class="bottom-bar">
+            <form ref="form" class="form">
+                <label class="search-bar">
+                    <input ref="input" type="text" placeholder="Write a message..." autocomplete=off></input>
+                </label>
+                <button type="submit" class="button ml__12">Send</button>
+            </form>
+            <button class="duel-invite">Invite</button>
+        </div>
+        <!-- <button class="duel-accept">Accept duel</button> -->
+        <!-- <button class="duel-refuse">Refuse duel</button> -->
     </div>
 </div>
