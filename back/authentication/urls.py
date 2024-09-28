@@ -6,7 +6,8 @@ urlpatterns = [
 
 	path('signup/', views.signupView),
 	path('login/', views.loginView),
-	path('verify-otp/', views.validateOTP),
+	path('otp/', views.sendOTPView),
+	path('otp/verify/', views.validateOTPView),
 	path('logout/', views.logoutView),
 	
     path('ft_auth/', views.ftAuth),

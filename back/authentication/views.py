@@ -115,20 +115,25 @@ def logoutView(request):
 		JsonResponse({"error": "Invalid token"}, status=400)
 
 
-
 @require_http_methods(["GET"])
-def resendOTP(request):
+def sendOTPView(request):
 	try:
-		user = request.user
+		user_id = request.session.get('pre_2fa_user_id')
+		if user_id is None:
+			return JsonResponse({"error": "Access denied. Please login first."}, status=403)
+
+		user = CustomUser.objects.get(id=user_id)
+		
 		sendOTP(user)
 		return JsonResponse({}, status=200)
 
 	except Exception as e:
+		logging.info(f'{e}')
 		return JsonResponse({"error": str(e)}, status=400)
 
 
 @require_http_methods(["POST"])
-def validateOTP(request):
+def validateOTPView(request):
 	try:
 		user_id = request.session.get('pre_2fa_user_id')
 		if user_id is None:
