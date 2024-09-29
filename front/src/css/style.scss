@@ -41,6 +41,8 @@
 @import 'nav';
 @import 'OTP';
 @import 'chatroom';
+@import 'chat';
+@import 'search';
 @import 'home';
 @import 'profile';
 @import 'utils';
@@ -67,6 +69,7 @@
 
 .form-control {
     border: none;
+	border-radius: 12px;
 }
 
 .form-control:focus {
