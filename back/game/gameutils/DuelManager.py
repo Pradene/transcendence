@@ -4,60 +4,86 @@ import typing
 
 if typing.TYPE_CHECKING:
     from chat.consumers import ChatConsumer
+    from account.models import CustomUser
+
+
+class Duel:
+    def __init__(self, p1: 'CustomUser', p2: 'CustomUser'):
+        self.players: typing.List['CustomUser'] = [p1, p2]
+
+        self.__accept: typing.Dict['CustomUser', bool] = {}
+        self.__accept[p1] = True
+        self.__accept[p2] = False
+
+    def accept(self, player: 'CustomUser'):
+        if not player in self.players:
+            return
+
+        self.__accept[player] = True
+
+    def refuse(self, player: 'CustomUser'):
+        if not player in self.players:
+            return
+
+        self.__accept[player] = False
+
+    def is_ready(self):
+        return self.__accept[self.players[0]] and self.__accept[self.players[1]]
+
+    def are_in(self, p1: 'CustomUser', p2: 'CustomUser'):
+        return p1 in self.players and p2 in self.players
+
+    def is_in(self, player):
+        return player in self.players
+
+    def get_opponent(self, player: 'CustomUser') -> 'CustomUser':
+        return self.players[0] if player == self.players[1] else self.players[1]
 
 
 class DuelManager:
     def __init__(self):
-        self.duels: typing.List[typing.List[int, int, bool]] = []
+        self.duels: typing.List[Duel] = []
 
-    def invite(self, challengerid: int, challengedid: int):
+    def invite(self, challenger: 'CustomUser', challenged: 'CustomUser'):
         for duel in self.duels:
-            if challengedid in duel and challengerid in duel:
-                logging.info(f"Player {challengerid} and {challengedid} are already in a duel.")
+            if duel.are_in(challenger, challenged):
                 return
 
-        self.duels.append([challengerid, challengedid, False])
-        logging.info(f"Player {challengerid} has invited {challengedid} to a duel.")
+        self.duels.append(Duel(challenger, challenged))
+        logging.info(f"Player {challenger.username} has invited {challenged.username} to a duel.")
         logging.info(f"Current duels: {self.duels}")
 
-    def accept(self, user: int, opponent: int) -> bool:
+    def get_duel(self, p1: 'CustomUser', p2: 'CustomUser') -> Duel | None:
         for duel in self.duels:
-            if user in duel and opponent in duel:
-                duel[2] = True
-                return True
-        return False
+            if duel.are_in(p1, p2):
+                return duel
 
-    def decline(self, challengedid: int, challengerid: int):
+        return None
+
+    def get_duels(self, player: 'CustomUser') -> typing.List[Duel]:
+        l = []
+
         for duel in self.duels:
-            if challengedid in duel and challengerid in duel:
-                self.duels.remove(duel)
-                logging.info(f"Player {challengerid} and {challengedid} have declined the duel.")
+            if duel.is_in(player):
+                l.append(duel)
 
-    def have_active_duel(self, playerid: int) -> bool:
-        logging.info(f"Checking if player {playerid} has an active duel.")
-        logging.info(f"Current duels: {self.duels}")
-        for duel in self.duels:
-            if playerid in duel:
-                return duel[2]
+        return l
 
-    def remove_from_duels(self, playerid: int, onlynonactive: bool = False):
-        if onlynonactive:
-            for duel in self.duels:
-                if playerid in duel and not duel[2]:
-                    self.duels.remove(duel)
-                    logging.info(f"Player {playerid} has been removed from duels.")
-        else:
-            for duel in self.duels:
-                if playerid in duel:
-                    self.duels.remove(duel)
-                    logging.info(f"Player {playerid} has been removed from duels.")
+    def get_active_duel(self, player: 'CustomUser') -> Duel | None:
+        actives = self.get_duels(player)
 
-    def get_opponent_id(self, playerid: int):
-        for duel in self.duels:
-            if duel[0] == playerid and duel[2]:
-                return duel[1]
-            elif duel[1] == playerid and duel[2]:
-                return duel[0]
+        for duel in actives:
+            if duel.is_ready():
+                return duel
+
+        return None
+
+    def remove_duel(self, duel: Duel):
+        self.duels.remove(duel)
+
+    def remove_duels(self, duels: typing.List[Duel]):
+        for duel in duels:
+            self.duels.remove(duel)
 
 
 DUELMANAGER: DuelManager = DuelManager()
