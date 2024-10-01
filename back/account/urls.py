@@ -14,4 +14,5 @@ urlpatterns = [
     
     path('', views.userView),
     path('<int:user_id>/', views.userView),
+    path('levelinfo/<int:user_id>', views.userLevel)
 ]

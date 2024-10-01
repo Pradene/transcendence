@@ -10,6 +10,7 @@ export class Profile extends TemplateComponent {
 
     async componentDidMount() {
         await this.getUser()
+        await this.getLevel()
         await this.getGames()
         await this.getStats()
     }
@@ -49,6 +50,23 @@ export class Profile extends TemplateComponent {
         } catch (error) {
             console.log(error)
         }
+    }
+
+    async getLevel() {
+        const req = await fetch(`/api/users/levelinfo/${this.getProfileID()}`)
+        const data = await req.json()
+
+        const level_element = document.querySelector(".level #level")
+        const xp_element = document.querySelector(".level #exp")
+        const xpmax_element = document.querySelector(".level #expMax")
+        const progress_element = document.querySelector(".information progress")
+
+        level_element.textContent = data.level
+        xp_element.textContent = data.xp
+        xpmax_element.textContent = data.requiredxp
+
+        progress_element.setAttribute("max", data.requiredxp)
+        progress_element.setAttribute("value", data.xp)
     }
 
     getProfileID() {
