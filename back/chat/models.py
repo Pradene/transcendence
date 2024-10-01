@@ -12,7 +12,7 @@ class ChatRoom(models.Model):
 
         # Get other user (for private rooms)
         def get_name():
-            return self.get_other_user(requesting_user)
+            return self.get_other_user(requesting_user).username
 
         # Get last message
         def get_last_message():
@@ -24,7 +24,7 @@ class ChatRoom(models.Model):
         # Get picture (for private rooms and public rooms)
         def get_picture():
             if self.is_private:
-                other_user = CustomUser.objects.get(username=self.get_other_user(requesting_user))
+                other_user = CustomUser.objects.get(id=self.get_other_user(requesting_user).id)
                 return other_user.picture.url if other_user.picture else 'profile-pictures/default.png'
             else:
                 last_message = self.get_last_message()
@@ -65,7 +65,7 @@ class ChatRoom(models.Model):
     def get_other_user(self, current_user):
         if self.is_private:
             other_user = self.users.exclude(id=current_user.id).first()
-            return other_user.username
+            return other_user
         else:
             return None
 

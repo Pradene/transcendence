@@ -69,6 +69,16 @@ class DuelManager:
 
         return l
 
+    def accept(self, user: 'CustomUser', opponent: 'CustomUser') -> bool:
+        if self.get_active_duel(user) is not None:
+            self.remove_duel(self.get_active_duel(user))
+
+        if self.get_duel(user, opponent) is None:
+            return False
+
+        self.get_duel(user, opponent).accept(user)
+        return True
+
     def get_active_duel(self, player: 'CustomUser') -> Duel | None:
         actives = self.get_duels(player)
 

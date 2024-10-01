@@ -24,9 +24,13 @@ export class ChatRoom extends TemplateComponent {
 
         window.addEventListener("wsMessage", this.WebsocketMessageListener)
 
-        // document.querySelector("button.duel-invite").removeEventListener("click", this.sendDuelInviteListener)
-        // document.querySelector("button.duel-accept").removeEventListener("click", this.acceptDuelListener)
-        // document.querySelector("button.duel-refuse").removeEventListener("click", this.refuseDuelListener)
+        document.querySelector("button.duel-invite").removeEventListener("click", this.sendDuelInviteListener)
+        document.querySelectorAll(".message button.accept").forEach((value, key, parent) => {
+            value.removeEventListener('click', this.acceptDuelListener)
+        })
+        document.querySelectorAll(".message button.refuse").forEach((value, key, parent) => {
+            value.removeEventListener('click', this.refuseDuelListener)
+        })
     }
 
     async componentDidMount() {
@@ -37,9 +41,7 @@ export class ChatRoom extends TemplateComponent {
         
         window.addEventListener("wsMessage", this.WebsocketMessageListener)
 
-        // document.querySelector("button.duel-invite").addEventListener("click", this.sendDuelInviteListener)
-        // document.querySelector("button.duel-accept").addEventListener("click", this.acceptDuelListener)
-        // document.querySelector("button.duel-refuse").addEventListener("click", this.refuseDuelListener)
+        document.querySelector("button.duel-invite").addEventListener("click", this.sendDuelInviteListener)
     }
 
     WebsocketMessage(event) {
@@ -67,11 +69,80 @@ export class ChatRoom extends TemplateComponent {
         this.challengerid = message.challenger
         const userid = getConnectedUserID()
 
-        if (getConnectedUserID() != who)
+        if (getConnectedUserID() != who) {
+            this.createRequestSendConfirmation(message)
             return
+        }
 
-        document.querySelector("button.duel-accept").style.backgroundColor = buttonAcceptColor
-        document.querySelector("button.duel-refuse").style.backgroundColor = buttonRefuseColor
+        const container = document.querySelector("div.messages")
+        const element = document.createElement('div')
+        element.classList.add('message', 'duel-request-message')
+
+        const imgContainer = document.createElement('a')
+        imgContainer.href = `/users/${message.user_id}/`
+        imgContainer.className = 'profile-picture'
+        imgContainer.dataset.link = ''
+
+        const img = document.createElement('img')
+
+        const messageContainer = document.createElement('div')
+        messageContainer.className = 'content'
+
+        const text = document.createElement('p')
+        text.textContent = "You have been invited to a duel: "
+
+        const button_accept = document.createElement('button')
+        button_accept.textContent = "Accept Duel"
+        button_accept.className = "accept"
+
+        const button_refuse = document.createElement('button')
+        button_refuse.textContent = "Refuse Duel"
+        button_refuse.className = "refuse"
+
+        element.appendChild(imgContainer)
+
+
+        imgContainer.appendChild(img)
+        element.appendChild(messageContainer)
+        messageContainer.appendChild(text)
+        messageContainer.appendChild(button_accept)
+        messageContainer.appendChild(button_refuse)
+        container.appendChild(element)
+
+        button_accept.addEventListener('click', this.acceptDuelListener)
+        button_refuse.addEventListener('click', this.refuseDuelListener)
+
+        container.scrollTop = container.scrollHeight
+
+    }
+
+    createRequestSendConfirmation(message) {
+        const container = document.querySelector("div.messages")
+        const element = document.createElement('div')
+        element.classList.add('message', 'right')
+
+        const imgContainer = document.createElement('a')
+        imgContainer.href = `/users/${message.user_id}/`
+        imgContainer.className = 'profile-picture'
+        imgContainer.dataset.link = ''
+
+        const img = document.createElement('img')
+
+        const messageContainer = document.createElement('div')
+        messageContainer.className = 'content'
+
+        const text = document.createElement('p')
+        text.textContent = "You have invited your opponent to a duel, waiting for a replie..."
+
+        element.appendChild(imgContainer)
+
+
+        imgContainer.appendChild(img)
+        element.appendChild(messageContainer)
+        messageContainer.appendChild(text)
+        container.appendChild(element)
+
+        container.scrollTop = container.scrollHeight
     }
 
     async sendMessage(event) {

@@ -73,20 +73,20 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
         from game.gameutils.DuelManager import DUELMANAGER
 
-        if DUELMANAGER.have_active_duel(self.__user.id):
+        if DUELMANAGER.get_active_duel(self.__user) is not None:
             from game.gameutils.GameManager import GameManager
             logging.info(f"User {self.__user} has an active duel, starting new game")
 
             gamemanager: GameManager = GameManager.getInstance()
-            opponent = await database_sync_to_async(CustomUser.objects.get)(
-                id=DUELMANAGER.get_opponent_id(self.__user.id))
+            duel = DUELMANAGER.get_active_duel(self.__user)
+            opponent = duel.get_opponent(self.__user)
 
             if gamemanager.gameExists(opponent.username):
                 logging.info(f"Game with {opponent.username} already exists, joining")
                 self.__interface.current_game = gamemanager.getGame(opponent.username)
                 await self.__interface.current_game.join(self.__interface)
                 self.__interface.current_game.start()
-                DUELMANAGER.remove_from_duels(self.__user.id)
+                DUELMANAGER.remove_duel(duel)
             else:
                 logging.info(f"Game with {opponent.username} does not exist, creating")
                 self.__interface.current_game = await gamemanager.createGame(self.__interface)
