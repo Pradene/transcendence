@@ -4,6 +4,7 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, Permis
 from django.conf import settings
 from django.db import models
 
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, password=None, **extra_fields):
         """
@@ -50,7 +51,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=255)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    otp_secret = models.CharField(blank=True, null=True)
     api_42_id = models.CharField(max_length=255, unique=True, null=True, blank=True)
 
     objects = CustomUserManager()
@@ -145,8 +145,3 @@ class Block(models.Model):
     blocker = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="blockeds", on_delete=models.CASCADE)
     blocked = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="blockers", on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
-
-
-class BlackListedToken(models.Model):
-    token = models.CharField(max_length=255)
-    blacklisted_on = models.DateTimeField(auto_now_add=True)

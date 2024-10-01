@@ -1,0 +1,122 @@
+$loader-height: 50px;
+$loader-width: 150px;
+$ball-size: 10px;
+$paddle-width: 3px;
+$paddle-height: 20px;
+$paddle-offset: 10px;
+$animation-duration: 10s;
+
+.game-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: none;
+    height: 100vh;
+    width: 100vw;
+    z-index: 0;
+}
+
+.game-canvas.active {
+    display: block;
+    z-index: 1;
+}
+
+.game-container {
+
+    .game-container-header {
+        display: flex;
+        flex-direction: row;
+
+        > * {
+            margin: 0px 10px 0px 10px;
+        }
+    }
+
+    .waiting-for-players {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+
+        visibility: hidden;
+    }
+
+    .queue-animation {
+        position: relative;
+        background-color: lightgrey;
+
+        //box-sizing: border-box;
+        min-height: $loader-height;
+        height: $loader-height;
+        width: $loader-width;
+
+        .animation-paddle {
+            position: absolute;
+
+            width: $paddle-width;
+            height: $paddle-height;
+            background-color: grey;
+
+            &:nth-child(1) {
+                left: $paddle-offset;
+                animation: queue-animation-paddle calc($animation-duration) linear alternate infinite;
+                animation-delay: (3 * $animation-duration) / 4;
+            }
+
+            &:nth-child(3) {
+                left: calc(100% - $paddle-offset);
+                animation: queue-animation-paddle calc($animation-duration) linear alternate-reverse infinite;
+            }
+        }
+
+        .animation-ball {
+            margin: 0;
+            padding: 0;
+
+            position: absolute;
+            top: calc(($loader-height - $ball-size) / 2);
+            width: $ball-size;
+            height: $ball-size;
+            border: calc($ball-size / 2) solid grey;
+            border-radius: 50%;
+
+            animation: queue-animation $animation-duration linear infinite;
+        }
+    }
+}
+
+@keyframes queue-animation {
+    0% {
+        left: $paddle-offset + $paddle-width;
+        top: calc(($loader-height - $ball-size) / 2);
+    }
+
+    25% {
+        left: 50%;
+        top: 0px;
+    }
+
+    50% {
+        left: calc(100% - $ball-size - $paddle-offset);
+        top: calc(($loader-height - $ball-size) / 2);
+    }
+
+    75% {
+        left: 50%;
+        top: calc($loader-height - $ball-size);
+    }
+
+    100% {
+        left: $paddle-offset + $paddle-width;
+        top: calc(($loader-height - $ball-size) / 2);
+    }
+}
+
+@keyframes queue-animation-paddle {
+    0% {
+        top: 0px;
+    }
+
+    100% {
+        top: calc($loader-height - $paddle-height);
+    }
+}

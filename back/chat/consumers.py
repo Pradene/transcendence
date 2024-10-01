@@ -1,3 +1,4 @@
+import typing
 import json
 import logging
 
@@ -7,6 +8,9 @@ from channels.db import database_sync_to_async
 from account.models import CustomUser
 from .models import ChatRoom, Message
 from .utils.elapsed_time import elapsed_time
+
+if typing.TYPE_CHECKING:
+    from game.gameutils.DuelManager import DUELMANAGER
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -29,6 +33,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
             
             await self.accept()
+            logging.info(f"User {self.user} connected to the chat")
 
 
     async def disconnect(self, close_code):
@@ -44,11 +49,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'chat',
                 self.channel_name
             )
+
+            from game.gameutils.DuelManager import DUELMANAGER
+            DUELMANAGER.remove_from_duels(self.user.id, onlynonactive=True)
     
 
     async def receive(self, text_data):
         data = json.loads(text_data)
         message_type = data.get('type')
+
+        logging.info(f"Consumer {self.user} received: {data}")
         
         if message_type == 'message':
             await self.message(data)
@@ -61,8 +71,110 @@ class ChatConsumer(AsyncWebsocketConsumer):
         
         elif message_type == 'quit_room':
             await self.quit_room(data)
-        
 
+        elif message_type == 'duel_request':
+            await self.request_duel(data)
+
+        elif message_type == 'duel_accept':
+            await self.accept_duel(data)
+
+        elif message_type == 'duel_refuse':
+            await self.refuse_duel(data)
+
+
+    async def request_duel(self, data: dict):
+        logging.info(f"User {self.user} requested a duel")
+
+        try:
+            roomid = data['room']
+            room: ChatRoom = await database_sync_to_async(ChatRoom.objects.get)(id=roomid)
+            opponent = await database_sync_to_async(CustomUser.objects.get)(username=room.get_other_user(self.user))
+
+            await self.channel_layer.group_send(
+                f"chat_{roomid}",
+                {
+                    "type": "duel_response",
+                    "action": "duel_request",
+                    "challenger": self.user.id,
+                    "challenged": opponent.id,
+                    "room_id": room.id
+                }
+            )
+
+            from game.gameutils.DuelManager import DUELMANAGER
+            DUELMANAGER.invite(self.user.id, opponent.id)
+
+        except KeyError as e:
+            logging.error("KeyError in request_duel")
+            return
+
+        except ChatRoom.DoesNotExist as e:
+            logging.error("Room does not exist")
+            return
+
+    async def accept_duel(self, data: dict):
+        try:
+            from game.gameutils.DuelManager import DUELMANAGER
+            if DUELMANAGER.have_active_duel(self.user.id):
+                logging.error("User does already have an active duel")
+                return
+
+            roomid = data['room']
+            challengerid = data['challenger']
+
+            if not DUELMANAGER.accept(self.user.id, challengerid):
+                logging.error("User tried to accept a duel that does not exist")
+                return
+
+            logging.log(logging.INFO, f"User {self.user} accepted the duel")
+            await self.channel_layer.group_send(
+                f"chat_{roomid}",
+                {
+                    "type": "duel_response",
+                    "action": "duel_accept",
+                    "challenger": challengerid,
+                    "challenged": self.user.id,
+                    "room_id": roomid
+                }
+            )
+
+        except KeyError as e:
+            logging.error("KeyError in accept_duel")
+            return
+
+        except ChatRoom.DoesNotExist as e:
+            logging.error("Room does not exist")
+            return
+
+    async def refuse_duel(self, data):
+        try:
+            from game.gameutils.DuelManager import DUELMANAGER
+            if not DUELMANAGER.have_active_duel(self.user.id):
+                return
+
+            roomid = data['room']
+            challengerid = data['challenger']
+
+            DUELMANAGER.decline(self.user.id, challengerid)
+
+            await self.channel_layer.group_send(
+                f"chat_{roomid}",
+                {
+                    "type": "duel_response",
+                    "action": "duel_refuse",
+                    "challenger": challengerid,
+                    "challenged": self.user.id,
+                    "room_id": roomid
+                }
+            )
+
+        except KeyError as e:
+            logging.error("KeyError in refuse_duel")
+            return
+
+        except ChatRoom.DoesNotExist as e:
+            logging.error("Room does not exist")
+            return
 
     async def message(self, data):
         content = data['content']
@@ -102,9 +214,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'timestamp': data['timestamp']
         }))
 
+    async def duel_response(self, data):
+        await self.send(text_data=json.dumps(data))
 
     async def create_room(self, data):
-        room_name = data.get('room_name')
+        logging.info(f'create room')
         is_private = data.get('is_private', True)
         user_ids = data.get('users', [])
 
@@ -112,7 +226,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             user_ids.append(self.users.id)
 
         room, created = await database_sync_to_async(ChatRoom.objects.get_or_create)(
-            name=room_name,
             is_private=is_private,
         )
 
@@ -122,6 +235,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 user = await database_sync_to_async(CustomUser.objects.get)(id=user_id)
                 await database_sync_to_async(room.users.add)(user)
 
+        logging.info(f'room created')
+        
         # Add the user to the channel layer group for real-time messaging
         await self.channel_layer.group_add(
             f'chat_{room.id}',
@@ -134,7 +249,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             {
                 'type': 'create_room_response',
                 'room_id': room.id,
-                'room_name': room.name,
                 'is_private': room.is_private
             }
         )
@@ -143,7 +257,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'action': 'room_created',
             'room_id': data['room_id'],
-            'room_name': data['room_name'],
             'is_private': data['is_private']
         }))
 
@@ -154,7 +267,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             room = await database_sync_to_async(ChatRoom.objects.get)(id=room_id)
             await database_sync_to_async(room.join_room)(self.user)
-            
+
             await self.channel_layer.group_add(
                 f'chat_{room.id}',
                 self.channel_name

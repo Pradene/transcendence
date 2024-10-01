@@ -18,63 +18,79 @@ export function getConnectedUserID() {
 }
 
 // CSRF Tokens utils
-export async function getCSRFToken() {
+export async function fetchCSRFToken() {
     try {
-        const url = getURL("api/csrf-token/")
-        const response = await fetch(url)
-    
-        if (response.ok) {
-            const data = await response.json()
-            const token = data.token
-
-            return token
-
-        } else {
-            throw new Error(`Failed to fetch data: ${response.status}`)
-        }
+        const url = getURL('api/csrf-token/')
+        const data = await apiRequest(url, {
+            method: 'GET'
+        })
 
     } catch (e) {
-        console.log(e)
+        return
     }
+}
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`
+    const parts = value.split(`; ${name}=`)
+    if (parts.length === 2)
+        return parts.pop().split(';').shift()
+    
+    return null
+}
+
+// CSRF Tokens utils
+export function getCSRFToken() {
+    return getCookie('csrftoken')
 }
 
 
 // Requests to server utils
-export async function apiRequest(url, method = "GET", body = null) {
-    
+export async function apiRequest(url, options = {}) {
     try {
         let headers = new Headers()
 
-        headers.append("Content-type", "application/json")
+        const method = options.method ? options.method.toUpperCase() : 'GET'
         
-        if (method != "GET") {
-            const csrfToken = await getCSRFToken()
-            if (csrfToken) headers.append("X-CSRFToken", csrfToken)
+        const csrfToken = getCSRFToken()
+        if (csrfToken)
+            headers.append("X-CSRFToken", csrfToken)
+
+        if (options.headers) {
+            Object.entries(options.headers).forEach(([key, value]) => {
+                headers.append(key, value)
+            })
         }
 
-        const options = {
-            method: method.toUpperCase(),
+        const fetchOptions = {
+            method: method,
             headers: headers,
-            credentials: "include"
+            credentials: "include",
+            ...options
         }
 
-        if (body) {
-            options.body = JSON.stringify(body)
+        if (options.body) {
+            if (options.body instanceof FormData) {
+                fetchOptions.body = options.body
+
+            } else {
+                fetchOptions.body = JSON.stringify(options.body)
+                fetchOptions.headers.append('Content-Type', 'application/json')
+            }
         }
 
-        const response = await fetch(url, options)
+
+        const response = await fetch(url, fetchOptions)
         const data = await response.json()
 
         if (response.ok) {
             return data
 
         } else {
-            console.log("response from api request not ok")
             if (response.status == 401) {
-                console.log("error: need to refresh token")
                 const refreshed = await refreshToken()
                 if (refreshed)
-                    return await apiRequest(url, method, body)
+                    return await apiRequest(url, options)
                 else
                     throw new Error("Couldn't refresh access token")
 
@@ -89,28 +105,18 @@ export async function apiRequest(url, method = "GET", body = null) {
 }
 
 async function refreshToken() {
-    const url = getURL("api/users/refresh-token/")
+    const url = getURL("api/auth/refresh-token/")
     
     try {
-        const data = await apiRequest(
-            url,
-            "POST"
-        )
+        const data = await apiRequest(url, {
+            method: "POST"
+        })
 
         return true
 
     } catch (e) {
         return false
     }
-}
-
-function getCookie(name) {
-    const value = `; ${document.cookie}`
-    const parts = value.split(`; ${name}=`)
-    if (parts.length === 2)
-        return parts.pop().split(';').shift()
-    
-    return null
 }
 
 function connectToWebsockets() {
@@ -125,8 +131,8 @@ function connectToWebsockets() {
 
 export async function checkLogin() {
     try {
-        const token = getCookie("access_token")
-        if (!token) {
+        const access = getCookie("access_token")
+        if (!access) {
             const value = await refreshToken()
             if (value)
                 connectToWebsockets()
@@ -134,7 +140,7 @@ export async function checkLogin() {
             return value
         }
 
-        const decoded = jwt.decode(token)        
+        const decoded = jwt.decode(access)     
         const current = Date.now() / 1000
 
         if (decoded.exp > current) {

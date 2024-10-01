@@ -5,8 +5,6 @@ import { GAME_MODE } from "./Defines.js";
 const hosturl = "wss://" + location.hostname + ":" + location.port + "/ws/game/";
 
 export class GameSocket {
-    _websocket;
-    _currentGame;
     static #GameSocket = null;
 
     constructor(socket) {

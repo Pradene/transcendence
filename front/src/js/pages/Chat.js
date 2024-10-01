@@ -1,4 +1,4 @@
-import { getURL, apiRequest } from '../utils/utils.js'
+import { getURL, apiRequest, truncateString } from '../utils/utils.js'
 import { TemplateComponent } from '../utils/TemplateComponent.js'
 
 export class Chat extends TemplateComponent {
@@ -12,6 +12,7 @@ export class Chat extends TemplateComponent {
     unmount() {
         const input = this.getRef('input')
         input.removeEventListener('keyup', this.handleSearchListener)
+        
         window.removeEventListener('wsMessage', this.receiveMessageListener)
     }
 
@@ -20,6 +21,7 @@ export class Chat extends TemplateComponent {
 
         const input = this.getRef('input')
         input.addEventListener('keyup', this.handleSearchListener)
+
         window.addEventListener('wsMessage', this.receiveMessageListener)
     }
 
@@ -45,7 +47,7 @@ export class Chat extends TemplateComponent {
         const rooms = roomList.children
 
         for (let room of rooms) {
-            const name = room.querySelector('.chatroom-name').textContent
+            const name = room.querySelector('.name').textContent
             if (value && !name.includes(value)) {
                 room.classList.add('hidden')
             } else {
@@ -56,12 +58,15 @@ export class Chat extends TemplateComponent {
 
     receiveMessage(event) {
         const message = event.message
-        
+        console.log(message)
+
         if (message && message.action === 'message') {
             const chatRooms = this.getRef('rooms')
-            const chatRoom = chatRooms.querySelector(`[data-room-id='${message.room}']`)
-            
-            const chatRoomMessage = chatRoom.querySelector('.chatroom-message')
+
+            const chatRoom = chatRooms.querySelector(`[data-room-id='${message.room_id}']`)
+
+
+            const chatRoomMessage = chatRoom.querySelector('.message')
             chatRoomMessage.textContent = truncateString(message.content, 48)
 
             // Modify thhe position of the room
@@ -72,10 +77,11 @@ export class Chat extends TemplateComponent {
 
     displayRoom(room) {
         const element = document.createElement('li')
-        element.className = 'list-group-item rounded'
+        element.className = 'room'
+        element.dataset.roomId = room.id
 
         const link = document.createElement('a')
-        link.className = 'd-flex align-items-center'
+        link.className = 'link'
         link.href = `/chat/${room.id}/`
         link.dataset.link = ''
 
@@ -86,13 +92,14 @@ export class Chat extends TemplateComponent {
         img.src = room.picture
 
         const infoContainer = document.createElement('div')
-        infoContainer.className = 'd-flex flex-column mx-2'
+        infoContainer.className = 'info'
 
         const name = document.createElement('span')
-        name.className = 'mb-0 chatroom-name'
+        name.className = 'name'
         name.textContent = room.name
 
         const message = document.createElement('span')
+        message.className = 'message'
         if (room.last_message) {
             message.textContent = room.last_message.content
         } else {

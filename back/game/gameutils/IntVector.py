@@ -3,6 +3,8 @@ import logging
 
 class IntVector:
     def __init__(self, vector: list[float]):
+
+        logging.info(f"[Vector]: {vector}")
         self.x: float = vector[0]
         self.y: float = vector[1]
 

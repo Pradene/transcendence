@@ -19,6 +19,7 @@ TIME_TO_SLEEP: float = (1 / FPS)
 
 class Game(AbstractGame):
     def __init__(self, p1: PlayerInterface):
+        logging.info("[Game]: in ctor")
         super().__init__(p1)
 
         self.__p1: Union[PlayerInterface, None] = p1
@@ -44,7 +45,10 @@ class Game(AbstractGame):
     async def join(self, p2: PlayerInterface) -> None:
         """Join a player to the game"""
 
+        logging.info(f"[Game]: Player {p2.getName()} joining game {self.getGameid()}")
+
         if self.__p2 is not None:
+            logging.error(f"[Game]: Game is full, aborting")
             raise RuntimeError("Game is full")
 
         self.__p2 = p2
@@ -52,11 +56,12 @@ class Game(AbstractGame):
         self.__p2.setJoined(True)
         self.__p2.setScore(0)
 
+        logging.info(f"[Game]: Player joined")
         # send game data to clients
         await self.update()
 
     async def __gameLoop(self) -> None:
-        # logging.log(logging.INFO, f"Game {self.getGameid()} started")
+        logging.info(f"Game {self.getGameid()} started")
 
         # wait 5 seconds for game start
         for i in range(0, 5):
@@ -89,6 +94,8 @@ class Game(AbstractGame):
     async def update(self, timer: Union[int | None] = None) -> None:
         """Send game datas to clients, and delete the game if it's finished"""
 
+
+        # logging.info("[Game]: Updating clients")
         # Send game datas to client
         data = self.__toJSON(timer)
 
@@ -186,6 +193,7 @@ class Game(AbstractGame):
         """Start the game loop"""
 
         self.__th.start()
+        logging.info(f"Thread for game {self.getGameid()} started")
 
     def saveToDB(self) -> None:
         """Save the game to the database"""

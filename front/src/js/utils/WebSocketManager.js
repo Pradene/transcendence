@@ -31,7 +31,7 @@ export class WebSocketManager {
         socket.onmessage = (event) => {
             this.handleMessage(event)
         
-            console.log("WebSocket message")
+            console.log("WebSocket message", event)
         }
 
         socket.onclose = (event) => {

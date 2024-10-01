@@ -1,94 +1,71 @@
 import * as THREE from 'three'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'
-import { Font } from 'three/examples/jsm/loaders/FontLoader.js'
-import { TTFLoader } from 'three/examples/jsm/loaders/TTFLoader.js'
 
 import { CurrentPlayer, Player } from "./Player.js"
 import { Ball } from "./Ball.js"
 import { Position } from "./Utils.js"
 import { GameSocket } from "./GameSocket.js"
-import { GAMECONTAINER } from "./DomElements.js"
-import { CANVAS_HEIGHT, CANVAS_WIDTH } from "./Defines.js"
+import { CANVAS_HEIGHT, CANVAS_WIDTH, THREE_RATIO } from "./Defines.js"
 
-const colors = {
-    waiting: {
-        background: "#000000ff",
-        border: "#ffffffff",
-        text: "#ffffffff"
-    },
-    running: {
-        background: "#000000ff",
-        text: "#ffffffff",
-        player: "#ffffffff",
-        border: "#ffffffff"
-    }
-}
+let font = null
+const loader = new FontLoader()
+loader.load("/src/fonts/Epilogue_Bold.json", (f) => font = f)
 
 export class Pong {
-    _canvas
-    _context
-    _renderer
-    _scene
-    _camera
-    _current_player
-    _opponent
-    _ball
-    _running
-
     constructor(canvas) {
-        this._current_player = undefined
+        this._player = undefined
         this._opponent = undefined
+        this._ball = undefined
+        this._timerMesh = undefined
         
         //set the canvas properties
-        canvas.style.backgroundColor = colors.waiting.background
-        canvas.style.border = "solid 1px " + colors.waiting.border
-        canvas.width = CANVAS_WIDTH
-        canvas.height = CANVAS_HEIGHT
         this._context = canvas.getContext("webgl2")
         this._canvas = canvas
+        this._canvas.classList.add("active")
+        this._canvas.width = window.screen.width
+        this._canvas.height = window.screen.height
 
         this._renderer = new THREE.WebGLRenderer({ antialias: true, canvas: this._canvas })
-        
+        this._renderer.setPixelRatio(window.devicePixelRatio)
+
         this._scene = new THREE.Scene()
         
         const fov = 60
         const near = 0.1
         const far = 100
-        const aspect = CANVAS_WIDTH / CANVAS_HEIGHT
+        const aspect = window.screen.width / window.screen.height
         this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
-        // set camera properties
-        this._camera.position.set(0, 0, 5) //position of the camera on the z axis
+        this._camera.position.set(0, 4, 10)
         this._camera.lookAt(0, 0, 0)
-        
-        
-        // this._ball = new Ball(new Position(0, 0))
-        this._running = false
-        this._timerMesh = null
 
-        this._font = null
-        const loader = new FontLoader()
-        loader.load("/src/fonts/Epilogue_Bold.json", (font) => {
-            this._font = font
-        })
+        this._ambientLight = new THREE.AmbientLight(0xffff00, 1)
+        this._scene.add(this._ambientLight)
+        
+        this._running = false
     }
 
     /**
      * Display the game
      */
     display() {
-        this._current_player?.display(this._context)
-        this._opponent?.display(this._context)
-        this._ball.display(this._context)
+        this._player?.display(this._scene)
+        this._opponent?.display(this._scene)
+        this._ball.display(this._scene)
     }
 
+    /**
+     * Display timer before game start
+     * @param {*} timer 
+     */
     displayTimer(timer) {
         const material = new THREE.MeshBasicMaterial({color: 0xDAFFFF})
         
         this.removeTimer()
         
+        // Create geometry
         const geometry = new TextGeometry(timer, {
-            font: this._font,
+            font: font,
             size: 1,
             height: 0.2,
             depth: 0.2,
@@ -99,19 +76,22 @@ export class Pong {
             bevelOffset: 0,
             bevelSegments: 5
         })
-        
+
+        // Center the geometry
         geometry.computeBoundingBox()
         const boundingBox = geometry.boundingBox
-        const textWidth = boundingBox.max.x - boundingBox.min.x
-        const textHeight = boundingBox.max.y - boundingBox.min.y
+        const center = new THREE.Vector3()
+        boundingBox.getCenter(center)
+        geometry.translate(-center.x, center.y, -center.z)
         
         this._timerMesh = new THREE.Mesh(geometry, material)
-        this._timerMesh.position.x = -textWidth / 2
-        this._timerMesh.position.y = -textHeight / 2
         
         this._scene.add(this._timerMesh)
     }
 
+    /**
+     * Remove timer from the canvas
+     */
     removeTimer() {
         if (this._timerMesh) {
             this._scene.remove(this._timerMesh)
@@ -125,12 +105,32 @@ export class Pong {
      * Stop the game
      */
     async stop() {
-        let gs = await GameSocket.get()
-        this._current_player?.stop()
+        const gs = await GameSocket.get()
         gs.removeGame()
 
-        const gameContainer = document.querySelector("div.game-container div.game")
-        gameContainer.removeChild(this._canvas)
+        this._player?.stop()
+
+        this._renderer.dispose()
+        this._scene = null
+
+        this._canvas.classList.remove("active")
+    }
+
+    createGame() {
+        this._player = new CurrentPlayer("a name", new Position(0, 0))
+        this._opponent = new Player("another name", new Position(0, 0))
+        this._ball = new Ball(new Position(0, 0))
+        
+        const width = CANVAS_HEIGHT / THREE_RATIO
+        const height = 0.2
+        const depth = CANVAS_WIDTH / THREE_RATIO
+        
+        const geometry = new THREE.BoxGeometry(width, height, depth)
+        geometry.translate(0, -0.2, 0)
+        const material = new THREE.MeshBasicMaterial({color: 0x00ff00})
+
+        this._platform = new THREE.Mesh(geometry, material)
+        this._scene.add(this._platform)
     }
 
     /**
@@ -139,18 +139,17 @@ export class Pong {
      */
     update(response) {
         // Initialize player 
-        if (!this._current_player) {
-            this._current_player = new CurrentPlayer("a name", new Position(0, 0))
-            this._opponent = new Player("another name", new Position(0, 0))
+        if (!this._player) {
+            this.createGame()
         }
 
         if (response.data.status === "finished") {
             this.stop()
         }
         
-        this._current_player?.setPositionFromArray(response.data.current_player.position)
+        this._player?.setPositionFromArray(response.data.current_player.position)
         this._opponent?.setPositionFromArray(response.data.opponent.position)
-        this._current_player?.setScore(response.data.current_player.score)
+        this._player?.setScore(response.data.current_player.score)
         this._opponent?.setScore(response.data.opponent.score)
         this._ball?.setPositionFromArray(response.data.ball)
 
@@ -159,9 +158,8 @@ export class Pong {
         
         // now redisplay the game
         if (typeof timer === "undefined" && this._running) {
-            console.log("running")
             this.removeTimer()
-            // this.display()
+            this.display()
 
         } else if (timer) {
             this.displayTimer(timer.toString())

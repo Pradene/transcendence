@@ -93,11 +93,13 @@ class GameManager:
         pass
 
     async def createGame(self, player: PlayerInterface) -> Game:
+        logging.info(f"[GameManager]: creating new game instance")
         from game.consumers import GameConsumer
         game = Game(player)
         GameManager.GAMES[player.getName()] = game
 
         await GameConsumer.onGameChange()
+        logging.info(f"[GameManager]: Game instance created")
         return game
 
     def gameExists(self, gameid: str) -> bool:

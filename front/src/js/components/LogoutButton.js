@@ -11,7 +11,6 @@ class LogoutButton extends HTMLElement {
 
     connectedCallback() {
         this._button = document.createElement("button")
-        this._button.className = "btn btn-primary"
         this._button.textContent = "Disconnect"
 
         this._button.addEventListener("click", async () => {
@@ -23,12 +22,11 @@ class LogoutButton extends HTMLElement {
 
     async handleClick() {
         try {
-            const url = getURL("api/users/logout/")
+            const url = getURL("api/auth/logout/")
 
-            await apiRequest(
-                url,
-                "POST"
-            )
+            await apiRequest(url, {
+                method: "POST"
+            })
             
             const ws = WebSocketManager.get()
             ws.disconnect('chat')

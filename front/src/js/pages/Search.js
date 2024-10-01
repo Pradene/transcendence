@@ -41,10 +41,10 @@ export class Search extends TemplateComponent {
 
     displayUser(user) {
         const element = document.createElement("li")
-        element.className = "list-group-item rounded"
+        element.className = "user"
 
         const link = document.createElement("a")
-        link.className = "d-flex align-items-center"
+        link.className = "link"
         link.dataset.link = ""
         link.href = `/users/${user.id}`
 
@@ -55,7 +55,7 @@ export class Search extends TemplateComponent {
         img.src = user.picture
 
         const name = document.createElement("div")
-        name.className = "mx-2"
+        name.className = "name"
         name.textContent = user.username
 
         imgContainer.appendChild(img)
