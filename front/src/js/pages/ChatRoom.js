@@ -1,6 +1,7 @@
 import { getURL, apiRequest, getConnectedUserID } from "../utils/utils.js"
 import { WebSocketManager } from "../utils/WebSocketManager.js"
 import { TemplateComponent } from "../utils/TemplateComponent.js"
+import {Router} from "../utils/Router";
 
 const buttonAcceptColor = "green"
 const buttonRefuseColor = "red"
@@ -44,7 +45,7 @@ export class ChatRoom extends TemplateComponent {
         document.querySelector("button.duel-invite").addEventListener("click", this.sendDuelInviteListener)
     }
 
-    WebsocketMessage(event) {
+    async WebsocketMessage(event) {
         console.log(event)
         const message = event.message
 
@@ -56,7 +57,8 @@ export class ChatRoom extends TemplateComponent {
         } else if (message.action == "duel_request") {
             this.processDuelRequest(message)
         } else if (message.action == "duel_accept") {
-            window.location.href = `/`
+            const router = Router.get()
+            await router.navigate("/")
         } else if (message.action == "duel_refuse") {
             this.processDuelRefuse(message)
         } else if (message.action == "duel_cancel") {

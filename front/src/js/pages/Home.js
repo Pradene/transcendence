@@ -16,9 +16,7 @@ export class Home extends TemplateComponent {
 
     async componentDidMount() {
         this._gameSocket = await GameSocket.get()
-        window.addEventListener("gameMessage", (e) => {
-            this.handleGameSocketMessage(e.detail.data)
-        })
+        window.addEventListener("gameMessage", (e) => this.handleGameSocketMessage(e.detail.data))
 
         const createTournamentButton = document.querySelector("button.create-tournament")
         createTournamentButton.addEventListener("click", () => {
@@ -31,7 +29,7 @@ export class Home extends TemplateComponent {
         })
     }
 
-    handleGameSocketMessage(response) {
+    async handleGameSocketMessage(response) {
         const gameContainer = document.querySelector("div.game canvas")
 
         switch (response.method) {
@@ -54,7 +52,7 @@ export class Home extends TemplateComponent {
                 break;
             case "redirect_game":
                 const gameid = response.gameid
-                document.location = `/game/${gameid}`
+                await Router.get().navigate(`/game/${gameid}`)
                 break;
         }
     }
