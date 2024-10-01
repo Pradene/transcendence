@@ -154,14 +154,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def refuse_duel(self, data):
         try:
             from game.gameutils.DuelManager import DUELMANAGER
-            if DUELMANAGER.get_active_duel(self.user) is None:
-                return
 
             roomid = data['room']
-            challenger = await database_sync_to_async(CustomUser.objects.get)(id=data['challenger'])
-            duel = DUELMANAGER.get_duel(self.user, challenger)
-            DUELMANAGER.remove_duel(duel)
+            room = await database_sync_to_async(ChatRoom.objects.get)(id=roomid)
+            challenger = await sync_to_async(room.get_other_user)(current_user=self.user)
 
+            duel = DUELMANAGER.get_duel(self.user, challenger)
+            if duel is None:
+                return
+            else:
+                DUELMANAGER.remove_duel(duel)
 
             await self.channel_layer.group_send(
                 f"chat_{roomid}",
@@ -175,7 +177,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
         except KeyError as e:
-            logging.error("KeyError in refuse_duel")
+            logging.error(f"KeyError in refuse_duel: {e.__str__()}")
             return
 
         except ChatRoom.DoesNotExist as e:

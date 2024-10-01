@@ -58,10 +58,16 @@ export class ChatRoom extends TemplateComponent {
         } else if (message.action == "duel_accept") {
             window.location.href = `/`
         } else if (message.action == "duel_refuse") {
-            //TODO: Display duel refuse
+            this.processDuelRefuse(message)
         } else if (message.action == "duel_cancel") {
             //TODO: Display duel cancel
         }
+    }
+
+    processDuelRefuse(message) {
+        document.querySelectorAll('.duel-request-message').forEach((value, key, parent) => {
+            value.remove()
+        })
     }
 
     processDuelRequest(message) {
@@ -119,7 +125,7 @@ export class ChatRoom extends TemplateComponent {
     createRequestSendConfirmation(message) {
         const container = document.querySelector("div.messages")
         const element = document.createElement('div')
-        element.classList.add('message', 'right')
+        element.classList.add('message', 'right', 'duel-request-message')
 
         const imgContainer = document.createElement('a')
         imgContainer.href = `/users/${message.user_id}/`
