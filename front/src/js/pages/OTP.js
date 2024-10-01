@@ -40,7 +40,7 @@ export class OTP extends TemplateComponent {
 		try {
 			console.log('otp')
 			const url = getURL('api/auth/otp/')
-			const data = await apiRequest(url, 'GET')
+			const data = await apiRequest(url)
 		
 		} catch (e) {
 			console.log(e)
@@ -57,8 +57,11 @@ export class OTP extends TemplateComponent {
 				throw new Error('Incomplete code')
 			
 			const url = getURL('api/auth/otp/verify/')
-			const data = await apiRequest(url, 'POST', {
-				code: input.value
+			const data = await apiRequest(url, {
+				method: 'POST', 
+				body: {
+					code: input.value
+				}
 			})
 
 			const router = Router.get()

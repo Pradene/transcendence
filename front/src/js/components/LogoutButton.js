@@ -24,10 +24,9 @@ class LogoutButton extends HTMLElement {
         try {
             const url = getURL("api/auth/logout/")
 
-            await apiRequest(
-                url,
-                "POST"
-            )
+            await apiRequest(url, {
+                method: "POST"
+            })
             
             const ws = WebSocketManager.get()
             ws.disconnect('chat')

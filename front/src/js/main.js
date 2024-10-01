@@ -1,5 +1,7 @@
 import { WebSocketManager } from "./utils/WebSocketManager.js"
 import { Router } from "./utils/Router.js"
+import { fetchCSRFToken } from "./utils/utils.js"
+import { GameSocket } from "./pong/GameSocket.js"
 
 import { Home } from "./pages/Home.js"
 import { Login } from "./pages/Login.js"
@@ -17,7 +19,9 @@ import "../js/components/FriendButton.js"
 
 import "../css/style.scss"
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+
+    await fetchCSRFToken()
 
     new WebSocketManager()
     
@@ -33,21 +37,27 @@ document.addEventListener("DOMContentLoaded", () => {
         {path: '/verify-otp/', view: new OTP(), protected: false},
     ])
 
-    document.body.addEventListener("click", (event) => {        
-        const link = isDataLink(event.target)
-        if (link) {
+    document.body.addEventListener("click", (event) => {
+        const target = event.target
+        if (isDataLink(target)) {
             event.preventDefault()
-            router.navigate(link)
+            router.navigate(target.href)
         }
+    })
+
+    window.addEventListener('beforeunload', () => {
+        const socket = GameSocket.get()
+        if (socket)
+            socket.close()
     })
 })
 
 const isDataLink = (elem) => {
-    let match = null
+    let match = false
 
     while (elem && elem.nodeName.toLowerCase() != "body") {
         if (elem.matches("[data-link]")) {
-            match = elem.href
+            match = true
             break
         }
         
