@@ -66,6 +66,8 @@ def userView(request, user_id=None):
 			user.picture = picture
 			
 			user.save()
+
+			logging.info(f'user : {user}')
 			
 			return JsonResponse({'message': 'Profile updated successfully'}, status=200)
 	

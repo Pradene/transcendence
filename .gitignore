@@ -3,5 +3,7 @@
 front/dist
 front/node_modules
 
+node_modules
+
 __pycache__
 **/__pycache__
