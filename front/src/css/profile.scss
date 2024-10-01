@@ -36,6 +36,15 @@
             width: 100%;
             border-radius: 12px;
             padding: 0px -2px;
+            color: var(--fifth-color);
+
+            &::-webkit-progress-value {
+                background: var(--fifth-color);
+            }
+            
+            &::-moz-progress-bar {
+                background: var(--fifth-color);
+            }
         }
     }
 }
