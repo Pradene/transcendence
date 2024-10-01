@@ -220,3 +220,17 @@ class Game(AbstractGame):
         """Return the game model"""
 
         return self.__gamemodel
+
+    async def redirectClients(self):
+        if self.__gamemodel is None:
+            return
+
+        data = {
+            "method": "redirect_game",
+            "status": True,
+            "gameid": self.__gamemodel.id
+        }
+
+        await self.__p1.getUpdateCallback()(data)
+        await self.__p2.getUpdateCallback()(data)
+

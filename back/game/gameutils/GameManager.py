@@ -7,6 +7,8 @@ import logging
 import time
 import asyncio
 
+from asgiref.sync import sync_to_async
+
 from threading import RLock, Thread
 
 
@@ -15,14 +17,14 @@ class ThreadingDict:
         self.__dict: Dict = {}
         # self.__ondelete: Callable = onDelete
         self.__lock: RLock = RLock()
-        self.__thread: Thread = Thread(target=self.__checkAndDelete)
+        self.__thread: Thread = Thread(target=asyncio.run, args=(self.__checkAndDelete(),))
 
         self.__thread.start()
 
     def __del__(self):
         self.__thread.join()
 
-    def __checkAndDelete(self):
+    async def __checkAndDelete(self):
         oneDeleted: bool = False
 
         while True:
@@ -32,14 +34,15 @@ class ThreadingDict:
                 for key in list(self.__dict.keys()):
                     if self.__dict[key].isFinished():
                         game = self.__dict.pop(key)
-                        game.saveToDB()
+                        await sync_to_async(game.saveToDB, thread_sensitive=True)()
+                        await game.redirectClients()
                         logging.log(logging.INFO, f"Game {key} deleted")
                         oneDeleted = True
 
             if oneDeleted:
                 from game.consumers import GameConsumer
                 oneDeleted = False
-                asyncio.run(GameConsumer.onGameChange())
+                await GameConsumer.onGameChange()
 
             time.sleep(1)
 

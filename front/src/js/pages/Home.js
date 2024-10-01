@@ -1,6 +1,7 @@
 import { TemplateComponent } from "../utils/TemplateComponent.js"
 import { GameSocket } from "../pong/GameSocket.js"
 import { Pong } from "../pong/Pong.js"
+import {Router} from "../utils/Router";
 
 export class Home extends TemplateComponent {
     constructor() {
@@ -50,6 +51,10 @@ export class Home extends TemplateComponent {
                     this._gameSocket._currentGame = new Pong(gameContainer);
 
                 this._gameSocket._currentGame.update(response);
+                break;
+            case "redirect_game":
+                const gameid = response.gameid
+                document.location = `/game/${gameid}`
                 break;
         }
     }
