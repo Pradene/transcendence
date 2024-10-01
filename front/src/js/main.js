@@ -12,6 +12,7 @@ import { ChatRoom } from "./pages/ChatRoom.js"
 import { Search } from "./pages/Search.js"
 import { Profile } from "./pages/Profile.js"
 import { EditProfile } from "./pages/EditProfile.js"
+import { GameView } from "./pages/GameView.js"
 
 import "../js/components/Nav.js"
 import "../js/components/LogoutButton.js"
@@ -35,6 +36,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         {path: '/login/', view: new Login(), protected: false},
         {path: '/signup/', view: new Signup(), protected: false},
         {path: '/verify-otp/', view: new OTP(), protected: false},
+        {path: '/game/:id/', view: new GameView(), protected: false},
     ])
 
     document.body.addEventListener("click", (event) => {

@@ -74,6 +74,9 @@ export class Profile extends TemplateComponent {
     displayGame(game) {
         const element = document.createElement('div')
         element.classList.add('game')
+        element.addEventListener('click', (event) => {
+            document.location = "/game/" + game.id
+        })
 
         const player = document.createElement('div')
         player.classList.add('player')
