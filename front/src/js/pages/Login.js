@@ -114,15 +114,14 @@ export class Login extends TemplateComponent {
         const url = getURL("api/auth/login/")
 
         try {
-            const data = await apiRequest(
-                url,
-                "POST",
-                {
+            const data = await apiRequest(url, {
+                method: "POST",
+                body: {
                     username: username.value,
                     password: password.value,
                     remember_me: rememberMe.value
                 }
-            )
+            })
 
             const router = Router.get()
             router.navigate("/verify-otp/")
@@ -141,7 +140,7 @@ export class Login extends TemplateComponent {
     async submit42LoginRequest() {
         try {
             const url = getURL("api/auth/ft_auth/")
-            const data = await apiRequest(url, "GET")
+            const data = await apiRequest(url)
 
             if (data.url) {
                 window.location.href = data.url

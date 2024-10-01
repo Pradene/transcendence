@@ -81,6 +81,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         elif message_type == 'duel_refuse':
             await self.refuse_duel(data)
 
+
     async def request_duel(self, data: dict):
         logging.info(f"User {self.user} requested a duel")
 

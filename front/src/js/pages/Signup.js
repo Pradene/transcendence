@@ -109,16 +109,15 @@ export class Signup extends TemplateComponent {
         try {
             const url = getURL("api/auth/signup/")
 
-            const data = await apiRequest(
-                url,
-                "POST",
-                {
-					email: email.value,
+            const data = await apiRequest(url, {
+                method: "POST",
+                body: {
+                    email: email.value,
                     username: username.value,
                     password: password.value,
                     password_confirmation: passwordConfirmation.value
                 }
-            )
+            })
 
             const router = Router.get()
             await router.navigate("/login/")
