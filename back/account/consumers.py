@@ -92,9 +92,6 @@ class FriendsConsumer(AsyncWebsocketConsumer):
             sender_data = friend_request.sender.toJSON()
             receiver_data = friend_request.receiver.toJSON()
 
-            # receiver_data = friend_request.receiver.toJSON()
-            # sender_data = friend_request.sender.toJSON()
-
             await self.channel_layer.group_send(
                 f'user_{friend_request.sender.id}',
                 {
@@ -120,25 +117,20 @@ class FriendsConsumer(AsyncWebsocketConsumer):
 
 
     async def cancel_friend_request(self, data):
-        receiver_id = data.get('receiver')
-
         try:
+            receiver_id = data.get('receiver')
             receiver = await database_sync_to_async(CustomUser.objects.get)(id=receiver_id)
             friend_request = await database_sync_to_async(FriendRequest.objects.get)(sender=self.user, receiver=receiver)
 
             await database_sync_to_async(friend_request.cancel)()
-
-            logging.info(f'friend request cancelled')
 
         except Exception as e:
             logging.info(f'error: {e}')
 
 
     async def accept_friend_request(self, data):
-        sender_id = data.get('sender')
-        logging.info(f'friend request from {sender_id} accepted')
-
         try:
+            sender_id = data.get('sender')
             sender = await database_sync_to_async(CustomUser.objects.get)(id=sender_id)
             friend_request = await database_sync_to_async(FriendRequest.objects.get)(sender=sender, receiver=self.user)
 
@@ -147,25 +139,16 @@ class FriendsConsumer(AsyncWebsocketConsumer):
             receiver_data = friend_request.receiver.toJSON()
             sender_data = friend_request.sender.toJSON()
 
-            await self.channel_layer.group_send(
-                f'user_{friend_request.sender.id}',
-                {
-                    'type': 'friend_request_response',
-                    'action': 'friend_request_accepted',
-                    'receiver': receiver_data,
-                    'sender': sender_data
-                }
-            )
-
-            await self.channel_layer.group_send(
-                f'user_{friend_request.receiver.id}',
-                {
-                    'type': 'friend_request_response',
-                    'action': 'friend_request_accepted',
-                    'receiver': receiver_data,
-                    'sender': sender_data
-                }
-            )
+            for user_id in [friend_request.receiver.id, friend_request.sender.id]:
+                await self.channel_layer.group_send(
+                    f'user_{user_id}',
+                    {
+                        'type': 'friend_request_response',
+                        'action': 'friend_request_accepted',
+                        'receiver': receiver_data,
+                        'sender': sender_data
+                    }
+                )
 
             await self.channel_layer.group_send(
                 'chat',  # Send to chat consumer room creation message
@@ -198,25 +181,16 @@ class FriendsConsumer(AsyncWebsocketConsumer):
             await database_sync_to_async(friend_request.delete)()
 
             # Notify sender and receiver about the decline
-            await self.channel_layer.group_send(
-                f'user_{friend_request.sender.id}',
-                {
-                    'type': 'friend_request_response',
-                    'action': 'friend_request_declined',
-                    'receiver': receiver_data,
-                    'sender': sender_data
-                }
-            )
-
-            await self.channel_layer.group_send(
-                f'user_{friend_request.receiver.id}',
-                {
-                    'type': 'friend_request_response',
-                    'action': 'friend_request_declined',
-                    'receiver': receiver_data,
-                    'sender': sender_data
-                }
-            )
+            for user_id in [friend_request.receiver.id, friend_request.sender.id]:
+                await self.channel_layer.group_send(
+                    f'user_{friend_request.sender.id}',
+                    {
+                        'type': 'friend_request_response',
+                        'action': 'friend_request_declined',
+                        'receiver': receiver_data,
+                        'sender': sender_data
+                    }
+                )
 
         except ObjectDoesNotExist:
             logging.info('Friend request does not exist.')
