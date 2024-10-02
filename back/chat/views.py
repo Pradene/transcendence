@@ -56,7 +56,9 @@ def roomView(request, room_id):
         'username': message.user.username,
         'picture': message.user.picture.url if message.user.picture else None,
         'content': message.content,
-        'timestamp': elapsed_time(message.timestamp)
+        'timestamp': elapsed_time(message.timestamp),
+        'is_duel': message.is_duel,
+        'duel_id': message.id
     } for message in messages]
 
     users = room.users.all()

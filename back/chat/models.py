@@ -69,12 +69,19 @@ class ChatRoom(models.Model):
         else:
             return None
 
+    def get_active_duels_for(self, user: CustomUser):
+        duels = self.messages.filter(user=user, is_duel=True, is_duel_expired=False, is_duel_accepted=False)
+        return duels
+
 
 class Message(models.Model):
     room = models.ForeignKey(ChatRoom, related_name='messages', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
+    is_duel = models.BooleanField(default=False)
+    is_duel_accepted = models.BooleanField(default=False)
+    is_duel_expired = models.BooleanField(default=False)
 
     def __str__(self):
         return self.content
@@ -85,4 +92,8 @@ class Message(models.Model):
             'user': self.user.username if self.user else None,
             'content': self.content,
             'timestamp': self.timestamp.isoformat(),
+            'is_duel': self.is_duel,
+            'is_duel_accepted': self.is_duel_accepted,
+            'is_duel_expired': self.is_duel_expired
         }
+

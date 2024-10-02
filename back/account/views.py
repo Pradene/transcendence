@@ -138,3 +138,4 @@ def userLevel(request, user_id):
 	except Exception as e:
 		logging.error(f'[userLevel]: {e.__str__()}')
 		return JsonResponse({}, status=400)
+
