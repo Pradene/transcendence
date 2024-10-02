@@ -7,13 +7,12 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 
 from .models import FriendList, FriendRequest, CustomUser
-from .utils.serializers import serialize_user
-
+from chat.models import ChatRoom
 
 class FriendsConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = self.scope["user"]
-        
+
         if self.user.is_authenticated:
             await self.channel_layer.group_add(
                 f"user_{self.user.id}",
@@ -22,8 +21,8 @@ class FriendsConsumer(AsyncWebsocketConsumer):
 
             await self.accept()
 
-            logging.info(self.channel_layer)
-            logging.info(self.channel_layer.groups)
+        else:
+            await self.close()
 
 
     async def disconnect(self, close_code):
@@ -37,8 +36,6 @@ class FriendsConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         data = json.loads(text_data)
         message_type = data['type']
-
-        logging.info(f'{message_type}')
 
         if message_type == 'friend_request_sended':
             await self.send_friend_request(data)
@@ -57,8 +54,7 @@ class FriendsConsumer(AsyncWebsocketConsumer):
         try:
             receiver_id = data['receiver']
             if self.user.id == receiver_id:
-                logging.info(f'You cannot send a friend request to yourself')
-                return
+                return # Exit if the request is sent to yourself
 
             receiver = await database_sync_to_async(
                 CustomUser.objects.get)(id=receiver_id)
@@ -71,8 +67,7 @@ class FriendsConsumer(AsyncWebsocketConsumer):
             is_friend = await database_sync_to_async(friend_list.is_friend)(receiver)
 
             if is_friend:
-                logging.info(f'Users are already friends')
-                return
+                return # Exit if users are already friends
 
             # Check if a friend request already exists before creating it
             existing_request = await database_sync_to_async(
@@ -83,9 +78,7 @@ class FriendsConsumer(AsyncWebsocketConsumer):
             )()
 
             if existing_request:
-                logging.info(f'Friend request already exists')
-                return  # Exit the function if the friend request already exists
-
+                return  # Exit if the friend request already exists
 
             friend_request = await database_sync_to_async(FriendRequest.objects.create)(sender=self.user, receiver=receiver)
 
@@ -132,14 +125,16 @@ class FriendsConsumer(AsyncWebsocketConsumer):
         try:
             sender_id = data.get('sender')
             sender = await database_sync_to_async(CustomUser.objects.get)(id=sender_id)
+            receiver = await database_sync_to_async(CustomUser.objects.get)(id=self.user.id)
+
             friend_request = await database_sync_to_async(FriendRequest.objects.get)(sender=sender, receiver=self.user)
 
             await database_sync_to_async(friend_request.accept)()
 
-            receiver_data = friend_request.receiver.toJSON()
-            sender_data = friend_request.sender.toJSON()
+            receiver_data = receiver.toJSON()
+            sender_data = sender.toJSON()
 
-            for user_id in [friend_request.receiver.id, friend_request.sender.id]:
+            for user_id in [receiver.id, sender.id]:
                 await self.channel_layer.group_send(
                     f'user_{user_id}',
                     {
@@ -150,14 +145,29 @@ class FriendsConsumer(AsyncWebsocketConsumer):
                     }
                 )
 
-            await self.channel_layer.group_send(
-                'chat',  # Send to chat consumer room creation message
-                {
-                    'type': 'create_room',
-                    'is_private': True,
-                    'users': [friend_request.receiver.id, friend_request.sender.id]
-                }
-            )
+            room = await database_sync_to_async(
+                ChatRoom.objects
+                .filter(is_private=True)
+                .filter(users=sender)
+                .filter(users=receiver)
+                .first
+            )()
+
+            if room:
+                return # Exit if the room already exists
+            
+            room = await database_sync_to_async(
+                ChatRoom.objects.create
+            )(is_private=True)
+
+            for user_id in [receiver.id, sender.id]:
+                await self.channel_layer.group_send(
+                    f'chat_user_{user_id}',
+                    {
+                        'type': 'join_room',
+                        'room_id': room.id
+                    }
+                )
         
         except Exception as e:
             logging.info(f'error: {e}')
