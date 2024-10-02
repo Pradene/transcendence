@@ -37,7 +37,7 @@ class FriendsConsumer(AsyncWebsocketConsumer):
         event = json.loads(text_data)
         message_type = event['type']
 
-        elif message_type == 'friend_request_sended':
+        if message_type == 'friend_request_sended':
             await self.send_friend_request(event)
         
         elif message_type == "friend_request_cancelled":
