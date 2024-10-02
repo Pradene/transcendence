@@ -86,18 +86,22 @@ def searchUsersView(request):
 @jwt_required
 @require_http_methods(["GET"])
 def getFriendsView(request, user_id=None):
-	if user_id is None:
-		user = request.user
-	else:
-		try:
-			user = CustomUser.objects.get(id=user_id)
-		except:
-			return JsonResponse({"error": str(e)}, status=400)
+	try:
+		if user_id is None:
+			user = request.user
+		else:
+			try:
+				user = CustomUser.objects.get(id=user_id)
+			except:
+				return JsonResponse({"error": str(e)}, status=400)
 
-	friend_list, created = FriendList.objects.get_or_create(user=user)
-	friends = friend_list.friends.all()
-	data = [friend.toJSON() for friend in friends]
-	return JsonResponse(serializer.data, safe=False, status=200)
+		friend_list, created = FriendList.objects.get_or_create(user=user)
+		friends = friend_list.friends.all()
+		data = [friend.toJSON() for friend in friends]
+		return JsonResponse(data, safe=False, status=200)
+	
+	except Exception as e:
+		return JsonResponse({}, status=400)
 
 
 @jwt_required

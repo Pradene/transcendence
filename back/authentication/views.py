@@ -101,6 +101,12 @@ def loginView(request):
 def logoutView(request):
 	try:
 		refresh_token = request.COOKIES.get("refresh_token")
+		
+		user_id = decode_token(refresh_token)
+		user = CustomUser.objects.get(id=user_id)
+		user.is_active = False
+		user.save()
+
 		token = BlackListedToken.objects.create(token=refresh_token)
 
 		logout(request)
@@ -145,6 +151,9 @@ def validateOTPView(request):
 
 		if OTP.validate(user, code):
 			login(request, user)
+
+			user.is_active = True
+			user.save()
 			
 			access_token, access_exp = create_access_token(user)
 			refresh_token, refresh_exp = create_refresh_token(user)
@@ -256,6 +265,9 @@ def ftAuthCallback(request):
 
 	user = login42user(access_token)
 	login(request, user)
+
+	user.is_active = True
+	user.save()
 
 	at, access_exp = create_access_token(user)
 	rt, refresh_exp = create_refresh_token(user)

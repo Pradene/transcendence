@@ -34,25 +34,25 @@ class FriendsConsumer(AsyncWebsocketConsumer):
 
 
     async def receive(self, text_data):
-        data = json.loads(text_data)
-        message_type = data['type']
+        event = json.loads(text_data)
+        message_type = event['type']
 
-        if message_type == 'friend_request_sended':
-            await self.send_friend_request(data)
+        elif message_type == 'friend_request_sended':
+            await self.send_friend_request(event)
         
         elif message_type == "friend_request_cancelled":
-            await self.cancel_friend_request(data)
+            await self.cancel_friend_request(event)
 
         elif message_type == 'friend_request_accepted':
-            await self.accept_friend_request(data)
+            await self.accept_friend_request(event)
 
         elif message_type == 'friend_request_declined':
-            await self.decline_friend_request(data)
+            await self.decline_friend_request(event)
 
 
-    async def send_friend_request(self, data):
+    async def send_friend_request(self, event):
         try:
-            receiver_id = data['receiver']
+            receiver_id = event.get('receiver')
             if self.user.id == receiver_id:
                 return # Exit if the request is sent to yourself
 
@@ -109,9 +109,9 @@ class FriendsConsumer(AsyncWebsocketConsumer):
             logging.info(f'error: {e}')
 
 
-    async def cancel_friend_request(self, data):
+    async def cancel_friend_request(self, event):
         try:
-            receiver_id = data.get('receiver')
+            receiver_id = event.get('receiver')
             receiver = await database_sync_to_async(CustomUser.objects.get)(id=receiver_id)
             friend_request = await database_sync_to_async(FriendRequest.objects.get)(sender=self.user, receiver=receiver)
 
@@ -121,9 +121,9 @@ class FriendsConsumer(AsyncWebsocketConsumer):
             logging.info(f'error: {e}')
 
 
-    async def accept_friend_request(self, data):
+    async def accept_friend_request(self, event):
         try:
-            sender_id = data.get('sender')
+            sender_id = event.get('sender')
             sender = await database_sync_to_async(CustomUser.objects.get)(id=sender_id)
             receiver = await database_sync_to_async(CustomUser.objects.get)(id=self.user.id)
 
@@ -173,9 +173,9 @@ class FriendsConsumer(AsyncWebsocketConsumer):
             logging.info(f'error: {e}')
     
 
-    async def decline_friend_request(self, data):
-        sender_id = data.get('sender')
-        receiver_id = data.get('receiver')
+    async def decline_friend_request(self, event):
+        sender_id = event.get('sender')
+        receiver_id = event.get('receiver')
 
         try:
             # Retrieve the friend request
@@ -208,10 +208,10 @@ class FriendsConsumer(AsyncWebsocketConsumer):
             logging.info(f'Error declining friend request: {e}')
 
 
-    async def friend_request_response(self, data):
-        action = data['action']
-        receiver = data['receiver']
-        sender = data['sender']
+    async def friend_request_response(self, event):
+        action = event['action']
+        receiver = event['receiver']
+        sender = event['sender']
 
         await self.send(text_data=json.dumps({
             'action': action,

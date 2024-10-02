@@ -67,7 +67,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
             'username': self.username,
             'email': self.email,
             'picture': self.picture.url if self.picture else None,
-            'is_active': self.is_active,
+            'is_active': self.is_active
         }
 
         if requesting_user is not None:
