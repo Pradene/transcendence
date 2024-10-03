@@ -10,6 +10,7 @@ export class OTP extends TemplateComponent {
 		this.handleSubmitListener = async (e) => await this.handleSubmit(e)
 		this.displayCodeListener = (e) => this.displayCode(e)
 		this.animCodeListener = () => this.animCode()
+		this.sendOTPListener = async () => await this.sendOTP()
 	}
 
 	unmount() {
@@ -30,6 +31,20 @@ export class OTP extends TemplateComponent {
 		input.addEventListener('input', this.displayCodeListener)
 		input.addEventListener('focus', this.animCodeListener)
 		input.addEventListener('blur', this.animCodeListener)
+
+		const otpButton = document.getElementById('otp-button')
+		otpButton.addEventListener('click', this.sendOTPListener)
+	}
+
+	async sendOTP() {
+		try {
+			console.log('otp')
+			const url = getURL('api/auth/otp/')
+			const data = await apiRequest(url)
+		
+		} catch (e) {
+			console.log(e)
+		}
 	}
 	
 	async handleSubmit(e) {
@@ -41,9 +56,12 @@ export class OTP extends TemplateComponent {
 			if (input.value.length != 6)
 				throw new Error('Incomplete code')
 			
-			const url = getURL('api/auth/verify-otp/')
-			const data = await apiRequest(url, 'POST', {
-				code: input.value
+			const url = getURL('api/auth/otp/verify/')
+			const data = await apiRequest(url, {
+				method: 'POST', 
+				body: {
+					code: input.value
+				}
 			})
 
 			const router = Router.get()

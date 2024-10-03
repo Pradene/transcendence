@@ -24,14 +24,10 @@ export class WebSocketManager {
 
         socket.onopen = (event) => {
             this.flushPendingMessages(type)
-            
-            console.log('WebSocket connection established')
         }
 
         socket.onmessage = (event) => {
             this.handleMessage(event)
-        
-            console.log("WebSocket message")
         }
 
         socket.onclose = (event) => {

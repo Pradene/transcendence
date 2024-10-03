@@ -1,13 +1,24 @@
 <nav-component></nav-component>
-<div class="w-100">
-    <div class="w-100 d-flex justify-content-between align-items-center bg-gray-800 rounded p-2 mb-2">
-        <p class="my-0" style="margin-left: 1rem;">Users</p>
-        <label class="form-container rounded px-3">
-            <img src="/assets/search.svg" width="16" height="16" />
-            <input ref="input" class="form-control" placeholder="Search..." type="text" required="True" autocomplete="off" />
-        </label>
+<div class=social>
+
+    <div class="search">
+        <div class="top">
+            <p>Users</p>
+            <label>
+                <input ref="input" class="form-control" placeholder="Search..." type="text" required="True" autocomplete="off" />
+            </label>
+        </div>
+        <ul ref="users" class="content"></ul>
     </div>
-    <div class="rounded bg-gray-800" style="min-height: 80vh;">
-        <ul ref="users" class="list-group scrollable px-2"></ul>
+
+    <div class="friends">
+        <div class="top">Friends</div>
+        <ul ref="friends" class="content"></ul>
     </div>
+
+    <div class="requests">
+        <div class="top">Requests</div>
+        <ul ref="requests" class="content"></ul>
+    </div>
+    
 </div>

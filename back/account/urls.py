@@ -3,9 +3,7 @@ from . import views
 
 urlpatterns = [
 	path('friend-requests/', views.getFriendRequestsView),
-	# path('friend-requests/<int:user_id>/', views.sendFriendRequestView),
-	# path('friend-requests/<int:user_id>/accept/', views.acceptFriendRequestView),
-	# path('friend-requests/<int:user_id>/decline/', views.declineFriendRequestView),
+	path('<int:user_id>/friend-requests/', views.getFriendRequestsView),
 
     path('search/', views.searchUsersView),
     
@@ -14,4 +12,5 @@ urlpatterns = [
     
     path('', views.userView),
     path('<int:user_id>/', views.userView),
+    path('levelinfo/<int:user_id>', views.userLevel)
 ]

@@ -8,4 +8,5 @@ from . import views
 urlpatterns = [
     path('history/', views.gameHistory),
     path('stats/', views.gameStats),
+    path('gameinfo/<int:gameid>/', views.gameInfo),
 ]

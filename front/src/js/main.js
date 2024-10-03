@@ -1,5 +1,7 @@
 import { WebSocketManager } from "./utils/WebSocketManager.js"
 import { Router } from "./utils/Router.js"
+import { fetchCSRFToken } from "./utils/utils.js"
+import { GameSocket } from "./pong/GameSocket.js"
 
 import { Home } from "./pages/Home.js"
 import { Login } from "./pages/Login.js"
@@ -10,6 +12,7 @@ import { ChatRoom } from "./pages/ChatRoom.js"
 import { Search } from "./pages/Search.js"
 import { Profile } from "./pages/Profile.js"
 import { EditProfile } from "./pages/EditProfile.js"
+import { GameView } from "./pages/GameView.js"
 
 import "../js/components/Nav.js"
 import "../js/components/LogoutButton.js"
@@ -17,7 +20,9 @@ import "../js/components/FriendButton.js"
 
 import "../css/style.scss"
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+
+    await fetchCSRFToken()
 
     new WebSocketManager()
     
@@ -31,23 +36,30 @@ document.addEventListener("DOMContentLoaded", () => {
         {path: '/login/', view: new Login(), protected: false},
         {path: '/signup/', view: new Signup(), protected: false},
         {path: '/verify-otp/', view: new OTP(), protected: false},
+        {path: '/game/:id/', view: new GameView(), protected: false},
     ])
 
-    document.body.addEventListener("click", (event) => {        
-        const link = isDataLink(event.target)
-        if (link) {
+    document.body.addEventListener("click", (event) => {
+        const target = event.target
+        if (isDataLink(target)) {
             event.preventDefault()
-            router.navigate(link)
+            router.navigate(target.href)
         }
+    })
+
+    window.addEventListener('beforeunload', () => {
+        const socket = GameSocket.get()
+        if (socket)
+            socket.close()
     })
 })
 
 const isDataLink = (elem) => {
-    let match = null
+    let match = false
 
     while (elem && elem.nodeName.toLowerCase() != "body") {
         if (elem.matches("[data-link]")) {
-            match = elem.href
+            match = true
             break
         }
         

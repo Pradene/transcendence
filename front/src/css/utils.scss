@@ -1,35 +1,52 @@
+body {
+    background: var(--primary-color);
+    color: var(--text-color);
+}
+
+#app {
+    margin: 0 auto;
+    width: 98%;
+    max-width: 800px;
+}
+
+a {
+    color: white;
+    text-decoration: none;
+}
+
+button, .button {
+    padding: 8px 12px;
+    border-radius: 12px;
+    
+    background: var(--fifth-color);
+    color: var(--text-color);
+    
+    cursor: pointer;
+    
+    border: none;
+    outline: none;
+    box-shadow: none;
+    appearance: none;
+    text-align: center;
+}
+
+button:hover, .button:hover {
+    background: var(--fifth-color-dark);
+    transition: background 0.2s;
+}
+
+
 .hidden {
     display: none;
 }
 
-/* CONTAINER */
-
-.container {
-    width: auto;
-}
-
-.container-fp {
-    width: 100%;
-    height: 100vh;
-
+.flex {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
 
-.container-flex {
-    display: flex;
-    align-items: center;
+    &.center {
+        align-items: center;
+    }
 }
-
-.container-flex-center {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
 
 /* SEARCH BAR*/
 .search-bar {
@@ -54,35 +71,9 @@
 }
 
 
-/* BUTTTON */
-.button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 8px 12px;
-    border-radius: 12px;
-    
-    background: var(--fifth-color);
-    color: var(--text-color);
-    
-    cursor: pointer;
-    
-    border: none;
-    outline: none;
-    box-shadow: none;
-    appearance: none;
-    text-align: center;
-}
-
-.button:hover {
-    background: var(--fifth-color-dark);
-    transition: background 0.2s;
-}
-
-
 /* PROFILE */
 .profile-picture {
+    position: relative;
     --size: 32px;
     height: var(--size);
     width: var(--size);
@@ -92,6 +83,27 @@
     padding: 4px;
     border-radius: 50%;
     border: 2px solid var(--forth-color);
+
+    span {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        height: 6px;
+        width: 6px;
+        border-radius: 50%;
+        background: var(--forth-color);
+        
+        &.online {
+            background: var(--fifth-color);
+        }
+    }
+
+    img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
 }
 
 .profile-picture-large {
@@ -113,20 +125,4 @@
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
-}
-
-/* TEXT */
-.text-xl {
-    font-size: 24px;
-    font-weight: 700;
-}
-
-.text-l {
-    font-size: 18px;
-    font-weight: 400;
-}
-
-.text-m {
-    font-size: 16px;
-    font-weight: 400;
 }

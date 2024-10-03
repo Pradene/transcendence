@@ -1,4 +1,5 @@
 import json
+import logging
 
 from django.views.decorators.http import require_GET, require_POST
 from django.http import JsonResponse
@@ -19,19 +20,19 @@ def roomsView(request):
             return JsonResponse(data, safe=False, status=200)
 
         except Exception as e:
+            logging.info(e)
             return JsonResponse({'error': str(e)}, status=400)
     
     elif request.method == "POST":
         try:
             data = json.loads(request.body)
-            name = data.get("name")
             user_ids = data.get("user_ids", [])
             users = CustomUser.objects.filter(id__in=user_ids)
 
             if not users.exists():
                 return JsonResponse({"error": "At least one user must be specified"}, status=400)
 
-            room = ChatRoom.objects.create(name=name, is_private=False)
+            room = ChatRoom.objects.create(is_private=False)
             room.users.set(users)
             room.save()
 
@@ -50,13 +51,36 @@ def roomView(request, room_id):
     )
 
     messages = Message.objects.filter(room=room).order_by('timestamp')
+
     messages_data = [{
         'user_id': message.user.id,
         'username': message.user.username,
         'picture': message.user.picture.url if message.user.picture else None,
         'content': message.content,
-        'timestamp': elapsed_time(message.timestamp)
+        'timestamp': elapsed_time(message.timestamp),
+        'is_duel': message.is_duel,
+        'duel_id': message.id,
+        'is_duel_expired': message.is_duel_expired,
+        'is_duel_accepted': message.is_duel_accepted
     } for message in messages]
+
+    # # is a duel have been played, fetch info about game
+    # for m in messages_data:
+    #     if not m['is_duel'] or not m['is_duel_accepted']:
+    #         continue
+    #
+    #     duel = Message.objects.get(id=m['duel_id']).duel
+    #     if duel is None:
+    #         return
+    #
+    #     game_data = {
+    #         'user1': duel.user1.username,
+    #         'user2': duel.user2.username,
+    #         'user1_score': duel.user1_score,
+    #         'user2_score': duel.user2_score
+    #     }
+    #
+    #     m['game_data'] = game_data
 
     users = room.users.all()
     users_data = [{
@@ -69,20 +93,17 @@ def roomView(request, room_id):
         other_user = room.users.exclude(id=user.id).first()
         if not other_user:
             return JsonResponse({'error': 'no other user found in this room'}, status=400)
-        room_name = other_user.username
         room_picture = user.picture.url if user.picture else None
 
     else:
-        room_name = room.name
         room_picture = room.picture
 
     data = {
-        'room_name': room_name,
         'room_picture': room_picture,
         'users': users_data,
         'messages': messages_data
     }
-    
+
     return JsonResponse(data, status=200)
 
 
@@ -92,7 +113,7 @@ def searchRoomsView(request):
     user = request.user
     query = request.GET.get('q', '')
     if query:
-        rooms = ChatRoom.objects.filter(users=user, name__icontains=query)
+        rooms = ChatRoom.objects.filter(users=user)
         data = [room.toJSON(user) for room in rooms]
         return JsonResponse(data, safe=False, status=200)
     

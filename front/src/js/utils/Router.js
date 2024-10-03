@@ -25,6 +25,10 @@ export class Router {
     }
 
     async navigate(path) {
+        if (!path) {
+            return
+        }
+
         if (!path.endsWith("/")) {
             path += "/"
         }

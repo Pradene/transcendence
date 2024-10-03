@@ -1,10 +1,12 @@
+import logging
+
 from django.conf import settings
 from django.db import models
 
 from account.models import CustomUser
+from game.models import GameModel
 
 class ChatRoom(models.Model):
-    name = models.CharField(max_length=255)
     picture = models.ImageField(upload_to='room_pictures/', default="room_pictures/default.png", blank=True, null=True)
     is_private =  models.BooleanField(default=True)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="rooms")
@@ -13,7 +15,7 @@ class ChatRoom(models.Model):
 
         # Get other user (for private rooms)
         def get_name():
-            return self.get_other_user(requesting_user)
+            return self.get_other_user(requesting_user).username
 
         # Get last message
         def get_last_message():
@@ -25,7 +27,7 @@ class ChatRoom(models.Model):
         # Get picture (for private rooms and public rooms)
         def get_picture():
             if self.is_private:
-                other_user = CustomUser.objects.get(username=self.get_other_user(requesting_user))
+                other_user = CustomUser.objects.get(id=self.get_other_user(requesting_user).id)
                 return other_user.picture.url if other_user.picture else 'profile-pictures/default.png'
             else:
                 last_message = self.get_last_message()
@@ -42,8 +44,8 @@ class ChatRoom(models.Model):
         }
 
     @classmethod
-    def create(cls, name, is_private=True, user_ids=None):
-        room = cls.objects.create(name=name, is_private=is_private)
+    def create(cls, is_private=True, user_ids=None):
+        room = cls.objects.create(is_private=is_private)
         if user_ids:
             users = CustomUser.objects.filter(id__in=user_ids)
             room.users.add(*users)
@@ -65,10 +67,23 @@ class ChatRoom(models.Model):
     
     def get_other_user(self, current_user):
         if self.is_private:
-            usernames = self.name.split('_')
-            return usernames[1] if usernames[0] == current_user.username else usernames[0]
+            other_user = self.users.exclude(id=current_user.id).first()
+            return other_user
         else:
             return None
+
+    def is_in_room(self, user: CustomUser):
+        users = self.users.all()
+        logging.info(f"[ROOM]: {user.username}:{user.id} {users[0].username}:{users[0].id} {users[1].username}:{users[1].id}")
+        return user.id == users[0].id or user.id == users[1].id
+
+    def get_active_duels_for(self, user: CustomUser):
+        duels = self.messages.filter(user=user, is_duel=True, is_duel_expired=False, is_duel_accepted=False)
+        return duels
+
+    def get_users_tuple(self):
+        users = self.users.all()
+        return (users[0], users[1])
 
 
 class Message(models.Model):
@@ -76,6 +91,10 @@ class Message(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
+    is_duel = models.BooleanField(default=False)
+    is_duel_accepted = models.BooleanField(default=False)
+    is_duel_expired = models.BooleanField(default=False)
+    duel = models.ForeignKey(GameModel, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.content
@@ -86,4 +105,8 @@ class Message(models.Model):
             'user': self.user.username if self.user else None,
             'content': self.content,
             'timestamp': self.timestamp.isoformat(),
+            'is_duel': self.is_duel,
+            'is_duel_accepted': self.is_duel_accepted,
+            'is_duel_expired': self.is_duel_expired
         }
+
