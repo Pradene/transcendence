@@ -104,7 +104,7 @@ def logoutView(request):
 		
 		user_id = decode_token(refresh_token)
 		user = CustomUser.objects.get(id=user_id)
-		user.is_active = False
+		user.is_online = False
 		user.save()
 
 		token = BlackListedToken.objects.create(token=refresh_token)
@@ -152,7 +152,7 @@ def validateOTPView(request):
 		if OTP.validate(user, code):
 			login(request, user)
 
-			user.is_active = True
+			user.is_online = True
 			user.save()
 			
 			access_token, access_exp = create_access_token(user)
@@ -266,7 +266,7 @@ def ftAuthCallback(request):
 	user = login42user(access_token)
 	login(request, user)
 
-	user.is_active = True
+	user.is_online = True
 	user.save()
 
 	at, access_exp = create_access_token(user)
