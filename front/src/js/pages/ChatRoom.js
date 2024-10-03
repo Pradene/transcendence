@@ -17,6 +17,7 @@ export class ChatRoom extends TemplateComponent {
         this.refuseDuelListener = async (e) => this.refuseDuel(e)
 
         this.challengerid = 0
+        this.room_id = null
     }
 
     unmount() {
@@ -32,9 +33,15 @@ export class ChatRoom extends TemplateComponent {
         document.querySelectorAll(".message button.refuse").forEach((value, key, parent) => {
             value.removeEventListener('click', this.refuseDuelListener)
         })
+
+        WebSocketManager.get().sendMessage("chat", {
+            "type": "quit_room",
+            "room_id": this.room_id
+        })
     }
 
     async componentDidMount() {
+        this.room_id = this.getRoomID()
         await this.getMessages()
         
         const form = this.getRef("form")
@@ -51,11 +58,11 @@ export class ChatRoom extends TemplateComponent {
 
         if (message.room_id != this.getRoomID()) {
             return
+        } else if (message.is_duel) {
+            this.processDuelRequest(message)
         } else if (message.action == "message") {
             const container = this.getRef("messages")
             this.displayMessage(container, message)
-        } else if (message.action == "duel_request") {
-            this.processDuelRequest(message)
         } else if (message.action == "duel_accept") {
             const router = Router.get()
             await router.navigate("/")
@@ -73,31 +80,18 @@ export class ChatRoom extends TemplateComponent {
     }
 
     processDuelRequest(message) {
-        const who = message.challenged
-        this.challengerid = message.challenger
+        const challenger = message.user_id
         const userid = getConnectedUserID()
+        const main_container = document.querySelector("div.messages")
 
-        if (getConnectedUserID() != who) {
-            this.createRequestSendConfirmation(message)
+        if (getConnectedUserID() === challenger) {
+            message.content = "You have invited your opponent to a duel, waiting for a replie..."
+            this.displayMessage(main_container, message)
             return
         }
 
-        const container = document.querySelector("div.messages")
-        const element = document.createElement('div')
-        element.classList.add('message', 'duel-request-message')
-
-        const imgContainer = document.createElement('a')
-        imgContainer.href = `/users/${message.user_id}/`
-        imgContainer.className = 'profile-picture'
-        imgContainer.dataset.link = ''
-
-        const img = document.createElement('img')
-
-        const messageContainer = document.createElement('div')
-        messageContainer.className = 'content'
-
-        const text = document.createElement('p')
-        text.textContent = "You have been invited to a duel: "
+        const container = document.createElement("div")
+        container.classList.add("duel-container")
 
         const button_accept = document.createElement('button')
         button_accept.textContent = "Accept Duel"
@@ -107,50 +101,15 @@ export class ChatRoom extends TemplateComponent {
         button_refuse.textContent = "Refuse Duel"
         button_refuse.className = "refuse"
 
-        element.appendChild(imgContainer)
+        if (!message.is_duel_expired) {
+            button_accept.addEventListener('click', this.acceptDuelListener)
+            button_refuse.addEventListener('click', this.refuseDuelListener)
+        }
 
-
-        imgContainer.appendChild(img)
-        element.appendChild(messageContainer)
-        messageContainer.appendChild(text)
-        messageContainer.appendChild(button_accept)
-        messageContainer.appendChild(button_refuse)
-        container.appendChild(element)
-
-        button_accept.addEventListener('click', this.acceptDuelListener)
-        button_refuse.addEventListener('click', this.refuseDuelListener)
-
-        container.scrollTop = container.scrollHeight
-
-    }
-
-    createRequestSendConfirmation(message) {
-        const container = document.querySelector("div.messages")
-        const element = document.createElement('div')
-        element.classList.add('message', 'right', 'duel-request-message')
-
-        const imgContainer = document.createElement('a')
-        imgContainer.href = `/users/${message.user_id}/`
-        imgContainer.className = 'profile-picture'
-        imgContainer.dataset.link = ''
-
-        const img = document.createElement('img')
-
-        const messageContainer = document.createElement('div')
-        messageContainer.className = 'content'
-
-        const text = document.createElement('p')
-        text.textContent = "You have invited your opponent to a duel, waiting for a replie..."
-
-        element.appendChild(imgContainer)
-
-
-        imgContainer.appendChild(img)
-        element.appendChild(messageContainer)
-        messageContainer.appendChild(text)
-        container.appendChild(element)
-
-        container.scrollTop = container.scrollHeight
+        message.content = "You have been invited to a duel: "
+        container.appendChild(button_accept)
+        container.appendChild(button_refuse)
+        this.displayMessage(main_container, message, container)
     }
 
     async sendMessage(event) {
@@ -178,8 +137,11 @@ export class ChatRoom extends TemplateComponent {
         const roomID = this.getRoomID()
         const ws = WebSocketManager.get()
         await ws.sendMessage("chat", {
-            type: "duel_request",
-            room: roomID
+            type: "message",
+            room: roomID,
+            content: "",
+            is_duel: true,
+            duel_action: "duel_request"
         })
     }
 
@@ -217,7 +179,10 @@ export class ChatRoom extends TemplateComponent {
             const messages = data.messages
             messages.forEach(message => {
                 const container = this.getRef("messages")
-                this.displayMessage(container, message)
+                if (message.is_duel)
+                    this.processDuelRequest(message)
+                else
+                    this.displayMessage(container, message)
             })
 
         } catch (error) {
@@ -226,7 +191,7 @@ export class ChatRoom extends TemplateComponent {
     }
 
     
-    displayMessage(container, message) {
+    displayMessage(container, message, innerElements = null) {
         if (!message)
             return
 
@@ -249,15 +214,18 @@ export class ChatRoom extends TemplateComponent {
 
         const messageContent = document.createElement('p')
         messageContent.textContent = message.content
+        messageContainer.appendChild(messageContent)
+
+        if (innerElements !== null) {
+            messageContainer.appendChild(innerElements)
+        }
 
         const messageTimestamp = document.createElement('span')
         messageTimestamp.textContent = message.timestamp
 
-
         element.appendChild(imgContainer)
         imgContainer.appendChild(img)
         element.appendChild(messageContainer)
-        messageContainer.appendChild(messageContent)
         messageContainer.appendChild(messageTimestamp)
 
         container.appendChild(element)

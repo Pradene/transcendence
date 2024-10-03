@@ -1,6 +1,7 @@
 import logging
 import asyncio
 import time
+import typing
 
 from typing import Union
 from threading import Thread, Lock
@@ -12,13 +13,14 @@ from game.gameutils.abstractgame import AbstractGame
 
 from game import models as gamemodels
 from account import models as accountmodels
+from chat.models import Message
 
 FPS: int = 30
 TIME_TO_SLEEP: float = (1 / FPS)
 
 
 class Game(AbstractGame):
-    def __init__(self, p1: PlayerInterface):
+    def __init__(self, p1: PlayerInterface, related_duel: Message | None = None):
         logging.info("[Game]: in ctor")
         super().__init__(p1)
 
@@ -36,6 +38,8 @@ class Game(AbstractGame):
         self.__score: tuple[int] = (0, 0)
 
         self.__gamemodel: Union[gamemodels.GameModel | None] = None
+
+        self.__related_duel = related_duel
 
 
     def __del__(self):
@@ -120,7 +124,7 @@ class Game(AbstractGame):
                 "gameid":         self.getGameid(),
                 "current_player": {
                     "position": self.__p1.getPosition().copy(),
-                    "score":    self.__p1.getScore()
+                    "score":    self.__p1.getScore(),
                 },
                 "opponent":       {
                     "position": self.__p2.getPosition().copy() if self.__p2 is not None else P2_POSITION.copy(),
@@ -213,6 +217,10 @@ class Game(AbstractGame):
             winner = winner
         )
         dbentry.save()
+
+        if self.__related_duel is not None:
+            self.__related_duel.duel = dbentry
+            self.__related_duel.save()
 
         self.__gamemodel = dbentry
 

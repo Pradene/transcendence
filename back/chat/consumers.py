@@ -52,17 +52,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.channel_name
             )
 
-            from game.gameutils.DuelManager import DUELMANAGER
-            duels = DUELMANAGER.get_duels(self.user)
-            if DUELMANAGER.get_active_duel(self.user) is not None:
-                duels.remove(DUELMANAGER.get_active_duel(self.user))
-            DUELMANAGER.remove_duels(duels)
+        # TODO: EXPIRE DUELS
 
     async def receive(self, text_data):
         data = json.loads(text_data)
         message_type = data.get('type')
 
         logging.info(f"Consumer {self.user} received: {data}")
+
+        if 'room' not in data.keys() and 'room_id' not in data.keys():
+            logging.error("[CONSUMER]: Invalid request, missing room or room_id field")
+            return
+
+        room = await database_sync_to_async(ChatRoom.objects.get)(id=data['room'] if 'room' in data.keys() else data['room_id'])
+        if not await database_sync_to_async(room.is_in_room)(self.user):
+            logging.error(f"[CONSUMER]: User {self.user.username} not in room {room.id}")
+            return
 
         if message_type == 'message':
             await self.message(data)
@@ -76,8 +81,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         elif message_type == 'quit_room':
             await self.quit_room(data)
 
-        elif message_type == 'duel_request':
-            await self.request_duel(data)
+        # elif message_type == 'duel_request':
+        #     await self.request_duel(data)
 
         elif message_type == 'duel_accept':
             await self.accept_duel(data)
@@ -86,12 +91,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.refuse_duel(data)
 
     @database_sync_to_async
-    def outdated_duels(self, duels: typing.List[Message]) -> list[dict]:
+    def outdated_duels(self, duels: typing.List[Message], create_message: bool = True) -> list[dict]:
         retv = []
 
         for duel in duels:
+            duel.is_duel_expired = True
+            duel.save()
+
+            if not create_message:
+                continue
+
             message = Message.objects.create(room=duel.room, user=self.user, content="A duel invitation has expired")
-            duel.update(is_duel_expired=True)
+            message.save()
 
             retv.append({
                 'type':      "message_response",
@@ -110,14 +121,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
         logging.info(f"User {self.user} requested a duel")
 
         try:
+            logging.info(f"[CONSUMER]: processing duel_request")
             roomid = data['room']
             room: ChatRoom = await database_sync_to_async(ChatRoom.objects.get)(id=roomid)
             opponent = await sync_to_async(room.get_other_user, thread_sensitive=True)(current_user=self.user)
 
             # clear former duel invitation and create new one
             outdated_duels = room.get_active_duels_for(self.user)
+            logging.info(f"[CONSUMER]: found {await sync_to_async(len, thread_sensitive=True)(outdated_duels)} duels, removing them")
             for m in await self.outdated_duels(outdated_duels):
-                self.channel_layer.group_send(
+                await self.channel_layer.group_send(
                     f'chat_{roomid}',
                     m
                 )
@@ -129,6 +142,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'duel_id':           message.id,
                 'duel_message_type': 'duel_request'
             }
+
+            return message
 
         except KeyError as e:
             logging.error("KeyError in request_duel")
@@ -142,26 +157,48 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def accept_duel(self, data: dict):
         try:
             from game.gameutils.DuelManager import DUELMANAGER
-            if DUELMANAGER.get_active_duel(self.user) is not None:
+            if DUELMANAGER.get_duel(self.user) is not None:
                 logging.error("User does already have an active duel")
                 return
 
-            roomid = data['room']
-            challenger = await database_sync_to_async(CustomUser.objects.get)(id=data['challenger'])
+            room = await database_sync_to_async(ChatRoom.objects.get)(id=data['room'])
+            challenger = await database_sync_to_async(room.get_other_user)(self.user)
 
-            if not DUELMANAGER.accept(self.user, challenger):
-                logging.error("User tried to accept a duel that does not exist")
+            # recover duel message, should be unique else error
+            message = await database_sync_to_async(room.messages.get)(is_duel=True, is_duel_expired=False, is_duel_accepted=False, user=challenger)
+            message.is_duel_accepted = True
+            await database_sync_to_async(message.save)()
+
+            users = await database_sync_to_async(room.get_users_tuple)()
+            if not DUELMANAGER.create_duel(users, message):
+                logging.error("[CONSUMER]: could not create duel")
                 return
 
-            logging.log(logging.INFO, f"User {self.user} accepted the duel")
+            logging.log(logging.INFO, f"[CONSUMER]: User {self.user} accepted the duel")
+
+            message = await self.save_message(room, self.user, "Duel have been accepted.")
             await self.channel_layer.group_send(
-                f"chat_{roomid}",
+                f'chat_{room.id}',
+                {
+                'type':      'message_response',
+                'action': 'message',
+                'room_id':   message.room.id,
+                'user_id':   message.user.id,
+                'username':  message.user.username,
+                'picture':   message.user.picture.url if message.user.picture else None,
+                'content':   message.content,
+                'timestamp': elapsed_time(message.timestamp),
+                'is_duel':   message.is_duel
+            })
+
+            await self.channel_layer.group_send(
+                f"chat_{room.id}",
                 {
                     "type":       "duel_response",
                     "action":     "duel_accept",
                     "challenger": challenger.id,
                     "challenged": self.user.id,
-                    "room_id":    roomid
+                    "room_id":    room.id
                 }
             )
 
@@ -173,30 +210,35 @@ class ChatConsumer(AsyncWebsocketConsumer):
             logging.error("Room does not exist")
             return
 
-
     async def refuse_duel(self, data):
         try:
-            from game.gameutils.DuelManager import DUELMANAGER
-
             roomid = data['room']
             room = await database_sync_to_async(ChatRoom.objects.get)(id=roomid)
             challenger = await sync_to_async(room.get_other_user)(current_user=self.user)
+            duels = await sync_to_async(room.get_active_duels_for)(user=challenger)
+            await self.outdated_duels(duels)
 
-            duel = DUELMANAGER.get_duel(self.user, challenger)
-            if duel is None:
-                return
-            else:
-                DUELMANAGER.remove_duel(duel)
+            message = await database_sync_to_async(Message.objects.create)(
+                user=self.user,
+                room=room,
+                content="The duel have been refused"
+            )
+
+            rdata = {
+                'type':      'message_response',
+                'action': 'message',
+                'room_id':   message.room.id,
+                'user_id':   message.user.id,
+                'username':  message.user.username,
+                'picture':   message.user.picture.url if message.user.picture else None,
+                'content':   message.content,
+                'timestamp': elapsed_time(message.timestamp),
+                'is_duel':   message.is_duel
+            }
 
             await self.channel_layer.group_send(
                 f"chat_{roomid}",
-                {
-                    "type":       "duel_response",
-                    "action":     "duel_refuse",
-                    "challenger": challenger.id,
-                    "challenged": self.user.id,
-                    "room_id":    roomid
-                }
+                rdata
             )
 
         except KeyError as e:
@@ -206,7 +248,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except ChatRoom.DoesNotExist as e:
             logging.error("Room does not exist")
             return
-
 
     async def message(self, data: dict):
         content = data['content']
@@ -221,13 +262,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
                 match duel_action:
                     case 'duel_request':
-                        await self.request_duel(data)
+                        message = await self.request_duel(data)
                     case 'duel_accept':
                         await self.accept_duel(data)
                     case 'duel_refuse':
                         await self.refuse_duel(data)
 
-                message = await self.save_message(room, self.user, content, is_duel=True)
             else:
                 message = await self.save_message(room, self.user, content)
 
@@ -345,25 +385,38 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
     async def quit_room(self, data):
+        logging.info(f"[CONSUMER]: {self.user.username} quitting room")
         room_id = data.get('room_id')
         try:
             room = await database_sync_to_async(ChatRoom.objects.get)(id=room_id)
-            await database_sync_to_async(room.quit)(self.user)
 
-            await self.channel_layer.group_discard({
-                f'chat_{room_id}',
-                self.channel_name
-            })
+            # removing duels
+            duels = await sync_to_async(room.get_active_duels_for)(user=self.user)
+            messages = await self.outdated_duels(duels)
+            for m in messages:
+                await self.channel_layer.group_send(
+                    f'chat_{room_id}',
+                    m
+                )
 
-            await self.channel_layer.group_send(
-                f'chat_{room_id}',
-                {
-                    'type':    'quit_room_response',
-                    'room_id': room_id
-                }
-            )
+            logging.info(f"[CONSUMER]: due to {self.user.username} quitting, removed {len(messages)} duels")
+            # await database_sync_to_async(room.quit)(self.user)
+            #
+            # await self.channel_layer.group_discard({
+            #     f'chat_{room_id}',
+            #     self.channel_name
+            # })
+            #
+            # await self.channel_layer.group_send(
+            #     f'chat_{room_id}',
+            #     {
+            #         'type':    'quit_room_response',
+            #         'room_id': room_id
+            #     }
+            # )
 
         except ChatRoom.DoesNotExist:
+            logging.error("[CONSUMER]: room does not exists")
             await self.send(text_data=json.dumps({
                 'error': 'Room does not exist'
             }))
@@ -383,10 +436,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     # save a message in the db
     @database_sync_to_async
     def save_message(self, room, user, message, is_duel=False):
-        if is_duel:
-            message = Message.objects.create(room=room, user=user, content="", is_duel=True)
-        else:
-            message = Message.objects.create(room=room, user=user, content=message)
+        message = Message.objects.create(room=room, user=user, content=message, is_duel=is_duel)
         message.save()
 
         return message

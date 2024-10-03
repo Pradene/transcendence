@@ -1,7 +1,10 @@
+import logging
+
 from django.conf import settings
 from django.db import models
 
 from account.models import CustomUser
+from game.models import GameModel
 
 class ChatRoom(models.Model):
     picture = models.ImageField(upload_to='room_pictures/', default="room_pictures/default.png", blank=True, null=True)
@@ -69,9 +72,18 @@ class ChatRoom(models.Model):
         else:
             return None
 
+    def is_in_room(self, user: CustomUser):
+        users = self.users.all()
+        logging.info(f"[ROOM]: {user.username}:{user.id} {users[0].username}:{users[0].id} {users[1].username}:{users[1].id}")
+        return user.id == users[0].id or user.id == users[1].id
+
     def get_active_duels_for(self, user: CustomUser):
         duels = self.messages.filter(user=user, is_duel=True, is_duel_expired=False, is_duel_accepted=False)
         return duels
+
+    def get_users_tuple(self):
+        users = self.users.all()
+        return (users[0], users[1])
 
 
 class Message(models.Model):
@@ -82,6 +94,7 @@ class Message(models.Model):
     is_duel = models.BooleanField(default=False)
     is_duel_accepted = models.BooleanField(default=False)
     is_duel_expired = models.BooleanField(default=False)
+    duel = models.ForeignKey(GameModel, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.content
