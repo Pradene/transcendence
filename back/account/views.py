@@ -106,12 +106,20 @@ def getFriendsView(request, user_id=None):
 
 @jwt_required
 @require_http_methods(["GET"])
-def getFriendRequestsView(request):
+def getFriendRequestsView(request, user_id=None):
 	try:
-		user = request.user
+		if user_id is None:
+			user = request.user
+		else:
+			try:
+				user = CustomUser.objects.get(id=user_id)
+			except:
+				return JsonResponse({"error": str(e)}, status=400)
+
 		requests = FriendRequest.objects.filter(receiver=user)
 		data = [request.toJSON() for request in requests]
 		return JsonResponse(data, safe=False, status=200)
+
 	except Exception as e:
 		return JsonResponse({}, status=400)
 

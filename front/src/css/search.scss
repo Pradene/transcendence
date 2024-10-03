@@ -21,6 +21,7 @@
         }
 
         .content {
+            margin: 0px 6px;
             border-radius: 12px;
             flex: 1;
             overflow-y: scroll;
@@ -64,5 +65,29 @@
     
     .search {
         grid-row: span 2;
+    }
+}
+
+.request {
+    border-radius: 12px;
+    padding: 12px;
+
+    &:hover {
+        background: var(--third-color);
+    }
+
+    .link {
+        display: flex;
+        align-items: center;
+
+        .name {
+            flex: 1;
+            display: block;
+            margin-left: 12px;
+        }
+
+        button {
+            margin-left: 6px;
+        }
     }
 }

@@ -50,7 +50,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     bio = models.TextField(blank=True, null=True)
     email = models.EmailField(max_length=255)
     is_staff = models.BooleanField(default=False)
-    is_online = models.BooleanField(default=True)
+    is_online = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     api_42_id = models.CharField(max_length=255, unique=True, null=True, blank=True)
 
     objects = CustomUserManager()

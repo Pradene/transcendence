@@ -134,16 +134,23 @@ class FriendsConsumer(AsyncWebsocketConsumer):
             receiver_data = receiver.toJSON()
             sender_data = sender.toJSON()
 
-            for user_id in [receiver.id, sender.id]:
-                await self.channel_layer.group_send(
-                    f'user_{user_id}',
-                    {
-                        'type': 'friend_request_response',
-                        'action': 'friend_request_accepted',
-                        'receiver': receiver_data,
-                        'sender': sender_data
-                    }
-                )
+            await self.channel_layer.group_send(
+                f'user_{receiver.id}',
+                {
+                    'type': 'friend_request_accepted_response',
+                    'action': 'friend_request_accepted',
+                    'friend': sender_data,
+                }
+            )
+
+            await self.channel_layer.group_send(
+                f'user_{sender.id}',
+                {
+                    'type': 'friend_request_accepted_response',
+                    'action': 'friend_request_accepted',
+                    'friend': receiver_data,
+                }
+            )
 
             room = await database_sync_to_async(
                 ChatRoom.objects
@@ -171,17 +178,28 @@ class FriendsConsumer(AsyncWebsocketConsumer):
         
         except Exception as e:
             logging.info(f'error: {e}')
+
+
+    async def friend_request_accepted_response(self, event):
+        action = event['action']
+        friend = event['friend']
+
+        await self.send(text_data=json.dumps({
+            'action': action,
+            'friend': friend
+        }))
     
 
     async def decline_friend_request(self, event):
-        sender_id = event.get('sender')
-        receiver_id = event.get('receiver')
-
         try:
+            sender_id = event.get('sender')
+            sender = await database_sync_to_async(CustomUser.objects.get)(id=sender_id)
+            receiver = await database_sync_to_async(CustomUser.objects.get)(id=self.user.id)
+
             # Retrieve the friend request
             friend_request = await database_sync_to_async(FriendRequest.objects.get)(
-                sender_id=sender_id,
-                receiver_id=receiver_id
+                sender=sender,
+                receiver=self.user
             )
 
             receiver_data = friend_request.receiver.toJSON()
