@@ -1,21 +1,29 @@
 import { TemplateComponent } from "../utils/TemplateComponent.js"
-import { getURL, apiRequest } from "../utils/utils.js"
+import { getURL, apiRequest, getConnectedUserID } from "../utils/utils.js"
+import { WebSocketManager } from "../utils/WebSocketManager.js"
 
 export class Search extends TemplateComponent {
     constructor() {
         super()
 
         this.searchUserListener = (e) => this.searchUser(e.target.value)
+        this.WebsocketMessageListener = (e) => this.WebsocketMessage(e)
     }
 
     unmount() {
         const input = this.getRef("input")
         input.removeEventListener("input", this.searchUserListener)
+    
+        window.removeEventListener('wsMessage', this.WebsocketMessageListener)
     }
 
     async componentDidMount() {
+        this.getFriends()
+
         const input = this.getRef("input")
         input.addEventListener("input", this.searchUserListener)
+
+        window.addEventListener('wsMessage', this.WebsocketMessageListener)
     }
 
     // Searching users
@@ -54,16 +62,41 @@ export class Search extends TemplateComponent {
         const img = document.createElement("img")
         img.src = user.picture
 
+        const status = document.createElement("span")
+        status.className = user.is_active ? "online" : ""
+
         const name = document.createElement("div")
         name.className = "name"
         name.textContent = user.username
 
         imgContainer.appendChild(img)
+        imgContainer.appendChild(status)
         link.appendChild(imgContainer)
         link.appendChild(name)
         element.appendChild(link)
 
         return element
+    }
+
+    WebsocketMessage(e) {
+        console.log(e)
+    }
+
+    async getFriends() {
+        try {
+            const id = getConnectedUserID()
+            const url = getURL(`api/users/${id}/friends/`)
+            const friends = await apiRequest(url)
+
+            const container = this.getRef('friends')
+            friends.forEach(friend => {
+                const element = this.displayUser(friend)
+                container.appendChild(element)
+            })
+
+        } catch (e) {
+            console.log(e)
+        }
     }
 
 }

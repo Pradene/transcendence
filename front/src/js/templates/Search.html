@@ -1,10 +1,24 @@
 <nav-component></nav-component>
-<div class="search">
-    <div class="top">
-        <p>Users</p>
-        <label>
-            <input ref="input" class="form-control" placeholder="Search..." type="text" required="True" autocomplete="off" />
-        </label>
+<div class=social>
+
+    <div class="search">
+        <div class="top">
+            <p>Users</p>
+            <label>
+                <input ref="input" class="form-control" placeholder="Search..." type="text" required="True" autocomplete="off" />
+            </label>
+        </div>
+        <ul ref="users" class="content"></ul>
     </div>
-    <ul ref="users" class="users"></ul>
+
+    <div class="friends">
+        <div class="top">Friends</div>
+        <ul ref="friends" class="content"></ul>
+    </div>
+
+    <div class="requests">
+        <div class="top">Requests</div>
+        <ul ref="requests" class="content"></ul>
+    </div>
+    
 </div>
