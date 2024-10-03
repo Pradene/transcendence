@@ -224,8 +224,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
 
         except ChatRoom.DoesNotExist as e:
-            logging.error("Room does not exist")
+            logging.error("[CONSUMER]: Room does not exist in accept_duel")
             return
+        
+        except Message.DoesNotExist as e:
+            logging.error(f"[CONSUMER]: Duel request does not exists in accept_duel")
 
     async def refuse_duel(self, data):
         try:

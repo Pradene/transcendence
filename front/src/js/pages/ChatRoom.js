@@ -1,7 +1,7 @@
 import { getURL, apiRequest, getConnectedUserID } from "../utils/utils.js"
 import { WebSocketManager } from "../utils/WebSocketManager.js"
 import { TemplateComponent } from "../utils/TemplateComponent.js"
-import {Router} from "../utils/Router";
+import { Router } from "../utils/Router";
 
 const buttonAcceptColor = "green"
 const buttonRefuseColor = "red"
@@ -79,12 +79,36 @@ export class ChatRoom extends TemplateComponent {
         })
     }
 
+    processPlayedDuel(message) {
+        message.content = ''
+        const game_data = message.game_data
+        const userid = getConnectedUserID()
+
+        const results = document.createElement('h3')
+        results.textContent = `${game_data.user1}:${game_data.user1_score} - ${game_data.user2}:${game_data.user2_score}`
+
+        const message_element = document.createElement("h3")
+        message_element.textContent = `You ${game_data.winner_id === userid ? "won" : "lost"} the duel!`
+
+        const container = document.createElement("div")
+        container.classList.add("duel-result")
+        container.appendChild(message_element)
+        container.appendChild(results)
+
+        this.displayMessage(document.querySelector(".messages"), message, container)
+    }
+
     processDuelRequest(message) {
         const challenger = message.user_id
         const userid = getConnectedUserID()
         const main_container = document.querySelector("div.messages")
 
-        if (getConnectedUserID() === challenger) {
+        if (message.is_duel_accepted && message.hasOwnProperty("game_data")) {
+            this.processPlayedDuel(message)
+        }
+
+        console.log(`${userid} ${challenger}`)
+        if (userid === challenger) {
             message.content = "You have invited your opponent to a duel, waiting for a replie..."
             this.displayMessage(main_container, message)
             return
@@ -109,6 +133,7 @@ export class ChatRoom extends TemplateComponent {
         message.content = "You have been invited to a duel: "
         container.appendChild(button_accept)
         container.appendChild(button_refuse)
+
         this.displayMessage(main_container, message, container)
     }
 
@@ -191,7 +216,7 @@ export class ChatRoom extends TemplateComponent {
     }
 
     
-    displayMessage(container, message, innerElements = null) {
+    displayMessage(container, message, innerElement = null) {
         if (!message)
             return
 
@@ -216,8 +241,8 @@ export class ChatRoom extends TemplateComponent {
         messageContent.textContent = message.content
         messageContainer.appendChild(messageContent)
 
-        if (innerElements !== null) {
-            messageContainer.appendChild(innerElements)
+        if (innerElement !== null) {
+            messageContainer.appendChild(innerElement)
         }
 
         const messageTimestamp = document.createElement('span')

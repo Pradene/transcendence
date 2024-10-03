@@ -64,23 +64,30 @@ def roomView(request, room_id):
         'is_duel_accepted': message.is_duel_accepted
     } for message in messages]
 
-    # # is a duel have been played, fetch info about game
-    # for m in messages_data:
-    #     if not m['is_duel'] or not m['is_duel_accepted']:
-    #         continue
-    #
-    #     duel = Message.objects.get(id=m['duel_id']).duel
-    #     if duel is None:
-    #         return
-    #
-    #     game_data = {
-    #         'user1': duel.user1.username,
-    #         'user2': duel.user2.username,
-    #         'user1_score': duel.user1_score,
-    #         'user2_score': duel.user2_score
-    #     }
-    #
-    #     m['game_data'] = game_data
+    # is a duel have been played, fetch info about game
+    logging.info(f"[ROOM_VIEW]: Fetching duels data in room")
+
+    for m in messages_data:
+        if not m['is_duel'] or not m['is_duel_accepted']:
+            continue
+    
+        logging.info(f"[ROOM_VIEW]: Fetching data for duel request {m['duel_id']} in room {room.id}")
+        duel = Message.objects.get(id=m['duel_id']).duel
+        if duel is None:
+            return
+    
+        logging.info(f"[ROOM_VIEW]: Corresponding duel found, recovering datas")
+        game_data = {
+            'winner_id': duel.winner.id,
+            'user1': duel.user1.username,
+            'user2': duel.user2.username,
+            'user1_score': duel.user1_score,
+            'user2_score': duel.user2_score
+        }
+    
+        m['game_data'] = game_data
+
+    logging.info(f"[ROOM_VIEW]: Fetching user data for room {room.id}")
 
     users = room.users.all()
     users_data = [{
