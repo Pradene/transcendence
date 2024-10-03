@@ -12,6 +12,7 @@ export class Home extends TemplateComponent {
 
     unmount() {
         this._gameSocket?.close()
+        console.log("Unmouting home page")
     }
 
     async componentDidMount() {

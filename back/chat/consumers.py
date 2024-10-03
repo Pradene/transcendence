@@ -43,6 +43,25 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if self.user.is_authenticated:
             rooms = await self.get_user_rooms()
             for room in rooms:
+                duels = await database_sync_to_async(room.get_active_duels_for)(self.user)
+                messages = await self.outdated_duels(duels)
+
+                for message in messages:
+                    await self.channel_layer.group_send(
+                        f'chat_{room.id}',
+                        {
+                            'type':      'message_response',
+                            'action':    'message',
+                            'room_id':   message.room.id,
+                            'user_id':   message.user.id,
+                            'username':  message.user.username,
+                            'picture':   message.user.picture.url if message.user.picture else None,
+                            'content':   message.content,
+                            'timestamp': elapsed_time(message.timestamp),
+                            'is_duel':   message.is_duel
+                        }
+                    )
+
                 await self.channel_layer.group_discard(
                     f'chat_{room.id}',
                     self.channel_name
@@ -52,8 +71,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'chat',
                 self.channel_name
             )
-
-        # TODO: EXPIRE DUELS
 
     async def receive(self, text_data):
         data = json.loads(text_data)
