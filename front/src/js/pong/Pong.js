@@ -105,20 +105,22 @@ export class Pong {
      * Stop the game
      */
     async stop() {
+        document.querySelector('.game .scores').style.visibility = "hidden"
+
         const gs = await GameSocket.get()
         gs.removeGame()
 
         this._player?.stop()
-
         this._renderer.dispose()
+
         this._scene = null
 
         this._canvas.classList.remove("active")
     }
 
     createGame() {
-        this._player = new CurrentPlayer("a name", new Position(0, 0))
-        this._opponent = new Player("another name", new Position(0, 0))
+        this._player = new CurrentPlayer("me", new Position(0, 0))
+        this._opponent = new Player("opponent", new Position(0, 0))
         this._ball = new Ball(new Position(0, 0))
         
         const width = CANVAS_HEIGHT / THREE_RATIO
@@ -131,6 +133,8 @@ export class Pong {
 
         this._platform = new THREE.Mesh(geometry, material)
         this._scene.add(this._platform)
+
+        document.querySelector('.game .scores').style.visibility = "visible"
     }
 
     /**
@@ -163,6 +167,8 @@ export class Pong {
 
         } else if (timer) {
             this.displayTimer(timer.toString())
+            this._player.name = response.data.current_player.username
+            this._opponent.name = response.data.opponent.username
         }
 
         this._renderer.render(this._scene, this._camera)

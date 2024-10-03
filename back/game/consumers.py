@@ -155,8 +155,11 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
     async def send_json(self, data):
         """Send JSON data to the client and log it to the console"""
-
-        await super().send_json(data)
+        try:
+            await super().send_json(data)
+        except Exception as e:
+            logging.error(f"[ERROR]: {e.__str__()}")
+            self.close()
 
     async def updateClient(self, gameData: dict):
         """Send updated game data to the client"""

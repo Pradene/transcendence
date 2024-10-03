@@ -36,6 +36,9 @@ export class Player {
         geometry.translate(x, y, z)
 
         this._paddle = new THREE.Mesh(geometry, material)
+
+        this._username_element = document.querySelector('.game .scores .opponent .username')
+        this._score_element = document.querySelector('.game .scores .opponent .score')
     }
 
     get position() {
@@ -56,6 +59,11 @@ export class Player {
 
     setScore(value) {
         this._score = value
+        this._score_element.textContent = this._score
+    }
+
+    getScore() {
+        return this._score
     }
 
     /**
@@ -77,6 +85,8 @@ export class Player {
      */
     display(scene) {
         scene.add(this._paddle)
+        this._username_element.textContent = this._name
+        this._score_element.textContent = this._score
     }
 
     stop() {}
@@ -98,6 +108,9 @@ export class CurrentPlayer extends Player {
         this._boundHandlerDown = this._keyDownHandler.bind(this)
         window.addEventListener("keypress", this._boundHandlerDown)
         window.addEventListener("keyup", this._boundHandlerUp)
+
+        this._username_element = document.querySelector('.game .scores .user .username')
+        this._score_element = document.querySelector('.game .scores .user .score')
     }
 
     _keyDownHandler(event) {
