@@ -58,6 +58,7 @@ export class Search extends TemplateComponent {
     displayUser(user) {
         const element = document.createElement("li")
         element.className = "user"
+        element.dataset.id = user.id
 
         const link = document.createElement("a")
         link.className = "link"
@@ -91,15 +92,22 @@ export class Search extends TemplateComponent {
 
         if (!message) return
 
+        console.log(message)
+
         if (message.action && message.action === 'friend_request_accepted') {
             const container = this.getRef('friends')
-            const element = this.displayUser(message.friend)
+            const element = this.displayUser(message.user)
             container.appendChild(element)
-        
+
         } else if (message.action && message.action === 'friend_request_received') {
             const container = this.getRef('requests')
             const element = this.displayRequest(message)
             container.appendChild(element)
+        
+        } else if (message.action && message.action === 'friend_removed') {
+            const container = this.getRef('friends')
+            const element = container.querySelector(`[data-id='${message.user.id}']`)
+            element.remove()
         }
     }
 
@@ -138,29 +146,27 @@ export class Search extends TemplateComponent {
     }
 
     displayRequest(request) {
-        console.log(request)
-
         const element = document.createElement("li")
         element.className = "request"
-        element.dataset.id = request.sender.id
+        element.dataset.id = request.user.id
 
         const link = document.createElement("a")
         link.className = "link"
         link.dataset.link = ""
-        link.href = `/users/${request.sender.id}/`
+        link.href = `/users/${request.user.id}/`
 
         const imgContainer = document.createElement("div")
         imgContainer.className = "profile-picture"
 
         const img = document.createElement("img")
-        img.src = request.sender.picture
+        img.src = request.user.picture
 
         const status = document.createElement("span")
-        status.className = request.sender.is_active ? "online" : ""
+        status.className = request.user.is_active ? "online" : ""
 
         const name = document.createElement("div")
         name.className = "name"
-        name.textContent = request.sender.username
+        name.textContent = request.user.username
 
         const buttons = document.createElement('div')
 
@@ -205,7 +211,7 @@ export class Search extends TemplateComponent {
         const ws = WebSocketManager.get()
         ws.sendMessage('friends', {
             'type': 'friend_request_accepted',
-            'sender': id
+            'user_id': id
         })
     }
 
@@ -213,7 +219,7 @@ export class Search extends TemplateComponent {
         const ws = WebSocketManager.get()
         ws.sendMessage('friends', {
             'type': 'friend_request_declined',
-            'sender': id
+            'user_id': id
         })
     }
 }

@@ -6,14 +6,31 @@ $paddle-height: 20px;
 $paddle-offset: 10px;
 $animation-duration: 10s;
 
-.game-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    display: none;
-    height: 100vh;
-    width: 100vw;
-    z-index: 0;
+.home {
+    height: 90vh;
+    width: 100%;
+    display: grid;
+    gap: 12px;
+    grid-template-rows: repeat(2, 1fr);
+
+    & > div {
+        position: relative;
+        background-color: var(--secondary-color);
+        border-radius: 12px;
+        padding: 36px;
+
+        h4 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        button {
+            position: absolute;
+            bottom: 36px;
+            right: 36px;
+        }
+    }
 }
 
 .game .scores {
@@ -40,10 +57,21 @@ $animation-duration: 10s;
     }
 }
 
-.game-canvas.active {
-    display: block;
-    z-index: 1;
+.game-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: none;
+    height: 100vh;
+    width: 100vw;
+    z-index: 0;
+    
+    &.active {
+        display: block;
+        z-index: 1;
+    }
 }
+
 
 .game-container {
 
