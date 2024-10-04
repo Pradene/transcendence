@@ -7,7 +7,10 @@ import logging
 import time
 import asyncio
 
+from asgiref.sync import sync_to_async
+
 from threading import RLock, Thread
+from chat.models import Message
 
 
 class ThreadingDict:
@@ -15,14 +18,14 @@ class ThreadingDict:
         self.__dict: Dict = {}
         # self.__ondelete: Callable = onDelete
         self.__lock: RLock = RLock()
-        self.__thread: Thread = Thread(target=self.__checkAndDelete)
+        self.__thread: Thread = Thread(target=asyncio.run, args=(self.__checkAndDelete(),))
 
         self.__thread.start()
 
     def __del__(self):
         self.__thread.join()
 
-    def __checkAndDelete(self):
+    async def __checkAndDelete(self):
         oneDeleted: bool = False
 
         while True:
@@ -32,14 +35,15 @@ class ThreadingDict:
                 for key in list(self.__dict.keys()):
                     if self.__dict[key].isFinished():
                         game = self.__dict.pop(key)
-                        game.saveToDB()
+                        await sync_to_async(game.saveToDB, thread_sensitive=True)()
+                        await game.redirectClients()
                         logging.log(logging.INFO, f"Game {key} deleted")
                         oneDeleted = True
 
             if oneDeleted:
                 from game.consumers import GameConsumer
                 oneDeleted = False
-                asyncio.run(GameConsumer.onGameChange())
+                await GameConsumer.onGameChange()
 
             time.sleep(1)
 
@@ -92,10 +96,10 @@ class GameManager:
     def __del__(self):
         pass
 
-    async def createGame(self, player: PlayerInterface) -> Game:
+    async def createGame(self, player: PlayerInterface, related_duel: Message | None = None) -> Game:
         logging.info(f"[GameManager]: creating new game instance")
         from game.consumers import GameConsumer
-        game = Game(player)
+        game = Game(player, related_duel=related_duel)
         GameManager.GAMES[player.getName()] = game
 
         await GameConsumer.onGameChange()

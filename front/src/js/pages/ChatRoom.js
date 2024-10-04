@@ -1,6 +1,7 @@
 import { getURL, apiRequest, getConnectedUserID } from "../utils/utils.js"
 import { WebSocketManager } from "../utils/WebSocketManager.js"
 import { TemplateComponent } from "../utils/TemplateComponent.js"
+import { Router } from "../utils/Router";
 
 const buttonAcceptColor = "green"
 const buttonRefuseColor = "red"
@@ -16,6 +17,7 @@ export class ChatRoom extends TemplateComponent {
         this.refuseDuelListener = async (e) => this.refuseDuel(e)
 
         this.challengerid = 0
+        this.room_id = null
     }
 
     unmount() {
@@ -24,12 +26,22 @@ export class ChatRoom extends TemplateComponent {
 
         window.addEventListener("wsMessage", this.WebsocketMessageListener)
 
-        // document.querySelector("button.duel-invite").removeEventListener("click", this.sendDuelInviteListener)
-        // document.querySelector("button.duel-accept").removeEventListener("click", this.acceptDuelListener)
-        // document.querySelector("button.duel-refuse").removeEventListener("click", this.refuseDuelListener)
+        document.querySelector("button.duel-invite").removeEventListener("click", this.sendDuelInviteListener)
+        document.querySelectorAll(".message button.accept").forEach((value, key, parent) => {
+            value.removeEventListener('click', this.acceptDuelListener)
+        })
+        document.querySelectorAll(".message button.refuse").forEach((value, key, parent) => {
+            value.removeEventListener('click', this.refuseDuelListener)
+        })
+
+        WebSocketManager.get().sendMessage("chat", {
+            "type": "quit_room",
+            "room_id": this.room_id
+        })
     }
 
     async componentDidMount() {
+        this.room_id = this.getRoomID()
         await this.getMessages()
         
         const form = this.getRef("form")
@@ -37,41 +49,92 @@ export class ChatRoom extends TemplateComponent {
         
         window.addEventListener("wsMessage", this.WebsocketMessageListener)
 
-        // document.querySelector("button.duel-invite").addEventListener("click", this.sendDuelInviteListener)
-        // document.querySelector("button.duel-accept").addEventListener("click", this.acceptDuelListener)
-        // document.querySelector("button.duel-refuse").addEventListener("click", this.refuseDuelListener)
+        document.querySelector("button.duel-invite").addEventListener("click", this.sendDuelInviteListener)
     }
 
-    WebsocketMessage(event) {
+    async WebsocketMessage(event) {
         console.log(event)
         const message = event.message
 
         if (message.room_id != this.getRoomID()) {
             return
+        } else if (message.is_duel) {
+            this.processDuelRequest(message)
         } else if (message.action == "message") {
             const container = this.getRef("messages")
             this.displayMessage(container, message)
-        } else if (message.action == "duel_request") {
-            this.processDuelRequest(message)
         } else if (message.action == "duel_accept") {
-            window.location.href = `/`
+            const router = Router.get()
+            await router.navigate("/")
         } else if (message.action == "duel_refuse") {
-            //TODO: Display duel refuse
+            this.processDuelRefuse(message)
         } else if (message.action == "duel_cancel") {
             //TODO: Display duel cancel
         }
     }
 
-    processDuelRequest(message) {
-        const who = message.challenged
-        this.challengerid = message.challenger
+    processDuelRefuse(message) {
+        document.querySelectorAll('.duel-request-message').forEach((value, key, parent) => {
+            value.remove()
+        })
+    }
+
+    processPlayedDuel(message) {
+        message.content = ''
+        const game_data = message.game_data
         const userid = getConnectedUserID()
 
-        if (getConnectedUserID() != who)
-            return
+        const results = document.createElement('h3')
+        results.textContent = `${game_data.user1}:${game_data.user1_score} - ${game_data.user2}:${game_data.user2_score}`
 
-        document.querySelector("button.duel-accept").style.backgroundColor = buttonAcceptColor
-        document.querySelector("button.duel-refuse").style.backgroundColor = buttonRefuseColor
+        const message_element = document.createElement("h3")
+        message_element.textContent = `You ${game_data.winner_id === userid ? "won" : "lost"} the duel!`
+
+        const container = document.createElement("div")
+        container.classList.add("duel-result")
+        container.appendChild(message_element)
+        container.appendChild(results)
+
+        this.displayMessage(document.querySelector(".messages"), message, container)
+    }
+
+    processDuelRequest(message) {
+        const challenger = message.user_id
+        const userid = getConnectedUserID()
+        const main_container = document.querySelector("div.messages")
+
+        if (message.is_duel_accepted && message.hasOwnProperty("game_data")) {
+            this.processPlayedDuel(message)
+        }
+
+        console.log(`${userid} ${challenger}`)
+        if (userid === challenger) {
+            message.content = "You have invited your opponent to a duel, waiting for a replie..."
+            this.displayMessage(main_container, message)
+            return
+        }
+
+        const container = document.createElement("div")
+        container.classList.add("duel-container")
+
+        const button_accept = document.createElement('button')
+        button_accept.textContent = "Accept Duel"
+        button_accept.className = "accept"
+
+        const button_refuse = document.createElement('button')
+        button_refuse.textContent = "Refuse Duel"
+        button_refuse.className = "refuse"
+
+        if (!message.is_duel_expired) {
+            button_accept.addEventListener('click', this.acceptDuelListener)
+            button_refuse.addEventListener('click', this.refuseDuelListener)
+        }
+
+        message.content = "You have been invited to a duel: "
+        container.appendChild(button_accept)
+        container.appendChild(button_refuse)
+
+        this.displayMessage(main_container, message, container)
     }
 
     async sendMessage(event) {
@@ -99,8 +162,11 @@ export class ChatRoom extends TemplateComponent {
         const roomID = this.getRoomID()
         const ws = WebSocketManager.get()
         await ws.sendMessage("chat", {
-            type: "duel_request",
-            room: roomID
+            type: "message",
+            room: roomID,
+            content: "",
+            is_duel: true,
+            duel_action: "duel_request"
         })
     }
 
@@ -138,7 +204,10 @@ export class ChatRoom extends TemplateComponent {
             const messages = data.messages
             messages.forEach(message => {
                 const container = this.getRef("messages")
-                this.displayMessage(container, message)
+                if (message.is_duel)
+                    this.processDuelRequest(message)
+                else
+                    this.displayMessage(container, message)
             })
 
         } catch (error) {
@@ -147,7 +216,7 @@ export class ChatRoom extends TemplateComponent {
     }
 
     
-    displayMessage(container, message) {
+    displayMessage(container, message, innerElement = null) {
         if (!message)
             return
 
@@ -170,15 +239,18 @@ export class ChatRoom extends TemplateComponent {
 
         const messageContent = document.createElement('p')
         messageContent.textContent = message.content
+        messageContainer.appendChild(messageContent)
+
+        if (innerElement !== null) {
+            messageContainer.appendChild(innerElement)
+        }
 
         const messageTimestamp = document.createElement('span')
         messageTimestamp.textContent = message.timestamp
 
-
         element.appendChild(imgContainer)
         imgContainer.appendChild(img)
         element.appendChild(messageContainer)
-        messageContainer.appendChild(messageContent)
         messageContainer.appendChild(messageTimestamp)
 
         container.appendChild(element)

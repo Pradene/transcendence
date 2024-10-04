@@ -1,6 +1,7 @@
 import { TemplateComponent } from "../utils/TemplateComponent.js"
 import { GameSocket } from "../pong/GameSocket.js"
 import { Pong } from "../pong/Pong.js"
+import {Router} from "../utils/Router";
 
 export class Home extends TemplateComponent {
     constructor() {
@@ -11,13 +12,12 @@ export class Home extends TemplateComponent {
 
     unmount() {
         this._gameSocket?.close()
+        console.log("Unmouting home page")
     }
 
     async componentDidMount() {
         this._gameSocket = await GameSocket.get()
-        window.addEventListener("gameMessage", (e) => {
-            this.handleGameSocketMessage(e.detail.data)
-        })
+        window.addEventListener("gameMessage", (e) => this.handleGameSocketMessage(e.detail.data))
 
         const createTournamentButton = document.querySelector("button.create-tournament")
         createTournamentButton.addEventListener("click", () => {
@@ -30,8 +30,9 @@ export class Home extends TemplateComponent {
         })
     }
 
-    handleGameSocketMessage(response) {
-        const gameContainer = document.querySelector("div.game canvas")
+    async handleGameSocketMessage(response) {
+        const gameContainer = document.querySelectorAll("div.game canvas")
+		// const scoreContainer = document.querySelector("div.score-canvas") 
 
         switch (response.method) {
             case "get_users":
@@ -50,6 +51,10 @@ export class Home extends TemplateComponent {
                     this._gameSocket._currentGame = new Pong(gameContainer);
 
                 this._gameSocket._currentGame.update(response);
+                break;
+            case "redirect_game":
+                const gameid = response.gameid
+                await Router.get().navigate(`/game/${gameid}`)
                 break;
         }
     }

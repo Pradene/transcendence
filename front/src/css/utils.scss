@@ -73,6 +73,7 @@ button:hover, .button:hover {
 
 /* PROFILE */
 .profile-picture {
+    position: relative;
     --size: 32px;
     height: var(--size);
     width: var(--size);
@@ -82,6 +83,27 @@ button:hover, .button:hover {
     padding: 4px;
     border-radius: 50%;
     border: 2px solid var(--forth-color);
+
+    span {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        height: 6px;
+        width: 6px;
+        border-radius: 50%;
+        background: var(--forth-color);
+        
+        &.online {
+            background: var(--fifth-color);
+        }
+    }
+
+    img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
 }
 
 .profile-picture-large {

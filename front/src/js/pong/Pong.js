@@ -15,6 +15,7 @@ loader.load("/src/fonts/Epilogue_Bold.json", (f) => font = f)
 
 export class Pong {
     constructor(canvas) {
+		console.log(canvas)
         this._player = undefined
         this._opponent = undefined
         this._ball = undefined
@@ -25,11 +26,23 @@ export class Pong {
 
         
         //set the canvas properties
-        this._context = canvas.getContext("webgl2")
-        this._canvas = canvas
+        this._context = canvas[0].getContext("webgl2")
+        this._canvas = canvas[0]
         this._canvas.classList.add("active")
         this._canvas.width = window.screen.width
         this._canvas.height = window.screen.height
+
+		this._scoreCtx = canvas[1].getContext('2d')
+		this._scoreCanvas = canvas[1]
+		this._scoreCanvas.classList.add('active')
+		if (this._scoreCanvas)
+			console.log("Je l'ai !")
+		this._scoreCanvas.width = window.screen.width;
+		this._scoreCanvas.height = window.screen.height;
+		if (this._scoreCtx)
+			console.log("Alleluia !!!")
+		else
+			console.log("yapa yapa")
 
         this._renderer = new THREE.WebGLRenderer({ antialias: true, canvas: this._canvas })
         this._renderer.setPixelRatio(window.devicePixelRatio)
@@ -115,15 +128,27 @@ export class Pong {
 
 	displayScore()
 	{
-		const scoreDiv = document.getElementsByClassName("scoreDiv")
+		this._scoreCtx.clearRect(0, 0, this._scoreCanvas.width, this._scoreCanvas.height);
+            
+            // Set styles for the score
+		this._scoreCtx.ba
+        this._scoreCtx.fillStyle = 'black';
+		this._scoreCtx.fillRect(0, 0, this._scoreCanvas.width, this._scoreCanvas.height)
+        this._scoreCtx.fillStyle = 'white';
+        this._scoreCtx.font = '15px Arial';
+            
+            // Draw the score in the upper left corner
+        this._scoreCtx.fillText(`${this._player._name}: ${this._player._score}`, 10, 30);
+        this._scoreCtx.fillText(`${this._opponent._name}: ${this._opponent._score}`, 10, 50);
+		/* const scoreDiv = document.getElementsByClassName("scoreDiv")
 		const pName = this._player._name
 		const oName = this._opponent._name
 		const pScore = this._player._score
 		const oScore = this._opponent._score
 		scoreDiv.textContent = `${pName}: ${pScore}\n${oName}: ${oScore}`
-		/* const material = new THREE.MeshPhongMaterial({color: 0xDAFFFF})
-        
-        this.removeScore()
+		const material = new THREE.MeshPhongMaterial({color: 0xDAFFFF})
+         */
+        /* this.removeScore()
         
 		const pn_text = this._player._name.toString()
 		const on_text = this._opponent._name.toString()
@@ -146,7 +171,7 @@ export class Pong {
 
 		const os_geometry = new TextGeometry(os_text, {
             font: font,
-            size: 0.4,
+            size: 0.3,
             height: 0.1,
             depth: 0.1,
             curveSegments: 12,
@@ -172,7 +197,7 @@ export class Pong {
 
 		const on_geometry = new TextGeometry(on_text, {
             font: font,
-            size: 0.4,
+            size: 0.3,
             height: 0.1,
             depth: 0.05,
             curveSegments: 12,
@@ -183,6 +208,7 @@ export class Pong {
             bevelSegments: 5
         })
 
+		const material = new THREE.MeshPhongMaterial({color: 0xE54B4B})
 		geometry.computeBoundingBox()
         const boundingBox = geometry.boundingBox
         const center = new THREE.Vector3()
@@ -200,18 +226,30 @@ export class Pong {
 		this._pnScoreMesh.position.set(0, 0, 7)
 		this._onScoreMesh.position.set(0, 0, -7)
         
-        this._scene.add(this._psScoreMesh, this._osScoreMesh, this._pnScoreMesh, this._onScoreMesh) */
+        this._camera.add(this._psScoreMesh, this._osScoreMesh, this._pnScoreMesh, this._onScoreMesh) */
 	}
 
 	removeScore() {
         if (this._psScoreMesh) {
-            this._scene.remove(this._psScoreMesh)
+            this._camera.remove(this._psScoreMesh)
             this._psScoreMesh.geometry.dispose()
             this._psScoreMesh.material.dispose()
             this._psScoreMesh = null
         }
+		if (this._pnScoreMesh) {
+            this._camera.remove(this._pnScoreMesh)
+            this._pnScoreMesh.geometry.dispose()
+            this._pnScoreMesh.material.dispose()
+            this._pnScoreMesh = null
+        }
+		if (this._onScoreMesh) {
+            this._camera.remove(this._onScoreMesh)
+            this._onScoreMesh.geometry.dispose()
+            this._onScoreMesh.material.dispose()
+            this._onScoreMesh = null
+        }
 		if (this._osScoreMesh) {
-            this._scene.remove(this._osScoreMesh)
+            this._camera.remove(this._osScoreMesh)
             this._osScoreMesh.geometry.dispose()
             this._osScoreMesh.material.dispose()
             this._osScoreMesh = null
@@ -269,12 +307,14 @@ export class Pong {
      * Stop the game
      */
     async stop() {
+        document.querySelector('.game .scores').style.visibility = "hidden"
+
         const gs = await GameSocket.get()
         gs.removeGame()
 
         this._player?.stop()
-
         this._renderer.dispose()
+
         this._scene = null
 
         this._canvas.classList.remove("active")
@@ -285,6 +325,7 @@ export class Pong {
 		label.setSize(window.innerHeight, window.innerWidth)
 		label.domElement.style.position = 'absolute'
 		label.domElement.style.top = '0'
+		label.domElement.style.color = "#FFFFFF"
 
 		document.body.appendChild(label.domElement)
 
@@ -296,13 +337,15 @@ export class Pong {
 		const scoreDiv = document.createElement('div')
 		scoreDiv.textContent = `${pName}: ${pScore}\n${oName}: ${oScore}`
 		scoreDiv.style.color = "white"
-		scoreDiv.style.fontSize = "15"
+		scoreDiv.style.fontSize = "15px"
 		scoreDiv.style.pointerEvents = "none"
+		scoreDiv.style.top = "10px"
+    	scoreDiv.style.left = "10px"
 		scoreDiv.className = "scoreDiv"
 
 		const scoreLabel = new CSS2DObject(scoreDiv)
-		//scoreLabel.position.set(0, 0, 0)
-		this._scene.add(scoreLabel)
+		scoreLabel.position.set(-window.innerWidth / 2 + 10, window.innerHeight / 2 - 10, 0)
+		this._camera.add(scoreLabel)
 	}
 
     createGame(response) {
@@ -312,9 +355,9 @@ export class Pong {
         this._opponent = new Player(p2, new Position(0, 0))
         this._ball = new Ball(new Position(0, 0))
 
-		const fieldWidth = CANVAS_HEIGHT / THREE_RATIO
+		const fieldWidth = CANVAS_HEIGHT / THREE_RATIO + 0.5
         const fieldHeight = 0.2
-        const fieldDepth = CANVAS_WIDTH / THREE_RATIO
+        const fieldDepth = CANVAS_WIDTH / THREE_RATIO + 0.5
 		console.log(`WIDTH : ${fieldWidth} \n DEPTH : ${fieldDepth} \n`)
         
         const width = CANVAS_HEIGHT / THREE_RATIO + 0.5
@@ -323,8 +366,8 @@ export class Pong {
         
         const geometry = new THREE.BoxGeometry(width, height, depth)
         geometry.translate(0, -0.2, 0)
-        const material = new THREE.MeshPhongMaterial({ color: 0x00ff00, transparent: true, opacity: 0.3 })
-		const wallMaterial = new THREE.MeshPhongMaterial({ color: 0xffffda, transparent: false, opacity: 0.5 });
+        const material = new THREE.MeshPhongMaterial({ color: 0x576066, transparent: true, opacity: 0.3 })
+		const wallMaterial = new THREE.MeshPhongMaterial({ color: 0xA3BAC3, transparent: false, opacity: 0.5 });
 
 		const topBotWidth = 6.7;
         const topBotHeight = 0.2;
@@ -405,7 +448,6 @@ export class Pong {
 		//console.log(response)
         if (!this._player) {
             this.createGame(response)
-			this.createScore()
         }
 
         if (response.data.status === "finished") {
@@ -428,6 +470,8 @@ export class Pong {
 
         } else if (timer) {
             this.displayTimer(timer.toString())
+            this._player.name = response.data.current_player.username
+            this._opponent.name = response.data.opponent.username
         }
 
         this._renderer.render(this._scene, this._camera)

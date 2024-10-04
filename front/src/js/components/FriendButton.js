@@ -45,7 +45,7 @@ class FriendButton extends HTMLElement {
     }
 
     connectedCallback() {
-        this._button.className = 'btn btn-primary'
+        this._button.className = 'button'
 
         this._button.addEventListener('click', async () => {
             console.log(this._id)

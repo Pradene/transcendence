@@ -6,6 +6,18 @@ $paddle-height: 20px;
 $paddle-offset: 10px;
 $animation-duration: 10s;
 
+.score-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+   /*  visibility: hidden;
+	visibility: visible; */
+	display: none;
+    height: 100vh;
+    width: 100vw;
+    z-index: 0;
+}
+
 .game-canvas {
     position: fixed;
     top: 0;
@@ -16,9 +28,38 @@ $animation-duration: 10s;
     z-index: 0;
 }
 
+.game .scores {
+    position: absolute;
+    top: 5%;
+    left: 0;
+    width: 100%;
+    visibility: hidden;
+
+    display: flex;
+    flex-direction: column;
+    gap: 2%;
+
+    text-align: center;
+    font-size: 24px;
+    z-index: 1;
+
+    .container {
+        display: flex;
+        flex-direction: row;
+        gap: 5%;
+        justify-content: center;
+        align-items: center;
+    }
+}
+
 .game-canvas.active {
     display: block;
     z-index: 1;
+}
+
+.score-canvas.active {
+    display: block;
+    z-index: 2;
 }
 
 .game-container {
@@ -35,9 +76,20 @@ $animation-duration: 10s;
     .waiting-for-players {
         display: flex;
         flex-direction: row;
+        align-content: center;
+        justify-content: center;
+
         width: 100%;
 
         visibility: hidden;
+
+        > p {
+            margin: 0px 10px 0px 10px;
+        }
+
+        > * {
+            align-self: center;
+        }
     }
 
     .queue-animation {

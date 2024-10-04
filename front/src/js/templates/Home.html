@@ -1,3 +1,4 @@
+<link rel="stylesheet" href="../../css/home.scss">
 <nav-component></nav-component>
 <div class="game-container">
     <div class="game-container-header">
@@ -14,7 +15,22 @@
 	</div>
 	<div class="game">
 		<canvas class="game-canvas"></canvas>
+		<canvas id="score-canvas"></canvas>
+		<div class="scores">
+			<h2>Score:</h2>
+			<div class="container">
+				<div class="user">
+					<h3 class="username"></h3>
+					<h3 class="score"></h3>
+				</div>
+				<div class="opponent">
+					<h3 class="username"></h3>
+					<h3 class="score"></h3>
+				</div>
+			</div>
+		</div>
 	</div>
+
 </div>
 
 <!-- <nav-component></nav-component>
@@ -45,4 +61,3 @@
 	</div>
 	<script type="module" src="src/js/script/checkbox.js"></script>
 </div> -->
-

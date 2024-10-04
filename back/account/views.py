@@ -88,27 +88,68 @@ def searchUsersView(request):
 @jwt_required
 @require_http_methods(["GET"])
 def getFriendsView(request, user_id=None):
-	if user_id is None:
-		user = request.user
-	else:
-		try:
-			user = CustomUser.objects.get(id=user_id)
-		except:
-			return JsonResponse({"error": str(e)}, status=400)
+	try:
+		if user_id is None:
+			user = request.user
+		else:
+			try:
+				user = CustomUser.objects.get(id=user_id)
+			except:
+				return JsonResponse({"error": str(e)}, status=400)
 
-	friend_list, created = FriendList.objects.get_or_create(user=user)
-	friends = friend_list.friends.all()
-	data = [friend.toJSON() for friend in friends]
-	return JsonResponse(serializer.data, safe=False, status=200)
+		friend_list, created = FriendList.objects.get_or_create(user=user)
+		friends = friend_list.friends.all()
+		data = [friend.toJSON() for friend in friends]
+		return JsonResponse(data, safe=False, status=200)
+	
+	except Exception as e:
+		return JsonResponse({}, status=400)
 
 
 @jwt_required
 @require_http_methods(["GET"])
-def getFriendRequestsView(request):
+def getFriendRequestsView(request, user_id=None):
 	try:
-		user = request.user
+		if user_id is None:
+			user = request.user
+		else:
+			try:
+				user = CustomUser.objects.get(id=user_id)
+			except:
+				return JsonResponse({"error": str(e)}, status=400)
+
 		requests = FriendRequest.objects.filter(receiver=user)
 		data = [request.toJSON() for request in requests]
 		return JsonResponse(data, safe=False, status=200)
+
 	except Exception as e:
 		return JsonResponse({}, status=400)
+
+@jwt_required
+@require_http_methods(["GET"])
+def userLevel(request, user_id):
+	try:
+		from game.models import GameModel
+
+		user = request.user
+		xp = len(GameModel.objects.filter(winner_id=user.id))
+		level = 0
+		requiredxp = 1
+
+		while xp >= requiredxp:
+			xp -= requiredxp
+			requiredxp += 1
+			level += 1
+
+		data = {
+			'level': level,
+			'xp': xp,
+			'requiredxp': requiredxp
+		}
+
+		return JsonResponse(data, safe=False, status=200)
+
+	except Exception as e:
+		logging.error(f'[userLevel]: {e.__str__()}')
+		return JsonResponse({}, status=400)
+

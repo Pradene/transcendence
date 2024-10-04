@@ -11,7 +11,7 @@ export function getConnectedUserID() {
         const decoded = jwt.decode(token)
 
         return decoded.user
-    
+
     } catch (e) {
         return null
     }

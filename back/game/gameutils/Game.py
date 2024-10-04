@@ -1,6 +1,7 @@
 import logging
 import asyncio
 import time
+import typing
 
 from typing import Union
 from threading import Thread, Lock
@@ -12,13 +13,14 @@ from game.gameutils.abstractgame import AbstractGame
 
 from game import models as gamemodels
 from account import models as accountmodels
+from chat.models import Message
 
 FPS: int = 30
 TIME_TO_SLEEP: float = (1 / FPS)
 
 
 class Game(AbstractGame):
-    def __init__(self, p1: PlayerInterface):
+    def __init__(self, p1: PlayerInterface, related_duel: Message | None = None):
         logging.info("[Game]: in ctor")
         super().__init__(p1)
 
@@ -36,6 +38,8 @@ class Game(AbstractGame):
         self.__score: tuple[int] = (0, 0)
 
         self.__gamemodel: Union[gamemodels.GameModel | None] = None
+
+        self.__related_duel = related_duel
 
 
     def __del__(self):
@@ -121,12 +125,14 @@ class Game(AbstractGame):
                 "current_player": {
                     "position": self.__p1.getPosition().copy(),
                     "score":    self.__p1.getScore(),
-                    "name":		self.__p1.getName()
+                    "name":		self.__p1.getName(),
+                    "username": self.__p1.getName()
                 },
                 "opponent":       {
                     "position": self.__p2.getPosition().copy() if self.__p2 is not None else P2_POSITION.copy(),
                     "score":    self.__p2.getScore() if self.__p2 is not None else 0,
-                    "name":		self.__p2.getName()
+                    "name":		self.__p2.getName(),
+                    "username": self.__p2.getName()
                 },
                 "ball":           self.__ball.getPosition()
             }
@@ -142,12 +148,14 @@ class Game(AbstractGame):
                 "current_player": {
                     "position": self.__p2.getPosition().copy() if self.__p2 is not None else P2_POSITION.copy(),
                     "score":    self.__p2.getScore() if self.__p2 is not None else 0,
-                    "name":		self.__p2.getName()
+                    "name":		self.__p2.getName(),
+                    "username": self.__p2.getName()
                 },
                 "opponent":       {
                     "position": self.__p1.getPosition().copy(),
                     "score":    self.__p1.getScore(),
-                    "name":		self.__p1.getName()
+                    "name":		self.__p1.getName(),
+                    "username": self.__p1.getName()
                 },
                 "ball":           self.__ball.getPosition()
             }
@@ -218,9 +226,27 @@ class Game(AbstractGame):
         )
         dbentry.save()
 
+        if self.__related_duel is not None:
+            self.__related_duel.duel = dbentry
+            self.__related_duel.save()
+
         self.__gamemodel = dbentry
 
     def getGameModel(self) -> Union[gamemodels.GameModel, None]:
         """Return the game model"""
 
         return self.__gamemodel
+
+    async def redirectClients(self):
+        if self.__gamemodel is None:
+            return
+
+        data = {
+            "method": "redirect_game",
+            "status": True,
+            "gameid": self.__gamemodel.id
+        }
+
+        await self.__p1.getUpdateCallback()(data)
+        await self.__p2.getUpdateCallback()(data)
+

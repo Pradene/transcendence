@@ -1,6 +1,7 @@
 NAME			:= Transcendence
 DOCKER_FLAGS 	:= --build
 HOST_HOSTNAME	:= $(shell hostname)
+DIR				:= $(shell basename $(shell pwd))
 
 ifneq ($(fg),)
 	DOCKER_FLAGS += -d
@@ -19,8 +20,8 @@ down:
 	docker compose down
 
 clean:
-	-docker volume rm transcendence_database
-	-docker volume rm transcendence_ssl_certs
+	-docker volume rm $(DIR)_database
+	-docker volume rm $(DIR)_ssl_certs
 	-docker container prune -f
 	-docker rmi $(docker images)
 

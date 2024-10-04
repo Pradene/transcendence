@@ -10,6 +10,7 @@ export class Profile extends TemplateComponent {
 
     async componentDidMount() {
         await this.getUser()
+        await this.getLevel()
         await this.getGames()
         await this.getStats()
     }
@@ -41,6 +42,7 @@ export class Profile extends TemplateComponent {
 
             } else {
                 const button = document.createElement("friend-button")
+                button.classList.add('button')
                 button.status = user.status
                 button.id = user.id
                 buttonContainer.appendChild(button)
@@ -49,6 +51,23 @@ export class Profile extends TemplateComponent {
         } catch (error) {
             console.log(error)
         }
+    }
+
+    async getLevel() {
+        const req = await fetch(`/api/users/levelinfo/${this.getProfileID()}`)
+        const data = await req.json()
+
+        const level_element = document.querySelector(".level #level")
+        const xp_element = document.querySelector(".level #exp")
+        const xpmax_element = document.querySelector(".level #expMax")
+        const progress_element = document.querySelector(".information progress")
+
+        level_element.textContent = data.level
+        xp_element.textContent = data.xp
+        xpmax_element.textContent = data.requiredxp
+
+        progress_element.setAttribute("max", data.requiredxp)
+        progress_element.setAttribute("value", data.xp)
     }
 
     getProfileID() {
@@ -74,6 +93,9 @@ export class Profile extends TemplateComponent {
     displayGame(game) {
         const element = document.createElement('div')
         element.classList.add('game')
+        element.addEventListener('click', (event) => {
+            document.location = "/game/" + game.id
+        })
 
         const player = document.createElement('div')
         player.classList.add('player')

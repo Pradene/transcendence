@@ -73,23 +73,23 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
         from game.gameutils.DuelManager import DUELMANAGER
 
-        if DUELMANAGER.have_active_duel(self.__user.id):
+        if DUELMANAGER.get_duel(self.__user) is not None:
             from game.gameutils.GameManager import GameManager
             logging.info(f"User {self.__user} has an active duel, starting new game")
 
             gamemanager: GameManager = GameManager.getInstance()
-            opponent = await database_sync_to_async(CustomUser.objects.get)(
-                id=DUELMANAGER.get_opponent_id(self.__user.id))
+            duel = DUELMANAGER.get_duel(self.__user)
+            opponent = await database_sync_to_async(duel.get_opponent)(self.__user)
 
             if gamemanager.gameExists(opponent.username):
                 logging.info(f"Game with {opponent.username} already exists, joining")
                 self.__interface.current_game = gamemanager.getGame(opponent.username)
                 await self.__interface.current_game.join(self.__interface)
                 self.__interface.current_game.start()
-                DUELMANAGER.remove_from_duels(self.__user.id)
+                DUELMANAGER.remove_duel(duel)
             else:
                 logging.info(f"Game with {opponent.username} does not exist, creating")
-                self.__interface.current_game = await gamemanager.createGame(self.__interface)
+                self.__interface.current_game = await gamemanager.createGame(self.__interface, duel.message)
 
     async def receive(self, text_data=None, bytes_data=None, **kwargs):
         """Handle incoming messages from the client"""
@@ -155,8 +155,11 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
     async def send_json(self, data):
         """Send JSON data to the client and log it to the console"""
-
-        await super().send_json(data)
+        try:
+            await super().send_json(data)
+        except Exception as e:
+            logging.error(f"[ERROR]: {e.__str__()}")
+            self.close()
 
     async def updateClient(self, gameData: dict):
         """Send updated game data to the client"""
