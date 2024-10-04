@@ -1,6 +1,7 @@
 import { Pong } from "./Pong.js";
 import { activateButtons, AVAILABLEGAMECONTAINER, AVAILABLETOURNAMENTCONTAINER, USERSCONTAINER } from "./DomElements.js";
 import { GAME_MODE } from "./Defines.js";
+import {Router} from "../utils/Router";
 
 const hosturl = "wss://" + location.hostname + ":" + location.port + "/ws/game/";
 
@@ -12,6 +13,13 @@ export class GameSocket {
 
         this._websocket = socket;
         this._websocket.onmessage = this.redirectMessages
+        this._websocket.onerror = (e) => {
+            console.trace()
+            console.error("Error: ", e);
+        }
+        this._websocket.onclose = () => {
+            console.trace()
+        }
     }
 
     /**
@@ -159,13 +167,34 @@ export class GameSocket {
             return ;
         }
 
-        const e = new CustomEvent("gameMessage", {
-            detail: {
-                data: response
-            }
-        })
+        const gameContainer = document.querySelector("div.game canvas")
+        const leave_queue_event = new CustomEvent("leaveQueue", {detail: response})
+        const join_queue_event = new CustomEvent("joinQueue", {detail: response});
 
-        window.dispatchEvent(e)
+        switch (response.method) {
+            case "get_users":
+                // this._gameSocket.processGetUsers(response);
+                break;
+            case "join_game":
+                window.dispatchEvent(leave_queue_event);
+                this.createNewGame(response);
+                break;
+            case "join_queue":
+                document.dispatchEvent(join_queue_event)
+                break;
+            case "update_game":
+                document.dispatchEvent(leave_queue_event)
+
+                if (!this._currentGame)
+                    this._currentGame = new Pong(gameContainer);
+
+                this._currentGame.update(response);
+                break;
+            case "redirect_game":
+                const gameid = response.gameid
+                await Router.get().navigate(`/game/${gameid}`)
+                break;
+        }
     }
 
     removeGame() {
@@ -175,7 +204,12 @@ export class GameSocket {
     close() {
         this._currentGame?.stop();
         this.removeGame();
+
+        // Remove all event listeners
+        this._websocket.onclose = () => {};
+        this._websocket.onerror = () => {};
         this._websocket.close();
+
         GameSocket.#GameSocket = null;
 
         console.log("Closing game socket");

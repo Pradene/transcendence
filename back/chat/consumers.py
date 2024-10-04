@@ -41,6 +41,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         if self.user.is_authenticated:
+            self.log("disconnecting...")
+
             rooms = await self.get_user_rooms()
             for room in rooms:
                 duels = await database_sync_to_async(room.get_active_duels_for)(self.user)
@@ -76,15 +78,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
         data = json.loads(text_data)
         message_type = data.get('type')
 
-        logging.info(f"Consumer {self.user} received: {data}")
+        self.log(f"received: {data}")
 
         if 'room' not in data.keys() and 'room_id' not in data.keys():
-            logging.error("[CONSUMER]: Invalid request, missing room or room_id field")
+            self.error("Invalid request, missing room or room_id field", is_error=True)
             return
 
         room = await database_sync_to_async(ChatRoom.objects.get)(id=data['room'] if 'room' in data.keys() else data['room_id'])
         if not await database_sync_to_async(room.is_in_room)(self.user):
-            logging.error(f"[CONSUMER]: User {self.user.username} not in room {room.id}")
+            self.error(f"not in room {room.id}")
             return
 
         if message_type == 'message':
@@ -136,17 +138,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 
     async def request_duel(self, data: dict):
-        logging.info(f"User {self.user} requested a duel")
+        self.log(f"requested a duel")
 
         try:
-            logging.info(f"[CONSUMER]: processing duel_request")
+            self.log(f"processing duel_request")
             roomid = data['room']
             room: ChatRoom = await database_sync_to_async(ChatRoom.objects.get)(id=roomid)
             opponent = await sync_to_async(room.get_other_user, thread_sensitive=True)(current_user=self.user)
 
             # clear former duel invitation and create new one
             outdated_duels = room.get_active_duels_for(self.user)
-            logging.info(f"[CONSUMER]: found {await sync_to_async(len, thread_sensitive=True)(outdated_duels)} duels, removing them")
+            self.log(f"found {await sync_to_async(len, thread_sensitive=True)(outdated_duels)} duels, removing them")
             for m in await self.outdated_duels(outdated_duels):
                 await self.channel_layer.group_send(
                     f'chat_{roomid}',
@@ -164,18 +166,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return message
 
         except KeyError as e:
-            logging.error("KeyError in request_duel")
+            self.error("KeyError in request_duel")
             return
 
         except ChatRoom.DoesNotExist as e:
-            logging.error("Room does not exist")
+            self.error("Room does not exist")
             return
 
     async def accept_duel(self, data: dict):
         try:
             from game.gameutils.DuelManager import DUELMANAGER
             if DUELMANAGER.get_duel(self.user) is not None:
-                logging.error("User does already have an active duel")
+                self.log("User does already have an active duel", is_error=True)
                 return
 
             room = await database_sync_to_async(ChatRoom.objects.get)(id=data['room'])
@@ -188,10 +190,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             users = await database_sync_to_async(room.get_users_tuple)()
             if not DUELMANAGER.create_duel(users, message):
-                logging.error("[CONSUMER]: could not create duel")
+                self.log("could not create duel", is_error=True)
                 return
 
-            logging.log(logging.INFO, f"[CONSUMER]: User {self.user} accepted the duel")
+            self.log("duel accepted")
 
             message = await self.save_message(room, self.user, "Duel have been accepted.")
             await self.channel_layer.group_send(
@@ -220,15 +222,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
         except KeyError as e:
-            logging.error("KeyError in accept_duel")
+            self.log("KeyError in accept_duel", is_error=True)
             return
 
         except ChatRoom.DoesNotExist as e:
-            logging.error("[CONSUMER]: Room does not exist in accept_duel")
+            self.log("Room does not exist in accept_duel", is_error=True)
             return
         
         except Message.DoesNotExist as e:
-            logging.error(f"[CONSUMER]: Duel request does not exists in accept_duel")
+            self.log(f"Duel request does not exists in accept_duel", is_error=True)
 
     async def refuse_duel(self, data):
         try:
@@ -263,16 +265,27 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
         except KeyError as e:
-            logging.error(f"KeyError in refuse_duel: {e.__str__()}")
+            self.error(f"KeyError in refuse_duel: {e.__str__()}")
             return
 
         except ChatRoom.DoesNotExist as e:
-            logging.error("Room does not exist")
+            self.error("Room does not exist")
             return
 
     async def duel_response(self, data):
         await self.send(text_data=json.dumps(data))
 
+    
+    def log(self, message: str, is_error: bool = False):
+        logmsg = f"[{type(self).__name__} ({self.user.username})]: {message}"
+
+        if is_error:
+            logging.error(logmsg)
+        else:
+            logging.info(logmsg)
+
+    def error(self, message: str):
+        self.log(message, True)
 
     async def message(self, data):
         content = data['content']
@@ -353,7 +366,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 )
 
         except Exception as e:
-            logging.info(e)
+            self.log(e)
 
     
     async def join_room(self, data):
@@ -402,7 +415,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     m
                 )
 
-            logging.info(f"[CONSUMER]: due to {self.user.username} quitting, removed {len(messages)} duels")
+            self.log(f"due to {self.user.username} quitting, removed {len(messages)} duels")
 
             # removing room
             # await database_sync_to_async(room.quit)(self.user)

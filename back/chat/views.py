@@ -74,7 +74,7 @@ def roomView(request, room_id):
         logging.info(f"[ROOM_VIEW]: Fetching data for duel request {m['duel_id']} in room {room.id}")
         duel = Message.objects.get(id=m['duel_id']).duel
         if duel is None:
-            return
+            continue
     
         logging.info(f"[ROOM_VIEW]: Corresponding duel found, recovering datas")
         game_data = {

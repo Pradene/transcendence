@@ -69,7 +69,7 @@ class Matchmaking:
                 await tournament.join(player)
                 player.current_game = tournament
 
-            tournament.start()
+            # tournament.start()
 
     def remove_from_queues(self, player: 'PlayerInterface'):
         if player in self.game_queue:

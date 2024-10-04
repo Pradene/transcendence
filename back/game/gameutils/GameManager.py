@@ -97,13 +97,13 @@ class GameManager:
         pass
 
     async def createGame(self, player: PlayerInterface, related_duel: Message | None = None) -> Game:
-        logging.info(f"[GameManager]: creating new game instance")
+        self.log(f"creating new game instance")
         from game.consumers import GameConsumer
         game = Game(player, related_duel=related_duel)
         GameManager.GAMES[player.getName()] = game
 
         await GameConsumer.onGameChange()
-        logging.info(f"[GameManager]: Game instance created")
+        self.log(f"Game instance created")
         return game
 
     def gameExists(self, gameid: str) -> bool:
@@ -136,11 +136,11 @@ class GameManager:
     def __deleteGame(self, gameid: str) -> None:
         game = GameManager.GAMES.pop(gameid, None)
         game.removeFromClients()
-        logging.log(logging.INFO, f"Game {gameid} deleted")
+        self.log(f"Game {gameid} deleted")
 
     def __deleteTournament(self, name: str) -> None:
         GameManager.TOURNAMENTS.pop(name, None)
-        logging.log(logging.INFO, f"Tournament {name} deleted")
+        self.log(f"Tournament {name} deleted")
 
     def toJSON(self) -> Dict:
         garr = [x.gameInfo() for x in GameManager.GAMES.values() if not x.gameInfo()["is_full"]]
@@ -150,7 +150,7 @@ class GameManager:
     @staticmethod
     def getInstance() -> 'GameManager':
         if GameManager.__instance is None:
-            logging.log(logging.INFO, "Creating GameManager instance")
+            logging.info("Creating GameManager instance")
             GameManager.__instance = GameManager()
             logging.info("GameManager instance created")
         return GameManager.__instance
@@ -159,3 +159,12 @@ class GameManager:
     def setUserList(userlist: List):
         GameManager.USERLIST = userlist
         logging.log(logging.INFO, "Userlist set")
+
+    def log(self, message: str):
+        logmsg = f"[{type(self).__name__}]: {message}"
+        logging.info(logmsg)
+
+    def error(self, message: str):
+        logmsg = f"[{type(self).__name__}]: {message}"
+        logging.error(logmsg)
+

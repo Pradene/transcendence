@@ -22,8 +22,10 @@ class DuelManager:
 
     def create_duel(self, users: typing.Tuple['CustomUser', 'CustomUser'], message: 'Message') -> bool:
         if self.get_duel(users[0]) is not None or self.get_duel(users[1]) is not None:
+            self.error(f"duel {users[0].username}:{users[1].username} allready exists")
             return False
 
+        self.log(f"duel {users[0].username}:{users[1].username} does not exists, creating")
         self.duels.append(Duel(users, message))
         return True
 
@@ -35,5 +37,13 @@ class DuelManager:
 
     def remove_duel(self, duel: Duel):
         self.duels.remove(duel)
+
+    def log(self, message: str):
+        logmsg = f"[{type(self).__name__}]: {message}"
+        logging.info(logmsg)
+
+    def error(self, message: str):
+        logmsg = f"[{type(self).__name__}]: {message}"
+        logging.error(logmsg)
 
 DUELMANAGER: DuelManager = DuelManager()

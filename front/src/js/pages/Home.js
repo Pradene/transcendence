@@ -17,7 +17,8 @@ export class Home extends TemplateComponent {
 
     async componentDidMount() {
         this._gameSocket = await GameSocket.get()
-        window.addEventListener("gameMessage", (e) => this.handleGameSocketMessage(e.detail.data))
+        window.addEventListener("joinQueue", (e) => this.showQueueAnimation())
+        window.addEventListener("leaveQueue", (e) => this.hideQueueAnimation())
 
         const createTournamentButton = document.querySelector("button.create-tournament")
         createTournamentButton.addEventListener("click", () => {
@@ -30,33 +31,9 @@ export class Home extends TemplateComponent {
         })
     }
 
-    async handleGameSocketMessage(response) {
-        const gameContainer = document.querySelector("div.game canvas")
-
-        switch (response.method) {
-            case "get_users":
-                // this._gameSocket.processGetUsers(response);
-                break;
-            case "join_game":
-                this.hideQueueAnimation();
-                this._gameSocket.createNewGame(response);
-                break;
-            case "join_queue":
-                this.showQueueAnimation();
-                break;
-            case "update_game":
-                this.hideQueueAnimation();
-                if (!this._gameSocket._currentGame)
-                    this._gameSocket._currentGame = new Pong(gameContainer);
-
-                this._gameSocket._currentGame.update(response);
-                break;
-            case "redirect_game":
-                const gameid = response.gameid
-                await Router.get().navigate(`/game/${gameid}`)
-                break;
-        }
-    }
+    // async handleGameSocketMessage(response) {
+    //
+    // }
 
     showQueueAnimation() {
         document.querySelector("div.game-container-header div.waiting-for-players").style.visibility = "visible";

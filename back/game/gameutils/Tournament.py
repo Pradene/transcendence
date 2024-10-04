@@ -139,3 +139,17 @@ class Tournament(AbstractGame):
             winner=winner
         )
         dbentry.save()
+
+    async def redirectClients(self):
+        # if self.__gamemodel is None:
+        #     return
+
+        # data = {
+        #     "method": "redirect_game",
+        #     "status": True,
+        #     "gameid": self.__gamemodel.id
+        # }
+
+        # for player in self.__players:
+        #     await player.getUpdateCallback()(data)
+        pass

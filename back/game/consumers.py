@@ -65,7 +65,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
         GameConsumer.USERS.append(self)
 
-        logging.log(logging.INFO, f"New GameConsumer connected: {str(self.__user)}:{self.__user.username}")
+        self.log("connected")
         self.__interface.setName(self.__user.username)
         await self.accept()
         await self.getGames()
@@ -75,20 +75,20 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
         if DUELMANAGER.get_duel(self.__user) is not None:
             from game.gameutils.GameManager import GameManager
-            logging.info(f"User {self.__user} has an active duel, starting new game")
+            self.log("active duel found")
 
             gamemanager: GameManager = GameManager.getInstance()
             duel = DUELMANAGER.get_duel(self.__user)
             opponent = await database_sync_to_async(duel.get_opponent)(self.__user)
 
             if gamemanager.gameExists(opponent.username):
-                logging.info(f"Game with {opponent.username} already exists, joining")
+                self.log(f"Game with {opponent.username} already exists, joining")
                 self.__interface.current_game = gamemanager.getGame(opponent.username)
                 await self.__interface.current_game.join(self.__interface)
                 self.__interface.current_game.start()
                 DUELMANAGER.remove_duel(duel)
             else:
-                logging.info(f"Game with {opponent.username} does not exist, creating")
+                self.log(f"Game with {opponent.username} does not exist, creating")
                 self.__interface.current_game = await gamemanager.createGame(self.__interface, duel.message)
 
     async def receive(self, text_data=None, bytes_data=None, **kwargs):
@@ -118,24 +118,39 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             case "update_player":
                 await self.updatePlayer(data)
 
+    def log(self, message: str, is_error=False):
+        logmsg = f"[{type(self).__name__} ({self.__user.username})]: {message}"
+
+        if is_error:
+            logging.error(logmsg)
+        else:
+            logging.info(logmsg)
+
     async def disconnect(self, close_code):
         """Handle client disconnection"""
 
         matchmaker.remove_from_queues(self.__interface)
 
-        logging.log(logging.INFO, f"User {self.__interface.getName()} disconnecting...")
-        if self.isInGame():
-            logging.log(logging.INFO,
-                        f"User {self.__interface.getName()} is in game {self.__interface.current_game.getGameid()}, quitting")
-            await self.__interface.current_game.quit()
-            logging.log(logging.INFO,
-                        f"User {self.__interface.getName()} has quit the game {self.__interface.current_game.getGameid()}")
+        self.log("disconnecting...")
 
+        # Remove from game if a game is active
+        if self.isInGame():
+            self.log(f"is in game {self.__interface.current_game.getGameid()}, quitting")
+            await self.__interface.current_game.quit()
+            self.__interface.current_game = None
+            self.log(f"has quit the game {self.__interface.current_game.getGameid()}")
+
+        # Remove duel if duel is active
+        if DUELMANAGER.get_duel(self.__user) is not None:
+            self.log("user have an active duel, removing")
+            DUELMANAGER.remove_duel(DUELMANAGER.get_duel(self.__user))
+
+        # Useless ???
         for user in GameConsumer.USERS:
             if user == self:
                 GameConsumer.USERS.remove(user)
 
-        logging.log(logging.INFO, f"User {self.__interface.getName()} has disconnected")
+        self.log("disconnected")
         await GameConsumer.onUserChange()
 
     def isInGame(self) -> bool:
@@ -158,7 +173,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         try:
             await super().send_json(data)
         except Exception as e:
-            logging.error(f"[ERROR]: {e.__str__()}")
+            self.log(f"{e.__str__()}", is_error=True)
             self.close()
 
     async def updateClient(self, gameData: dict):
@@ -197,8 +212,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             await self.send_json(response.toJSON())
 
     def __deleteCurrentGame(self):
-        logging.log(logging.INFO,
-                    f"User {self.__interface.getName()} left the game {self.__interface.current_game.getGameid()}")
+        self.log(f"left the game {self.__interface.current_game.getGameid()}")
         self.__interface.current_game = None
 
     async def updatePlayer(self, data) -> None:
