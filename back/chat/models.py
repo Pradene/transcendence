@@ -73,9 +73,9 @@ class ChatRoom(models.Model):
             return None
 
     def is_in_room(self, user: CustomUser):
-        users = self.users.all()
-        logging.info(f"[ROOM]: {user.username}:{user.id} {users[0].username}:{users[0].id} {users[1].username}:{users[1].id}")
-        return user.id == users[0].id or user.id == users[1].id
+        return self.users.filter(id=user.id).exists()
+        # logging.info(f"[ROOM]: {user.username}:{user.id} {users[0].username}:{users[0].id} {users[1].username}:{users[1].id}")
+        # return user.id == users[0].id or user.id == users[1].id
 
     def get_active_duels_for(self, user: CustomUser):
         duels = self.messages.filter(user=user, is_duel=True, is_duel_expired=False, is_duel_accepted=False)
