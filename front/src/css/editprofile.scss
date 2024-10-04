@@ -1,10 +1,14 @@
-#file-upload {
-    display: none;
-}
-
-.edit-form {
+.edit {
+    height: 90vh;
+    border-radius: 12px;
+    background: var(--secondary-color);
+    padding: 12px;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    width: 200px;
+    justify-content: center;
+
+    form {
+        width: 100%;
+        max-width: 600px;
+    }
 }

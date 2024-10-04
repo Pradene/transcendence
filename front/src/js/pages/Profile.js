@@ -42,7 +42,6 @@ export class Profile extends TemplateComponent {
 
             } else {
                 const button = document.createElement("friend-button")
-                button.classList.add('button')
                 button.status = user.status
                 button.id = user.id
                 buttonContainer.appendChild(button)

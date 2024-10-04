@@ -152,7 +152,6 @@ export class GameSocket {
      */
     async redirectMessages(event) {
         let response = JSON.parse(event.data);
-        console.log("Received message", response);
         
         if (!response.status) {
             alert("Error: " + response.reason);

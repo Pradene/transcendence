@@ -31,21 +31,21 @@ export class Home extends TemplateComponent {
     }
 
     async handleGameSocketMessage(response) {
-        const gameContainer = document.querySelector("div.game canvas")
+        const gameContainer = document.querySelector(".game-canvas")
 
         switch (response.method) {
             case "get_users":
                 // this._gameSocket.processGetUsers(response);
                 break;
             case "join_game":
-                this.hideQueueAnimation();
+                // this.hideQueueAnimation();
                 this._gameSocket.createNewGame(response);
                 break;
             case "join_queue":
-                this.showQueueAnimation();
+                // this.showQueueAnimation();
                 break;
             case "update_game":
-                this.hideQueueAnimation();
+                // this.hideQueueAnimation();
                 if (!this._gameSocket._currentGame)
                     this._gameSocket._currentGame = new Pong(gameContainer);
 
