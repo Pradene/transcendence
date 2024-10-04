@@ -1,50 +1,14 @@
-.editprofile {
-	display: flex;
-	align-items: center;
-}
-
-#file-upload {
-    display: none;
-}
-
-.edit-form {
+.edit {
+    height: 90vh;
+    border-radius: 12px;
+    background: var(--secondary-color);
+    padding: 12px;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    width: 200px;
-}
+    justify-content: center;
 
-.gamess {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-}
-
-.fieldss {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-}
-
-.styleInput {
-	display: flex;
-	flex-direction: column;
-	-webkit-appearance: none;
-	-moz-appearance: none;
-	appearance: none;
-	background-color: transparent;
-	background: none;
-	width: 50px;
-	height: 50px;
-	cursor: pointer;
-}
-
-.styleInput::-webkit-color-swatch {
-	border-radius: 50%;
-	border: 3px solid #ffffff
-}
-
-.styleInput::-moz-color-swatch {
-	border-radius: 50%;
-	border: 3px solid #ffffff
+    form {
+        width: 100%;
+        max-width: 600px;
+    }
 }

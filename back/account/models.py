@@ -93,11 +93,11 @@ class FriendList(models.Model):
         if user in self.friends.all():
             self.friends.remove(user)
 
-    def unfriend(self, rm_user):
-        self.remove_friend(rm_user)
+    def unfriend(self, user):
+        self.remove_friend(user)
 
-        user, created = FriendList.objects.get_or_create(user=rm_user)
-        user.remove_friend(self.user)
+        friend_list, created = FriendList.objects.get_or_create(user=user)
+        friend_list.remove_friend(self.user)
 
     def is_friend(self, user):
         return user in self.friends.all()
@@ -122,8 +122,7 @@ class FriendRequest(models.Model):
 
     def toJSON(self):
         return {
-            'sender': self.sender.toJSON(),
-            'receiver': self.receiver.toJSON()
+            'user': self.sender.toJSON(),
         }
 
     def accept(self):

@@ -108,7 +108,7 @@ export class ChatRoom extends TemplateComponent {
         }
 
         console.log(`${userid} ${challenger}`)
-        if (userid === challenger) {
+        if (userid == challenger) {
             message.content = "You have invited your opponent to a duel, waiting for a replie..."
             this.displayMessage(main_container, message)
             return

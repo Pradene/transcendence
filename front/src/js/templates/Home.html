@@ -1,36 +1,38 @@
 <link rel="stylesheet" href="../../css/home.scss">
 <nav-component></nav-component>
-<div class="game-container">
-    <div class="game-container-header">
-    	<button class="create-game">Join a Game</button>
-    	<button class="create-tournament">Join a Tournament</button>
-		<div class="waiting-for-players">
-			<p>Waiting for players to join...</p>
-			<div class="queue-animation">
-				<div class="animation-paddle"></div>
-				<div class="animation-ball"></div>
-				<div class="animation-paddle"></div>
-			</div>
-		</div>
+<div class="home">
+	<div class="game-container">
+		<h4>Online game</h4>
+		<p>Play an online game versus another player,<br>
+		first player to 5 points will win the game.</p>
+		<button class="button create-game">Play</button>
 	</div>
-	<div class="game">
-		<canvas class="game-canvas"></canvas>
-		<canvas id="score-canvas"></canvas>
-		<div class="scores">
-			<h2>Score:</h2>
-			<div class="container">
-				<div class="user">
-					<h3 class="username"></h3>
-					<h3 class="score"></h3>
-				</div>
-				<div class="opponent">
-					<h3 class="username"></h3>
-					<h3 class="score"></h3>
-				</div>
+
+	<div class="tournament-container">
+		<h4>Online tournament</h4>
+		<p>Play in an online tournament,<br>
+		versus 3 other players.</p>
+		<button class="button create-tournament">Play</button>
+	</div>
+
+</div>
+
+<div class="game">
+	<div class="scores">
+		<h2>Score:</h2>
+		<div class="container">
+			<div class="user">
+				<h3 class="username"></h3>
+				<h3 class="score"></h3>
+			</div>
+			<div class="opponent">
+				<h3 class="username"></h3>
+				<h3 class="score"></h3>
 			</div>
 		</div>
 	</div>
 
+	<canvas class="game-canvas"></canvas>
 </div>
 
 <!-- <nav-component></nav-component>

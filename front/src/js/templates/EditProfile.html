@@ -1,46 +1,22 @@
 <nav-component></nav-component>
-<div class="container bg-gray-800 d-flex justify-content-between rounded">
-    <div class="editprofile">
-        <form ref="form" action="PUT">
-            <div class="d-flex flex-column align-items-center mb-2">
-                <div class="profile-picture-large mb-2">
-                    <img ref="picture-preview" alt="Profile picture" />
-                </div>
-                <div class="button">
-                    <label for="file-upload"  class="form-label text-white m-1">Change picture</label>
-                    <input ref="picture-input" id="file-upload" class="form-control d-none" type="file" />
-                </div>
+<div class="edit">
+    <form ref="form" action="PUT">
+        <div class="d-flex flex-column align-items-center mb-4">
+            <div class="profile-picture-large mb-2">
+                <img ref="picture-preview" alt="Profile picture" />
             </div>
-            <input ref="username" class="w-100 form-control mb-2" type="text" placeholder="Username" autocomplete="off" required="True" />
-            <input ref="email" class="w-100 form-control mb-2" type="email" placeholder="Email" autocomplete="off" required="True" />
-			<label>Game styling</label>
-			<div class="gamess">
-				<div>
-					<label>Paddle</label>
-					<input ref="pColor" class="styleInput" type="color" placeholder="Paddle" />
-				</div>
-				<div>
-					<label>Ball</label>
-					<input ref="bColor" class="styleInput" type="color" placeholder="Ball" />
-				</div>
-				<div>
-					<label>Wall</label>
-					<input ref="wColor"class="styleInput" type="color" placeholder="Wall" />
-				</div>
-				<div class="fieldss">
-					<label>Field</label>
-					<div>
-						<label>Color</label>
-						<input ref="fColor" class="styleInput" type="color" placeholder="Field" />
-					</div>
-					<div>
-						<label>Opacity</label>
-						<input ref="fOpacity" type="range" name="opacity" min="0" max="100" />
-					</div>
-				</div>
-				
-			</div>
-            <button type="submit" class="w-100 button">Edit profile</button>
-        </form>
-    </div>
+            <div class="button">
+                <label for="file-upload"  class="form-label text-white m-1">Change picture</label>
+                <input ref="picture-input" id="file-upload" class="form-control d-none" type="file" />
+            </div>
+        </div>
+        
+        <label for="username" class="mb-1">Username</label>
+        <input ref="username" id="username" class="w-100 form-control mb-4" type="text" placeholder="Username" autocomplete="off" required="True" />
+        
+        <label for="email" class="mb-1">Email</label>
+        <input ref="email" id="email" class="w-100 form-control mb-4" type="email" placeholder="Email" autocomplete="off" required="True" />
+        
+        <button type="submit" class="w-100 button">Edit profile</button>
+    </form>
 </div>

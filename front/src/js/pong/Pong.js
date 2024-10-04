@@ -26,23 +26,11 @@ export class Pong {
 
         
         //set the canvas properties
-        this._context = canvas[0].getContext("webgl2")
-        this._canvas = canvas[0]
+        this._context = canvas.getContext("webgl2")
+        this._canvas = canvas
         this._canvas.classList.add("active")
         this._canvas.width = window.screen.width
         this._canvas.height = window.screen.height
-
-		this._scoreCtx = canvas[1].getContext('2d')
-		this._scoreCanvas = canvas[1]
-		this._scoreCanvas.classList.add('active')
-		if (this._scoreCanvas)
-			console.log("Je l'ai !")
-		this._scoreCanvas.width = window.screen.width;
-		this._scoreCanvas.height = window.screen.height;
-		if (this._scoreCtx)
-			console.log("Alleluia !!!")
-		else
-			console.log("yapa yapa")
 
         this._renderer = new THREE.WebGLRenderer({ antialias: true, canvas: this._canvas })
         this._renderer.setPixelRatio(window.devicePixelRatio)
@@ -94,7 +82,6 @@ export class Pong {
         this._opponent?.display(this._scene)
         
         this._ball.display(this._scene)
-		this.displayScore()
 
 		window.addEventListener('keydown', (event) => {
             switch (event.key) {
@@ -229,33 +216,6 @@ export class Pong {
         this._camera.add(this._psScoreMesh, this._osScoreMesh, this._pnScoreMesh, this._onScoreMesh) */
 	}
 
-	removeScore() {
-        if (this._psScoreMesh) {
-            this._camera.remove(this._psScoreMesh)
-            this._psScoreMesh.geometry.dispose()
-            this._psScoreMesh.material.dispose()
-            this._psScoreMesh = null
-        }
-		if (this._pnScoreMesh) {
-            this._camera.remove(this._pnScoreMesh)
-            this._pnScoreMesh.geometry.dispose()
-            this._pnScoreMesh.material.dispose()
-            this._pnScoreMesh = null
-        }
-		if (this._onScoreMesh) {
-            this._camera.remove(this._onScoreMesh)
-            this._onScoreMesh.geometry.dispose()
-            this._onScoreMesh.material.dispose()
-            this._onScoreMesh = null
-        }
-		if (this._osScoreMesh) {
-            this._camera.remove(this._osScoreMesh)
-            this._osScoreMesh.geometry.dispose()
-            this._osScoreMesh.material.dispose()
-            this._osScoreMesh = null
-        }
-    }
-
     /**
      * Display timer before game start
      * @param {*} timer 
@@ -319,34 +279,6 @@ export class Pong {
 
         this._canvas.classList.remove("active")
     }
-
-	createScore() {
-		const label = new CSS2DRenderer()
-		label.setSize(window.innerHeight, window.innerWidth)
-		label.domElement.style.position = 'absolute'
-		label.domElement.style.top = '0'
-		label.domElement.style.color = "#FFFFFF"
-
-		document.body.appendChild(label.domElement)
-
-		const pName = this._player._name
-		const oName = this._opponent._name
-		const pScore = this._player._score
-		const oScore = this._opponent._score
-
-		const scoreDiv = document.createElement('div')
-		scoreDiv.textContent = `${pName}: ${pScore}\n${oName}: ${oScore}`
-		scoreDiv.style.color = "white"
-		scoreDiv.style.fontSize = "15px"
-		scoreDiv.style.pointerEvents = "none"
-		scoreDiv.style.top = "10px"
-    	scoreDiv.style.left = "10px"
-		scoreDiv.className = "scoreDiv"
-
-		const scoreLabel = new CSS2DObject(scoreDiv)
-		scoreLabel.position.set(-window.innerWidth / 2 + 10, window.innerHeight / 2 - 10, 0)
-		this._camera.add(scoreLabel)
-	}
 
     createGame(response) {
 		const p1 = response.data.current_player.name

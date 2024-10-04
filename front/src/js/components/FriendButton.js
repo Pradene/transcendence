@@ -52,6 +52,8 @@ class FriendButton extends HTMLElement {
             await this.handleClick()
         })
 
+        window.addEventListener('wsMessage', (e) => this.handleWebsocketMessage(e.detail))
+
         this.appendChild(this._button)
     }
 
@@ -59,6 +61,7 @@ class FriendButton extends HTMLElement {
         switch (this.status) {
             case 'friend':
                 // Handle unfriending
+                await this.removeFriend()
                 this.status = 'none'
                 break
             case 'request_received':
@@ -79,12 +82,40 @@ class FriendButton extends HTMLElement {
         }
     }
 
+    handleWebsocketMessage(e) {
+        console.log(e)
+        const message = e.message
+
+        if (!message || !message.action) return 
+
+        if (message.action === 'friend_request_received') {
+            this.status = 'request_received'
+        } else if (message.action === 'friend_request_accepted') {
+            this.status = 'friend'
+        } else if (message.action === 'friend_request_declined') {
+            this.status = 'none'
+        } else if (message.action === 'friend_request_cancelled') {
+            this.status = 'none'
+        } else if (message.action === 'friend_removed') {
+            this.status = 'none'
+        }
+    }
+
+    async sendFriendRequest() {
+        const ws = WebSocketManager.get()
+
+        await ws.sendMessage('friends', {
+            'type': 'friend_request_sended',
+            'user_id': this._id
+        })
+    }
+
     async acceptIncomingFriendRequest() {
         const ws = WebSocketManager.get()
 
         await ws.sendMessage('friends', {
             'type': 'friend_request_accepted',
-            'sender': this._id
+            'user_id': this._id
         })
     }
 
@@ -93,16 +124,7 @@ class FriendButton extends HTMLElement {
 
         await ws.sendMessage('friends', {
             'type': 'friend_request_declined',
-            'sender': this._id
-        })
-    }
-
-    async sendFriendRequest() {
-        const ws = WebSocketManager.get()
-
-        await ws.sendMessage('friends', {
-            'type': 'friend_request_sended',
-            'receiver': this._id
+            'user_id': this._id
         })
     }
 
@@ -111,7 +133,7 @@ class FriendButton extends HTMLElement {
 
         await ws.sendMessage('friends', {
             'type': 'friend_request_cancelled',
-            'receiver': this._id
+            'user_id': this._id
         })
     }
 
@@ -119,7 +141,7 @@ class FriendButton extends HTMLElement {
         const ws = WebSocketManager.get()
 
         await ws.sendMessage('friends', {
-            'type': 'remove_friend',
+            'type': 'friend_removed',
             'user_id': this._id
         })
     }
