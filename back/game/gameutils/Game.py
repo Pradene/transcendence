@@ -120,11 +120,13 @@ class Game(AbstractGame):
                 "gameid":         self.getGameid(),
                 "current_player": {
                     "position": self.__p1.getPosition().copy(),
-                    "score":    self.__p1.getScore()
+                    "score":    self.__p1.getScore(),
+                    "name":		self.__p1.getName()
                 },
                 "opponent":       {
                     "position": self.__p2.getPosition().copy() if self.__p2 is not None else P2_POSITION.copy(),
-                    "score":    self.__p2.getScore() if self.__p2 is not None else 0
+                    "score":    self.__p2.getScore() if self.__p2 is not None else 0,
+                    "name":		self.__p2.getName()
                 },
                 "ball":           self.__ball.getPosition()
             }
@@ -139,11 +141,13 @@ class Game(AbstractGame):
                 "gameid":         self.getGameid(),
                 "current_player": {
                     "position": self.__p2.getPosition().copy() if self.__p2 is not None else P2_POSITION.copy(),
-                    "score":    self.__p2.getScore() if self.__p2 is not None else 0
+                    "score":    self.__p2.getScore() if self.__p2 is not None else 0,
+                    "name":		self.__p2.getName()
                 },
                 "opponent":       {
                     "position": self.__p1.getPosition().copy(),
-                    "score":    self.__p1.getScore()
+                    "score":    self.__p1.getScore(),
+                    "name":		self.__p1.getName()
                 },
                 "ball":           self.__ball.getPosition()
             }

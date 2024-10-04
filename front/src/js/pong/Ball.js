@@ -5,10 +5,10 @@ class Ball {
     constructor(position) {
         this._position = position
 
-        const material = new THREE.MeshBasicMaterial({color: 0xff0000})
+        const material = new THREE.MeshPhongMaterial({color: 0xff0000})
         
         const radius = BALL_RADIUS / THREE_RATIO
-        const geometry = new THREE.SphereGeometry(radius, 6, 6)
+        const geometry = new THREE.SphereGeometry(radius, 30, 30)
         
         geometry.computeBoundingBox()
         const boundingBox = geometry.boundingBox

@@ -14,8 +14,9 @@ export class Player {
         this._name = name
         this._position = position
         this._score = 0
+		this._scoreMesh = undefined;
 
-        const material = new THREE.MeshBasicMaterial({color: 0xff0000})
+        const material = new THREE.MeshPhongMaterial({color: 0xff0000})
         
         const paddleWidth = PADDLE_WIDTH / THREE_RATIO
         const paddleHeight = PADDLE_HEIGHT / THREE_RATIO

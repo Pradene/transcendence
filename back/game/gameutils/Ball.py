@@ -90,12 +90,12 @@ class Ball:
             elif self.getY() == SCREEN_HEIGHT - BALL_SIZE and y > 0:
                 arr = self.__revY(arr)
             #check hit right wall
-            elif self.getX() == SCREEN_WIDTH - BALL_SIZE:
+            elif self.getX() == SCREEN_WIDTH + 10 - BALL_SIZE:
                 p1.incrPoints()
                 self.finishBall()
                 break
             #check hit left wall
-            elif self.getX() == 0:
+            elif self.getX() == -10:
                 p2.incrPoints()
                 self.finishBall()
                 break
