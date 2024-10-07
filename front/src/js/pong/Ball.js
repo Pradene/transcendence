@@ -19,7 +19,7 @@ class Ball {
         
         const x = -width / 2
         const y = -height / 2
-        const z = -depth / 2
+        const z = depth / 2
 
         geometry.translate(x, y, z)
 
