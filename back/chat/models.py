@@ -82,7 +82,7 @@ class ChatRoom(models.Model):
         return duels
 
     def get_users_tuple(self):
-        users = self.users.all()
+        users = self.users.all().distinct()
         return (users[0], users[1])
 
 

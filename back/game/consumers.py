@@ -16,6 +16,8 @@ from game.gameutils.DuelManager import DUELMANAGER
 from account.models import CustomUser
 from chat.models import ChatRoom
 
+from utils.logger import Logger
+
 # This is a global variable that is used to check if the module has been initialised
 MODULE_INITIALIZED: bool = False
 
@@ -38,7 +40,7 @@ class GameConsumerResponse:
         return response
 
 
-class GameConsumer(AsyncJsonWebsocketConsumer):
+class GameConsumer(AsyncJsonWebsocketConsumer, Logger):
     USERS: List = []
 
     def __init__(self, *args, **kwargs):
@@ -54,6 +56,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
     async def connect(self):
         self.__user = self.scope["user"]
+        self._logClassIdentifier = self.__user.username
 
         if not self.__user.is_authenticated:
             await self.close()
@@ -118,14 +121,6 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             case "update_player":
                 await self.updatePlayer(data)
 
-    def log(self, message: str, is_error=False):
-        logmsg = f"[{type(self).__name__} ({self.__user.username})]: {message}"
-
-        if is_error:
-            logging.error(logmsg)
-        else:
-            logging.info(logmsg)
-
     async def disconnect(self, close_code):
         """Handle client disconnection"""
 
@@ -137,8 +132,8 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         if self.isInGame():
             self.log(f"is in game {self.__interface.current_game.getGameid()}, quitting")
             await self.__interface.current_game.quit()
-            self.__interface.current_game = None
             self.log(f"has quit the game {self.__interface.current_game.getGameid()}")
+            self.__interface.current_game = None
 
         # Remove duel if duel is active
         if DUELMANAGER.get_duel(self.__user) is not None:

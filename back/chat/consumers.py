@@ -11,13 +11,20 @@ from .models import ChatRoom, Message
 from .utils.elapsed_time import elapsed_time
 from asgiref.sync import sync_to_async
 
+from utils.logger import Logger
+
 if typing.TYPE_CHECKING:
     from game.gameutils.DuelManager import DUELMANAGER
 
 
-class ChatConsumer(AsyncWebsocketConsumer):
+class ChatConsumer(AsyncWebsocketConsumer, Logger):
+
+    def __init__(self):
+        super().__init__()
+
     async def connect(self):
         self.user = self.scope['user']
+        self._logClassIdentifier = self.user.username
         
         if self.user.is_authenticated:
             rooms = await self.get_user_rooms()
@@ -274,18 +281,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def duel_response(self, data):
         await self.send(text_data=json.dumps(data))
-
-    
-    def log(self, message: str, is_error: bool = False):
-        logmsg = f"[{type(self).__name__} ({self.user.username})]: {message}"
-
-        if is_error:
-            logging.error(logmsg)
-        else:
-            logging.info(logmsg)
-
-    def error(self, message: str):
-        self.log(message, True)
 
     async def message(self, data):
         content = data['content']
