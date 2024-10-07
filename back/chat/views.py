@@ -112,16 +112,3 @@ def roomView(request, room_id):
     }
 
     return JsonResponse(data, status=200)
-
-
-@jwt_required
-@require_GET
-def searchRoomsView(request):
-    user = request.user
-    query = request.GET.get('q', '')
-    if query:
-        rooms = ChatRoom.objects.filter(users=user)
-        data = [room.toJSON(user) for room in rooms]
-        return JsonResponse(data, safe=False, status=200)
-    
-    return JsonResponse({}, status=400)

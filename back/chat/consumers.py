@@ -5,14 +5,14 @@ import logging
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-
-from account.models import CustomUser
-from .models import ChatRoom, Message
-from .utils.elapsed_time import elapsed_time
 from asgiref.sync import sync_to_async
 
-if typing.TYPE_CHECKING:
-    from game.gameutils.DuelManager import DUELMANAGER
+from account.models import CustomUser
+from .models import ChatRoom, Message, Invitation
+from .utils.elapsed_time import elapsed_time
+from .utils.rooms import is_user_room_member
+
+from game.gameutils.DuelManager import DUELMANAGER
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -21,7 +21,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         
         if self.user.is_authenticated:
             rooms = await self.get_user_rooms()
-
             for room in rooms:
                 await self.channel_layer.group_add(
                     f'chat_{room.id}',
@@ -41,56 +40,46 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         if self.user.is_authenticated:
-            self.log("disconnecting...")
-
             rooms = await self.get_user_rooms()
             for room in rooms:
-                duels = await database_sync_to_async(room.get_active_duels_for)(self.user)
-                messages = await self.outdated_duels(duels)
-
-                for message in messages:
-                    await self.channel_layer.group_send(
-                        f'chat_{room.id}',
-                        {
-                            'type':      'message_response',
-                            'action':    'message',
-                            'room_id':   message.room.id,
-                            'user_id':   message.user.id,
-                            'username':  message.user.username,
-                            'picture':   message.user.picture.url if message.user.picture else None,
-                            'content':   message.content,
-                            'timestamp': elapsed_time(message.timestamp),
-                            'is_duel':   message.is_duel
-                        }
-                    )
-
                 await self.channel_layer.group_discard(
                     f'chat_{room.id}',
                     self.channel_name
                 )
             
             await self.channel_layer.group_discard(
-                'chat',
+                f'chat_user_{self.user.id}',
                 self.channel_name
             )
 
     async def receive(self, text_data):
         data = json.loads(text_data)
+        logging.info(f"received: {data}")
+
         message_type = data.get('type')
+        room_id = data.get('room_id')
 
-        self.log(f"received: {data}")
-
-        if 'room' not in data.keys() and 'room_id' not in data.keys():
-            self.error("Invalid request, missing room or room_id field", is_error=True)
-            return
-
-        room = await database_sync_to_async(ChatRoom.objects.get)(id=data['room'] if 'room' in data.keys() else data['room_id'])
-        if not await database_sync_to_async(room.is_in_room)(self.user):
-            self.error(f"not in room {room.id}")
+        room = await database_sync_to_async(ChatRoom.objects.get)(id=room_id)
+        is_member = await database_sync_to_async(room.is_in_room)(self.user)
+        
+        if not is_member:
+            logging.error(f"{self.user} not in room {room.id}")
             return
 
         if message_type == 'message':
             await self.message(data)
+
+        elif message_type == 'send_invitation':
+            await self.send_invitation(data)
+
+        elif message_type == 'cancel_invitation':
+            await self.cancel_invitation(data)
+
+        elif message_type == 'decline_invitation':
+            await self.decline_invitation(data)
+
+        elif message_type == 'accept_invitation':
+            await self.accept_invitation(data)
         
         elif message_type == 'create_room':
             await self.create_room(data)
@@ -101,40 +90,111 @@ class ChatConsumer(AsyncWebsocketConsumer):
         elif message_type == 'quit_room':
             await self.quit_room(data)
 
-        # elif message_type == 'duel_request':
-        #     await self.request_duel(data)
 
-        elif message_type == 'duel_accept':
-            await self.accept_duel(data)
+    async def send_invitation(self, data):
+        try:
+            room_id = data.get('room_id')
+            room = await database_sync_to_async(
+                ChatRoom.objects.get
+            )(id=room_id)
 
-        elif message_type == 'duel_refuse':
-            await self.refuse_duel(data)
+            existing_invitation = await database_sync_to_async(
+                Invitation.objects
+                .filter()
+            )(sender=self.user, status='pending')
 
-    @database_sync_to_async
-    def outdated_duels(self, duels: typing.List[Message], create_message: bool = True) -> list[dict]:
-        retv = []
+            if existing_invitation.exists():
+                await database_sync_to_async(
+                    existing_invitation.update
+                )(status='canceled')
 
-        for duel in duels:
-            duel.is_duel_expired = True
-            duel.save()
+            invitation = await database_sync_to_async(
+                Invitation.objects.create
+            )(room=room, sender=self.user)
 
-            if not create_message:
-                continue
+            await self.channel_layer.group_send(
+                f'chat_{room.id}',
+                {
+                    'type': 'invitation_response',
+                    'id': invitation.id,
+                    'status': invitation.status,
+                    'sender': self.user.toJSON()
+                }
+            )
 
-            message = Message.objects.create(room=duel.room, user=self.user, content="A duel invitation has expired")
-            message.save()
+        except Exception as e:
+            logging.info(f'error {e}')
 
-            retv.append({
-                'type':      "message_response",
-                'room_id':   message.room.id,
-                'user_id':   message.user.id,
-                'username':  message.user.username,
-                'picture':   message.user.picture.url if message.user.picture else None,
-                'content':   message.content,
-                'timestamp': elapsed_time(message.timestamp)
-            })
 
-        return retv
+    async def cancel_invitation(self, data):
+        try:
+            room_id = data.get('room_id')
+            invitation_id = data.get('invitation_id')
+
+            room = await database_sync_to_async(
+                ChatRoom.objects.get
+            )(id=room_id)
+
+            invitation = await database_sync_to_async(
+                Invitation.objects.get
+            )(id=invitation_id)
+
+            if invitation.sender != self.user:
+                return
+            elif invitation.room.id != room.id:
+                return
+
+            invitation.status = 'canceled'
+            await database_sync_to_async(invitation.save)()
+
+            await self.channel_layer.group_send(
+                f'chat_{room.id}',
+                {
+                    'type': 'invitation_response',
+                    'id': invitation.id,
+                    'status': invitation.status,
+                    'sender': self.user.toJSON()
+                }
+            )
+
+        except Exception as e:
+            logging.error(f'error: {e}')
+
+
+    async def decline_invatition(self, data):
+        try:
+            room_id = data.get('room_id')
+            invitation_id = data.get('invitation_id')
+
+            room = await database_sync_to_async(
+                ChatRoom.objects.get
+            )(id=room_id)
+
+            invitation = await database_sync_to_async(
+                Invitation.objects.get
+            )(id=invitation_id)
+
+            if invitation.sender == self.user:
+                return
+
+            if invitation.room.id != room.id:
+                return
+
+            invitation.status = 'declined'
+            await database_sync_to_async(invitation.save)()
+
+            await self.channel_layer.group_send(
+                f'chat_{room.id}',
+                {
+                    'type': 'invitation_response',
+                    'id': invitation.id,
+                    'status': invitation.status,
+                    'sender': invitation.sender
+                }
+            )
+
+        except Exception as e:
+            logging.error(f'error: {e}')
 
 
     async def request_duel(self, data: dict):
@@ -200,7 +260,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 f'chat_{room.id}',
                 {
                 'type':      'message_response',
-                'action': 'message',
+                'action':    'message',
                 'room_id':   message.room.id,
                 'user_id':   message.user.id,
                 'username':  message.user.username,
@@ -288,45 +348,28 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.log(message, True)
 
     async def message(self, data):
-        content = data['content']
-        room_id = data['room']
-        is_duel = 'is_duel' in data.keys() and data['is_duel']
+        content = data.get('content')
+        room_id = data.get('room_id')
 
         try:
             room = await database_sync_to_async(ChatRoom.objects.get)(id=room_id)
+            message = await database_sync_to_async(
+                Message.objects.create
+            )(room=room, user=self.user, content=content)
 
-            if is_duel:
-                duel_action = data['duel_action']
-
-                match duel_action:
-                    case 'duel_request':
-                        message = await self.request_duel(data)
-                    case 'duel_accept':
-                        await self.accept_duel(data)
-                    case 'duel_refuse':
-                        await self.refuse_duel(data)
-
-            else:
-                message = await self.save_message(room, self.user, content)
-
-            rdata = {
+            data = {
                 'type':      'message_response',
                 'room_id':   message.room.id,
                 'user_id':   message.user.id,
                 'username':  message.user.username,
                 'picture':   message.user.picture.url if message.user.picture else None,
                 'content':   message.content,
-                'timestamp': elapsed_time(message.timestamp),
-                'is_duel':   message.is_duel
+                'timestamp': elapsed_time(message.timestamp)
             }
-
-            # merge dict with new datas for duel handling
-            if is_duel:
-                rdata = rdata | data['duel_data']
 
             await self.channel_layer.group_send(
                 f'chat_{room.id}',
-                rdata
+                data
             )
 
         except ChatRoom.DoesNotExist:

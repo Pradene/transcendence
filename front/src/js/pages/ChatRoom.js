@@ -148,7 +148,7 @@ export class ChatRoom extends TemplateComponent {
             const ws = WebSocketManager.get()
             await ws.sendMessage("chat", {
                 type: "message",
-                room: roomID,
+                room_id: roomID,
                 content: value
             })
 
@@ -163,7 +163,7 @@ export class ChatRoom extends TemplateComponent {
         const ws = WebSocketManager.get()
         await ws.sendMessage("chat", {
             type: "message",
-            room: roomID,
+            room_id: roomID,
             content: "",
             is_duel: true,
             duel_action: "duel_request"
@@ -177,7 +177,7 @@ export class ChatRoom extends TemplateComponent {
         const ws = WebSocketManager.get()
         await ws.sendMessage("chat", {
             type: "duel_accept",
-            room: roomID,
+            room_id: roomID,
             challenger: this.challengerid
         })
     }
@@ -189,7 +189,7 @@ export class ChatRoom extends TemplateComponent {
         const ws = WebSocketManager.get()
         await ws.sendMessage("chat", {
             type: "duel_refuse",
-            room: roomID
+            room_id: roomID
         })
     }
 

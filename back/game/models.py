@@ -1,6 +1,31 @@
 from django.conf import settings
-
 from django.db import models
+
+
+class Game(models.Model):
+    status = models.CharField(choices=[
+        ('waiting', 'Waiting'),
+        ('ready', 'Ready'),
+        ('started', 'Started'),
+        ('finished', 'Finished')
+    ])
+    players = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='games')
+    connected_players = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True)
+
+    def set_winner(self):
+        scores = {ps.player: ps.score for ps in self.scores.all()}
+        self.winner = max(scores, key=scores.get, default=None)
+        self.status = 'finished'
+        self.save()
+
+class Score(models.Model):
+    game = models.ForeignKey(Game, related_name='scores', on_delete=models.CASCADE)
+    player = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    score = models.IntegerField(default=0)
+
+    class Meta:
+        unique_together = ('game', 'player')
+
 
 
 # Create your models here.
