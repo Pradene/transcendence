@@ -52,10 +52,17 @@ class ChatConsumer(AsyncWebsocketConsumer, Logger):
 
             rooms = await self.get_user_rooms()
             for room in rooms:
+                other = await database_sync_to_async(room.get_other_user)(self.user)
+
                 duels = await database_sync_to_async(room.get_active_duels_for)(self.user)
                 messages = await self.outdated_duels(duels)
 
+                duels = await database_sync_to_async(room.get_active_duels_for)(other)
+                messages += await self.outdated_duels(duels, custom_message=f"{self.user.username} left, duel expired")
+
                 for message in messages:
+                    self.info(f"sending message: {message['content']}")
+
                     await self.channel_layer.group_send(
                         f'chat_{room.id}',
                         {
@@ -117,9 +124,31 @@ class ChatConsumer(AsyncWebsocketConsumer, Logger):
         elif message_type == 'duel_refuse':
             await self.refuse_duel(data)
 
+        elif message_type == 'duel_response':
+            rooms = await self.get_user_rooms()
+            for room in rooms:
+                other = await database_sync_to_async(room.get_other_user)(self.user)
+
+                duels = await database_sync_to_async(room.get_active_duels_for)(self.user)
+                messages = await self.outdated_duels(duels, custom_message=f"{self.user.username} accepted another duel")
+                duels = await database_sync_to_async(room.get_active_duels_for)(other)
+                messages += await self.outdated_duels(duels, custom_message=f"{self.user.username} accepted another duel")
+
+                for message in messages:
+                    self.info(f"sending message: {message['content']}")
+
+                    await self.channel_layer.group_send(
+                        f'chat_{room.id}',
+                        message
+                    )
+                
+
     @database_sync_to_async
-    def outdated_duels(self, duels: typing.List[Message], create_message: bool = True) -> list[dict]:
+    def outdated_duels(self, duels: typing.List[Message], create_message: bool = True, custom_message: str = "A duel invitation has expired") -> list[dict]:
         retv = []
+
+        if len(duels) > 0:
+            self.info(f"removing {len(duels)} duels")
 
         for duel in duels:
             duel.is_duel_expired = True
@@ -128,13 +157,14 @@ class ChatConsumer(AsyncWebsocketConsumer, Logger):
             if not create_message:
                 continue
 
-            message = Message.objects.create(room=duel.room, user=self.user, content="A duel invitation has expired")
+            message = Message.objects.create(room=duel.room, user=self.user, content=custom_message)
             message.save()
 
             retv.append({
                 'type':      "message_response",
                 'room_id':   message.room.id,
                 'user_id':   message.user.id,
+                'id':        message.id,
                 'username':  message.user.username,
                 'picture':   message.user.picture.url if message.user.picture else None,
                 'content':   message.content,
@@ -402,8 +432,11 @@ class ChatConsumer(AsyncWebsocketConsumer, Logger):
             room = await database_sync_to_async(ChatRoom.objects.get)(id=room_id)
 
             # removing duels
+            other = await database_sync_to_async(room.get_other_user)(self.user)
             duels = await sync_to_async(room.get_active_duels_for)(user=self.user)
+            # duels += await sync_to_async(room.get_active_duels_for)(other)
             messages = await self.outdated_duels(duels)
+
             for m in messages:
                 await self.channel_layer.group_send(
                     f'chat_{room_id}',

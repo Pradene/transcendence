@@ -7,19 +7,23 @@ import account.models
 from game.gameutils.Game import Game
 from game.gameutils.PlayerInterface import PlayerInterface
 from game.gameutils.abstractgame import AbstractGame
+from utils.logger import Logger
 
 from threading import Thread
 
 import game.models as gamemodels
+from game.models import TournamentModel
 import account.models as accountmodels
 
 
-class Tournament(AbstractGame):
+class Tournament(AbstractGame, Logger):
     def __init__(self, player: PlayerInterface):
-        super().__init__(player)
+        AbstractGame.__init__(player)
+        Logger.__init__()
 
         self.__players: List[PlayerInterface] = []
         self.__games: List[Game] = []
+        self.__gamemodel: 'TournamentModel' | None = None
 
         self.__th = Thread(target=asyncio.run, args=(self.__tournamentLoop(),))
 
@@ -139,6 +143,7 @@ class Tournament(AbstractGame):
             winner=winner
         )
         dbentry.save()
+        self.__gamemodel = dbentry
 
     async def redirectClients(self):
         if self.__gamemodel is None:

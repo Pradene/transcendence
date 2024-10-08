@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY requirements.txt .
 COPY ./tools/script.sh /usr/sbin/entrypoint.sh
+COPY ./insults.txt .
 RUN chmod +x /usr/sbin/entrypoint.sh
 
 RUN apk update && \

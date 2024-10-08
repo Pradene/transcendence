@@ -64,6 +64,10 @@ export class ChatRoom extends TemplateComponent {
             const container = this.getRef("messages")
             this.displayMessage(container, message)
         } else if (message.action == "duel_accept") {
+            WebSocketManager.get().sendMessage("chat", {
+                "type": "duel_response",
+                "room_id": this.getRoomID()
+            })
             const router = Router.get()
             await router.navigate("/")
         } else if (message.action == "duel_refuse") {
