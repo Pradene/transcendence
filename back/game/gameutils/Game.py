@@ -244,7 +244,7 @@ class Game(AbstractGame):
         data = {
             "method": "redirect_game",
             "status": True,
-            "gameid": self.__gamemodel.id
+            "url": f"/game/{self.__gamemodel.id}"
         }
 
         await self.__p1.getUpdateCallback()(data)

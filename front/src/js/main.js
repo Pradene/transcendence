@@ -12,12 +12,13 @@ import { ChatRoom } from "./pages/ChatRoom.js"
 import { Search } from "./pages/Search.js"
 import { Profile } from "./pages/Profile.js"
 import { EditProfile } from "./pages/EditProfile.js"
-import { GameView } from "./pages/GameView.js"
+import { TournamentView } from "./pages/TournamentView";
 
+import { GameView } from "./pages/GameView.js"
 import "../js/components/Nav.js"
 import "../js/components/LogoutButton.js"
-import "../js/components/FriendButton.js"
 
+import "../js/components/FriendButton.js"
 import "../css/style.scss"
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -37,6 +38,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         {path: '/signup/', view: new Signup(), protected: false},
         {path: '/verify-otp/', view: new OTP(), protected: false},
         {path: '/game/:id/', view: new GameView(), protected: true},
+        {path: '/tournament/:id', view: new TournamentView(), protected: true},
     ])
 
     document.body.addEventListener("click", (event) => {

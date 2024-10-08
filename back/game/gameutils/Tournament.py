@@ -141,15 +141,14 @@ class Tournament(AbstractGame):
         dbentry.save()
 
     async def redirectClients(self):
-        # if self.__gamemodel is None:
-        #     return
+        if self.__gamemodel is None:
+            return
 
-        # data = {
-        #     "method": "redirect_game",
-        #     "status": True,
-        #     "gameid": self.__gamemodel.id
-        # }
+        data = {
+            "method": "redirect_game",
+            "status": True,
+            "url": f"/tournament/{self.__gamemodel.id}"
+        }
 
-        # for player in self.__players:
-        #     await player.getUpdateCallback()(data)
-        pass
+        for player in self.__players:
+            await player.getUpdateCallback()(data)

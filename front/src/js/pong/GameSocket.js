@@ -190,8 +190,8 @@ export class GameSocket {
                 this._currentGame.update(response);
                 break;
             case "redirect_game":
-                const gameid = response.gameid
-                await Router.get().navigate(`/game/${gameid}`)
+                const url = response.url
+                await Router.get().navigate(url)
                 break;
         }
     }

@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.db.models import Q
 
 from config.decorators import jwt_required
-from .models import GameModel
+from .models import GameModel, TournamentModel
 from account.models import CustomUser
 
 
@@ -51,6 +51,25 @@ def gameInfo(request, gameid):
             'data': [
                 [game.user1.username, game.user1_score],
                 [game.user2.username, game.user2_score]
+            ],
+            'exists': True
+        }
+
+        return JsonResponse(data, safe=False, status=200)
+
+    except Exception as e:
+        return JsonResponse({'exists': False}, safe=False, status=500)
+
+@jwt_required
+def tournamentInfo(request, tournamentid):
+    try:
+        tournament = TournamentModel.objects.get(id=tournamentid)
+        data = {
+            'winner': tournament.winner.username,
+            'data': [
+                [[tournament.game1.user1.username, tournament.game1.user1_score], [tournament.game1.user2.username, tournament.game1.user2_score]],
+                [[tournament.game2.user1.username, tournament.game2.user1_score], [tournament.game2.user2.username, tournament.game2.user2_score]],
+                [[tournament.game3.user1.username, tournament.game3.user1_score], [tournament.game3.user2.username, tournament.game3.user2_score]],
             ],
             'exists': True
         }
