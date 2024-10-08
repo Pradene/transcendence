@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db import models
 
 from account.models import CustomUser
-from game.models import GameModel
+from game.models import Game
 
 class ChatRoom(models.Model):
     picture = models.ImageField(upload_to='room_pictures/', default="room_pictures/default.png", blank=True, null=True)
@@ -76,7 +76,7 @@ class ChatRoom(models.Model):
         return self.users.filter(id=user.id).exists()
 
     def get_active_duels_for(self, user: CustomUser):
-        duels = self.messages.filter(user=user, is_duel=True, is_duel_expired=False, is_duel_accepted=False)
+        duels = self.invitations.filter(sender=user, status="pending")
         return duels
 
     def get_users_tuple(self):
@@ -112,6 +112,7 @@ class Invitation(models.Model):
         ('finished', 'Finished')
     ], default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
+    game = models.ForeignKey(Game, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return 'Game invitation from {self.sender}'
+        return f'Game invitation from {self.sender}'

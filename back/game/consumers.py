@@ -23,21 +23,21 @@ MODULE_INITIALIZED: bool = False
 
 
 class GameConsumerResponse:
-    def __init__(self, method: str, status: bool, data: dict = {}, reason: str = ""):
-        self.method = method
-        self.status = status
-        self.data = data
-        self.reason = reason
+	def __init__(self, method: str, status: bool, data: dict = {}, reason: str = ""):
+		self.method = method
+		self.status = status
+		self.data = data
+		self.reason = reason
 
-    def toJSON(self) -> dict:
-        response: dict = {
-            "method": self.method,
-            "status": self.status,
-            "reason": self.reason,
-            "data":   self.data,
-        }
+	def toJSON(self) -> dict:
+		response: dict = {
+			"method": self.method,
+			"status": self.status,
+			"reason": self.reason,
+			"data":   self.data,
+		}
 
-        return response
+		return response
 
 
 # class GameConsumer(AsyncJsonWebsocketConsumer):
@@ -268,133 +268,134 @@ class GameConsumerResponse:
 
 
 class GameConsumer(AsyncJsonWebsocketConsumer):
-    async def connect(self):
-        self.user = self.scope['user']
-        
-        if self.user.is_authenticated:
-            self.game_id = self.scope['url_route']['kwargs']['game_id']
-            
-            if not await self.is_user_in_game():
-                await self.close()
-                return
-            
-            self.group_name = f'game_{self.game_id}'
+	async def connect(self):
+		self.user = self.scope['user']
+		
+		if self.user.is_authenticated:
+			self.game_id = self.scope['url_route']['kwargs']['game_id']
+			
+			if not await self.is_user_in_game():
+				await self.close()
+				return
+			
+			self.group_name = f'game_{self.game_id}'
 
-            await self.channel_layer.group_add(
-                self.group_name,
-                self.channel_name
-            )
+			await self.channel_layer.group_add(
+				self.group_name,
+				self.channel_name
+			)
 
-            await self.accept()
-        
-        else:
-            await self.close()
-
-
-    async def disconnect(self, close_code):
-        if self.user.is_authenticated:
-            await self.channel_layer.group_discard(
-                self.group_name,
-                self.channel_name
-            )
-
-    async def receive(self, text_data):
-        try:
+			await self.accept()
+		
+		else:
+			await self.close()
 
 
-        except Exception as e:
-            logging.error(f'error: {e}')
+	async def disconnect(self, close_code):
+		if self.user.is_authenticated:
+			await self.channel_layer.group_discard(
+				self.group_name,
+				self.channel_name
+			)
 
-    async def is_user_in_game(self):
-        ''' Check if the current user is in the game. '''
-        return await database_sync_to_async(
-            Game.objects
-            .filter(id=self.game_id, players=self.user)
-            .exists
-        )()
+	async def receive(self, text_data):
+		try:
+			data = json.loads(text_data)
+			logging.info(f'received: {data}')
+
+		except Exception as e:
+			logging.error(f'error: {e}')
+
+	async def is_user_in_game(self):
+		''' Check if the current user is in the game. '''
+		return await database_sync_to_async(
+			Game.objects
+			.filter(id=self.game_id, players=self.user)
+			.exists
+		)()
 
 
 class MatchmakingConsumer(AsyncJsonWebsocketConsumer):
-    game_queue = deque()
-    channels = {}
+	game_queue = deque()
+	channels = {}
 
-    async def connect(self):
-        self.user = self.scope['user']
+	async def connect(self):
+		self.user = self.scope['user']
 
-        if self.user.is_authenticated:
-            self.channels[self.user.id] = self.channel_name
+		if self.user.is_authenticated:
+			self.channels[self.user.id] = self.channel_name
 
-            await self.channel_layer.group_add(
-                f'matchmaking_pool',
-                self.channel_name
-            )
+			await self.channel_layer.group_add(
+				f'matchmaking_pool',
+				self.channel_name
+			)
 
-            await self.accept()
+			await self.accept()
 
-        else:
-            await self.close()
+		else:
+			await self.close()
 
-    async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(
-            f'matchmaking_pool',
-            self.channel_name
-        )
+	async def disconnect(self, close_code):
+		await self.channel_layer.group_discard(
+			f'matchmaking_pool',
+			self.channel_name
+		)
 
-        if self.user in self.game_queue:
-            self.game_queue.remove(self.user)
+		if self.user in self.game_queue:
+			self.game_queue.remove(self.user)
 
-    async def receive(self, text_data):
-        data = json.loads(text_data)
-        message_type = data.get('type')
+	async def receive(self, text_data):
+		data = json.loads(text_data)
+		message_type = data.get('type')
 
-        logging.info(data)
+		logging.info(data)
 
-        if message_type == 'join_queue':
-            await self.join_queue(data)
+		if message_type == 'join_queue':
+			await self.join_queue(data)
 
-    async def join_queue(self, data):
-        if self.user not in self.game_queue:
-            self.game_queue.append(self.user)
-            await self.join_game()
+	async def join_queue(self, data):
+		if self.user not in self.game_queue:
+			self.game_queue.append(self.user)
+			await self.join_game()
 
-        else:
-            logging.error('user is already in queue')
-
-
-    async def join_game(self):
-        if len(self.game_queue) >= 2:
-            game = await database_sync_to_async(
-                Game.objects.create
-            )()
-
-            player1 = self.game_queue.popleft()
-            player2 = self.game_queue.popleft()
-
-            await database_sync_to_async(
-                game.players.add
-            )(player1, player2)
-
-            await self.game_found(player1.id, game.id)
-            await self.game_found(player2.id, game.id)
+		else:
+			logging.error('user is already in queue')
 
 
-    async def game_found(self, user_id, game_id):
-        channel_name = self.channels.get(user_id)
-        if not channel_name:
-            return
+	async def join_game(self):
+		if len(self.game_queue) >= 2:
+			game = await database_sync_to_async(
+				Game.objects.create
+			)()
 
-        await self.channel_layer.send(
-            channel_name,
-            {
-                'type': 'game_found_response',
-                'game_id': game_id
-            }
-        )
+			player1 = self.game_queue.popleft()
+			player2 = self.game_queue.popleft()
 
-    async def game_found_response(self, data):
-        game_id = data.get('game_id')
-        
-        await self.send(text_data=json.dumps({
-            'type': 'game_found',
-            'game_id': game_id
-        }))
+			await database_sync_to_async(
+				game.players.add
+			)(player1, player2)
+
+			await self.game_found(player1.id, game.id)
+			await self.game_found(player2.id, game.id)
+
+
+	async def game_found(self, user_id, game_id):
+		channel_name = self.channels.get(user_id)
+		if not channel_name:
+			return
+
+		await self.channel_layer.send(
+			channel_name,
+			{
+				'type': 'game_found_response',
+				'game_id': game_id
+			}
+		)
+
+	async def game_found_response(self, data):
+		game_id = data.get('game_id')
+		
+		await self.send(text_data=json.dumps({
+			'type': 'game_found',
+			'game_id': game_id
+		}))

@@ -15,6 +15,7 @@ export class ChatRoom extends TemplateComponent {
         this.sendDuelInviteListener = async (e) => this.sendDuelInvite(e)
         this.acceptDuelListener = async (e) => this.acceptDuel(e)
         this.refuseDuelListener = async (e) => this.refuseDuel(e)
+		this.cancelDuelListener = async (e) => this.cancelDuel(e)
 
         this.challengerid = 0
         this.room_id = null
@@ -32,6 +33,9 @@ export class ChatRoom extends TemplateComponent {
         })
         document.querySelectorAll(".message button.refuse").forEach((value, key, parent) => {
             value.removeEventListener('click', this.refuseDuelListener)
+        })
+		document.querySelectorAll(".message button.cancel").forEach((value, key, parent) => {
+            value.removeEventListener('click', this.cancelDuelListener)
         })
 
         WebSocketManager.get().sendMessage("chat", {
@@ -53,27 +57,33 @@ export class ChatRoom extends TemplateComponent {
     }
 
     async WebsocketMessage(event) {
-        console.log(event)
+        console.log('bob', event)
         const message = event.message
 
         if (message.room_id != this.getRoomID()) {
             return
-        } else if (message.is_duel) {
+        } else if (message.type == "invitation" && message.status == 'pending') {
             this.processDuelRequest(message)
         } else if (message.action == "message") {
             const container = this.getRef("messages")
             this.displayMessage(container, message)
-        } else if (message.action == "duel_accept") {
+        } else if (message.status == "accepted") {
             const router = Router.get()
             await router.navigate("/")
-        } else if (message.action == "duel_refuse") {
+        } else if (message.status == "declined") {
             this.processDuelRefuse(message)
-        } else if (message.action == "duel_cancel") {
-            //TODO: Display duel cancel
+        } else if (message.status == "canceled") {
+            this.processDuelCancel(message)
         }
     }
 
     processDuelRefuse(message) {
+        document.querySelectorAll('.duel-request-message').forEach((value, key, parent) => {
+            value.remove()
+        })
+    }
+
+	processDuelCancel(message) {
         document.querySelectorAll('.duel-request-message').forEach((value, key, parent) => {
             value.remove()
         })
@@ -99,23 +109,33 @@ export class ChatRoom extends TemplateComponent {
     }
 
     processDuelRequest(message) {
-        const challenger = message.user_id
+        const challenger = message.user
         const userid = getConnectedUserID()
         const main_container = document.querySelector("div.messages")
-
+		
         if (message.is_duel_accepted && message.hasOwnProperty("game_data")) {
-            this.processPlayedDuel(message)
+			this.processPlayedDuel(message)
         }
-
+		
         console.log(`${userid} ${challenger}`)
         if (userid == challenger) {
-            message.content = "You have invited your opponent to a duel, waiting for a replie..."
-            this.displayMessage(main_container, message)
+			const pendingContainer = document.createElement("div")
+			pendingContainer.classList.add("pending-container")
+			pendingContainer.dataset.invitationId = message.id
+			message.content = "You have invited your opponent to a duel, waiting for a reply..."
+            const buttonCancel = document.createElement('button')
+			buttonCancel.className = 'cancel'
+			buttonCancel.textContent = 'Cancel Duel'
+			buttonCancel.addEventListener('click', event => this.cancelDuelListener(event))
+			pendingContainer.appendChild(buttonCancel)
+			this.displayMessage(main_container, message, pendingContainer)
             return
         }
-
+		
         const container = document.createElement("div")
         container.classList.add("duel-container")
+		container.dataset.invitationId = message.id;
+		console.log(message)
 
         const button_accept = document.createElement('button')
         button_accept.textContent = "Accept Duel"
@@ -125,9 +145,9 @@ export class ChatRoom extends TemplateComponent {
         button_refuse.textContent = "Refuse Duel"
         button_refuse.className = "refuse"
 
-        if (!message.is_duel_expired) {
-            button_accept.addEventListener('click', this.acceptDuelListener)
-            button_refuse.addEventListener('click', this.refuseDuelListener)
+        if (!message.status != 'Canceled') {
+            button_accept.addEventListener('click', event => this.acceptDuelListener(event))
+            button_refuse.addEventListener('click', event => this.refuseDuelListener(event))
         }
 
         message.content = "You have been invited to a duel: "
@@ -162,34 +182,56 @@ export class ChatRoom extends TemplateComponent {
         const roomID = this.getRoomID()
         const ws = WebSocketManager.get()
         await ws.sendMessage("chat", {
-            type: "message",
+            type: "send_invitation",
             room_id: roomID,
+			user_id: getConnectedUserID(),
             content: "",
-            is_duel: true,
-            duel_action: "duel_request"
+            /* is_duel: true,
+            duel_action: "duel_request" */
         })
     }
 
     async acceptDuel(event) {
-        event.preventDefault()
+		const target = event.target
 
         const roomID = this.getRoomID()
         const ws = WebSocketManager.get()
+		const invitation = target.closest('div.duel-container')
+		const invitation_id = invitation.getAttribute('data-invitation-id')
+		console.log(invitation)
+		console.log(invitation_id)
         await ws.sendMessage("chat", {
-            type: "duel_accept",
+            type: "accept_invitation",
             room_id: roomID,
-            challenger: this.challengerid
+            invitation_id: invitation_id
         })
     }
 
     async refuseDuel(event) {
-        event.preventDefault()
+        const target = event.target
 
         const roomID = this.getRoomID()
         const ws = WebSocketManager.get()
+		const invitation = target.closest('div.duel-container')
+		const invitation_id = invitation.getAttribute('data-invitation-id')
         await ws.sendMessage("chat", {
-            type: "duel_refuse",
-            room_id: roomID
+            type: "decline_invitation",
+            room_id: roomID,
+			invitation_id: invitation_id
+        })
+    }
+
+	async cancelDuel(event) {
+        const target = event.target
+
+        const roomID = this.getRoomID()
+        const ws = WebSocketManager.get()
+		const invitation = target.closest('div.pending-container')
+		const invitation_id = invitation.getAttribute('data-invitation-id')
+        await ws.sendMessage("chat", {
+            type: "cancel_invitation",
+            room_id: roomID,
+			invitation_id: invitation_id
         })
     }
 
@@ -204,7 +246,7 @@ export class ChatRoom extends TemplateComponent {
             const messages = data.messages
             messages.forEach(message => {
                 const container = this.getRef("messages")
-                if (message.is_duel)
+                if (message.type == "invitation")
                     this.processDuelRequest(message)
                 else
                     this.displayMessage(container, message)
@@ -223,7 +265,7 @@ export class ChatRoom extends TemplateComponent {
         const element = document.createElement("div")
         element.classList.add('message')
         
-        if (message.user_id === getConnectedUserID())
+        if (message.user_id === getConnectedUserID() || message.user === getConnectedUserID())
             element.classList.add("right")
 
         const imgContainer = document.createElement('a')
@@ -246,7 +288,7 @@ export class ChatRoom extends TemplateComponent {
         }
 
         const messageTimestamp = document.createElement('span')
-        messageTimestamp.textContent = message.timestamp
+        messageTimestamp.textContent = message.elapsed_timestamp
 
         element.appendChild(imgContainer)
         imgContainer.appendChild(img)
