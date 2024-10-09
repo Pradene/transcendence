@@ -1,16 +1,14 @@
 from django.conf import settings
 from django.db import models
 
-
 class Game(models.Model):
     status = models.CharField(choices=[
         ('waiting', 'Waiting'),
         ('ready', 'Ready'),
         ('started', 'Started'),
         ('finished', 'Finished')
-    ])
+    ], default='waiting')
     players = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='games')
-    connected_players = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True)
 
     def set_winner(self):
         scores = {ps.player: ps.score for ps in self.scores.all()}

@@ -1,49 +1,42 @@
 import { TemplateComponent } from "../utils/TemplateComponent"
 import { Router } from "../utils/Router"
+import { Pong } from "../pong/Pong"
 
 export class Game extends TemplateComponent {
     constructor() {
         super()
 
         this.socket = null
+        this.removeGame = () => this.game.end()
+
+        this.keyDownHandler = (e) => this.movePlayer(e)
+        this.keyUpHandler = (e) => this.stopPlayer(e)
     }
 
     unmount() {
         if (this.socket)
             this.socket.close()
+        this.game.end()
+
+        window.removeEventListener('beforeunload', this.removeGame)
+        window.removeEventListener('keydown', this.keyDownHandler)
+        window.removeEventListener('keyup', this.keyUpHandler)
     }
 
     async componentDidMount() {
+        const canvas = document.getElementById('canvas')
+        this.game = new Pong(canvas)
+        
         this.connectToGameWebSocket()
-        // const gameinfo = await (await fetch(`/api/games/gameinfo/${this.getGameID()}`)).json()
-        // console.log(gameinfo)
 
-        // if (gameinfo.exists === false)
-        //     this.displayNotFound()
-
-        // const winner = gameinfo.winner
-        // const user1 = gameinfo.data[0]
-        // const user2 = gameinfo.data[1]
-
-        // const header = document.querySelector("h1.players")
-        // const winnerelement = document.querySelector("h2.winner")
-        // const user1name = document.querySelector(".p1 .username")
-        // const user1score = document.querySelector(".p1 .score")
-        // const user2name = document.querySelector(".p2 .username")
-        // const user2score = document.querySelector(".p2 .score")
-
-        // header.textContent = `${user1[0]} VS ${user2[0]}`
-        // winnerelement.textContent = `WINNER: ${winner}`
-        // user1name.textContent = user1[0]
-        // user2name.textContent = user2[0]
-        // user1score.textContent = user1[1]
-        // user2score.textContent = user2[1]
-
+        window.addEventListener('beforeunload', this.removeGame)
+        window.addEventListener('keydown', this.keyDownHandler)
+        window.addEventListener('keyup', this.keyUpHandler)
     }
 
     connectToGameWebSocket() {
         const id = this.getGameID()
-        const url = `wss://${location.hostname}:${location.port}/ws/matchmaking/${id}/`
+        const url = `wss://${location.hostname}:${location.port}/ws/game/${id}/`
         this.socket = new WebSocket(url)
 
         this.socket.onopen = () => {
@@ -51,7 +44,10 @@ export class Game extends TemplateComponent {
         }
 
         this.socket.onmessage = (e) => {
-            console.log(e)
+            const data = JSON.parse(e.data)
+            console.log(data)
+                        
+            this.handleWebSocketMessage(data)
         }
 
         this.socket.onerror = (e) => {
@@ -63,10 +59,38 @@ export class Game extends TemplateComponent {
 
         this.socket.onclose = () => {
             console.log('Game WebSocket closed')
+
+            const router = Router.get()
+            router.navigate('/')
         }
+    }
+
+    handleWebSocketMessage(data) {
+        this.game.update(data)
     }
 
     getGameID() {
         return location.pathname.split("/")[2]
+    }
+
+    movePlayer(e) {
+        if (e.key === 'a') {
+            this.socket.send(JSON.stringify({
+                movement: 'UP'
+            }))
+            
+        } else if (e.key === 'd') {
+            this.socket.send(JSON.stringify({
+                movement: 'DOWN'
+            }))
+        }
+    }
+    
+    stopPlayer(e) {
+        if (e.key === 'a' || e.key === 'd') {
+            this.socket.send(JSON.stringify({
+                movement: 'NONE'
+            }))
+        }
     }
 }

@@ -5,6 +5,8 @@ P2_POSITION: List[int] = [800 - 16, 268]
 SCREEN_WIDTH: int = 800
 SCREEN_HEIGHT: int = 600
 
+COUNTDOWN: int = 3
+
 BALL_SIZE: int = 4
 BALL_SPEED: int = 5
 BALL_SPEED_INCREMENT: float = .3

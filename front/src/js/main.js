@@ -1,7 +1,6 @@
 import { WebSocketManager } from './utils/WebSocketManager.js'
 import { Router } from './utils/Router.js'
 import { fetchCSRFToken } from './utils/utils.js'
-import { GameSocket } from './pong/GameSocket.js'
 
 import { Home } from './pages/Home.js'
 import { Login } from './pages/Login.js'
@@ -47,12 +46,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             event.preventDefault()
             router.navigate(target.href)
         }
-    })
-
-    window.addEventListener('beforeunload', () => {
-        const socket = GameSocket.get()
-        if (socket)
-            socket.close()
     })
 })
 
