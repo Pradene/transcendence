@@ -17,7 +17,8 @@ export class GameSocket {
             console.trace()
             console.error("Error: ", e);
         }
-        this._websocket.onclose = () => {
+        this._websocket.onclose = (event) => {
+            console.log("Connection closed: ", event.code, event.reason);
             console.trace()
         }
     }

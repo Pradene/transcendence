@@ -65,6 +65,7 @@ class Tournament(AbstractGame, Logger):
     async def __tournamentLoop(self) -> None:
         game0 = self.__games[0]
         game1 = self.__games[1]
+        losers = []
 
         game0.start()
         game1.start()
@@ -78,6 +79,7 @@ class Tournament(AbstractGame, Logger):
         # get the first winner and start the next game
         self.log("First game finished")
         winner0 = game0.getWinner() if game0.isFinished() else game1.getWinner()
+        losers.append(game0.get_loser() if game0.isFinished() else game1.get_loser())
         remaining_game = game0 if not game0.isFinished() else game1
 
         if winner0 is None:
@@ -97,6 +99,7 @@ class Tournament(AbstractGame, Logger):
         # get the second winner and start the last game
         self.log("Second game finished")
         winner1 = remaining_game.getWinner()
+        losers.append(remaining_game.get_loser())
         if winner1 is None:
             self.error("Second game finished because a player left, stopping tournament")
             await self._setFinished()
@@ -105,6 +108,8 @@ class Tournament(AbstractGame, Logger):
         # start last game
         self.log("Starting last game")
         await game3.join(winner1)
+        game3.add_spectator(losers[0])
+        game3.add_spectator(losers[1])
         game3.start()
 
         while not game3.isFinished():

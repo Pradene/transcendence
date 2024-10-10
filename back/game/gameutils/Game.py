@@ -16,7 +16,7 @@ from account import models as accountmodels
 from chat.models import Message
 from utils.logger import Logger
 
-FPS: int = 30
+FPS: int = 15
 TIME_TO_SLEEP: float = (1 / FPS)
 
 
@@ -41,6 +41,7 @@ class Game(AbstractGame, Logger):
         self.__gamemodel: Union[gamemodels.GameModel | None] = None
 
         self.__related_duel = related_duel
+        self.__spectators: list['PlayerInterface'] = []
 
         self.set_log_identifier(f"{self.getGameid()}")
         self.log(f"Game created")
@@ -49,6 +50,14 @@ class Game(AbstractGame, Logger):
         self.log("Game deleted")
         if self.__th is not None and self.__th.is_alive():
             self.__th.join()
+
+    def add_spectator(self, player: 'PlayerInterface'):
+        self.__spectators.append(player)
+
+    def get_loser(self) -> 'PlayerInterface':
+        if self.__p1.won():
+            return self.__p2
+        return self.__p1
 
     async def join(self, p2: PlayerInterface) -> None:
         """Join a player to the game"""
@@ -109,6 +118,9 @@ class Game(AbstractGame, Logger):
             await self.__p1.getUpdateCallback()(data[0])
         if self.__p2 is not None:
             await self.__p2.getUpdateCallback()(data[1])
+
+        for spectator in self.__spectators:
+            await spectator.getUpdateCallback()(data[0])
 
     def __toJSON(self, timer: Union[int | None] = None) -> List[dict]:
         """Return the game data in JSON format"""

@@ -214,8 +214,7 @@ export class Pong {
      */
     update(response) {
         // Initialize player
-        
-		console.log("update")
+
         if (!this._player) {
             this.createGame(response)
         }
@@ -249,6 +248,7 @@ export class Pong {
             this._opponent.name = response.data.opponent.username
         }
 
+        console.log("rendering")
         this._renderer.render(this._scene, this._camera)
     }
 
