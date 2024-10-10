@@ -248,7 +248,7 @@ export class Pong {
             this._opponent.name = response.data.opponent.username
         }
 
-        console.log("rendering")
+        // console.log("rendering")
         this._renderer.render(this._scene, this._camera)
     }
 

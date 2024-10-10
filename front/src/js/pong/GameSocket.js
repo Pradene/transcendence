@@ -155,7 +155,7 @@ export class GameSocket {
      * @param request The request to be send
      */
     send(request) {
-        console.log("Sending request: ", request);
+        // console.log("Sending request: ", request);
         this._websocket.send(JSON.stringify(request));
     }
 
