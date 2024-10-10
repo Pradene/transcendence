@@ -271,6 +271,30 @@ from .models import Game
 #         return self.__user.username
 
 
+def generate_vector():
+    return {
+        'x': 0,
+        'y': 1
+    }
+
+
+class Ball:
+    def __init__(self):
+        self.position = {'x': 0, 'y': 0}
+        self.direction = generate_vector()
+        self.moving = False
+
+    async def start(self):
+        if self.moving == False:
+            self.position = {'x': 0, 'y': 0}
+            self.direction = generate_vector()
+            self.moving = True
+            await asyncio.sleep(1)
+
+    def move(self):
+        self.position += self.direction
+
+
 class Player:
     def __init__(self, id, pos_x = 0, pos_y = 0):
         self.id = id
@@ -305,6 +329,7 @@ class GameManager:
         self.game = game
         self.users = users
         self.players = self.init_players()
+        self.ball = Ball()
         self.observers = []
         self.countdown = COUNTDOWN
 
@@ -357,6 +382,8 @@ class GameManager:
                 for user_id, player in self.players.items():
                     player.move()
 
+                # self.ball.move()
+
                 await self.notify_observers()
 
                 current_frame = time.time()
@@ -376,7 +403,9 @@ class GameManager:
         logging.info(f'update user {user_id}')
         logging.info(f'move {movement}')
 
-        self.players.get(user_id).setMovement(movement)
+        player = self.players.get(user_id)
+        logging.info(F'player: {player}')
+        player.setMovement(movement)
 
     def get_player_info(self, user_id):
         player = self.players.get(user_id)
@@ -419,6 +448,7 @@ class GameManager:
 class GameConsumer(AsyncJsonWebsocketConsumer):
     connected_users = {}
     game_managers = {}
+    game_manager_lock = asyncio.Lock()
 
     async def connect(self):
         self.user = self.scope['user']
@@ -443,12 +473,16 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
             await self.accept()
 
-            if self.game_id not in GameConsumer.game_managers:
-                users = await database_sync_to_async(list)(self.game.players.all())
-                self.game_manager = GameManager(self.game, users)
-                GameConsumer.game_managers[self.game_id] = self.game_manager
-            else:
-                self.game_manager = GameConsumer.game_managers[self.game_id]
+            async with GameConsumer.game_manager_lock:
+                if self.game_id not in GameConsumer.game_managers:
+                    logging.info('creating game')
+                    users = await database_sync_to_async(list)(self.game.players.all())
+                    self.game_manager = GameManager(self.game, users)
+                    GameConsumer.game_managers[self.game_id] = self.game_manager
+                else:
+                    self.game_manager = GameConsumer.game_managers[self.game_id]
+
+            logging.info(self.game_manager)
 
             if await database_sync_to_async(self.check_users_connected)():
                 logging.info(f"All players are connected. Starting the game!")
@@ -467,12 +501,14 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
     async def receive(self, text_data):
         try:
             data = json.loads(text_data)
-            logging.info(data)
 
             if not self.game_manager:
                 return
+                
+            logging.info(data)
 
             if data['movement']:
+                logging.info('update player move')
                 self.game_manager.update_player(self.user.id, data['movement'])
 
         except Exception as e:
