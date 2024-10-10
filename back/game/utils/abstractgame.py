@@ -5,20 +5,20 @@ from typing import Union
 
 from threading import RLock
 
-from game.gameutils.PlayerInterface import PlayerInterface
+from game.utils.Player import Player
 
 class AbstractGame(ABC):
-    def __init__(self, creator: PlayerInterface):
+    def __init__(self, creator: Player):
         self.__id = creator.getName()
 
-        self._winner: Union[PlayerInterface, None] = None
+        self._winner: Union[Player, None] = None
         self._finished: bool = False
         self._finishedLock: RLock = RLock()
 
         logging.log(logging.INFO, f"[AbstractGame]: Game {self.getGameid()} created")
 
     @abstractmethod
-    async def join(self, player: PlayerInterface) -> None:
+    async def join(self, player: Player) -> None:
         pass
 
     @abstractmethod
@@ -41,13 +41,13 @@ class AbstractGame(ABC):
         with self._finishedLock:
             return self._finished
 
-    async def _setFinished(self, winner: Union[PlayerInterface, None] = None) -> None:
+    async def _setFinished(self, winner: Union[Player, None] = None) -> None:
         with self._finishedLock:
             self._finished = True
             self._winner = winner
             await self.update()
 
-    def getWinner(self) -> Union[PlayerInterface, None]:
+    def getWinner(self) -> Union[Player, None]:
         return self._winner
 
     def getGameid(self) -> str:

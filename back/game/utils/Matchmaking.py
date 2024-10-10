@@ -3,7 +3,7 @@ import typing
 
 # Perform type checking
 if typing.TYPE_CHECKING:
-    from game.gameutils.PlayerInterface import PlayerInterface
+    from game.utils.Player import Player
 
 import logging
 import random
@@ -11,10 +11,10 @@ import random
 
 class Matchmaking:
     def __init__(self):
-        self.game_queue: typing.List[PlayerInterface] = []
-        self.tournament_queue: typing.List[PlayerInterface] = []
+        self.game_queue: typing.List[Player] = []
+        self.tournament_queue: typing.List[Player] = []
 
-    async def join_game_queue(self, player: 'PlayerInterface'):
+    async def join_game_queue(self, player: 'Player'):
         if player in self.game_queue or player in self.tournament_queue:
             raise ValueError("Player is already in a queue")
         self.game_queue.append(player)
@@ -29,8 +29,8 @@ class Matchmaking:
             players = [self.game_queue.pop(0), self.game_queue.pop(0)]
             random.shuffle(players)
 
-            from game.gameutils.GameManager import GameManager
-            from game.gameutils.Game import Game
+            from game.utils.GameManager import GameManager
+            from game.utils.Game import Game
             game_manager: GameManager = GameManager.getInstance()
 
             # create the game and join
@@ -44,7 +44,7 @@ class Matchmaking:
 
             game.start()
 
-    async def join_tournament_queue(self, player: 'PlayerInterface'):
+    async def join_tournament_queue(self, player: 'Player'):
         if player in self.game_queue or player in self.tournament_queue:
             raise ValueError("Player is already in a queue")
         self.tournament_queue.append(player)
@@ -59,8 +59,8 @@ class Matchmaking:
                        self.tournament_queue.pop(0)]
             random.shuffle(players)
 
-            from game.gameutils.GameManager import GameManager
-            from game.gameutils.Tournament import Tournament
+            from game.utils.GameManager import GameManager
+            from game.utils.Tournament import Tournament
             game_manager: GameManager = GameManager.getInstance()
 
             # create the tournament, join and register as current game for each player
@@ -71,7 +71,7 @@ class Matchmaking:
 
             # tournament.start()
 
-    def remove_from_queues(self, player: 'PlayerInterface'):
+    def remove_from_queues(self, player: 'Player'):
         if player in self.game_queue:
             self.game_queue.remove(player)
         if player in self.tournament_queue:

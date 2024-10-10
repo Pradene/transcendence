@@ -41,9 +41,6 @@ export class MatchMaking extends TemplateComponent {
 
         this.socket.onerror = (e) => {
             console.error('WebSocket error: ', e)
-
-            const router = Router.get()
-            router.navigate('/')
         }
 
         this.socket.onclose = () => {
