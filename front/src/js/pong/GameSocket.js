@@ -163,7 +163,7 @@ export class GameSocket {
      * Parse messages from the server.
      * @param event
      */
-    redirectMessages(event) {
+    async redirectMessages(event) {
         let response = JSON.parse(event.data);
         
         if (!response.status) {
@@ -191,14 +191,14 @@ export class GameSocket {
 
                 if (!this._currentGame) {
                     console.log("Creating new game")
-                    this._currentGame = new Pong(gameContainer);
+                    this._currentGame = new Pong(gameContainer, response);
                 }
                 this._currentGame.update(response);
                 break;
             case "redirect_game":
                 const url = response.url
                 console.log("Redirecting to: ", url)
-                Router.get().navigate(url)
+                await Router.get().navigate(url)
                 break;
         }
     }

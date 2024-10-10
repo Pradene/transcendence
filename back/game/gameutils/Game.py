@@ -119,6 +119,7 @@ class Game(AbstractGame, Logger):
         if self.__p2 is not None:
             await self.__p2.getUpdateCallback()(data[1])
 
+        data[0]['is_spectating'] = True
         for spectator in self.__spectators:
             await spectator.getUpdateCallback()(data[0])
 

@@ -89,6 +89,7 @@ class Tournament(AbstractGame, Logger):
 
 
         game3 = Game(winner0)
+        game3.add_spectator(losers[0])
         self.__games.append(game3)
         await game3.update()
 
@@ -108,7 +109,6 @@ class Tournament(AbstractGame, Logger):
         # start last game
         self.log("Starting last game")
         await game3.join(winner1)
-        game3.add_spectator(losers[0])
         game3.add_spectator(losers[1])
         game3.start()
 

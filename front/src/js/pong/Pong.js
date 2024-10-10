@@ -8,13 +8,14 @@ import { Ball } from "./Ball.js"
 import { Position } from "./Utils.js"
 import { GameSocket } from "./GameSocket.js"
 import { CANVAS_HEIGHT, CANVAS_WIDTH, THREE_RATIO } from "./Defines.js"
+import {Score} from "./Score";
 
 let font = null
 const loader = new FontLoader()
 loader.load("/src/fonts/Epilogue_Bold.json", (f) => font = f)
 
 export class Pong {
-    constructor(canvas) {
+    constructor(canvas, response) {
 		console.log(canvas)
         this._player = undefined
         this._opponent = undefined
@@ -22,6 +23,8 @@ export class Pong {
         this._timerMesh = undefined
         this._psScoreMesh = undefined
         this._osScoreMesh = undefined
+        this._score = new Score(response)
+        this._score.show()
 
 
         
@@ -74,6 +77,14 @@ export class Pong {
                     break;
             }
         });
+
+        this._spectating = response.is_spectating
+        if (this._spectating) {
+            const spectating_element = document.createElement('h2')
+            spectating_element.textContent = "Spectating"
+            spectating_element.classList.add('spectating')
+            document.querySelector('.game .scores').appendChild(spectating_element)
+        }
     }
 
     /**
@@ -153,9 +164,8 @@ export class Pong {
         this._scene = null
 
         this._canvas.classList.remove("active")
-		const score = document.getElementById("score")
-
-		score.style.visibility = 'hidden'
+        this._score.hide()
+        document.querySelector('.game .scores .spectating')?.remove()
     }
 
     createGame(response) {
@@ -224,7 +234,8 @@ export class Pong {
             this.stop()
             return
         }
-        
+
+        this._score.update(response)
         this._player?.setPositionFromArray(response.data.current_player.position)
         this._opponent?.setPositionFromArray(response.data.opponent.position)
         this._player?.setScore(response.data.current_player.score)
