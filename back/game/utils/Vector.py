@@ -1,8 +1,10 @@
 import math
+import random
 import logging
 
 def generate_vector():
-    return Vector2(1, 0)
+    number = random.uniform(-0.5, 0.5)
+    return Vector2(1, number).normalize()
 
 class Vector2:
     def __init__(self, x, y):
