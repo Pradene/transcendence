@@ -1,6 +1,7 @@
 import logging
 import inspect
 
+
 class Logger:
     def __init__(self):
         self._logClassIdentifier: str | None = None
@@ -12,6 +13,9 @@ class Logger:
             self.info(message, caller)
         else:
             self.error(message, caller)
+
+    def set_log_identifier(self, identifier: str):
+        self._logClassIdentifier = identifier
 
     def info(self, message: str, caller: str | None = None):
         if caller is None:

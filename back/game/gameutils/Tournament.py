@@ -18,8 +18,8 @@ import account.models as accountmodels
 
 class Tournament(AbstractGame, Logger):
     def __init__(self, player: PlayerInterface):
-        AbstractGame.__init__(player)
-        Logger.__init__()
+        AbstractGame.__init__(self, creator=player)
+        Logger.__init__(self)
 
         self.__players: List[PlayerInterface] = []
         self.__games: List[Game] = []
@@ -69,19 +69,22 @@ class Tournament(AbstractGame, Logger):
         game0.start()
         game1.start()
 
+        self.log("Tournament started")
+
         # wait for one game to finish
         while not game0.isFinished() and not game1.isFinished():
             time.sleep(1)
 
         # get the first winner and start the next game
+        self.log("First game finished")
         winner0 = game0.getWinner() if game0.isFinished() else game1.getWinner()
         remaining_game = game0 if not game0.isFinished() else game1
 
         if winner0 is None:
+            self.error("First game finished because a player left, stopping tournament")
             await self._setFinished()
             return
 
-        logging.log(logging.INFO, f"Game 0 finished, winner: {winner0.getName()}")
 
         game3 = Game(winner0)
         self.__games.append(game3)
@@ -91,22 +94,29 @@ class Tournament(AbstractGame, Logger):
         while not remaining_game.isFinished():
             time.sleep(1)
 
+        # get the second winner and start the last game
+        self.log("Second game finished")
         winner1 = remaining_game.getWinner()
         if winner1 is None:
+            self.error("Second game finished because a player left, stopping tournament")
             await self._setFinished()
             return
 
-        logging.log(logging.INFO, f"Game 1 finished, winner: {winner1.getName()}")
-
         # start last game
+        self.log("Starting last game")
         await game3.join(winner1)
         game3.start()
 
         while not game3.isFinished():
             time.sleep(1)
 
+        self.log("Last game finished")
         winner3 = game3.getWinner()
-        logging.log(logging.INFO, f"Game 2 finished, winner: {winner3.getName()}")
+        if winner3 is None:
+            self.error("Last game finished because a player left, stopping tournament")
+            await self._setFinished()
+            return
+
         await self._setFinished(game3.getWinner())
 
     async def quit(self) -> None:
@@ -155,5 +165,6 @@ class Tournament(AbstractGame, Logger):
             "url": f"/tournament/{self.__gamemodel.id}"
         }
 
+        self.log(f"Redirecting clients to {data['url']}")
         for player in self.__players:
             await player.getUpdateCallback()(data)

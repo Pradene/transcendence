@@ -12,7 +12,7 @@ export class GameSocket {
         this._currentGame = null;
 
         this._websocket = socket;
-        this._websocket.onmessage = this.redirectMessages
+        this._websocket.onmessage = this.redirectMessages.bind(this)
         this._websocket.onerror = (e) => {
             console.trace()
             console.error("Error: ", e);
@@ -50,6 +50,10 @@ export class GameSocket {
             this.#GameSocket = new GameSocket(socket);
         }
 
+        return GameSocket.#GameSocket;
+    }
+
+    static getSync() {
         return GameSocket.#GameSocket;
     }
 
@@ -158,7 +162,7 @@ export class GameSocket {
      * Parse messages from the server.
      * @param event
      */
-    async redirectMessages(event) {
+    redirectMessages(event) {
         let response = JSON.parse(event.data);
         
         if (!response.status) {
@@ -184,20 +188,23 @@ export class GameSocket {
             case "update_game":
                 document.dispatchEvent(leave_queue_event)
 
-                if (!this._currentGame)
+                if (!this._currentGame) {
+                    console.log("Creating new game")
                     this._currentGame = new Pong(gameContainer);
-
+                }
                 this._currentGame.update(response);
                 break;
             case "redirect_game":
                 const url = response.url
-                await Router.get().navigate(url)
+                console.log("Redirecting to: ", url)
+                Router.get().navigate(url)
                 break;
         }
     }
 
     removeGame() {
         this._currentGame = null;
+        console.log("Removing game from socket", this._currentGame)
     }
     
     close() {

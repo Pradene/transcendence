@@ -141,10 +141,10 @@ export class Pong {
     /**
      * Stop the game
      */
-    async stop() {
+    stop() {
         document.querySelector('.game .scores').style.visibility = "hidden"
 
-        const gs = await GameSocket.get()
+        const gs = GameSocket.getSync()
         gs.removeGame()
 
         this._player?.stop()
@@ -153,7 +153,7 @@ export class Pong {
         this._scene = null
 
         this._canvas.classList.remove("active")
-		const score = document.getElementsById("score")
+		const score = document.getElementById("score")
 
 		score.style.visibility = 'hidden'
     }
@@ -203,7 +203,7 @@ export class Pong {
 
         this._platform = new THREE.Mesh(geometry, material)
         this._scene.add(this._platform, top, bot, left, right)
-		const score = document.getElementsById("score")
+		const score = document.getElementById("score")
 
 		score.style.visibility = 'visible'
     }
@@ -213,14 +213,17 @@ export class Pong {
      * @param response
      */
     update(response) {
-        // Initialize player 
-		//console.log(response)
+        // Initialize player
+        
+		console.log("update")
         if (!this._player) {
             this.createGame(response)
         }
 
         if (response.data.status === "finished") {
+            console.log("Game is finished", response)
             this.stop()
+            return
         }
         
         this._player?.setPositionFromArray(response.data.current_player.position)
@@ -231,12 +234,15 @@ export class Pong {
 
         this._running = response.data.status === "running"
         const timer = response.data.timer
-        
+
         // now redisplay the game
-        if (typeof timer === "undefined" && this._running) {
+
+        if (this._scene === null) {
+            console.log("Scene is null")
+            return
+        } else if (typeof timer === "undefined" && this._running) {
             this.removeTimer()
             this.display()
-
         } else if (timer) {
             this.displayTimer(timer.toString())
             this._player.name = response.data.current_player.username

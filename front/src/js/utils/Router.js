@@ -60,7 +60,7 @@ export class Router {
             }
 
         } else {
-            console.log("doesn't match any route")
+            console.log(location, " doesn't match any route")
             this.navigate('/')
         }
     }

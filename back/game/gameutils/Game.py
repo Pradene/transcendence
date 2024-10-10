@@ -14,15 +14,16 @@ from game.gameutils.abstractgame import AbstractGame
 from game import models as gamemodels
 from account import models as accountmodels
 from chat.models import Message
+from utils.logger import Logger
 
 FPS: int = 30
 TIME_TO_SLEEP: float = (1 / FPS)
 
 
-class Game(AbstractGame):
+class Game(AbstractGame, Logger):
     def __init__(self, p1: PlayerInterface, related_duel: Message | None = None):
-        logging.info("[Game]: in ctor")
-        super().__init__(p1)
+        AbstractGame.__init__(self, creator=p1)
+        Logger.__init__(self)
 
         self.__p1: Union[PlayerInterface, None] = p1
         self.__p2: Union[PlayerInterface, None] = None
@@ -41,18 +42,21 @@ class Game(AbstractGame):
 
         self.__related_duel = related_duel
 
+        self.set_log_identifier(f"{self.getGameid()}")
+        self.log(f"Game created")
 
     def __del__(self):
+        self.log("Game deleted")
         if self.__th is not None and self.__th.is_alive():
             self.__th.join()
 
     async def join(self, p2: PlayerInterface) -> None:
         """Join a player to the game"""
 
-        logging.info(f"[Game]: Player {p2.getName()} joining game {self.getGameid()}")
+        self.log(f"Player {p2.getName()} joined")
 
         if self.__p2 is not None:
-            logging.error(f"[Game]: Game is full, aborting")
+            self.error(f"Game is full, aborting")
             raise RuntimeError("Game is full")
 
         self.__p2 = p2
@@ -60,12 +64,11 @@ class Game(AbstractGame):
         self.__p2.setJoined(True)
         self.__p2.setScore(0)
 
-        logging.info(f"[Game]: Player joined")
         # send game data to clients
         await self.update()
 
     async def __gameLoop(self) -> None:
-        logging.info(f"Game {self.getGameid()} started")
+        self.info(f"Game started")
 
         # wait 5 seconds for game start
         for i in range(0, 5):
@@ -97,7 +100,6 @@ class Game(AbstractGame):
 
     async def update(self, timer: Union[int | None] = None) -> None:
         """Send game datas to clients, and delete the game if it's finished"""
-
 
         # logging.info("[Game]: Updating clients")
         # Send game datas to client
@@ -247,6 +249,7 @@ class Game(AbstractGame):
             "url": f"/game/{self.__gamemodel.id}"
         }
 
+        self.log(f"Redirecting clients to {data['url']}")
         await self.__p1.getUpdateCallback()(data)
         await self.__p2.getUpdateCallback()(data)
 
