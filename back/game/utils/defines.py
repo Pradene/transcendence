@@ -19,3 +19,5 @@ PADDLE_WIDTH: int = 8
 PADDLE_HEIGHT: int = 64
 
 POINTS_TO_WIN: int = 5
+
+FPS: int = 60

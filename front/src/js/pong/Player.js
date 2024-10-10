@@ -32,6 +32,6 @@ export class Player {
         vec.y = 0
         vec.z = x / THREE_RATIO
         
-        this.instance.position.set(vec.x, vec.y, vec.z)
+        this.instance.position.copy(vec)
     }
 }

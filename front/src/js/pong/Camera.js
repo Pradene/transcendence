@@ -31,9 +31,19 @@ export class ThreeCamera {
         
         this.scene.add(this.instance)
     }
+
+    // position is a THREE.Vector3
+    setPosition(position) {
+        this.instance.position.copy(position)
+        this.instance.lookAt(0, 0, 0)
+    }
     
     resize() {
         this.instance.aspect = this.sizes.width / this.sizes.height
         this.instance.updateProjectionMatrix()
+    }
+
+    update() {
+
     }
 }

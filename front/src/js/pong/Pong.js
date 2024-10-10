@@ -32,9 +32,27 @@ export class Pong {
         this.player = new Player()
         this.opponent = new Player()
 
+        this.ball = new Ball()
+
         this.sizes.on('resize', () => this.resize())
 
         window.addEventListener('beforeunload', () => Pong.instance = null)
+    
+        window.addEventListener('keydown', (e) => {
+            switch (e.key) {
+                case 'p':
+                    this.camera.setPosition(new THREE.Vector3(0, 4, 10))
+                    break
+                case 'o':
+                    this.camera.setPosition(new THREE.Vector3(0, 4, -10))
+                    break
+                case 'u':
+                    this.camera.setPosition(new THREE.Vector3(0, 10, 0))
+                    break
+                default:
+                    break
+            }
+        })
     }
 
     static get() {
@@ -59,10 +77,12 @@ export class Pong {
             this.platform.create()
             this.player.create(data.player.position.x, data.player.position.y)
             this.opponent.create(data.opponent.position.x, data.opponent.position.y)
+            this.ball.create(data.ball.position.x, data.ball.position.y)
             
         } else if (data && data.status === 'started') {
             this.player.setPosition(data.player.position.x, data.player.position.y)
             this.opponent.setPosition(data.opponent.position.x, data.opponent.position.y)
+            this.ball.setPosition(data.ball.position.x, data.ball.position.y)
         }
 
         this.renderer.update()
@@ -75,17 +95,17 @@ export class Pong {
 
 	displayScore()
 	{
-		this._scoreCtx.clearRect(0, 0, this._scoreCanvas.width, this._scoreCanvas.height);
+		this._scoreCtx.clearRect(0, 0, this._scoreCanvas.width, this._scoreCanvas.height)
             
         // Set styles for the score
 		this._scoreCtx.ba
-        this._scoreCtx.fillStyle = 'black';
+        this._scoreCtx.fillStyle = 'black'
 		this._scoreCtx.fillRect(0, 0, this._scoreCanvas.width, this._scoreCanvas.height)
-        this._scoreCtx.fillStyle = 'white';
-        this._scoreCtx.font = '15px Arial';
+        this._scoreCtx.fillStyle = 'white'
+        this._scoreCtx.font = '15px Arial'
             
         // Draw the score in the upper left corner
-        this._scoreCtx.fillText(`${this._player._name}: ${this._player._score}`, 10, 30);
-        this._scoreCtx.fillText(`${this._opponent._name}: ${this._opponent._score}`, 10, 50);
+        this._scoreCtx.fillText(`${this._player._name}: ${this._player._score}`, 10, 30)
+        this._scoreCtx.fillText(`${this._opponent._name}: ${this._opponent._score}`, 10, 50)
 	}
 }

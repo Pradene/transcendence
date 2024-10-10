@@ -6,10 +6,10 @@ import typing
 from typing import Union
 from threading import Thread, Lock
 
-from game.gameutils.PlayerInterface import PlayerInterface
-from game.gameutils.Ball import Ball
-from game.gameutils.defines import *
-from game.gameutils.abstractgame import AbstractGame
+from game.utils.Player import Player
+from game.utils.Ball import Ball
+from game.utils.defines import *
+from game.utils.abstractgame import AbstractGame
 
 from game import models as gamemodels
 from account import models as accountmodels
@@ -20,12 +20,12 @@ TIME_TO_SLEEP: float = (1 / FPS)
 
 
 class Game(AbstractGame):
-    def __init__(self, p1: PlayerInterface, related_duel: Message | None = None):
+    def __init__(self, p1: Player, related_duel: Message | None = None):
         logging.info("[Game]: in ctor")
         super().__init__(p1)
 
-        self.__p1: Union[PlayerInterface, None] = p1
-        self.__p2: Union[PlayerInterface, None] = None
+        self.__p1: Union[Player, None] = p1
+        self.__p2: Union[Player, None] = None
         self.__ball: Ball = Ball()
         self.__dataLock: Lock = Lock()
 
@@ -46,7 +46,7 @@ class Game(AbstractGame):
         if self.__th is not None and self.__th.is_alive():
             self.__th.join()
 
-    async def join(self, p2: PlayerInterface) -> None:
+    async def join(self, p2: Player) -> None:
         """Join a player to the game"""
 
         logging.info(f"[Game]: Player {p2.getName()} joining game {self.getGameid()}")

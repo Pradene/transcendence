@@ -45,7 +45,7 @@ export class Game extends TemplateComponent {
 
         this.socket.onmessage = (e) => {
             const data = JSON.parse(e.data)
-            console.log(data)
+            // console.log(data)
                         
             this.handleWebSocketMessage(data)
         }
