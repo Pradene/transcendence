@@ -111,7 +111,7 @@ class Ball:
         cx = self.getX()
         px = player.getX()
 
-        if y != 0 and cx > px and cx < px + PADDLE_WIDTH:
+        if y != 0 and cx + BALL_SIZE > px and cx < px + PADDLE_WIDTH:
             if y == -1 and self.getY() == player.getY() + PADDLE_HEIGHT:
                 return True
             elif y == 1 and self.getY() + BALL_SIZE == player.getY():
