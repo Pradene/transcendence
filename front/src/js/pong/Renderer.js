@@ -27,7 +27,6 @@ export class ThreeRenderer {
     }
 
     update() {
-        console.log(this.instance)
         this.instance.render(this.scene, this.camera.instance)
     }
 

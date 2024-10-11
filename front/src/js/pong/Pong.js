@@ -86,13 +86,6 @@ export class Pong {
 
         } else if (data && data.status === 'waiting') {
             this.timer.create(data.timer)
-
-        } else if (data && data.status === 'ready') {
-            this.timer.remove()
-            this.platform.create()
-            this.player.create(data.player.position.x, data.player.position.y)
-            this.opponent.create(data.opponent.position.x, data.opponent.position.y)
-            this.ball.create(data.ball.position.x, data.ball.position.y)
             
         } else if (data && data.status === 'started') {
             this.player.setPosition(data.player.position.x, data.player.position.y)

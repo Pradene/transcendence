@@ -257,10 +257,10 @@ class MatchmakingConsumer(AsyncJsonWebsocketConsumer):
     async def game_found_response(self, data):
         game_id = data.get('game_id')
         
-        await self.send(text_data=json.dumps({
+        await self.send_json({
             'type': 'game_found',
             'game_id': game_id
-        }))
+        })
 
 
 

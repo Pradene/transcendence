@@ -66,10 +66,6 @@ class GameManager:
                 await asyncio.sleep(1)
                 self.countdown -= 1
 
-            self.game.status = 'ready'
-            await database_sync_to_async(self.game.save)()
-            await self.notify_observers()
-
             self.game.status = 'started'
             await database_sync_to_async(self.game.save)()
             await self.notify_observers()
@@ -194,7 +190,7 @@ class GameManager:
                 'timer': self.countdown
             }
 
-        elif status == 'ready' or status == 'started':
+        elif status == 'started':
             return {
                 'status': status,
                 'players': {

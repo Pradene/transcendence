@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { Pong } from "./Pong.js"
-import { CANVAS_HEIGHT, CANVAS_WIDTH, THREE_RATIO } from "./Defines.js"
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from "./Defines.js"
 
 export class Platform {
     constructor() {
@@ -8,14 +8,16 @@ export class Platform {
 
         this.scene = this.game.scene
         this.instance = null
+
+        this.setInstance()
     }
 
-    create() {
+    setInstance() {
         const material = new THREE.MeshPhongMaterial({ color: 0x576066, transparent: true, opacity: 0.3 })
         
-        const fieldWidth = CANVAS_HEIGHT / THREE_RATIO + 0.2
+        const fieldWidth = CANVAS_HEIGHT + 0.2
         const fieldHeight = 0.2
-        const fieldDepth = CANVAS_WIDTH / THREE_RATIO + 0.2
+        const fieldDepth = CANVAS_WIDTH + 0.2
         
         const fieldGeometry = new THREE.BoxGeometry(
             fieldWidth,

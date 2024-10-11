@@ -9,19 +9,19 @@ export class Player {
         this.game = Pong.get()
 
         this.scene = this.game.scene
+
+        this.setInstance()
     }
 
-    create(x, y) {
+    setInstance() {
         const material = new THREE.MeshPhongMaterial({color: 0xE54B4B})
         
-        const paddleWidth = PADDLE_WIDTH / THREE_RATIO
-        const paddleHeight = PADDLE_HEIGHT / THREE_RATIO
-        const paddleDepth = PADDLE_HEIGHT / THREE_RATIO
+        const paddleWidth = PADDLE_WIDTH
+        const paddleHeight = PADDLE_HEIGHT
+        const paddleDepth = PADDLE_HEIGHT
         const geometry = new THREE.BoxGeometry(paddleWidth, paddleHeight, paddleDepth)
 
         this.instance = new THREE.Mesh(geometry, material)
-
-        this.setPosition(x, y)
 
         this.scene.add(this.instance)
     }
