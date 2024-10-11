@@ -48,17 +48,17 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
             async with GameConsumer.game_manager_lock:
                 if self.game_id not in GameConsumer.game_managers:
-                    logging.info('creating game')
+                    
                     users = await database_sync_to_async(list)(self.game.players.all())
                     self.game_manager = GameManager(self.game, users)
+                    
                     GameConsumer.game_managers[self.game_id] = self.game_manager
+                
                 else:
                     self.game_manager = GameConsumer.game_managers[self.game_id]
 
             if await database_sync_to_async(self.check_users_connected)():
-                logging.info(f"All players are connected. Starting the game!")
-                self.game_manager.add_observer(self)
-                
+                self.game_manager.add_observer(self)                
                 asyncio.create_task(self.game_manager.start_game())
 
         else:
@@ -75,11 +75,8 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
             if not self.game_manager:
                 return
-                
-            logging.info(data)
 
             if data['movement']:
-                logging.info('update player move')
                 self.game_manager.update_player(self.user.id, data['movement'])
 
         except Exception as e:

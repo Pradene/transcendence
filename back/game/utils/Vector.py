@@ -6,6 +6,16 @@ def generate_vector():
     number = random.uniform(-0.5, 0.5)
     return Vector2(1, number).normalize()
 
+def generate_vector_in_direction(direction):
+    number = random.uniform(-0.5, 0.5)
+
+    if direction == 'left':
+        return Vector2(-1, number).normalize()
+    elif direction == 'right':
+        return Vector2(1, number).normalize()
+    else:
+        return Vector2(1, number).normalize()
+
 class Vector2:
     def __init__(self, x, y):
         self.x = x

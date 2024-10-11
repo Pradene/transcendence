@@ -15,6 +15,7 @@ from game.utils.Vector import Vector2
 from game.utils.intersections import *
 
 from chat.models import Message
+from game.models import Score
 
 TIME_TO_SLEEP: float = (1 / FPS)
 
@@ -22,24 +23,24 @@ class GameManager:
     def __init__(self, game, users):
         self.game = game
         self.users = users
-        self.players = self.init_players()
+        self.players = self.initialize_players()
+        self.scores = {user.id: 0 for user in users}
         self.ball = Ball()
         self.observers = []
         self.countdown = COUNTDOWN
 
-
-    def init_players(self):
+    def initialize_players(self):
         positions = {
             0: -400 + 20,
             1: 400 - 20
         }
 
-        return {
-            user.id: Player(
-                id=user.id,
-                pos_x=positions[i]
-            ) for i, user in enumerate(self.users)
-        }
+        players = {}
+        for i, user in enumerate(self.users):
+            player = Player(id=user.id, pos_x=positions[i])
+            players[user.id] = player
+        
+        return players
 
 
     def add_observer(self, observer):
@@ -79,7 +80,8 @@ class GameManager:
                 for user_id, player in self.players.items():
                     player.move()
 
-                self.ball.move()
+                if self.ball.moving:
+                    self.ball.move()
 
                 self.check_collisions()
 
@@ -119,10 +121,20 @@ class GameManager:
     def check_wall_collisions(self, start, end):
         # Check collision with left wall
         if line_intersects_line(start, end, Vector2(-400, 300), Vector2(-400, -300)):
-            return Vector2(1, 0)  # Collision normal facing right
+            player = self.get_player_by_x_position(-400 + 20)
+            self.scores[player.id] += 1
+            asyncio.create_task(self.ball.reset(direction='left'))
+            logging.info(self.scores[player.id])
+            return None
+
         # Check collision with right wall
         if line_intersects_line(start, end, Vector2(400, 300), Vector2(400, -300)):
-            return Vector2(-1, 0)  # Collision normal facing left
+            player = self.get_player_by_x_position(400 - 20)
+            self.scores[player.id] += 1
+            asyncio.create_task(self.ball.reset(direction='right'))
+            logging.info(self.scores[player.id])
+            return None
+        
         # Check collision with top wall
         if line_intersects_line(start, end, Vector2(-400, 300), Vector2(400, 300)):
             return Vector2(0, 1)  # Collision normal facing down
@@ -130,6 +142,13 @@ class GameManager:
         if line_intersects_line(start, end, Vector2(-400, -300), Vector2(400, -300)):
             return Vector2(0, -1)  # Collision normal facing up
         
+        return None
+
+    def get_player_by_x_position(self, x_position):
+        # Find and return the player with the specified `pos_x` value
+        for player in self.players.values():
+            if player.position.x == x_position:
+                return player
         return None
 
 
