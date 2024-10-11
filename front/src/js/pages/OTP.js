@@ -116,6 +116,12 @@ export class OTP extends TemplateComponent {
 			child.textContent = ''
 		})
 
+		label.classList.add('shake')
+
+		setTimeout(function() {
+			label.classList.remove('shake')
+		}, 300)
+
 		children[0].classList.toggle('active')
 	}
 }
