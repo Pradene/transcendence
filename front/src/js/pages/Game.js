@@ -66,23 +66,7 @@ export class Game extends TemplateComponent {
     }
 
     handleWebSocketMessage(data) {
-        if (data.type === 'player_info') {
-            this.displayPlayersName(data)
-
-        } else {
-            this.game.update(data)
-        }
-    }
-
-    displayPlayersName(data) {
-        const player = data.player
-        const opponent = data.opponent
-
-        const playerName = document.querySelector('.scores .player .username')
-        playerName.textContent = player
-
-        const opponentName = document.querySelector('.scores .opponent .username')
-        opponentName.textContent = opponent
+        this.game.update(data)
     }
 
     getGameID() {

@@ -177,7 +177,6 @@ class GameManager:
         player = self.players.get(user_id)
         return {
             'id': player.id,
-            'username': player.name,
             'score': player.score,
             'position': {
                 'x': player.position.x,

@@ -11,8 +11,9 @@ export class ThreeRenderer {
         this.camera = this.game.camera
         this.canvas = this.game.canvas
 
+        this.instance = null
+
         this.setInstance()
-        this.update()
     }
 
     setInstance() {
@@ -26,6 +27,7 @@ export class ThreeRenderer {
     }
 
     update() {
+        console.log(this.instance)
         this.instance.render(this.scene, this.camera.instance)
     }
 
