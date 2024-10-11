@@ -30,7 +30,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             self.game_id = self.scope['url_route']['kwargs']['game_id']
             self.group_name = f'game_{self.game_id}'
             if not await self.is_user_in_game():
-                await self.close()
+                await self.close(1000)
                 return
 
             self.game = await database_sync_to_async(
@@ -38,13 +38,15 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             )(id=self.game_id)
 
             if self.game.status == 'finished':
-                await self.close()
+                await self.close(1000)
                 return
 
             self.add_connected_user(self.user, self.game_id)
             await self.channel_layer.group_add(self.group_name, self.channel_name)
 
             await self.accept()
+
+            await self.send_username()
 
             async with GameConsumer.game_manager_lock:
                 if self.game_id not in GameConsumer.game_managers:
@@ -129,6 +131,19 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
                 'data': game_state
             }
         )
+
+    async def send_username(self):
+        users = await database_sync_to_async(list)(self.game.players.all())
+
+        player = next((user for user in users if user.id == self.user.id), None)
+        opponent = next((user for user in users if user.id != self.user.id), None)
+
+        await self.send_json({
+            'type': 'player_info',
+            'player': player.username,
+            'opponent': opponent.username
+        })
+
 
     async def send_game(self, event):
         data = event.get('data')

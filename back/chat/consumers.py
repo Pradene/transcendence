@@ -12,7 +12,6 @@ from .models import ChatRoom, Message, Invitation
 from .utils.elapsed_time import elapsed_time
 from .utils.rooms import is_user_room_member
 
-from game.utils.DuelManager import DUELMANAGER
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -235,7 +234,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def accept_duel(self, data: dict):
         try:
-            from game.utils.DuelManager import DUELMANAGER
             if DUELMANAGER.get_duel(self.user) is not None:
                 self.log("User does already have an active duel", is_error=True)
                 return

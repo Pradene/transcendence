@@ -65,7 +65,7 @@ export class OTP extends TemplateComponent {
 			})
 
 			const router = Router.get()
-			router.navigate('/')
+			await router.navigate('/')
 		
 		} catch (e) {
 			this.removeCode()

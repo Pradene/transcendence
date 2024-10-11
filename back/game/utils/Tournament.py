@@ -1,23 +1,24 @@
-import asyncio
-import logging
-import time
-from typing import List, Union
+# import asyncio
+# import logging
+# import time
+# from typing import List, Union
 
-import account.models
-from game.utils.Game import Game
-from game.utils.Player import Player
-from game.utils.abstractgame import AbstractGame
+# import account.models
+# from game.utils.Game import Game
+# from game.utils.Player import Player
+# from game.utils.abstractgame import AbstractGame
 
-from threading import Thread
+# from threading import Thread
 
-import game.models as gamemodels
-import account.models as accountmodels
+# import game.models as gamemodels
+# import account.models as accountmodels
 
 
-class Tournament(AbstractGame):
+class Tournament():
     def __init__(self):
         pass
 
+# class Tournament(AbstractGame):
 #     def __init__(self, player: Player):
 #         super().__init__(player)
 

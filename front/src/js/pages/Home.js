@@ -14,12 +14,12 @@ export class Home extends TemplateComponent {
         const GameButton = document.querySelector("button.create-game");
         const TournamentButton = document.querySelector("button.create-tournament")
         
-        TournamentButton.addEventListener("click", () => {
-            router.navigate('/matchmaking/')
+        TournamentButton.addEventListener("click", async () => {
+            await router.navigate('/matchmaking/')
         })
         
-        GameButton.addEventListener("click", () => {
-            router.navigate('/matchmaking/')
+        GameButton.addEventListener("click", async () => {
+            await router.navigate('/matchmaking/')
         })
     }
 }

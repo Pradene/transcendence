@@ -7,6 +7,8 @@ export class Game extends TemplateComponent {
         super()
 
         this.socket = null
+        this.game = null
+
         this.removeGame = () => this.game.end()
 
         this.keyDownHandler = (e) => this.movePlayer(e)
@@ -16,7 +18,9 @@ export class Game extends TemplateComponent {
     unmount() {
         if (this.socket)
             this.socket.close()
-        this.game.end()
+
+        if (this.game)
+            this.game.end()
 
         window.removeEventListener('beforeunload', this.removeGame)
         window.removeEventListener('keydown', this.keyDownHandler)
@@ -45,28 +49,40 @@ export class Game extends TemplateComponent {
 
         this.socket.onmessage = (e) => {
             const data = JSON.parse(e.data)
-            // console.log(data)
-                        
+            
             this.handleWebSocketMessage(data)
         }
 
-        this.socket.onerror = (e) => {
+        this.socket.onerror = async (e) => {
             console.error('WebSocket error: ', e)
 
             const router = Router.get()
-            router.navigate('/')
+            await router.navigate('/')
         }
 
         this.socket.onclose = () => {
             console.log('Game WebSocket closed')
-
-            const router = Router.get()
-            router.navigate('/')
         }
     }
 
     handleWebSocketMessage(data) {
-        this.game.update(data)
+        if (data.type === 'player_info') {
+            this.displayPlayersName(data)
+
+        } else {
+            this.game.update(data)
+        }
+    }
+
+    displayPlayersName(data) {
+        const player = data.player
+        const opponent = data.opponent
+
+        const playerName = document.querySelector('.scores .player .username')
+        playerName.textContent = player
+
+        const opponentName = document.querySelector('.scores .opponent .username')
+        opponentName.textContent = opponent
     }
 
     getGameID() {
