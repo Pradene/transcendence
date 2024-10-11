@@ -57,9 +57,7 @@ def roomView(request, room_id):
 
 	messages_data = [{
 		'type': 'message',
-		'user_id': message.user.id,
-		'username': message.user.username,
-		'picture': message.user.picture.url if message.user.picture else None,
+		'sender': message.user.toJSON(),
 		'content': message.content,
 		'elapsed_timestamp': elapsed_time(message.timestamp),
 		'timestamp': message.timestamp
@@ -70,8 +68,7 @@ def roomView(request, room_id):
 	invitations_data = [{
 		'id': invitation.id,
 		'type': 'invitation',
-		'user': invitation.sender.id,
-		'username': invitation.sender.username,
+		'sender': invitation.sender.toJSON(),
 		'elapsed_timestamp': elapsed_time(invitation.created_at),
 		'timestamp': invitation.created_at,
 		'status': invitation.status

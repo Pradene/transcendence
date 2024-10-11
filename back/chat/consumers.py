@@ -13,7 +13,7 @@ from .models import ChatRoom, Message, Invitation
 from .utils.elapsed_time import elapsed_time
 from .utils.rooms import is_user_room_member
 
-from game.gameutils.DuelManager import DUELMANAGER
+from game.utils.DuelManager import DUELMANAGER
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -99,15 +99,27 @@ class ChatConsumer(AsyncWebsocketConsumer):
 				ChatRoom.objects.get
 			)(id=room_id)
 
-			existing_invitation = await database_sync_to_async(
-				Invitation.objects
-				.filter
-			)(sender=self.user, status='pending')
+			existing_invitations = await database_sync_to_async(
+				list
+			)(Invitation.objects.filter(sender=self.user, room=room, status='pending'))
+			
+			
+			# Loop through each existing invitation
+			for invitation in existing_invitations:
+				invitation.status='canceled'
+				await database_sync_to_async(invitation.save)()
+			
+				await self.channel_layer.group_send(
+					f'chat_{room.id}',
+					{
+						'type': 'invitation',
+						'id': invitation.id,
+						'room_id': room.id,
+						'status': invitation.status,
+						'sender': self.user.toJSON()
+					}
+				)
 
-			if await database_sync_to_async(existing_invitation.exists)():
-				await database_sync_to_async(
-					existing_invitation.update
-				)(status='canceled')
 
 			invitation = await database_sync_to_async(
 				Invitation.objects.create
@@ -118,7 +130,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			await self.channel_layer.group_send(
 				f'chat_{room.id}',
 				{
-					'type': 'invitation_response',
+					'type': 'invitation',
 					'id': invitation.id,
 					'room_id': room_id,
 					'status': invitation.status,
@@ -158,7 +170,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			await self.channel_layer.group_send(
 				f'chat_{room.id}',
 				{
-					'type': 'invitation_response',
+					'type': 'invitation',
 					'id': invitation.id,
 					'room_id': room_id,
 					'status': invitation.status,
@@ -206,7 +218,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			await self.channel_layer.group_send(
 				f'chat_{room.id}',
 				{
-					'type': 'invitation_response',
+					'type': 'invitation',
 					'id': invitation.id,
 					'room_id': room_id,
 					'status': invitation.status,
@@ -227,6 +239,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 				Invitation.objects.get
 			)(id=invitation_id)
 
+			if invitation.status != 'pending':
+				return
+
 			invitation_sender = await database_sync_to_async(lambda: invitation.sender)()
 
 			if invitation_sender == self.user:
@@ -245,11 +260,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			await self.channel_layer.group_send(
 				f'chat_{room.id}',
 				{
-					'type': 'invitation_response',
+					'type': 'invitation',
 					'id': invitation.id,
 					'room_id': room_id,
 					'status': invitation.status,
-					'sender': invitation_sender.toJSON()
+					'sender': invitation_sender.toJSON(),
+					'game_id': invitation.game.id
 				}
 			)
 
@@ -257,7 +273,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			logging.error(f'error: {e}')
 
 
-	async def invitation_response(self, data):
+	async def invitation(self, data):
 		await self.send(text_data=json.dumps(data))
 
 
@@ -299,7 +315,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 	async def accept_duel(self, data: dict):
 		try:
-			from game.gameutils.DuelManager import DUELMANAGER
+			from game.utils.DuelManager import DUELMANAGER
 			if DUELMANAGER.get_duel(self.user) is not None:
 				self.log("User does already have an active duel", is_error=True)
 				return
@@ -424,7 +440,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			data = {
 				'type':      'message_response',
 				'room_id':   message.room.id,
-				'user_id':   message.user.id,
+				'sender':   message.user.toJSON(),
 				'username':  message.user.username,
 				'picture':   message.user.picture.url if message.user.picture else None,
 				'content':   message.content,
