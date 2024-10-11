@@ -40,11 +40,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         {path: '/game/:id/', view: new Game(), protected: true},
     ])
 
-    document.body.addEventListener('click', (event) => {
+    document.body.addEventListener('click', async (event) => {
         const target = event.target
         if (isDataLink(target)) {
             event.preventDefault()
-            router.navigate(target.href)
+            await router.navigate(target.href)
         }
     })
 })

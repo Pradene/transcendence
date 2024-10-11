@@ -5,22 +5,22 @@ import asyncio
 
 from game.utils.Player import Player
 from game.utils.defines import *
-from game.utils.Vector import Vector2, generate_vector
+from game.utils.Vector import *
 
 
 class Ball:
     def __init__(self):
         self.position = Vector2(0, 0)
         self.direction = generate_vector()
-        self.moving = False
+        self.moving = True
         self.speed = BALL_SPEED
 
-    async def start(self):
-        if self.moving == False:
-            self.position = Vector2(0, 0)
-            self.direction = generate_vector()
-            self.moving = True
-            await asyncio.sleep(1)
+    async def reset(self, direction):
+        self.position = Vector2(0, 0)
+        self.direction = generate_vector_in_direction(direction)
+        self.moving = False
+        await asyncio.sleep(1)
+        self.moving = True
 
     def move(self):
         self.position += self.direction.scale(self.speed)

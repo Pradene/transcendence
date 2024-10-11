@@ -13,7 +13,6 @@ from .models import ChatRoom, Message, Invitation
 from .utils.elapsed_time import elapsed_time
 from .utils.rooms import is_user_room_member
 
-from game.utils.DuelManager import DUELMANAGER
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -440,7 +439,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			data = {
 				'type':      'message_response',
 				'room_id':   message.room.id,
-				'sender':   message.user.toJSON(),
+				'sender':    message.user.toJSON(),
 				'username':  message.user.username,
 				'picture':   message.user.picture.url if message.user.picture else None,
 				'content':   message.content,

@@ -39,6 +39,7 @@ export class Router {
 
     async handleRoute() {
         const location = window.location.pathname
+        console.log(location)
         const matchedRoute = this.matchRoute(location)
         if (matchedRoute) {
             const View = matchedRoute.route.view

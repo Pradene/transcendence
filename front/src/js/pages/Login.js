@@ -124,7 +124,7 @@ export class Login extends TemplateComponent {
             })
 
             const router = Router.get()
-            router.navigate("/verify-otp/")
+            await router.navigate("/verify-otp/")
 
         } catch (e) {
             username.value = ""

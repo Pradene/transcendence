@@ -34,7 +34,7 @@ class LogoutButton extends HTMLElement {
             ws.disconnect('friends')
             
             const router = Router.get()
-            router.navigate("/login/")
+            await router.navigate("/login/")
 
         } catch (error) {
             console.log(error)

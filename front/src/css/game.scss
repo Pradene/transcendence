@@ -9,21 +9,31 @@
 	top: 5%;
 	left: 0;
 	width: 100%;
-	display: none;
+	padding: 24px;
 
 	display: flex;
-	flex-direction: column;
-	gap: 2%;
+	justify-content: space-between;
+	flex-direction: row;
 
 	text-align: center;
-	font-size: 24px;
+	font-size: 18px;
 	z-index: 1;
 
-	.container {
+	& > div {
 		display: flex;
 		flex-direction: row;
-		gap: 5%;
-		justify-content: center;
 		align-items: center;
+		justify-content: space-between;
+
+		gap: 24px;
+		width: 250px;
+		
+		background: var(--secondary-color);
+		border-radius: 12px;
+		padding: 12px 24px;
+	
+		&.opponent {
+			flex-direction: row-reverse;
+		}
 	}
 }

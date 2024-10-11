@@ -17,9 +17,9 @@ export class MatchMaking extends TemplateComponent {
         this.connectToMatchMakingWebSocket()
 
         const cancelButton = document.getElementById('cancel-matchmaking')
-        cancelButton.addEventListener('click', () => {
+        cancelButton.addEventListener('click', async () => {
             const router = Router.get()
-            router.navigate('/')
+            await router.navigate('/')
         })
     }
 
@@ -33,14 +33,17 @@ export class MatchMaking extends TemplateComponent {
             this.socket.send(JSON.stringify({type: 'join_queue'}))
         }
 
-        this.socket.onmessage = (e) => {
+        this.socket.onmessage = async (e) => {
             console.log(e)
             
-            this.handleWebSocketMessage(e)
+            await this.handleWebSocketMessage(e)
         }
 
-        this.socket.onerror = (e) => {
+        this.socket.onerror = async (e) => {
             console.error('WebSocket error: ', e)
+        
+            const router = Router.get()
+            await router.navigate('/')
         }
 
         this.socket.onclose = () => {
@@ -48,14 +51,15 @@ export class MatchMaking extends TemplateComponent {
         }
     }
 
-    handleWebSocketMessage(e) {
+    async handleWebSocketMessage(e) {
         const data = JSON.parse(e.data)
+        console.log(data)
 
         if (data.type == 'game_found') {
             const id = data.game_id
 
             const router = Router.get()
-            router.navigate(`/game/${id}/`)
+            await router.navigate(`/game/${id}/`)
         }
     }
 }

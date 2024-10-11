@@ -6,13 +6,12 @@ from game.utils.Vector import Vector2
 
 
 class Player:
-    def __init__(self, id, pos_x = 0, pos_y = 0):
+    def __init__(self, id, name, position):
         self.id = id
-        self.position = Vector2(pos_x, pos_y)
+        self.name = name
+        self.position = position
         self.movement = 'NONE'
-
-        logging.info(f'player id: {self.id}')
-        logging.info(f'player position: {self.position}')
+        self.score = 0
 
     def setMovement(self, movement):
         if movement != "UP" and movement != "DOWN" and movement != "NONE":
@@ -30,6 +29,17 @@ class Player:
             self.position.y += speed
             if self.position.y > 300 - PADDLE_HEIGHT / 2:
                 self.position.y = 300 - PADDLE_HEIGHT / 2
+
+    def get_bound(self):
+        width = PADDLE_WIDTH
+        height = PADDLE_HEIGHT
+        
+        return {
+            'left': self.position.x - width / 2,
+            'right': self.position.x + width / 2,
+            'top': self.position.y - height / 2,
+            'bottom': self.position.y + height / 2,
+        }
 
 # class Player:
 #     def __init__(self, name: str, updateCallback: Callable, deleteGameCallback: Callable):
