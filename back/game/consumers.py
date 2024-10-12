@@ -151,7 +151,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         if data['status'] == 'waiting':
             await self.send_json(data)
 
-        elif data['status'] == 'started' or data['status'] == 'ready':
+        elif data['status'] == 'started' or data['status'] == 'finished':
             players = data['players']
             ball = data['ball']
             player = players.get(self.user.id)

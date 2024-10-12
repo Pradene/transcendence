@@ -55,4 +55,21 @@ export class Platform {
 
         this.scene.add(this.instance)
     }
+
+    remove() {
+        this.scene.remove(this.instance)
+
+        this.instance.traverse((child) => {
+            if (child.geometry) child.geometry.dispose()
+
+            if (child.material) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(mat => mat.dispose())
+                } else {
+                    child.material.dispose()
+                }
+            }
+        })
+    }
+
 }

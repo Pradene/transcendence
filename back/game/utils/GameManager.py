@@ -190,7 +190,7 @@ class GameManager:
                 'timer': self.countdown
             }
 
-        elif status == 'started':
+        elif status == 'started' or status == 'finished':
             return {
                 'status': status,
                 'players': {
@@ -203,11 +203,6 @@ class GameManager:
                         'y': self.ball.position.y
                     }
                 }
-            }
-
-        elif status == 'finished':
-            return {
-                'status': status
             }
 
         else:

@@ -92,6 +92,13 @@ export class Pong {
             this.opponent.setPosition(data.opponent.position.x, data.opponent.position.y)
             this.ball.setPosition(data.ball.position.x, data.ball.position.y)
             this.displayScore(data)
+            
+        } else if (data && data.status === 'finished') {
+            this.displayScore(data)
+            this.ball.remove()
+            this.player.remove()
+            this.opponent.remove()
+            this.platform.remove()
         }
     }
     

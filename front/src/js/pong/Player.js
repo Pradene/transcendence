@@ -26,6 +26,12 @@ export class Player {
         this.scene.add(this.instance)
     }
 
+    remove() {
+        this.scene.remove(this.instance)
+        this.instance.material.dispose()
+        this.instance.geometry.dispose()
+    }
+
     setPosition(x, y) {
         const vec = new THREE.Vector3(0, 0, 0)
         vec.x = y / THREE_RATIO

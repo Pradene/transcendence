@@ -10,9 +10,9 @@ def line_rect_collision(start, end, player):
     # Check for intersection with each side and return the normal vector
 
     if line_intersects_line(start, end, Vector2(rect_left, rect_top), Vector2(rect_right, rect_top)):
-        return Vector2(0, -1)  # Top collision normal
+        return Vector2(0, 1)  # Top collision normal
     if line_intersects_line(start, end, Vector2(rect_left, rect_bottom), Vector2(rect_right, rect_bottom)):
-        return Vector2(0, 1)   # Bottom collision normal
+        return Vector2(0, -1)   # Bottom collision normal
     if line_intersects_line(start, end, Vector2(rect_left, rect_top), Vector2(rect_left, rect_bottom)):
         return Vector2(-1, 0)  # Left collision normal
     if line_intersects_line(start, end, Vector2(rect_right, rect_top), Vector2(rect_right, rect_bottom)):
