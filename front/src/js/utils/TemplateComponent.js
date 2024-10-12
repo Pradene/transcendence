@@ -34,7 +34,7 @@ export class TemplateComponent {
                     return Promise.reject("No content found")
                 }
             })
-            .then(content => {
+            .then(() => {
                 this.componentDidMount()
             })
             .catch(error => {console.log("Error:", error)})

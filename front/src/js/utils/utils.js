@@ -1,20 +1,9 @@
+import { Session } from "./Session.js"
 import { WebSocketManager } from "./WebSocketManager.js"
 import jwt from "jsonwebtoken"
 
 export function getURL(url) {
     return "https://" + location.hostname + ":" + location.port + "/" + url
-}
-
-export function getConnectedUserID() {
-    try {
-        const token = getCookie("access_token")
-        const decoded = jwt.decode(token)
-
-        return decoded.user
-
-    } catch (e) {
-        return null
-    }
 }
 
 // CSRF Tokens utils
@@ -30,7 +19,12 @@ export async function fetchCSRFToken() {
     }
 }
 
-function getCookie(name) {
+// CSRF Tokens utils
+export function getCSRFToken() {
+    return getCookie('csrftoken')
+}
+
+export function getCookie(name) {
     const value = `; ${document.cookie}`
     const parts = value.split(`; ${name}=`)
     if (parts.length === 2)
@@ -38,12 +32,6 @@ function getCookie(name) {
     
     return null
 }
-
-// CSRF Tokens utils
-export function getCSRFToken() {
-    return getCookie('csrftoken')
-}
-
 
 // Requests to server utils
 export async function apiRequest(url, options = {}) {
@@ -135,13 +123,16 @@ export async function checkLogin() {
         if (!access) {
             const value = await refreshToken()
             if (value)
+                Session.setUserID()
                 connectToWebsockets()
 
             return value
         }
 
-        const decoded = jwt.decode(access)     
+        const decoded = jwt.decode(access)
         const current = Date.now() / 1000
+
+        Session.setUserID()
 
         if (decoded.exp > current) {
             connectToWebsockets()

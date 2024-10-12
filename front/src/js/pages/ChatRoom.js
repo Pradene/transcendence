@@ -2,6 +2,7 @@ import { getURL, apiRequest, getConnectedUserID } from '../utils/utils.js'
 import { WebSocketManager } from '../utils/WebSocketManager.js'
 import { TemplateComponent } from '../utils/TemplateComponent.js'
 import { Router } from '../utils/Router'
+import { Session } from '../utils/Session.js'
 
 export class ChatRoom extends TemplateComponent {
     constructor() {
@@ -18,14 +19,14 @@ export class ChatRoom extends TemplateComponent {
     }
 
     async unmount() {
-        await this.cancelAllInvitations()
-    
         const form = this.getRef('form')
         form.addEventListener('submit', this.sendMessageListener)
-
+        
         window.addEventListener('wsMessage', this.WebsocketMessageListener)
-
+        
         document.querySelector('button.duel-invite').removeEventListener('click', this.sendInvitationListener)
+        
+        await this.cancelAllInvitations()
     }
 
     async componentDidMount() {
@@ -47,7 +48,6 @@ export class ChatRoom extends TemplateComponent {
 
     async WebsocketMessage(event) {
         const message = event.message
-        console.log('message:', message)
 
         if (message.room_id != this.roomID) {
             return
@@ -136,6 +136,7 @@ export class ChatRoom extends TemplateComponent {
         invitation.appendChild(content)
     }
 
+    // Send a message
     async sendMessage(event) {
         event.preventDefault()
 
@@ -155,6 +156,7 @@ export class ChatRoom extends TemplateComponent {
         }
     }
 
+    // Send an invitation
     async sendInvitation(event) {
         event.preventDefault()
 
@@ -164,11 +166,12 @@ export class ChatRoom extends TemplateComponent {
         await ws.sendMessage('chat', {
             type: 'send_invitation',
             room_id: roomID,
-			user_id: getConnectedUserID(),
+			user_id: Session.getUserID(),
             content: '',
         })
     }
 
+    // Accept a specific invitation
     async acceptInvitation(invitation) {
         const roomID = this.roomID
 		const invitation_id = invitation.getAttribute('data-invitation-id')
@@ -181,6 +184,7 @@ export class ChatRoom extends TemplateComponent {
         })
     }
 
+    // Refuse a specific invitation
     async refuseInvitation(invitation) {
         const roomID = this.roomID
 		const invitation_id = invitation.getAttribute('data-invitation-id')
@@ -193,6 +197,7 @@ export class ChatRoom extends TemplateComponent {
         })
     }
 
+    // Cancel a specific invitation
 	async cancelInvitaion(invitation) {
         const roomID = this.roomID
 		const invitation_id = invitation.getAttribute('data-invitation-id')
@@ -205,6 +210,7 @@ export class ChatRoom extends TemplateComponent {
         })
     }
 
+    // Cancel all pending invitations
     async cancelAllInvitations() {
         const roomID = this.roomID
         console.log(roomID)
@@ -216,6 +222,8 @@ export class ChatRoom extends TemplateComponent {
         })
     }
 
+    // Get all messages from the server 
+    // and after display them in the chat
     async getMessages() {
         try {
             const roomID = this.roomID
@@ -233,7 +241,7 @@ export class ChatRoom extends TemplateComponent {
         }
     }
 
-    
+    // Display message
     displayMessage(container, message) {
         if (!message)
             return
@@ -241,7 +249,7 @@ export class ChatRoom extends TemplateComponent {
         const element = document.createElement('div')
         element.classList.add('message')
         
-        if (message.sender.id === getConnectedUserID())
+        if (message.sender.id === Session.getUserID())
             element.classList.add('right')
 
         const imgContainer = document.createElement('a')
@@ -278,6 +286,7 @@ export class ChatRoom extends TemplateComponent {
         container.scrollTop = container.scrollHeight
     }
 
+    // Display the invitation based on her status
     displayInvitation(container, invitation) {
         const status = invitation.status
         
@@ -285,7 +294,7 @@ export class ChatRoom extends TemplateComponent {
             const buttonContainer = document.createElement('div')
             buttonContainer.className = 'flex'
             
-            if (invitation.sender.id === getConnectedUserID()) {
+            if (invitation.sender.id === Session.getUserID()) {
                 const cancelButton = document.createElement('button')
                 cancelButton.textContent = 'Cancel'
                 cancelButton.className = 'button cancel'
@@ -324,6 +333,7 @@ export class ChatRoom extends TemplateComponent {
 
     }
 
+    // Utility function to get the room id from the url
     getRoomID() {
         return location.pathname.split('/')[2]
     }

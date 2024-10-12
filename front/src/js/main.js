@@ -19,13 +19,14 @@ import '../js/components/FriendButton.js'
 
 import '../css/style.scss'
 import { MatchMaking } from './pages/MatchMaking.js'
+import { Session } from './utils/Session.js'
 
 document.addEventListener('DOMContentLoaded', async () => {
 
     await fetchCSRFToken()
 
     new WebSocketManager()
-    
+        
     const router = new Router([
         {path: '/', view: new Home(), protected: true},
         {path: '/chat/', view: new Chat(), protected: true},

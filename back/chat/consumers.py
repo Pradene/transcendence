@@ -368,9 +368,9 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 				)
 
 		except Exception as e:
-			self.log(e)
+			logging.info(f'error: {e}')
 
-	
+
 	async def join_room(self, data):
 		try:
 			room_id = data.get('room_id')
@@ -383,25 +383,15 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 				self.channel_name
 			)
 
-			await self.channel_layer.group_send(
-				f'chat_{room.id}',
-				{
-					'type': 'join_room_response',
-					'room_id': room.id
-				}
-			)
+			await self.send_json({
+				'action': 'room_joined',
+				'room_id': room.id
+			})
 		
 		except ChatRoom.DoesNotExist:
 			await self.send(text_data=json.dumps({
 				'error': 'Room does not exist'
 			}))
-
-
-	async def join_room_response(self, data):
-		await self.send(text_data=json.dumps({
-			'action': 'room_joined',
-			'room_id': data['room_id']
-		}))
 
 
 	async def quit_room(self, data):

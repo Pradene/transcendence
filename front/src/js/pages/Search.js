@@ -1,3 +1,4 @@
+import { Session } from "../utils/Session.js"
 import { TemplateComponent } from "../utils/TemplateComponent.js"
 import { getURL, apiRequest, getConnectedUserID } from "../utils/utils.js"
 import { WebSocketManager } from "../utils/WebSocketManager.js"
@@ -113,7 +114,7 @@ export class Search extends TemplateComponent {
 
     async getFriends() {
         try {
-            const id = getConnectedUserID()
+            const id = Session.getUserID()
             const url = getURL(`api/users/${id}/friends/`)
             const friends = await apiRequest(url)
 
@@ -130,7 +131,7 @@ export class Search extends TemplateComponent {
 
     async getRequests() {
         try {
-            const id = getConnectedUserID()
+            const id = Session.getUserID()
             const url = getURL(`api/users/${id}/friend-requests/`)
             const requests = await apiRequest(url)
 
