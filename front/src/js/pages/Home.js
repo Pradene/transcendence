@@ -6,7 +6,7 @@ export class Home extends TemplateComponent {
         super()
     }
 
-    unmount() {}
+    async unmount() {}
 
     async componentDidMount() {
         const router = Router.get()

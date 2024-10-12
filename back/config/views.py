@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 @csrf_exempt
 def getCSRFTokenView(request):
     token = get_token(request)
-    return JsonResponse({'token': token}, status=200)
+    return JsonResponse({}, status=200)
 
 @csrf_exempt
 def base(request):

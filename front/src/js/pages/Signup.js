@@ -10,7 +10,7 @@ export class Signup extends TemplateComponent {
         this.ball = undefined
     }
     
-    unmount() {
+    async unmount() {
         const form = this.getRef("form")
         form.removeEventListener("submit", this.handleSubmitListener)
         

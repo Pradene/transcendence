@@ -15,7 +15,7 @@ export class Game extends TemplateComponent {
         this.keyUpHandler = (e) => this.stopPlayer(e)
     }
 
-    unmount() {
+    async unmount() {
         if (this.socket)
             this.socket.close()
 

@@ -46,7 +46,7 @@ export class Router {
             const isProtected = matchedRoute.route.protected
             
             if (this.currentView && typeof this.currentView.unmount === "function") {
-                this.currentView.unmount()
+                await this.currentView.unmount()
             }
             
             const isAuthenticated = await checkLogin()

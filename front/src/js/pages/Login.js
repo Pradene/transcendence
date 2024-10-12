@@ -14,7 +14,7 @@ export class Login extends TemplateComponent {
         this.ball = undefined
     }
     
-    unmount() {
+    async unmount() {
         const form = this.getRef("form")
         form.removeEventListener("submit", this.submitLoginRequestListener)
         

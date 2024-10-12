@@ -161,7 +161,7 @@ class GameManager:
         for player in self.players.values():
             if player.position.x == x_position:
                 return player
-        return None
+        return None 
 
 
     def update_player(self, user_id, movement):

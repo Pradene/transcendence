@@ -6,7 +6,7 @@ export class Profile extends TemplateComponent {
         super()
     }
 
-    unmount() {}
+    async unmount() {}
 
     async componentDidMount() {
         await this.getUser()

@@ -8,7 +8,7 @@ export class MatchMaking extends TemplateComponent {
         this.socket = null
     }
 
-    unmount() {
+    async unmount() {
         if (this.socket)
             this.socket.close()
     }

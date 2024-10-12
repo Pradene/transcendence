@@ -11,7 +11,7 @@ export class Search extends TemplateComponent {
         this.handleRequetsListener = (e) => this.handleRequests(e)
     }
 
-    unmount() {
+    async unmount() {
         const input = this.getRef("input")
         input.removeEventListener("input", this.searchUserListener)
 

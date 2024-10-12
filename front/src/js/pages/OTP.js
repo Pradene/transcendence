@@ -13,7 +13,7 @@ export class OTP extends TemplateComponent {
 		this.sendOTPListener = async () => await this.sendOTP()
 	}
 
-	unmount() {
+	async unmount() {
 		const form = this.getRef('form')
 		form.removeEventListener('submit', this.handleSubmitListener)
 
