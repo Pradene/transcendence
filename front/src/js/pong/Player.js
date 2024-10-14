@@ -105,9 +105,10 @@ export class CurrentPlayer extends Player {
     constructor(name, position) {
         super(name, position)
         this._movement = "NONE"
+        this._p2movement = "NONE"
         this._boundHandlerUp = this._keyUpHandler.bind(this)
         this._boundHandlerDown = this._keyDownHandler.bind(this)
-        window.addEventListener("keypress", this._boundHandlerDown)
+        window.addEventListener("keydown", this._boundHandlerDown)
         window.addEventListener("keyup", this._boundHandlerUp)
 
         this._username_element = document.querySelector('.game .scores .user .username')
@@ -119,10 +120,18 @@ export class CurrentPlayer extends Player {
             this.movement = "UP"
         else if (event.key === "d")
             this.movement = "DOWN"
+        else if (event.key === "ArrowLeft")
+            this.p2movement = "UP"
+        else if (event.key === "ArrowRight")
+            this.p2movement = "DOWN"
+        console.log(event.key)
     }
 
     _keyUpHandler(event) {
-        this.movement = "NONE"
+        if (event.key === "a" || event.key === "d")
+            this.movement = "NONE"
+        else if(event.key === "ArrowLeft" || event.key === "ArrowRight")
+            this.p2movement = "NONE"
     }
 
     /**
@@ -134,7 +143,8 @@ export class CurrentPlayer extends Player {
         let request = {
             method: "update_player",
             data: {
-                movement: this._movement
+                movement: this._movement,
+                p2movement: this._p2movement
             }
         }
         gs.send(request)
@@ -146,6 +156,15 @@ export class CurrentPlayer extends Player {
 
         this._movement = value
         this._update().then(r => {})
+    }
+
+    set p2movement(value) {
+        if (this._p2movement === value)
+            return
+
+        this._p2movement = value
+        this._update().then(r => {})
+
     }
 
     stop() {

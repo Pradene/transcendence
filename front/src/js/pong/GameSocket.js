@@ -140,6 +140,18 @@ export class GameSocket {
         this.send(request);
     }
 
+    requestLocalGame() {
+        if (this._currentGame) {
+            return
+        }
+
+        const request = {
+            method: "create_local",
+        }
+
+        this.send(request)
+    }
+
     /**
      * Create a new game
      * @param response

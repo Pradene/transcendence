@@ -29,6 +29,11 @@ export class Home extends TemplateComponent {
         createGameButton.addEventListener("click", () => {
             this._gameSocket.requestJoinGameQueue()
         })
+
+        const createLocalButton = document.querySelector("button.create-local")
+        createLocalButton.addEventListener("click", () => {
+            this._gameSocket.requestLocalGame()
+        })
     }
 
     // async handleGameSocketMessage(response) {
