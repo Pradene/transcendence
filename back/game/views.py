@@ -12,8 +12,14 @@ from account.models import CustomUser
 def gameHistory(request):
     try:
         user = request.user
-        games = GameModel.objects.filter(Q(user1=user) | Q(user2=user))
-        data = [game.toJSON(user) for game in games]
+        tournaments = TournamentModel.objects.filter(users__in=[user])
+        tournament_gameids = [[t.game1.id, t.game2.id, t.game3.id] for t in tournaments]
+        tournament_gameids = [gameid for sublist in tournament_gameids for gameid in sublist]
+
+        games = GameModel.objects.filter(~Q(id__in=tournament_gameids), Q(user1=user) | Q(user2=user))
+
+        data = [game.toJSON(user) for game in games] + [tournament.toJSON() for tournament in tournaments]
+        data = sorted(data, key=lambda element: element['date'])
         return JsonResponse(data, safe=False, status=200)
 
     except Exception as e:

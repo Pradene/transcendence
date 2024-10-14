@@ -90,6 +90,10 @@ export class Profile extends TemplateComponent {
     }
 
     displayGame(game) {
+        if (game.isTournament) {
+            return this.displayTournament(game)
+        }
+
         const element = document.createElement('div')
         element.classList.add('game')
         element.addEventListener('click', (event) => {
@@ -128,6 +132,36 @@ export class Profile extends TemplateComponent {
         element.appendChild(player)
         element.appendChild(score)
         element.appendChild(opponent)
+
+        return element
+    }
+
+    displayTournament(game) {
+        console.log("test")
+        const element = document.createElement('div')
+        element.classList.add('game', 'tournament')
+        element.addEventListener('click', (event) => {
+            document.location = "/tournament/" + game.id
+        })
+
+        const player = document.createElement('div')
+        player.classList.add('player')
+        const playerImgContainer = document.createElement('div')
+        playerImgContainer.classList.add('profile-picture')
+        const playerImg = document.createElement('img')
+        playerImg.src = game.winner.picture
+        const playerUsername = document.createElement('p')
+        playerUsername.textContent = game.winner.username
+
+        const won = document.createElement('p')
+        won.textContent = game.winner.id == this.getProfileID() ? "Won" : "Lost"
+
+        playerImgContainer.appendChild(playerImg)
+        player.appendChild(playerImgContainer)
+        player.appendChild(playerUsername)
+
+        element.appendChild(player)
+        element.appendChild(won)
 
         return element
     }
