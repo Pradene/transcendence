@@ -65,17 +65,7 @@ class ChatConsumer(AsyncWebsocketConsumer, Logger):
 
                     await self.channel_layer.group_send(
                         f'chat_{room.id}',
-                        {
-                            'type':      'message_response',
-                            'action':    'message',
-                            'room_id':   message.room.id,
-                            'user_id':   message.user.id,
-                            'username':  message.user.username,
-                            'picture':   message.user.picture.url if message.user.picture else None,
-                            'content':   message.content,
-                            'timestamp': elapsed_time(message.timestamp),
-                            'is_duel':   message.is_duel
-                        }
+                        message
                     )
 
                 await self.channel_layer.group_discard(
