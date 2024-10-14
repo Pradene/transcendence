@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         {path: '/signup/', view: new Signup(), protected: false},
         {path: '/verify-otp/', view: new OTP(), protected: false},
         {path: '/game/:id/', view: new GameView(), protected: true},
-        {path: '/tournament/:id', view: new TournamentView(), protected: true},
+        {path: '/tournament/:id/', view: new TournamentView(), protected: true},
     ])
 
     document.body.addEventListener("click", (event) => {
