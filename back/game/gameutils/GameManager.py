@@ -96,10 +96,10 @@ class GameManager:
     def __del__(self):
         pass
 
-    async def createGame(self, player: PlayerInterface, related_duel: Message | None = None) -> Game:
+    async def createGame(self, player: PlayerInterface, related_duel: Message | None = None, isLocal = False) -> Game:
         self.log(f"creating new game instance")
         from game.consumers import GameConsumer
-        game = Game(player, related_duel=related_duel)
+        game = Game(player, related_duel=related_duel, isLocal=isLocal)
         GameManager.GAMES[player.getName()] = game
 
         await GameConsumer.onGameChange()

@@ -19,9 +19,14 @@ from utils.logger import Logger
 FPS: int = 15
 TIME_TO_SLEEP: float = (1 / FPS)
 
+async def empty_callback():
+    pass
+
+async def empty_callback1(anarg):
+    pass
 
 class Game(AbstractGame, Logger):
-    def __init__(self, p1: PlayerInterface, related_duel: Message | None = None):
+    def __init__(self, p1: PlayerInterface, related_duel: Message | None = None, isLocal = False):
         AbstractGame.__init__(self, creator=p1)
         Logger.__init__(self)
 
@@ -45,6 +50,11 @@ class Game(AbstractGame, Logger):
 
         self.set_log_identifier(f"{self.getGameid()}")
         self.log(f"Game created")
+
+        self.__is_local = isLocal
+        if isLocal:
+            self.__p2 = PlayerInterface("2", empty_callback1, empty_callback)
+            self.__p2.setPosition(P2_POSITION.copy())
 
     def __del__(self):
         self.log("Game deleted")
@@ -121,6 +131,12 @@ class Game(AbstractGame, Logger):
 
         for spectator in self.__spectators:
             await spectator.getUpdateCallback()(data[0])
+
+    def is_local_game(self) -> bool:
+        return self.__is_local
+
+    def getP2(self) -> Union[PlayerInterface, None]:
+        return self.__p2
 
     def __toJSON(self, timer: Union[int | None] = None) -> List[dict]:
         """Return the game data in JSON format"""
@@ -224,7 +240,7 @@ class Game(AbstractGame, Logger):
     def saveToDB(self) -> None:
         """Save the game to the database"""
 
-        if self.getWinner() is None:
+        if self.getWinner() is None or self.__is_local:
             return
 
         user1 = accountmodels.CustomUser.objects.get(username=self.__p1.getName())

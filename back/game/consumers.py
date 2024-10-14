@@ -118,6 +118,8 @@ class GameConsumer(AsyncJsonWebsocketConsumer, Logger):
                 await self.getGames()
             case "join_queue":
                 await self.join_queue(data)
+            case "create_local":
+                await self.create_local()
             case "update_player":
                 await self.updatePlayer(data)
 
@@ -147,6 +149,25 @@ class GameConsumer(AsyncJsonWebsocketConsumer, Logger):
 
         self.log("disconnected")
         await GameConsumer.onUserChange()
+
+    async def create_local(self):
+        if self.isInGame():
+            return
+
+        try:
+            from game.gameutils.GameManager import GameManager
+            manager = GameManager.getInstance()
+
+            self.info(f"Creating local game")
+            game = await manager.createGame(self.__interface, isLocal=True)
+            self.__interface.current_game = game
+
+            p2 = game.getP2()
+            game.join(p2)
+            game.start()
+
+        except Exception as e:
+            self.error(f"{e.__str__()}")
 
     def isInGame(self) -> bool:
         """Check if the user is in a game"""
@@ -219,13 +240,20 @@ class GameConsumer(AsyncJsonWebsocketConsumer, Logger):
             return
 
         try:
+            game = self.__interface.current_game
             movement = data["data"]["movement"]
+            p2movement = data['data']['p2movement'] if game.is_local_game() else None
+
             self.__interface.setMovement(movement)
+            if game.is_local_game():
+                game.getP2().setMovement(p2movement)
+
         except KeyError as error:
             response = GameConsumerResponse(method="update_player", status=False,
                                             reason=f"{Response.INVALIDREQUEST}: {error}")
             await self.send_json(response.toJSON())
             return
+
         except ValueError as error:
             response = GameConsumerResponse(method="update_player", status=False,
                                             reason=f"{Response.INVALIDMOVEMENT}: {error}")
