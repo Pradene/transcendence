@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import {CSS2DRenderer, CSS2DObject} from 'three/examples/jsm/renderers/CSS2DRenderer.js'
+import { Router } from "../utils/Router.js"
 
 import { Player } from "./Player.js"
 import { Ball } from "./Ball.js"
@@ -99,6 +100,7 @@ export class Pong {
             this.player.remove()
             this.opponent.remove()
             this.platform.remove()
+			this.displayResult(data)
         }
     }
     
@@ -119,6 +121,7 @@ export class Pong {
     }
 
     displayPlayersName(data) {
+		console.log('big', data)
         const player = data.player
         const opponent = data.opponent
 
@@ -128,4 +131,38 @@ export class Pong {
         const opponentName = document.querySelector('.scores .opponent .username')
         opponentName.textContent = opponent
     }
+
+	displayResult(data) {
+		console.log(data)
+		const result = document.getElementById('result')
+		const player = data.player
+		const opponent = data.opponent
+		const playerName = document.querySelector('.scores .player .username').textContent
+		console.log("player", player)
+		console.log("opponent", opponent)
+		const wol = document.getElementById('wol')
+		const resmsg = document.getElementById('resmsg')
+		if (player.score > opponent.score)
+		{
+			wol.textContent = 'You Won !'
+			resmsg.textContent = `Congratulation ${playerName}`
+			const firework1 = document.getElementById('firework1')
+			const firework2 = document.getElementById('firework2')
+			const firework3 = document.getElementById('firework3')
+			firework1.removeAttribute('hidden')
+			firework2.removeAttribute('hidden')
+			firework3.removeAttribute('hidden')
+		} else {
+			wol.textContent = 'You Lose ...'
+			resmsg.textContent = `Don't give up ${playerName}, you'll do better next time, maybe...`
+		}
+		const button = document.getElementById('leaveBut')
+		button.addEventListener('click', (e) => this.leaveGame(e))
+		result.removeAttribute('hidden')
+	}
+
+	async leaveGame(event) {
+		const router = Router.get()
+        await router.navigate("/")
+	}
 }

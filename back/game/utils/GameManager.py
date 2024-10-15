@@ -116,7 +116,7 @@ class GameManager:
     async def check_wall_collisions(self, start, end):
         # Check collision with left wall
         if line_intersects_line(start, end, Vector2(-400, 300), Vector2(-400, -300)):
-            player = self.get_player_by_x_position(-400 + 20)
+            player = self.get_player_by_x_position(400 - 20)
             self.players[player.id].score += 1
 
             if await self.check_game_finished():
@@ -127,7 +127,7 @@ class GameManager:
 
         # Check collision with right wall
         if line_intersects_line(start, end, Vector2(400, 300), Vector2(400, -300)):
-            player = self.get_player_by_x_position(400 - 20)
+            player = self.get_player_by_x_position(-400 + 20)
             self.players[player.id].score += 1
 
             if await self.check_game_finished():
