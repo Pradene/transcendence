@@ -1,24 +1,9 @@
 .gameview {
 
-  .players, .winner {
-    text-align: center;
-  }
-
-  .game-not-found {
-    visibility: hidden;
-  }
-
-  .stat {
-    margin-top: 20px;
-
-    div {
-      display: flex;
-      flex-direction: row;
-    }
-
-    .username {
-      flex-grow: 1;
-    }
+  .game-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
 }
 

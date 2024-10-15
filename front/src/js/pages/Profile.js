@@ -80,8 +80,14 @@ export class Profile extends TemplateComponent {
 
             const container = document.getElementById("games-history")
             games.forEach(game => {
-                const element = this.displayGame(game)
-                container.appendChild(element)
+                if (game.isTournament) {
+                    const element = this.displayTournament(game);
+                    container.appendChild(element)
+                } else {
+                    const element = document.createElement('game-min')
+                    element.setAttribute('gameid', game.id)
+                    container.appendChild(element)
+                }
             })
             
         } catch (e) {
@@ -100,14 +106,15 @@ export class Profile extends TemplateComponent {
             document.location = "/game/" + game.id
         })
 
-        const player = document.createElement('div')
-        player.classList.add('player')
-        const playerImgContainer = document.createElement('div')
-        playerImgContainer.classList.add('profile-picture')
-        const playerImg = document.createElement('img')
-        playerImg.src = game.player.picture
-        const playerUsername = document.createElement('p')
-        playerUsername.textContent = game.player.username
+        const player = document.createElement('user-profile')
+        player.setAttribute('playerid', game.player.id)
+        // player.classList.add('player')
+        // const playerImgContainer = document.createElement('div')
+        // playerImgContainer.classList.add('profile-picture')
+        // const playerImg = document.createElement('img')
+        // playerImg.src = game.player.picture
+        // const playerUsername = document.createElement('p')
+        // playerUsername.textContent = game.player.username
         
         const opponent = document.createElement('div')
         opponent.classList.add('player', 'end')
@@ -121,9 +128,9 @@ export class Profile extends TemplateComponent {
         const score = document.createElement('div')
         score.textContent = `${game.player_score} vs ${game.opponent_score}`
 
-        playerImgContainer.appendChild(playerImg)
-        player.appendChild(playerImgContainer)
-        player.appendChild(playerUsername)
+        // playerImgContainer.appendChild(playerImg)
+        // player.appendChild(playerImgContainer)
+        // player.appendChild(playerUsername)
 
         opponent.appendChild(opponentUsername)
         opponentImgContainer.appendChild(opponentImg)

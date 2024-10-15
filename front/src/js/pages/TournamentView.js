@@ -18,19 +18,12 @@ export class TournamentView extends TemplateComponent {
 
         const header = document.querySelector("h1.players")
         const winnerelement = document.querySelector("h2.winner")
-        const games = document.querySelectorAll(".game-list .game")
+        const gamelist = document.querySelector(".game-list")
 
-        games.forEach((game, index) => {
-            const user1 = game.querySelector(".user1")
-            const user2 = game.querySelector(".user2")
-            const user1score = game.querySelector(".user1-score")
-            const user2score = game.querySelector(".user2-score")
-            const data = gameinfo.data[index]
-
-            user1.textContent = data[0][0]
-            user2.textContent = data[1][0]
-            user1score.textContent = data[0][1]
-            user2score.textContent = data[1][1]
+        gameinfo.data.forEach((game) => {
+            const element = document.createElement("game-min")
+            element.setAttribute("gameid", game.id)
+            gamelist.appendChild(element)
         })
     }
 

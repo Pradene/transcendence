@@ -1,0 +1,11 @@
+game-min {
+  display: flex;
+  flex-direction: row;
+
+  align-items: center;
+  text-align: center;
+
+  > * {
+    flex-grow: 1;
+  }
+}

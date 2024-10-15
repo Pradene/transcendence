@@ -17,8 +17,9 @@ import { TournamentView } from "./pages/TournamentView";
 import { GameView } from "./pages/GameView.js"
 import "../js/components/Nav.js"
 import "../js/components/LogoutButton.js"
-
+import "../js/components/UserProfile.js"
 import "../js/components/FriendButton.js"
+import "../js/components/GameMin.js"
 import "../css/style.scss"
 
 document.addEventListener("DOMContentLoaded", async () => {

@@ -52,14 +52,7 @@ def gameStats(request):
 def gameInfo(request, gameid):
     try:
         game = GameModel.objects.get(id=gameid)
-        data = {
-            'winner': game.winner.username,
-            'data': [
-                [game.user1.username, game.user1_score],
-                [game.user2.username, game.user2_score]
-            ],
-            'exists': True
-        }
+        data = game.toJSON(request.user)
 
         return JsonResponse(data, safe=False, status=200)
 
@@ -73,9 +66,9 @@ def tournamentInfo(request, tournamentid):
         data = {
             'winner': tournament.winner.username,
             'data': [
-                [[tournament.game1.user1.username, tournament.game1.user1_score], [tournament.game1.user2.username, tournament.game1.user2_score]],
-                [[tournament.game2.user1.username, tournament.game2.user1_score], [tournament.game2.user2.username, tournament.game2.user2_score]],
-                [[tournament.game3.user1.username, tournament.game3.user1_score], [tournament.game3.user2.username, tournament.game3.user2_score]],
+                tournament.game1.toJSON(request.user),
+                tournament.game2.toJSON(request.user),
+                tournament.game3.toJSON(request.user)
             ],
             'exists': True
         }
