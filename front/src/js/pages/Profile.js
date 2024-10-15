@@ -80,14 +80,11 @@ export class Profile extends TemplateComponent {
 
             const container = document.getElementById("games-history")
             games.forEach(game => {
-                if (game.isTournament) {
-                    const element = this.displayTournament(game);
-                    container.appendChild(element)
-                } else {
-                    const element = document.createElement('game-min')
-                    element.setAttribute('gameid', game.id)
-                    container.appendChild(element)
-                }
+                const element = document.createElement('game-min')
+                element.setAttribute('gameid', game.id)
+                if (game.isTournament)
+                    element.classList.add("tournament")
+                container.appendChild(element)
             })
             
         } catch (e) {

@@ -64,7 +64,8 @@ def tournamentInfo(request, tournamentid):
     try:
         tournament = TournamentModel.objects.get(id=tournamentid)
         data = {
-            'winner': tournament.winner.username,
+            'id': tournament.id,
+            'winner': tournament.winner.toJSON(),
             'data': [
                 tournament.game1.toJSON(request.user),
                 tournament.game2.toJSON(request.user),
