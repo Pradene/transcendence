@@ -1,0 +1,37 @@
+.gameview {
+
+  .game-not-found {
+    visibility: hidden;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+
+    > user-profile {
+      padding: 20px;
+    }
+
+    .game-list {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
+  &.not-found {
+    .game-not-found {
+      visibility: visible;
+    }
+
+    .stat {
+      display: none;
+    }
+
+    .players {
+      display: none;
+    }
+  }
+}

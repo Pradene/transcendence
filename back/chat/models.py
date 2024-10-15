@@ -12,6 +12,7 @@ class ChatRoom(models.Model):
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="rooms")
     
     def toJSON(self, requesting_user):
+        logging.info(requesting_user.username)
 
         # Get other user (for private rooms)
         def get_name():

@@ -1,5 +1,6 @@
 import json
 import logging
+import traceback
 
 from django.views.decorators.http import require_GET, require_POST
 from django.http import JsonResponse
@@ -13,6 +14,7 @@ from .utils.elapsed_time import elapsed_time
 @jwt_required
 def roomsView(request):
     user = request.user
+    logging.info(user.username)
     if request.method == "GET":
         try:
             rooms = ChatRoom.objects.filter(users=user)
@@ -20,8 +22,9 @@ def roomsView(request):
             return JsonResponse(data, safe=False, status=200)
 
         except Exception as e:
-            logging.info(e)
-            return JsonResponse({'error': str(e)}, status=400)
+            logging.info(traceback.format_exc())
+            logging.info(str(e))
+            return JsonResponse({'error': str(e.with_traceback)}, status=400)
     
     elif request.method == "POST":
         try:
