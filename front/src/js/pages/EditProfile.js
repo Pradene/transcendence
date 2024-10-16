@@ -35,11 +35,12 @@ export class EditProfile extends TemplateComponent {
             const picture = this.getRef("picture-preview")
             const username = this.getRef("username")
             const email = this.getRef("email")
+            const is_2fa_enabled = this.getRef("is_2fa_enabled")
 
             picture.src = user.picture
             username.value = user.username
             email.value = user.email
-
+            is_2fa_enabled.checked = user.is_2fa_enabled
         } catch (e) {
             console.log(e)
             return
@@ -68,12 +69,14 @@ export class EditProfile extends TemplateComponent {
         const input = this.getRef("picture-input")
         const username = this.getRef("username")
         const email = this.getRef("email")
+        const is_2fa_enable = this.getRef("is_2fa_enabled")
 
         try {
             const body = new FormData()
 
             body.append("username", username.value)
             body.append("email", email.value)
+            body.append("is_2fa_enabled", is_2fa_enable.checked)
 
             const file = input.files[0]
             if (file)

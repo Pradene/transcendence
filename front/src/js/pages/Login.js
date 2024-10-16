@@ -124,8 +124,10 @@ export class Login extends TemplateComponent {
             })
 
             const router = Router.get()
-            router.navigate("/verify-otp/")
-
+            if (data['2fa_enabled'])
+                await router.navigate("/verify-otp/")
+            else
+                await router.navigate("/")
         } catch (e) {
             username.value = ""
             password.value = ""

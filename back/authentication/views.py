@@ -71,19 +71,27 @@ def loginView(request):
 		password = data.get("password")
 		remember_me = data.get("remember_me", False)
 
+		# authentificate user
 		try:
-			user = authenticate(request, username=username, password=password)
+			user: CustomUser = authenticate(request, username=username, password=password)
 			if user is None:
 				return JsonResponse({"error": "Login failed"}, status=400)
+
+			if not user.is_2fa_enabled:
+				logging.info(f"User {user.username} did not activate 2fa, skipping")
+				request.session['pre_2fa_user_id'] = user.id
+				response = validateOTPView(request)
+				return response
 
 		except Exception as e:
 			return JsonResponse({"error": str(e)}, status=400)
 
+		# ask for 2fa
 		try:
 			request.session['pre_2fa_user_id'] = user.id
 			sendOTP(user)
 
-			return JsonResponse({}, status=200)
+			return JsonResponse({'2fa_enabled': True}, status=200)
 		
 		except Exception as token_error:
 			return JsonResponse({"error": str(token_error)}, status=400)
@@ -149,7 +157,7 @@ def validateOTPView(request):
 		code = data.get('code')
 		user = CustomUser.objects.get(id=user_id)
 
-		if OTP.validate(user, code):
+		if OTP.validate(user, code) or user.is_2fa_enabled is False:
 			login(request, user)
 
 			user.is_online = True
@@ -157,7 +165,7 @@ def validateOTPView(request):
 			
 			access_token, access_exp = create_access_token(user)
 			refresh_token, refresh_exp = create_refresh_token(user)
-			response = JsonResponse({}, status=200)
+			response = JsonResponse({"2fa_enabled": False} if not user.is_2fa_enabled else {}, status=200)
 
 			response.set_cookie(
 				"access_token", access_token,

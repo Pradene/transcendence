@@ -34,11 +34,12 @@ def userView(request, user_id=None):
 	elif request.method == "POST":
 		try:
 			# Update user profile
-			user = request.user
+			user: CustomUser = request.user
 
 			username = request.POST.get('username', user.username)
 			bio = request.POST.get('bio', user.bio)
 			email = request.POST.get('email', user.email)
+			is_2fa_enabled = request.POST.get('is_2fa_enabled', user.is_2fa_enabled)
 
 			if 'picture' in request.FILES:
 				picture = request.FILES['picture']
@@ -47,11 +48,21 @@ def userView(request, user_id=None):
 
 			if CustomUser.objects.exclude(id=user.id).filter(username=username).exists():
 				return JsonResponse({'error': 'Username is already taken'}, status=400)
-			
+
+			logging.info("Updating user profile")
+			logging.info(f"Username: {username}")
+			logging.info(f"Email: {email}")
+			logging.info(f"Bio: {bio}")
+			logging.info(f"Picture: {picture}")
+			logging.info(f"2FA: {is_2fa_enabled}")
+
 			user.username = username
 			user.email = email
 			user.bio = bio
 			user.picture = picture
+			user.is_2fa_enabled = True if is_2fa_enabled == u'true' else False
+
+			logging.info(f"2FA test: {user.is_2fa_enabled}")
 			
 			user.save()
 

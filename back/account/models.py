@@ -4,6 +4,7 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, Permis
 from django.conf import settings
 from django.db import models
 
+from account.utils.defines import TWO_FA_METHOD
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, password=None, **extra_fields):
@@ -54,6 +55,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     api_42_id = models.CharField(max_length=255, unique=True, null=True, blank=True)
 
+    is_2fa_enabled = models.BooleanField(default=False)
+    twofa_method = models.IntegerField(default=TWO_FA_METHOD.EMAIL)
+
     objects = CustomUserManager()
 
     USERNAME_FIELD = "username"
@@ -77,6 +81,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
                 data['status'] = friend_list.get_friend_status(self)
             except Exception as e:
                 data['status'] = 'none'
+
+            if requesting_user.id == self.id:
+                data['is_2fa_enabled'] = self.is_2fa_enabled
 
         return data
 
