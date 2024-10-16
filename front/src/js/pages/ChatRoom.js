@@ -1,5 +1,5 @@
 import { getURL, apiRequest, getConnectedUserID } from '../utils/utils.js'
-import { WebSocketManager } from '../utils/WebSocketManager.js'
+import { WSManager } from '../utils/WebSocketManager.js'
 import { TemplateComponent } from '../utils/TemplateComponent.js'
 import { Router } from '../utils/Router'
 import { Session } from '../utils/Session.js'
@@ -145,8 +145,7 @@ export class ChatRoom extends TemplateComponent {
         const roomID = this.roomID
 
         if (input.value != '') {
-            const ws = WebSocketManager.get()
-            await ws.sendMessage('chat', {
+            WSManager.send('chat', {
                 type: 'send_message',
                 room_id: roomID,
                 content: value
@@ -162,8 +161,7 @@ export class ChatRoom extends TemplateComponent {
 
         const roomID = this.roomID
 
-        const ws = WebSocketManager.get()
-        await ws.sendMessage('chat', {
+        WSManager.send('chat', {
             type: 'send_invitation',
             room_id: roomID,
 			user_id: Session.getUserID(),
@@ -176,8 +174,7 @@ export class ChatRoom extends TemplateComponent {
         const roomID = this.roomID
 		const invitation_id = invitation.getAttribute('data-invitation-id')
         
-        const ws = WebSocketManager.get()
-        await ws.sendMessage('chat', {
+        WSManager.send('chat', {
             type: 'accept_invitation',
             room_id: roomID,
             invitation_id: invitation_id
@@ -189,8 +186,7 @@ export class ChatRoom extends TemplateComponent {
         const roomID = this.roomID
 		const invitation_id = invitation.getAttribute('data-invitation-id')
         
-        const ws = WebSocketManager.get()
-        await ws.sendMessage('chat', {
+        WSManager.send('chat', {
 			type: 'decline_invitation',
             room_id: roomID,
 			invitation_id: invitation_id
@@ -202,8 +198,7 @@ export class ChatRoom extends TemplateComponent {
         const roomID = this.roomID
 		const invitation_id = invitation.getAttribute('data-invitation-id')
         
-        const ws = WebSocketManager.get()
-        await ws.sendMessage('chat', {
+        WSManager.send('chat', {
             type: 'cancel_invitation',
             room_id: roomID,
 			invitation_id: invitation_id
@@ -215,8 +210,7 @@ export class ChatRoom extends TemplateComponent {
         const roomID = this.roomID
         console.log(roomID)
 
-        const ws = WebSocketManager.get()
-        await ws.sendMessage('chat', {
+        WSManager.send('chat', {
             type: 'cancel_all_invitations',
             room_id: roomID,
         })

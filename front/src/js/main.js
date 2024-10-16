@@ -1,4 +1,3 @@
-import { WebSocketManager } from './utils/WebSocketManager.js'
 import { Router } from './utils/Router.js'
 import { fetchCSRFToken } from './utils/utils.js'
 
@@ -12,6 +11,7 @@ import { Search } from './pages/Search.js'
 import { Profile } from './pages/Profile.js'
 import { EditProfile } from './pages/EditProfile.js'
 import { Game } from './pages/Game.js'
+import { Tournament } from './pages/Tournament.js'
 
 import '../js/components/Nav.js'
 import '../js/components/LogoutButton.js'
@@ -24,8 +24,6 @@ import { Session } from './utils/Session.js'
 document.addEventListener('DOMContentLoaded', async () => {
 
     await fetchCSRFToken()
-
-    new WebSocketManager()
         
     const router = new Router([
         {path: '/', view: new Home(), protected: true},
@@ -39,6 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         {path: '/verify-otp/', view: new OTP(), protected: false},
         {path: '/matchmaking/', view: new MatchMaking, protected: true},
         {path: '/game/:id/', view: new Game(), protected: true},
+        {path: '/tournament/:id/', view: new Tournament(), protected: true},
     ])
 
     document.body.addEventListener('click', async (event) => {

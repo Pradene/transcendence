@@ -1,7 +1,6 @@
 import { Router } from '../utils/Router.js'
 import { TemplateComponent } from '../utils/TemplateComponent.js'
 import { apiRequest, getURL } from '../utils/utils.js'
-import { WebSocketManager } from '../utils/WebSocketManager.js'
 
 export class OTP extends TemplateComponent {
 	constructor() {

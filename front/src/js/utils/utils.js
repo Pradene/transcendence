@@ -1,5 +1,5 @@
 import { Session } from "./Session.js"
-import { WebSocketManager } from "./WebSocketManager.js"
+import { WSManager } from "./WebSocketManager.js"
 import jwt from "jsonwebtoken"
 
 export function getURL(url) {
@@ -108,13 +108,11 @@ async function refreshToken() {
 }
 
 function connectToWebsockets() {
-    const ws = WebSocketManager.get()
-
     const friendsURL = "wss://" + location.hostname + ":" + location.port + "/ws/friends/";
     const chatURL = "wss://" + location.hostname + ":" + location.port + "/ws/chat/";
     
-    ws.connect(friendsURL, "friends")
-    ws.connect(chatURL, "chat")
+    WSManager.add('friends', friendsURL)
+    WSManager.add('chat', chatURL)
 }
 
 export async function checkLogin() {

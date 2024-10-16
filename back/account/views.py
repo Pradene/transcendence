@@ -129,10 +129,8 @@ def getFriendRequestsView(request, user_id=None):
 @require_http_methods(["GET"])
 def userLevel(request, user_id):
 	try:
-		from game.models import GameModel
-
 		user = request.user
-		xp = len(GameModel.objects.filter(winner_id=user.id))
+		# xp = len(GameModel.objects.filter(winner_id=user.id))
 		level = 0
 		requiredxp = 1
 

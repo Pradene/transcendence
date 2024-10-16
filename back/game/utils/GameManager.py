@@ -7,7 +7,6 @@ from channels.db import database_sync_to_async
 from typing import List, Dict, Union, Callable
 
 from game.utils.Ball import Ball
-from game.utils.Tournament import Tournament
 from game.utils.Player import Player
 from game.utils.defines import *
 from game.utils.Vector import Vector2
@@ -22,10 +21,12 @@ class GameManager:
     def __init__(self, game, users):
         self.game = game
         self.users = users
-        self.players = self.initialize_players()
         self.ball = Ball()
+        self.players = {}
         self.observers = []
         self.countdown = COUNTDOWN
+
+        self.initialize_players()
 
     def initialize_players(self):
         positions = {
@@ -33,16 +34,13 @@ class GameManager:
             1: 400 - 20
         }
 
-        players = {}
         for i, user in enumerate(self.users):
             player = Player(
                 id=user.id,
                 name=user.username,
                 position=Vector2(positions[i], 0)
             )
-            players[user.id] = player
-        
-        return players
+            self.players[user.id] = player
 
 
     def add_observer(self, observer):
@@ -146,13 +144,25 @@ class GameManager:
         return None
 
     async def check_game_finished(self):
+        finished = False
         for player in self.players.values():
             if player.score >= POINTS_TO_WIN:
                 # Set the game status to finished and save the result to the database
-                self.game.status = 'finished'
-                await database_sync_to_async(self.game.save)()
+                finished =  True
+
+        if finished:
+            for user in self.users:
+                player = self.players.get(user.id)
+                if player:
+                    await database_sync_to_async(
+                        Score.objects.create
+                    )(game=self.game, player=user, score=player.score)
+
+                else:
+                    logging.info(f'No player found for user ID {user.id}')
                 
-                return True
+            await database_sync_to_async(self.game.set_winner)()
+            return True
         
         return False
 

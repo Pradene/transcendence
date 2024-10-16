@@ -1,2 +1,7 @@
 - room creation real time response
 - messages, friends pagination
+
+- add spectator
+    - remove check is in game when connecting
+    - add connected check if the user is part of players
+    - when receiving message check user is inside the game (maybe done ?)

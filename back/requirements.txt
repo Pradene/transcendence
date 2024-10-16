@@ -1,9 +1,10 @@
 Django==5.0.6
+django-cors-headers==4.4.0
+django-background-tasks==1.2.8
 psycopg2==2.9.9
 daphne==4.1.2
 channels==4.1.0
 Pillow==10.4.0
-django-cors-headers==4.4.0
 pyjwt==2.8.0
 pyotp==2.9.0
 requests_oauthlib==2.0.0

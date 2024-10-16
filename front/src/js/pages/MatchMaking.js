@@ -30,7 +30,7 @@ export class MatchMaking extends TemplateComponent {
         this.socket.onopen = () => {
             console.log('Connected to matchmaking WebSocket')
 
-            this.socket.send(JSON.stringify({type: 'join_queue'}))
+            this.socket.send(JSON.stringify({type: 'join_game_queue'}))
         }
 
         this.socket.onmessage = async (e) => {
@@ -55,7 +55,7 @@ export class MatchMaking extends TemplateComponent {
         const data = JSON.parse(e.data)
         console.log(data)
 
-        if (data.type == 'game_found') {
+        if (data.type === 'game_found') {
             const id = data.game_id
 
             const router = Router.get()

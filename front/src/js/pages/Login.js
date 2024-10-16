@@ -1,5 +1,4 @@
 import { TemplateComponent } from "../utils/TemplateComponent.js"
-import { WebSocketManager } from "../utils/WebSocketManager.js"
 import { getURL, apiRequest, getCSRFToken } from "../utils/utils.js"
 import { Router } from "../utils/Router.js"
 

@@ -1,7 +1,7 @@
 import { Session } from "../utils/Session.js"
 import { TemplateComponent } from "../utils/TemplateComponent.js"
 import { getURL, apiRequest, getConnectedUserID } from "../utils/utils.js"
-import { WebSocketManager } from "../utils/WebSocketManager.js"
+import { WSManager } from "../utils/WebSocketManager.js"
 
 export class Search extends TemplateComponent {
     constructor() {
@@ -209,16 +209,14 @@ export class Search extends TemplateComponent {
     }
 
     sendAcceptRequest(id) {
-        const ws = WebSocketManager.get()
-        ws.sendMessage('friends', {
+        WSManager.send('friends', {
             'type': 'friend_request_accepted',
             'user_id': id
         })
     }
 
     sendDeclineRequest(id) {
-        const ws = WebSocketManager.get()
-        ws.sendMessage('friends', {
+        WSManager.send('friends', {
             'type': 'friend_request_declined',
             'user_id': id
         })

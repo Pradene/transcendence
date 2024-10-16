@@ -15,10 +15,12 @@ from django.contrib.auth import authenticate, login, logout
 from django.core.mail import send_mail
 from django.views.decorators.http import require_http_methods
 
-from .utils.token import create_access_token, create_refresh_token, decode_token
-from .utils.sendOTP import sendOTP
-from .models import BlackListedToken, OTP
-from .utils.oauth import login42user
+from authentication.models import BlackListedToken, OTP
+
+from authentication.utils.token import create_access_token, create_refresh_token, decode_token
+from authentication.utils.oauth import login42user
+from authentication.utils.mails import send_signup_email, send_login_email
+
 from account.models import CustomUser
 from config.decorators import jwt_required
 
@@ -44,20 +46,13 @@ def signupView(request):
 			# return JsonResponse({'error': 'Password must be at least 8 characters long.'}, status=400)
 
 		try:
-			subject = 'Account creation confirmation'
-			message = f"Dear {username},\n\nYour accounthas been created.\n\nThank you!\n\nIf you're not the one that create this account please contact us at pong.point42@gmail.com"
-			from_email = settings.DEFAULT_FROM_EMAIL
-			recipient_list = [email]
-			ret = send_mail(subject, message, from_email, recipient_list)
-			logging.info(ret)
-			if ret == 0:
-				return JsonResponse({'error': 'Invalid email'}, status=400)
 			user = CustomUser.objects.create_user(email=email, username=username, password=password)
+			send_signup_email(email, username)
 			return JsonResponse({}, status=200)
 		
 		except Exception as e:
 			logging.error(f'error: {e}')
-			return JsonResponse({'error': 'Login failed'}, status=400)
+			return JsonResponse({'error': str(e)}, status=400)
 
 	except json.JSONDecodeError:
 		return JsonResponse({'error': 'Invalid JSON'}, status=400)
@@ -82,7 +77,10 @@ def loginView(request):
 
 		try:
 			request.session['pre_2fa_user_id'] = user.id
-			sendOTP(user)
+
+			code = OTP.generate(user)
+			logging.info(f'OTP code: {code}')
+			send_login_email(user.email, user.username, code)
 
 			return JsonResponse({}, status=200)
 		

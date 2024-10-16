@@ -57,7 +57,7 @@ export class Game extends TemplateComponent {
             console.log('WebSocket error: ', e)
 
             const router = Router.get()
-            await router.navigate('/')
+            await router.back()
         }
 
         this.socket.onclose = () => {

@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.db.models import Q
 
 from config.decorators import jwt_required
-from .models import GameModel
+from .models import Game
 from account.models import CustomUser
 
 
@@ -12,7 +12,7 @@ from account.models import CustomUser
 def gameHistory(request):
     try:
         user = request.user
-        games = GameModel.objects.filter(Q(user1=user) | Q(user2=user))
+        games = Game.objects.filter(players=user)
         data = [game.toJSON(user) for game in games]
         return JsonResponse(data, safe=False, status=200)
 
@@ -24,17 +24,17 @@ def gameHistory(request):
 def gameStats(request):
     try:
         user = request.user
-        games = GameModel.objects.filter(Q(user1=user) | Q(user2=user))
+        games = Game.objects.filter(players=user)
 
-        wins = games.filter(winner=user).count()
-        loses = games.exclude(winner=user).count()
+        # wins = games.filter(winner=user).count()
+        # loses = games.exclude(winner=user).count()
 
         total_games = games.count()
 
         data = {
             'total_games': total_games,
-            'wins': wins,
-            'loses': loses,
+            # 'wins': wins,
+            # 'loses': loses,
         }
 
         return JsonResponse(data, safe=False, status=200)
@@ -45,13 +45,13 @@ def gameStats(request):
 @jwt_required
 def gameInfo(request, gameid):
     try:
-        game = GameModel.objects.get(id=gameid)
+        game = Game.objects.get(id=gameid)
         data = {
-            'winner': game.winner.username,
-            'data': [
-                [game.user1.username, game.user1_score],
-                [game.user2.username, game.user2_score]
-            ],
+            # 'winner': game.winner.username,
+            # 'data': [
+                # [game.user1.username, game.user1_score],
+                # [game.user2.username, game.user2_score]
+            # ],
             'exists': True
         }
 
