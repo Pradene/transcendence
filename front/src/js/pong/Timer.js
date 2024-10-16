@@ -9,6 +9,7 @@ export class Timer {
         this.game = Pong.get()
 
         this.scene = this.game.scene
+        this.camera = this.game.camera.instance
 
         this.font = null
         this.loadFont()
@@ -34,9 +35,9 @@ export class Timer {
         // Create geometry
         const geometry = new TextGeometry(time.toString(), {
             font: this.font,
-            size: 1,
-            height: 0.2,
-            depth: 0.2,
+            size: 0.5,
+            height: 0.1,
+            depth: 0.1,
             curveSegments: 12,
             bevelEnabled: true,
             bevelThickness: 0.02,
@@ -53,10 +54,17 @@ export class Timer {
         geometry.translate(-center.x, -center.y, -center.z)
         
         this.instance = new THREE.Mesh(geometry, material)
+
+        const direction = new THREE.Vector3()
+        this.camera.getWorldDirection(direction)
+        const distance = 2
+        this.instance.position.copy(this.camera.position).add(direction.normalize().multiplyScalar(distance))
         
+        this.instance.rotation.copy(this.camera.rotation)
+
         this.scene.add(this.instance)
 
-        this.animate()
+        // this.animate()
 
         setTimeout(() => {
             this.remove()

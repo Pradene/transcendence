@@ -121,7 +121,6 @@ export class Pong {
     }
 
     displayPlayersName(data) {
-		console.log('big', data)
         const player = data.player
         const opponent = data.opponent
 
@@ -133,17 +132,17 @@ export class Pong {
     }
 
 	displayResult(data) {
-		console.log(data)
 		const result = document.getElementById('result')
-		const player = data.player
+		
+        const player = data.player
 		const opponent = data.opponent
-		const playerName = document.querySelector('.scores .player .username').textContent
-		console.log("player", player)
-		console.log("opponent", opponent)
+		
+        const playerName = document.querySelector('.scores .player .username').textContent
+
 		const wol = document.getElementById('wol')
 		const resmsg = document.getElementById('resmsg')
-		if (player.score > opponent.score)
-		{
+		
+        if (player.score > opponent.score) {
 			wol.textContent = 'You Won !'
 			resmsg.textContent = `Congratulation ${playerName}`
 			const firework1 = document.getElementById('firework1')
@@ -152,11 +151,13 @@ export class Pong {
 			firework1.removeAttribute('hidden')
 			firework2.removeAttribute('hidden')
 			firework3.removeAttribute('hidden')
-		} else {
+		
+        } else {
 			wol.textContent = 'You Lose ...'
 			resmsg.textContent = `Don't give up ${playerName}, you'll do better next time, maybe...`
 		}
-		const button = document.getElementById('leaveBut')
+		
+        const button = document.getElementById('leave-game')
 		button.addEventListener('click', (e) => this.leaveGame(e))
 		result.removeAttribute('hidden')
 	}

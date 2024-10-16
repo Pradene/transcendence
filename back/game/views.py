@@ -26,15 +26,15 @@ def gameStats(request):
         user = request.user
         games = Game.objects.filter(players=user)
 
-        # wins = games.filter(winner=user).count()
-        # loses = games.exclude(winner=user).count()
+        wins = games.filter(winner=user).count()
+        loses = games.exclude(winner=user).count()
 
         total_games = games.count()
 
         data = {
             'total_games': total_games,
-            # 'wins': wins,
-            # 'loses': loses,
+            'wins': wins,
+            'loses': loses,
         }
 
         return JsonResponse(data, safe=False, status=200)
@@ -47,10 +47,10 @@ def gameInfo(request, gameid):
     try:
         game = Game.objects.get(id=gameid)
         data = {
-            # 'winner': game.winner.username,
+            'winner': game.winner.username,
             # 'data': [
-                # [game.user1.username, game.user1_score],
-                # [game.user2.username, game.user2_score]
+            #     [game.user1.username, game.user1_score],
+            #     [game.user2.username, game.user2_score]
             # ],
             'exists': True
         }
