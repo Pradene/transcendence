@@ -14,17 +14,18 @@ export class TournamentView extends TemplateComponent {
         const user1 = gameinfo.data[0]
         const user2 = gameinfo.data[1]
 
-        console.log(gameinfo)
-        console.log(winner)
+        const container = document.querySelector(".stat")
+
         const winnerElement = document.createElement("user-profile")
         winnerElement.setAttribute("playerid", winner.id)
+        winnerElement.classList.add('winner')
 
-        const gamelist = document.querySelector(".game-list")
-        document.querySelector(".gameview .stat").insertBefore(winnerElement, gamelist)
-        gameinfo.data.forEach((game) => {
+        container.appendChild(winnerElement)
+        gameinfo.data.forEach((game, key) => {
             const element = document.createElement("game-min")
             element.setAttribute("gameid", game.id)
-            gamelist.appendChild(element)
+            element.classList.add(`g${key + 1}`)
+            container.appendChild(element)
         })
     }
 

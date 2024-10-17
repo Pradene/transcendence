@@ -1,10 +1,13 @@
+import {Router} from "../utils/Router";
+
 class UserProfile extends HTMLElement {
     constructor() {
         super();
+        this.userid = 0
     }
 
     async connectedCallback() {
-        const userid = this.getAttribute('playerid')
+        const userid = this.hasAttribute('userid') ? this.getAttribute('userid') : this.getAttribute('playerid')
         const data = await (await fetch(`/api/users/${userid}/`)).json()
 
         const playerImgContainer = document.createElement('div')
@@ -17,6 +20,12 @@ class UserProfile extends HTMLElement {
         playerImgContainer.appendChild(playerImg)
         this.appendChild(playerImgContainer)
         this.appendChild(playerUsername)
+
+        this.userid = userid
+        this.addEventListener("click", async (event) => {
+            event.stopPropagation()
+            await Router.get().navigate(`/users/${this.userid}/`)
+        })
     }
 }
 

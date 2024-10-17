@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 
 from django.db import models
@@ -17,7 +19,7 @@ class GameModel(models.Model):
 
     date = models.DateTimeField(default=timezone.now)
 
-    def toJSON(self, user):
+    def toJSON(self, user: CustomUser | None = None) -> dict:
         def get_opponent():
             if self.user1 == user:
                 return self.user2.toJSON()
@@ -46,6 +48,18 @@ class GameModel(models.Model):
                 return self.user2_score
             return None
 
+        if user is None:
+            logging.info("User is None, sending default data")
+            return {
+                'id':          self.id,
+                'user1':       self.user1.toJSON(),
+                'user2':       self.user2.toJSON(),
+                'user1_score': self.user1_score,
+                'user2_score': self.user2_score,
+                'winner':      self.winner.toJSON(),
+                'date':        self.date
+            }
+
         return {
             'id': self.id,
             'player': get_player(),
@@ -56,7 +70,6 @@ class GameModel(models.Model):
             'isTournament': False,
             'date': self.date
         }
-
 
 
 class TournamentModel(models.Model):

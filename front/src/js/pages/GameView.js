@@ -12,24 +12,35 @@ export class GameView extends TemplateComponent {
         if (gameinfo.exists === false)
             this.displayNotFound()
 
-        const winner = gameinfo.winner
-        const user1 = gameinfo.data[0]
-        const user2 = gameinfo.data[1]
+        const winner_id = gameinfo.winner.id
+        const user1_id = gameinfo.user1.id
+        const user1_score = gameinfo.user1_score
+        const user2_id = gameinfo.user2.id
+        const user2_score = gameinfo.user2_score
 
-        const header = document.querySelector("h1.players")
-        const winnerelement = document.querySelector("h2.winner")
-        const user1name = document.querySelector(".p1 .username")
-        const user1score = document.querySelector(".p1 .score")
-        const user2name = document.querySelector(".p2 .username")
-        const user2score = document.querySelector(".p2 .score")
+        const winner_element = document.createElement('user-profile')
+        winner_element.setAttribute('userid', winner_id)
+        winner_element.classList.add('winner')
 
-        header.textContent = `${user1[0]} VS ${user2[0]}`
-        winnerelement.textContent = `WINNER: ${winner}`
-        user1name.textContent = user1[0]
-        user2name.textContent = user2[0]
-        user1score.textContent = user1[1]
-        user2score.textContent = user2[1]
+        const user1_element = document.createElement('user-profile')
+        user1_element.setAttribute('userid', user1_id)
+        user1_element.classList.add('username')
 
+        const user2_element = document.createElement('user-profile')
+        user2_element.setAttribute('userid', user2_id)
+        user2_element.classList.add('username')
+
+        //todo: add score and append elements to container
+        const container = document.querySelector('.stat')
+        const table_begin = document.querySelector('.table')
+        const user1_score_element = document.querySelector('.p1 .score')
+        const user2_score_element = document.querySelector('.p2 .score')
+
+        container.insertBefore(winner_element, table_begin)
+        document.querySelector('.p1').insertBefore(user1_element, user1_score_element)
+        document.querySelector('.p2').insertBefore(user2_element, user2_score_element)
+        user1_score_element.textContent = user1_score
+        user2_score_element.textContent = user2_score
     }
 
     displayNotFound() {

@@ -52,7 +52,7 @@ def gameStats(request):
 def gameInfo(request, gameid):
     try:
         game = GameModel.objects.get(id=gameid)
-        data = game.toJSON(request.user)
+        data = game.toJSON()
 
         return JsonResponse(data, safe=False, status=200)
 
