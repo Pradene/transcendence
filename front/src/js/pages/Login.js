@@ -1,6 +1,6 @@
-import { TemplateComponent } from "../utils/TemplateComponent.js"
-import { getURL, apiRequest, getCSRFToken } from "../utils/utils.js"
-import { Router } from "../utils/Router.js"
+import { TemplateComponent } from '../utils/TemplateComponent.js'
+import { getURL, apiRequest, getCSRFToken } from '../utils/utils.js'
+import { Router } from '../utils/Router.js'
 
 
 export class Login extends TemplateComponent {
@@ -12,32 +12,32 @@ export class Login extends TemplateComponent {
     }
     
     async unmount() {
-        const form = this.getRef("form")
-        form.removeEventListener("submit", this.submitLoginRequestListener)
+        const form = this.getRef('form')
+        form.removeEventListener('submit', this.submitLoginRequestListener)
         
-        const OAuthButton = this.getRef("ft_auth")
-        OAuthButton.removeEventListener("click", this.submit42LoginRequestListener)
+        const OAuthButton = this.getRef('ft_auth')
+        OAuthButton.removeEventListener('click', this.submit42LoginRequestListener)
     }
 
     async componentDidMount() {
-        const form = this.getRef("form")
-        form.addEventListener("submit", this.submitLoginRequestListener)
+        const form = this.getRef('form')
+        form.addEventListener('submit', this.submitLoginRequestListener)
 
-        const OAuthButton = this.getRef("ft_auth")
-        OAuthButton.addEventListener("click", this.submit42LoginRequestListener)
+        const OAuthButton = this.getRef('ft_auth')
+        OAuthButton.addEventListener('click', this.submit42LoginRequestListener)
     }
 
     async submitLoginRequest(event) {
         event.preventDefault()
 
-        const username = this.getRef("username")
-        const password = this.getRef("password")
-        const rememberMe = this.getRef("remember-me")
-        const url = getURL("api/auth/login/")
+        const username = document.getElementById('username')
+        const password = document.getElementById('password')
+        const rememberMe = document.getElementById('remember-me')
+        const url = getURL('api/auth/login/')
 
         try {
             const data = await apiRequest(url, {
-                method: "POST",
+                method: 'POST',
                 body: {
                     username: username.value,
                     password: password.value,
@@ -46,14 +46,11 @@ export class Login extends TemplateComponent {
             })
 
             const router = Router.get()
-            await router.navigate("/verify-otp/")
+            await router.navigate('/verify-otp/')
 
         } catch (e) {
-            username.value = ""
-            password.value = ""
-
-            username.classList.remove("active")
-            password.classList.remove("active")
+            username.value = ''
+            password.value = ''
 
             this.displayErrors(e.message)
         }
@@ -61,14 +58,14 @@ export class Login extends TemplateComponent {
 
     async submit42LoginRequest() {
         try {
-            const url = getURL("api/auth/ft_auth/")
+            const url = getURL('api/auth/ft_auth/')
             const data = await apiRequest(url)
 
             if (data.url) {
                 window.location.href = data.url
 
             } else {
-                throw new Error("Couldn't redirect to external API")
+                throw new Error(`Couldn't redirect to external API`)
             }
 
         } catch (e) {
@@ -77,11 +74,15 @@ export class Login extends TemplateComponent {
     }
 
     displayErrors(error) {
-        const container = this.getRef("error")
-        container.classList.remove("hidden")
+        console.log('Login error:', error)
 
-        const el = document.createElement("p")
-        el.textContent = error
-        container.replaceChildren(el)
+        const fields = document.querySelectorAll('.input')
+
+        Array.from(fields).forEach(field => {
+            console.log(field)
+
+            const el = field.querySelector('label')
+            el.classList.remove('hidden')
+        })
     }
 }

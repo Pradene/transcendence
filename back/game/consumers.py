@@ -288,6 +288,8 @@ class MatchmakingConsumer(AsyncJsonWebsocketConsumer):
 
             await self.accept()
 
+            logging.info(f'type: {self.type}')
+
             if self.type == 'game':
                 await self.join_game_queue()
 
@@ -321,20 +323,24 @@ class MatchmakingConsumer(AsyncJsonWebsocketConsumer):
             logging.error('user is already in queue')
 
     async def join_tournament(self):
-        if len(self.tournament_queue) >= 2:
+        if len(self.tournament_queue) >= 4:
             tournament = await database_sync_to_async(
                 Tournament.objects.create
             )()
 
             player1 = self.tournament_queue.popleft()
             player2 = self.tournament_queue.popleft()
+            player3 = self.tournament_queue.popleft()
+            player4 = self.tournament_queue.popleft()
 
             await database_sync_to_async(
                 tournament.players.add
-            )(player1, player2)
+            )(player1, player2, player3, player4)
 
             await self.tournament_found(player1.id, tournament.id)
             await self.tournament_found(player2.id, tournament.id)
+            await self.tournament_found(player3.id, tournament.id)
+            await self.tournament_found(player4.id, tournament.id)
 
     async def tournament_found(self, user_id, tournament_id):
         channel_name = self.channels.get(user_id)

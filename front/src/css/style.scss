@@ -51,33 +51,4 @@
 @import 'gameinfo';
 @import 'registration';
 @import 'loading';
-
-.box-container {
-    margin: 0 auto;
-
-    background: var(--secondary-color);
-    border-radius: 18px;
-    padding: 12px;
-    overflow: hidden;
-}
-
-.container-xxs {
-    width: 100%;
-    max-width: 350px;
-}
-
-.form-container {
-    display: flex;
-    align-items: center;
-    background: #1e2124;
-}
-
-.form-control {
-    border: none;
-	border-radius: 12px;
-}
-
-.form-control:focus {
-    box-shadow: none;
-}
-
+@import 'text.scss';

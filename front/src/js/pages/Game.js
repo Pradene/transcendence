@@ -1,6 +1,6 @@
 import { TemplateComponent } from "../utils/TemplateComponent"
-import { Router } from "../utils/Router"
 import { Pong } from "../pong/Pong"
+import { WSManager } from "../utils/WebSocketManager"
 
 export class Game extends TemplateComponent {
     constructor() {
@@ -41,26 +41,24 @@ export class Game extends TemplateComponent {
     connectToGameWebSocket() {
         const id = this.getGameID()
         const url = `wss://${location.hostname}:${location.port}/ws/game/${id}/`
-        this.socket = new WebSocket(url)
+        
+        const socket = WSManager.add('game', url)
 
-        this.socket.onopen = () => {
+        socket.onopen = () => {
             console.log('Connected to game WebSocket')
         }
 
-        this.socket.onmessage = (e) => {
+        socket.onmessage = (e) => {
             const data = JSON.parse(e.data)
             
             this.handleWebSocketMessage(data)
         }
 
-        this.socket.onerror = async (e) => {
+        socket.onerror = async (e) => {
             console.log('WebSocket error: ', e)
-
-            const router = Router.get()
-            await router.back()
         }
 
-        this.socket.onclose = () => {
+        socket.onclose = () => {
             console.log('Game WebSocket closed')
         }
     }
@@ -74,23 +72,30 @@ export class Game extends TemplateComponent {
     }
 
     movePlayer(e) {
+        
         if (e.key === 'a') {
-            this.socket.send(JSON.stringify({
+            const message = {
                 movement: 'UP'
-            }))
+            }
+
+            WSManager.send('game', message)
             
         } else if (e.key === 'd') {
-            this.socket.send(JSON.stringify({
+            const message = {
                 movement: 'DOWN'
-            }))
+            }
+
+            WSManager.send('game', message)
         }
     }
     
     stopPlayer(e) {
         if (e.key === 'a' || e.key === 'd') {
-            this.socket.send(JSON.stringify({
+            const message = {
                 movement: 'NONE'
-            }))
+            }
+
+            WSManager.send('game', message)
         }
     }
 }

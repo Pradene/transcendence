@@ -5,12 +5,9 @@ export class WSManager {
     static pendingMessages = {}
 
     static add(type, url) {
-        console.log(type)
-
         if (this.sockets[type]) {
             console.log(`Already connected to socket type ${type}`)
-            // this.remove(type)
-            return
+            return this.sockets[type]
         }
 
         const socket = new WebSocket(url)

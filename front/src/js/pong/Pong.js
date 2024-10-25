@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import {CSS2DRenderer, CSS2DObject} from 'three/examples/jsm/renderers/CSS2DRenderer.js'
 import { Router } from "../utils/Router.js"
 
 import { Player } from "./Player.js"
@@ -10,6 +9,8 @@ import { Sizes } from './Sizes.js'
 import { Environment } from './Environment.js'
 import { Timer } from './Timer.js'
 import { Platform } from './Platform.js'
+import { Stadium } from './Stadium.js'
+import { WSManager } from '../utils/WebSocketManager.js'
 
 export class Pong {
     constructor(canvas) {
@@ -29,6 +30,7 @@ export class Pong {
         this.environment = new Environment()
         this.timer = new Timer()
         this.platform = new Platform()
+        this.stadium = new Stadium()
 
         this.player = new Player()
         this.opponent = new Player()
@@ -101,6 +103,8 @@ export class Pong {
             this.opponent.remove()
             this.platform.remove()
 			this.displayResult(data)
+
+            WSManager.remove('game')
         }
     }
     
@@ -158,12 +162,13 @@ export class Pong {
 		}
 		
         const button = document.getElementById('leave-game')
-		button.addEventListener('click', (e) => this.leaveGame(e))
+		button.addEventListener('click', () => this.leaveGame())
 		result.removeAttribute('hidden')
 	}
 
-	async leaveGame(event) {
+	async leaveGame() {
+        console.log('going back')
 		const router = Router.get()
-        await router.navigate("/")
+        await router.back()
 	}
 }
