@@ -59,10 +59,12 @@ class GameConsumer(AsyncJsonWebsocketConsumer, Logger):
         self._logClassIdentifier = self.__user.username
 
         if not self.__user.is_authenticated:
+            self.error("User is not authenticated")
             await self.close()
             return
 
         elif self.__user.username in [user.getUsername() for user in GameConsumer.USERS]:
+            self.error("User is already connected")
             await self.close()
             return
 
@@ -128,7 +130,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer, Logger):
 
         matchmaker.remove_from_queues(self.__interface)
 
-        self.log("disconnecting...")
+        self.log(f"disconnecting with code {close_code}...")
 
         # Remove from game if a game is active
         if self.isInGame():
