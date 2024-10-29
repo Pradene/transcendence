@@ -130,19 +130,11 @@ def getFriendRequestsView(request, user_id=None):
 def userLevel(request, user_id):
 	try:
 		user = request.user
-		# xp = len(GameModel.objects.filter(winner_id=user.id))
-		level = 0
-		requiredxp = 1
-
-		while xp >= requiredxp:
-			xp -= requiredxp
-			requiredxp += 1
-			level += 1
 
 		data = {
-			'level': level,
-			'xp': xp,
-			'requiredxp': requiredxp
+			'level': user.level,
+			'xp': user.xp,
+			'requiredxp': user.level * 100
 		}
 
 		return JsonResponse(data, safe=False, status=200)

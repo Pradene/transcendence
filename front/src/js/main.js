@@ -18,8 +18,6 @@ import '../js/components/LogoutButton.js'
 import '../js/components/FriendButton.js'
 
 import '../css/style.scss'
-import { MatchMaking } from './pages/MatchMaking.js'
-import { Session } from './utils/Session.js'
 
 document.addEventListener('DOMContentLoaded', async () => {
 
@@ -35,7 +33,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         {path: '/login/', view: new Login(), protected: false},
         {path: '/signup/', view: new Signup(), protected: false},
         {path: '/verify-otp/', view: new OTP(), protected: false},
-        {path: '/matchmaking/', view: new MatchMaking, protected: true},
         {path: '/game/:id/', view: new Game(), protected: true},
         {path: '/tournament/:id/', view: new Tournament(), protected: true},
     ])

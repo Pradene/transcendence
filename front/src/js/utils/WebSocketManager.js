@@ -1,5 +1,3 @@
-import { checkLogin } from "./utils.js"
-
 export class WSManager {
     static sockets = {}
     static pendingMessages = {}
@@ -13,6 +11,8 @@ export class WSManager {
         const socket = new WebSocket(url)
         this.sockets[type] = socket
 
+        this.saveConnection(type, url)
+
         return socket
     }
 
@@ -22,6 +22,8 @@ export class WSManager {
 
         delete this.sockets[type]
         socket.close()
+
+        this.removeConnection(type)
     }
 
     static get(type) {
@@ -42,7 +44,7 @@ export class WSManager {
                 
                 if (!socket) {
                     // Attempt to reconnect if the socket is not present
-                    const connections = JSON.parse(localStorage.getItem('wsConnections')) || {}
+                    const connections = JSON.parse(localStorage.getItem('sockets')) || {}
                     const url = connections[type]
                     if (url) {
                         this.connect(url, type)
@@ -56,24 +58,38 @@ export class WSManager {
     }
 
     static saveConnection(type, url) {
-        const connections = JSON.parse(localStorage.getItem('wsConnections')) || {}
-        connections[type] = url
-        localStorage.setItem('wsConnections', JSON.stringify(connections))
+        let sockets = {}
+
+        try {
+            const storedSockets = localStorage.getItem('sockets')
+            sockets = storedSockets ? JSON.parse(storedSockets) : {}
+        
+        } catch (error) {
+            console.error('Error parsing sockets from localStorage:', error)
+            sockets = {}
+        }
+
+        sockets[type] = url
+
+        try {
+            localStorage.setItem('sockets', JSON.stringify(sockets))
+        
+        } catch (error) {
+            console.error('Error saving sockets to localStorage:', error)
+        }
     }
 
     static removeConnection(type) {
-        const connections = JSON.parse(localStorage.getItem('wsConnections')) || {}
-        delete connections[type]
-        localStorage.setItem('wsConnections', '')
+        const sockets = JSON.parse(localStorage.getItem('sockets')) || {}
+        delete sockets[type]
+        localStorage.setItem('sockets', '')
     }
 
     static reconnectAllSockets() {
-        if (checkLogin()) {
-            const connections = JSON.parse(localStorage.getItem('wsConnections')) || {}
-            Object.keys(connections).forEach(type => {
-                this.connect(connections[type], type)
-            })
-        }
+        const sockets = JSON.parse(localStorage.getItem('sockets')) || {}
+        Object.keys(sockets).forEach(type => {
+            this.connect(sockets[type], type)
+        })
     }
 
     static queueMessage(type, message) {

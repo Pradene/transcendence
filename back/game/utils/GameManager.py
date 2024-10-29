@@ -14,6 +14,7 @@ from game.utils.intersections import *
 
 from chat.models import Message
 from game.models import Score
+from account.models import CustomUser
 
 TIME_TO_SLEEP: float = (1 / FPS)
 
@@ -149,6 +150,11 @@ class GameManager:
             if player.score >= POINTS_TO_WIN:
                 # Set the game status to finished and save the result to the database
                 finished =  True
+                user = await database_sync_to_async(
+                    CustomUser.objects.get
+                )(id=player.id)
+
+                await database_sync_to_async(user.add_xp)(10)
 
         if finished:
             for user in self.users:
