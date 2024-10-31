@@ -2,25 +2,29 @@ import { TemplateComponent } from "../utils/TemplateComponent.js"
 import { WebSocketManager } from "../utils/WebSocketManager.js"
 import { getURL, apiRequest, getCSRFToken } from "../utils/utils.js"
 import { Router } from "../utils/Router.js"
+import { loadTranslations } from '../components/loadTranslations.js';
 
+document.addEventListener("DOMContentLoaded", () => {
+    loadTranslations('fr');
+});
 
 export class Login extends TemplateComponent {
     constructor() {
         super()
-        
+
         this.submit42LoginRequestListener = async (e) => await this.submit42LoginRequest(e)
         this.submitLoginRequestListener = async (e) => await this.submitLoginRequest(e)
-    
+
         this.ball = undefined
     }
-    
+
     unmount() {
         const form = this.getRef("form")
         form.removeEventListener("submit", this.submitLoginRequestListener)
-        
+
         const OAuthButton = this.getRef("ft_auth")
         OAuthButton.removeEventListener("click", this.submit42LoginRequestListener)
-        
+
         this.ball.remove()
     }
 

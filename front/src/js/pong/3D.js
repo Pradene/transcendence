@@ -13,9 +13,9 @@ class ThreeD {
         // this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
         this._camera = camera;
         /* camera.position.z = 3; //position of the camera on the z axis*/
-        //camera.position.x = -4; 
+        //camera.position.x = -4;
         /* const controls = new OrbitControls(this._camera, this._renderer.domElement);
-        
+
         controls.enableDamping = true; // Smooth the movement
         controls.dampingFactor = 0.25;
         controls.screenSpacePanning = false; // Prevent panning in screen space
@@ -172,7 +172,7 @@ class ThreeD {
 			  uniform float uTime;
 			  uniform float uMaxRadius;
 			  uniform float uSpeed;
-		  
+
 			  void main() {
 				vec3 pos = position * uMaxRadius * (uTime * uSpeed);
 				gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
@@ -180,7 +180,7 @@ class ThreeD {
 			`,
             fragmentShader: `
 			  uniform float uTime;
-		  
+
 			  void main() {
 				float alpha = 1.0 - uTime;
 				gl_FragColor = vec4(1.0, 1.0, 1.0, alpha); // White color with fading alpha
@@ -311,7 +311,7 @@ class ThreeD {
             MIDDLE: THREE.MOUSE.DOLLY,
             RIGHT: THREE.MOUSE.PAN
         };
-        
+
         // For touch sensitivity
         controls.touches = {
             ONE: THREE.TOUCH.ROTATE,

@@ -2,24 +2,21 @@
 <nav-component></nav-component>
 <div class="home">
 	<div class="game-container">
-		<h4>Online game</h4>
-		<p>Play an online game versus another player,<br>
-		first player to 5 points will win the game.</p>
-		<button class="button create-game">Play</button>
+		<h4 id="online-game-title"></h4>
+		<p id ="online-game-description"></p>
+		<button id ="online-game-button" class="button create-game"></button>
 	</div>
 
 	<div class="tournament-container">
-		<h4>Online tournament</h4>
-		<p>Play in an online tournament,<br>
-		versus 3 other players.</p>
-		<button class="button create-tournament">Play</button>
+		<h4 id="tournament-title"></h4>
+		<p id="tournament-description"></p>
+		<button id="tournament-button" class="button create-tournament"></button>
 	</div>
 
 	<div class="local-container">
-		<h4>Local game</h4>
-		<p>Play a local game against a friend,<br>
-		first player use arrow key, second one use Q/D.</p>
-		<button class="button create-local">Play</button>
+		<h4 id="local-game-title"></h4>
+		<p id="local-game-description"></p>
+		<button id="local-game-button" class="button create-local"></button>
 	</div>
 </div>
 
@@ -35,6 +32,10 @@
 				<h3 class="username"></h3>
 				<h3 class="score"></h3>
 			</div>
+		</div>
+		<div id="mobile-pad" style="display: none;">
+			<div id="left-arrow" class="arrow">⬅️</div>
+			<div id="right-arrow" class="arrow">➡️</div>
 		</div>
 	</div>
 

@@ -1,0 +1,29 @@
+{
+	"_comment": "Login translation",
+
+	"login_hello": "Bonjour,",
+	"login_welcome_message": "Nous sommes heureux de vous voir",
+	"login_username_placeholder": "Nom d'utilisateur",
+	"login_password_placeholder": "Mot de passe",
+	"login_remember_me": "Se souvenir de moi",
+	"login_button": "Connexion",
+	"login_with_42": "Connexion avec 42",
+	"login_signup_message": "Pas encore de compte ? <a href='/signup/' data-link=''>S'inscrire</a>",
+	"forgot_password": "Mot de passe oublié ?",
+
+	"_comment_": "Signup translation",
+
+	"__comment_": "Home translation",
+
+	"online_game_title": "Jeu en ligne",
+	"online_game_description": "Jouez une partie en ligne contre un autre joueur,<br>le premier à gagner 5 points remporte la partie.",
+	"online_game_button": "Jouer",
+	"tournament_title": "Tournoi en ligne",
+	"tournament_description": "Participez à un tournoi en ligne,<br>contre 3 autres joueurs.",
+	"tournament_button": "Jouer",
+	"local_game_title": "Jeu local",
+	"local_game_description": "Jouez à un jeu local contre un ami,<br>le premier utilise les flèches, le deuxième utilise Q/D.",
+	"local_game_button": "Jouer",
+	"score_title": "Score:"
+
+  }

@@ -2,11 +2,13 @@ import { TemplateComponent } from "../utils/TemplateComponent.js"
 import { GameSocket } from "../pong/GameSocket.js"
 import { Pong } from "../pong/Pong.js"
 import {Router} from "../utils/Router";
+import { loadTranslations } from '../components/loadTranslations.js';
+
 
 export class Home extends TemplateComponent {
     constructor() {
         super()
-        
+
         this._gameSocket = null
     }
 

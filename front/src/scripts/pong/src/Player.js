@@ -57,8 +57,18 @@ class CurrentPlayer extends Player {
         this._movement = "NONE";
         this._boundHandlerUp = this._keyUpHandler.bind(this);
         this._boundHandlerDown = this._keyDownHandler.bind(this);
+        this._boundTouchStart = this._touchStartHandler.bind(this);
+        this._boundTouchEnd = this._touchEndHandler.bind(this);
+
+        let canvas = document.getElementById('game-canvas');
+        canvas.addEventListener("touchstart", this._boundTouchStart);
+        canvas.addEventListener("touchend", this._boundTouchEnd);
+
         window.addEventListener("keypress", this._boundHandlerDown);
         window.addEventListener("keyup", this._boundHandlerUp);
+/*
+        document.addEventListener("touchstart", this._boundTouchStart);
+        document.addEventListener("touchend", this._boundTouchEnd); */
     }
     _keyDownHandler(event) {
         if (event.key === "w")
@@ -68,6 +78,23 @@ class CurrentPlayer extends Player {
     }
     _keyUpHandler(event) {
         this.movement = "NONE";
+    }
+
+    _touchStartHandler(event) {
+        event.preventDefault();
+        this._touchStartY = event.changedTouches[0].screenY;
+        console.log("touchStart at ", this.touchStartY)
+    }
+
+    _touchEndHandler(event) {
+        event.preventDefault();
+        let touchEndY = event.changedTouches[0].screenY;
+        console.log("touchEnd at ", _touchEndY)
+        if (this._touchStartY > touchEndY) {
+            this.movement = "UP";
+        } else if (this._touchStartY < touchEndY) {
+            this.movement = "DOWN";
+        }
     }
     /**
      * Update the player's movement on the server.
@@ -95,6 +122,9 @@ class CurrentPlayer extends Player {
         clearInterval(this._intervalid);
         window.removeEventListener("keypress", this._keyDownHandler);
         window.removeEventListener("keyup", this._keyUpHandler);
+
+        document.removeEventListener("touchstart", this._boundTouchStart);
+        document.removeEventListener("touchend", this._boundTouchEnd);
     }
     _intervalid;
     _movement;

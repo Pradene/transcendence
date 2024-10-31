@@ -1,4 +1,4 @@
-<div class="min-vh-100 d-flex flex-column align-items-center justify-content-center">
+<!-- <div class="min-vh-100 d-flex flex-column align-items-center justify-content-center">
     <div class="container-xxs box-container px-4 py-4">
         <div class="mb-4">
             <h2>Hello,</h2>
@@ -20,6 +20,32 @@
         <button class="button w-100 mb-3" ref="ft_auth" id="ft_auth">Login with 42</button>
         <span class="d-flex justify-content-center">
             <p>Doesn't have account yet? <a href="/signup/" data-link="">Sign up</a></p>
+        </span>
+    </div>
+</div> -->
+
+<div class="min-vh-100 d-flex flex-column align-items-center justify-content-center">
+    <div class="container-xxs box-container px-4 py-4">
+        <div class="mb-4">
+            <h2 class="login-title"></h2>
+            <p class="login-welcome-message"></p>
+        </div>
+        <form ref="form" action="POST" class="mb-2">
+            <div ref="error" class="hidden registration-form-error"></div>
+            <input id="login_username_placeholder" class="form-control mb-3" id="username" placeholder="Username" type="text" autocomplete="off" required="True" />
+            <input id="login_password_placeholder" class="form-control mb-2" id="password" placeholder="Password" type="password" autocomplete="off"  />
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center">
+                    <input ref="remember-me" id="remember-me" type="checkbox" />
+                    <label id="login-remerber-me" for="remember-me" class="mx-1"></label>
+                </div>
+                <a id="forgot_password" href="/" class="forgot-password-link" data-link=""></a>
+            </div>
+            <button id="login-button" type="submit" class="button w-100"></button>
+        </form>
+        <button id="login_with_42" class="button w-100 mb-3" ref="ft_auth" id="ft_auth"></button>
+        <span class="d-flex justify-content-center">
+            <p id="login_signup_message" class="signup-link">Doesn't have account yet? <a href="/signup/" data-link=""></a></p>
         </span>
     </div>
 </div>

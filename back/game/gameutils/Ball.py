@@ -52,12 +52,12 @@ class Ball:
         narr = [(x, -y) for x, y in arr]
         self.__direction.reverseY()
         return narr
-    
+
     def isFinished(self) -> bool:
         """Did the current ball hit the left or right wall"""
 
         return self.__finished
-    
+
     def finishBall(self) -> None:
         """Finish the ball"""
 

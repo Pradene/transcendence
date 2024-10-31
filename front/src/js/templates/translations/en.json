@@ -1,0 +1,20 @@
+{
+	"_comment": "Login translation",
+
+
+	"_comment_": "Signup translation",
+
+	"__comment_": "Home translation",
+
+	"online_game_title": "Online Game",
+	"online_game_description": "Play an online game versus another player,<br>first player to 5 points will win the game.",
+	"online_game_button": "Play",
+	"tournament_title": "Online Tournament",
+	"tournament_description": "Play in an online tournament,<br>versus 3 other players",
+	"tournament_button": "Play",
+	"local_game_title": "local Game",
+	"local_game_description": "Play a local game against a friend,<br> first player uses arrow keys, second one uses A/D.",
+	"local_game_button": "Play",
+	"score_title": "Score:"
+
+  }
