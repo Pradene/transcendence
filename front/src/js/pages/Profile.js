@@ -1,12 +1,13 @@
 import { TemplateComponent } from "../utils/TemplateComponent.js"
 import { getURL, apiRequest, getConnectedUserID } from "../utils/utils.js"
+import { Session } from "../utils/Session.js"
 
 export class Profile extends TemplateComponent {
     constructor() {
         super()
     }
 
-    unmount() {}
+    async unmount() {}
 
     async componentDidMount() {
         await this.getUser()
@@ -29,12 +30,12 @@ export class Profile extends TemplateComponent {
             picture.src = user.picture
             username.textContent = user.username
 
-            if (id == getConnectedUserID()) {
+            if (id == Session.getUserID()) {
                 const logoutButton = document.createElement("logout-button")
                 buttonContainer.appendChild(logoutButton)
 
                 const editBtton = document.createElement("a")
-                editBtton.href = `/users/${getConnectedUserID()}/edit/`
+                editBtton.href = `/users/${Session.getUserID()}/edit/`
                 editBtton.dataset.link = ""
                 editBtton.textContent = "Edit profile"
                 editBtton.classList.add('button')

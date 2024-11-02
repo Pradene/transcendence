@@ -4,7 +4,7 @@ from django.conf import settings
 from django.db import models
 
 from account.models import CustomUser
-from game.models import GameModel
+from game.models import Game
 
 class ChatRoom(models.Model):
     picture = models.ImageField(upload_to='room_pictures/', default="room_pictures/default.png", blank=True, null=True)
@@ -75,11 +75,9 @@ class ChatRoom(models.Model):
 
     def is_in_room(self, user: CustomUser):
         return self.users.filter(id=user.id).exists()
-        # logging.info(f"[ROOM]: {user.username}:{user.id} {users[0].username}:{users[0].id} {users[1].username}:{users[1].id}")
-        # return user.id == users[0].id or user.id == users[1].id
 
     def get_active_duels_for(self, user: CustomUser):
-        duels = self.messages.filter(user=user, is_duel=True, is_duel_expired=False, is_duel_accepted=False)
+        duels = self.invitations.filter(sender=user, status="pending")
         return duels
 
     def get_users_tuple(self):
@@ -92,10 +90,6 @@ class Message(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
-    is_duel = models.BooleanField(default=False)
-    is_duel_accepted = models.BooleanField(default=False)
-    is_duel_expired = models.BooleanField(default=False)
-    duel = models.ForeignKey(GameModel, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.content
@@ -105,9 +99,21 @@ class Message(models.Model):
             'id': self.id,
             'user': self.user.username if self.user else None,
             'content': self.content,
-            'timestamp': self.timestamp.isoformat(),
-            'is_duel': self.is_duel,
-            'is_duel_accepted': self.is_duel_accepted,
-            'is_duel_expired': self.is_duel_expired
+            'timestamp': self.timestamp.isoformat()
         }
 
+class Invitation(models.Model):
+    room = models.ForeignKey(ChatRoom, related_name='invitations', on_delete=models.CASCADE)
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='invitations', on_delete=models.CASCADE)
+    status = models.CharField(choices=[
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('declined', 'Declined'),
+        ('canceled', 'Canceled'),
+        ('finished', 'Finished')
+    ], default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    game = models.ForeignKey(Game, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return f'Game invitation from {self.sender}'

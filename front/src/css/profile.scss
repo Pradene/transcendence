@@ -19,27 +19,24 @@
     }
   }
 
-  .information {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+    .information {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        width: 100%;
 
-    .username {
-      font-size: 18px;
-      margin-bottom: 12px;
-    }
-
-    .level {
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .progress-bar {
-      height: 12px;
-      width: 100%;
-      border-radius: 12px;
-      padding: 0px -2px;
-      color: var(--fifth-color);
+        .level {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .progress-bar {
+            height: 12px;
+            width: 100%;
+            border-radius: 12px;
+            padding: 0px -2px;
+            color: var(--fifth-color);
 
       &::-webkit-progress-value {
         background: var(--fifth-color);
@@ -119,4 +116,18 @@
       margin: 0px 6px;
     }
   }
+}
+
+@media (max-width: 768px) {
+    .profile {
+        flex-direction: column;
+
+        .picture {
+            margin: 0 0 24px 0;
+        }
+
+        .information {
+            flex: 1 1 auto;
+        }
+    }
 }

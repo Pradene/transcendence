@@ -1,273 +1,174 @@
 import * as THREE from 'three'
-import {CSS2DRenderer, CSS2DObject} from 'three/examples/jsm/renderers/CSS2DRenderer.js'
-import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'
+import { Router } from "../utils/Router.js"
 
-import { CurrentPlayer, Player } from "./Player.js"
+import { Player } from "./Player.js"
 import { Ball } from "./Ball.js"
-import { Position } from "./Utils.js"
-import { GameSocket } from "./GameSocket.js"
-import { CANVAS_HEIGHT, CANVAS_WIDTH, THREE_RATIO } from "./Defines.js"
-
-let font = null
-const loader = new FontLoader()
-loader.load("/src/fonts/Epilogue_Bold.json", (f) => font = f)
+import { ThreeCamera } from './Camera.js'
+import { ThreeRenderer } from './Renderer.js'
+import { Sizes } from './Sizes.js'
+import { Environment } from './Environment.js'
+import { Timer } from './Timer.js'
+import { Platform } from './Platform.js'
+import { Stadium } from './Stadium.js'
+import { WSManager } from '../utils/WebSocketManager.js'
 
 export class Pong {
     constructor(canvas) {
-		console.log(canvas)
-        this._player = undefined
-        this._opponent = undefined
-        this._ball = undefined
-        this._timerMesh = undefined
-        this._psScoreMesh = undefined
-        this._osScoreMesh = undefined
 
+        if (Pong.instance) {
+            return Pong.instance
+        }
 
-        
-        //set the canvas properties
-        this._context = canvas.getContext("webgl2")
-        this._canvas = canvas
-        this._canvas.classList.add("active")
-        this._canvas.width = window.screen.width
-        this._canvas.height = window.screen.height
+        Pong.instance = this
 
-        this._renderer = new THREE.WebGLRenderer({ antialias: true, canvas: this._canvas })
-        this._renderer.setPixelRatio(window.devicePixelRatio)
+        canvas.getContext('webgl2')
+        this.canvas = canvas
+        this.sizes = new Sizes()
+        this.scene = new THREE.Scene()
+        this.camera = new ThreeCamera()
+        this.renderer = new ThreeRenderer()
+        this.environment = new Environment()
+        this.timer = new Timer()
+        this.platform = new Platform()
+        this.stadium = new Stadium()
 
-        this._scene = new THREE.Scene()
-        
-        const fov = 60
-        const near = 0.1
-        const far = 100
-        const aspect = window.screen.width / window.screen.height
-        this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
-        this._camera.position.set(0, 4, 10)
-        this._camera.lookAt(0, 0, 0)
+        this.player = new Player()
+        this.opponent = new Player()
 
-		this._dLight = new THREE.DirectionalLight(0xFFFFFF, 3);
-        this._dLight.position.set(0, 4, 6);
-		this._sLight = new THREE.DirectionalLight(0xFFFFFF, 1.1);
-        this._sLight.position.set(3, -2, -3);
-        this._aLight = new THREE.AmbientLight(0xFFFFFF, 0.6);
-        this._scene.add(this._aLight, this._dLight, this._sLight)
-        
-        this._running = false
+        this.ball = new Ball()
 
-		window.addEventListener('keydown', (event) => {
-            switch (event.key) {
-                case 'p':
-                    this._camera.position.set(0, 4, 10);
-                    this._camera.lookAt(0, 0, 0);
-                    this._camera.up.set(0, 1, 0);
-                    break;
-                case 'o':
-                    this._camera.position.set(0, 4, -10);
-                    this._camera.lookAt(0, 0, 0);
-                    this._camera.up.set(0, 1, 0);
-                    break;
-                case 'u':
-                    this._camera.position.set(0, 10, 0);
-                    this._camera.lookAt(0, 0, 0);
-                    break;
-                default:
-                    break;
-            }
-        });
+        this.sizes.on('resize', () => this.resize())
+
+        this.endGame = () => this.end()
+        window.addEventListener('beforeunload', this.endGame)
+    
+        this.inputHandler = (e) => this.changeCameraPosition(e)
+        window.addEventListener('keydown', this.inputHandler)
+
+        this.requestId = null
+        this.display()
     }
 
-    /**
-     * Display the game
-     */
+    static get() {
+        return Pong.instance || new Pong()
+    }
+
+    changeCameraPosition(e) {
+        switch (e.key) {
+            case 'p':
+                this.camera.setPosition(new THREE.Vector3(0, 4, 10))
+                break
+            case 'o':
+                this.camera.setPosition(new THREE.Vector3(0, 4, -10))
+                break
+            case 'u':
+                this.camera.setPosition(new THREE.Vector3(0, 10, 0))
+                break
+            default:
+                break
+        }
+    }
+
+    end() {
+        Pong.instance = null
+
+        if (this.requestId) {
+            window.cancelAnimationFrame(this.requestId)
+            this.requestId = null
+        }
+    }
+
+    resize() {
+        this.camera.resize()
+        this.renderer.resize()
+    }
+
+    update(data) {
+        if (data.type === 'player_info') {
+            this.displayPlayersName(data)
+
+        } else if (data && data.status === 'waiting') {
+            this.timer.create(data.timer)
+            
+        } else if (data && data.status === 'started') {
+            this.player.setPosition(data.player.position.x, data.player.position.y)
+            this.opponent.setPosition(data.opponent.position.x, data.opponent.position.y)
+            this.ball.setPosition(data.ball.position.x, data.ball.position.y)
+            this.displayScore(data)
+            
+        } else if (data && data.status === 'finished') {
+            this.displayScore(data)
+            this.ball.remove()
+            this.player.remove()
+            this.opponent.remove()
+            this.platform.remove()
+			this.displayResult(data)
+
+            WSManager.remove('game')
+        }
+    }
+    
     display() {
-        this._player?.display(this._scene)
-        this._opponent?.display(this._scene)
-        
-        this._ball.display(this._scene)
+        this.renderer.update()
+        this.requestId = window.requestAnimationFrame(this.display.bind(this))
     }
 
-	displayScore()
-	{
+    displayScore(data) {
+        const playerScore = data.player.score
+        const opponentScore = data.opponent.score
+
+        const playerScoreElement = document.querySelector('.scores .player .score')
+        playerScoreElement.textContent = playerScore
+        
+        const opponentScoreElement = document.querySelector('.scores .opponent .score')
+        opponentScoreElement.textContent = opponentScore
+    }
+
+    displayPlayersName(data) {
+        const player = data.player
+        const opponent = data.opponent
+
+        const playerName = document.querySelector('.scores .player .username')
+        playerName.textContent = player
+
+        const opponentName = document.querySelector('.scores .opponent .username')
+        opponentName.textContent = opponent
+    }
+
+	displayResult(data) {
+		const result = document.getElementById('result')
 		
+        const player = data.player
+		const opponent = data.opponent
+		
+        const playerName = document.querySelector('.scores .player .username').textContent
+
+		const wol = document.getElementById('wol')
+		const resmsg = document.getElementById('resmsg')
+		
+        if (player.score > opponent.score) {
+			wol.textContent = 'You Won !'
+			resmsg.textContent = `Congratulation ${playerName}`
+			const firework1 = document.getElementById('firework1')
+			const firework2 = document.getElementById('firework2')
+			const firework3 = document.getElementById('firework3')
+			firework1.removeAttribute('hidden')
+			firework2.removeAttribute('hidden')
+			firework3.removeAttribute('hidden')
+		
+        } else {
+			wol.textContent = 'You Lose ...'
+			resmsg.textContent = `Don't give up ${playerName}, you'll do better next time, maybe...`
+		}
+		
+        const button = document.getElementById('leave-game')
+		button.addEventListener('click', () => this.leaveGame())
+		result.removeAttribute('hidden')
 	}
 
-    /**
-     * Display timer before game start
-     * @param {*} timer 
-     */
-    displayTimer(timer) {
-        const material = new THREE.MeshPhongMaterial({color: 0xDAFFFF})
-        
-        this.removeTimer()
-        
-        // Create geometry
-        const geometry = new TextGeometry(timer, {
-            font: font,
-            size: 1,
-            height: 0.2,
-            depth: 0.2,
-            curveSegments: 12,
-            bevelEnabled: true,
-            bevelThickness: 0.02,
-            bevelSize: 0.05,
-            bevelOffset: 0,
-            bevelSegments: 5
-        })
-
-        // Center the geometry
-        geometry.computeBoundingBox()
-        const boundingBox = geometry.boundingBox
-        const center = new THREE.Vector3()
-        boundingBox.getCenter(center)
-        geometry.translate(-center.x, center.y, -center.z)
-        
-        this._timerMesh = new THREE.Mesh(geometry, material)
-        
-        this._scene.add(this._timerMesh)
-    }
-
-    /**
-     * Remove timer from the canvas
-     */
-    removeTimer() {
-        if (this._timerMesh) {
-            this._scene.remove(this._timerMesh)
-            this._timerMesh.geometry.dispose()
-            this._timerMesh.material.dispose()
-            this._timerMesh = null
-        }
-    }
-
-    /**
-     * Stop the game
-     */
-    stop() {
-        document.querySelector('.game .scores').style.visibility = "hidden"
-
-        const gs = GameSocket.getSync()
-        gs.removeGame()
-
-        this._player?.stop()
-        this._renderer.dispose()
-
-        this._scene = null
-
-        this._canvas.classList.remove("active")
-		const score = document.getElementById("score")
-
-		score.style.visibility = 'hidden'
-    }
-
-    createGame(response) {
-		const p1 = response.data.current_player.name
-		const p2 = response.data.opponent.name
-		this._player = new CurrentPlayer(p1, new Position(0, 0))
-        this._opponent = new Player(p2, new Position(0, 0))
-        this._ball = new Ball(new Position(0, 0))
-
-		const fieldWidth = CANVAS_HEIGHT / THREE_RATIO + 0.5
-        const fieldHeight = 0.2
-        const fieldDepth = CANVAS_WIDTH / THREE_RATIO + 0.5
-		console.log(`WIDTH : ${fieldWidth} \n DEPTH : ${fieldDepth} \n`)
-        
-        const width = CANVAS_HEIGHT / THREE_RATIO + 0.5
-        const height = 0.2
-        const depth = CANVAS_WIDTH / THREE_RATIO + 0.5
-        
-        const geometry = new THREE.BoxGeometry(width, height, depth)
-        geometry.translate(0, -0.2, 0)
-        const material = new THREE.MeshPhongMaterial({ color: 0x576066, transparent: true, opacity: 0.3 })
-		const wallMaterial = new THREE.MeshPhongMaterial({ color: 0xA3BAC3, transparent: false, opacity: 0.5 });
-
-		const topBotWidth = 6.7;
-        const topBotHeight = 0.2;
-        const topBotDepth = 0.2;
-        const topBotGeometry = new THREE.BoxGeometry(topBotWidth, topBotHeight, topBotDepth);
-        const leftRightWidth = 0.2;
-        const leftRightHeight = 0.2;
-        const leftRightDepth = 8.5;
-        const leftRightGeometry = new THREE.BoxGeometry(leftRightWidth, leftRightHeight, leftRightDepth);
-
-		
-
-		const top = new THREE.Mesh(topBotGeometry, wallMaterial);
-		top.position.set(0, 0, -4.25)
-        const left = new THREE.Mesh(leftRightGeometry, wallMaterial);
-        const bot = new THREE.Mesh(topBotGeometry, wallMaterial);
-        const right = new THREE.Mesh(leftRightGeometry, wallMaterial);
-
-		
-		bot.position.set(0, 0, 4.25)
-		left.position.set(-3.25, 0, 0)
-		right.position.set(3.25, 0, 0)
-
-        this._platform = new THREE.Mesh(geometry, material)
-        this._scene.add(this._platform, top, bot, left, right)
-		const score = document.getElementById("score")
-
-		score.style.visibility = 'visible'
-    }
-
-    /**
-     * Update the game data and display it.
-     * @param response
-     */
-    update(response) {
-        // Initialize player
-
-        if (!this._player) {
-            this.createGame(response)
-        }
-
-        if (response.data.status === "finished") {
-            console.log("Game is finished", response)
-            this.stop()
-            return
-        }
-        
-        this._player?.setPositionFromArray(response.data.current_player.position)
-        this._opponent?.setPositionFromArray(response.data.opponent.position)
-        this._player?.setScore(response.data.current_player.score)
-        this._opponent?.setScore(response.data.opponent.score)
-        this._ball?.setPositionFromArray(response.data.ball)
-
-        this._running = response.data.status === "running"
-        const timer = response.data.timer
-
-        // now redisplay the game
-
-        if (this._scene === null) {
-            console.log("Scene is null")
-            return
-        } else if (typeof timer === "undefined" && this._running) {
-            this.removeTimer()
-            this.display()
-        } else if (timer) {
-            this.displayTimer(timer.toString())
-            this._player.name = response.data.current_player.username
-            this._opponent.name = response.data.opponent.username
-        }
-
-        // console.log("rendering")
-        this._renderer.render(this._scene, this._camera)
-    }
-
-    get canvas() {
-        return this._canvas
-    }
-
-    get running() {
-        return this._running
-    }
-
-    set running(status) {
-        if (!this.running && status) {
-            this._running = true
-        
-        } else if (this.running && !status) {
-            this.stop().then(() => {
-                this._running = false
-            })
-        }
-    }
+	async leaveGame() {
+        console.log('going back')
+		const router = Router.get()
+        await router.back()
+	}
 }

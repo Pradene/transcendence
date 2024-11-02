@@ -1,50 +1,65 @@
-import { TemplateComponent } from "../utils/TemplateComponent.js"
-import { GameSocket } from "../pong/GameSocket.js"
-import { Pong } from "../pong/Pong.js"
-import {Router} from "../utils/Router";
+import { TemplateComponent } from '../utils/TemplateComponent.js'
+import {Router} from '../utils/Router.js'
+import { WSManager } from '../utils/WebSocketManager.js'
 
 export class Home extends TemplateComponent {
     constructor() {
         super()
-        
-        this._gameSocket = null
     }
 
-    unmount() {
-        this._gameSocket?.close()
-        console.log("Unmouting home page")
+    async unmount() {
+        WSManager.remove('matchmaking')
     }
 
     async componentDidMount() {
-        this._gameSocket = await GameSocket.get()
-        window.addEventListener("joinQueue", (e) => this.showQueueAnimation())
-        window.addEventListener("leaveQueue", (e) => this.hideQueueAnimation())
+        const gameButton = document.querySelector('button.create-game')
+        const tournamentButton = document.querySelector('button.create-tournament')
+        const cancelButton = document.querySelector('#cancel-matchmaking')
 
-        const createTournamentButton = document.querySelector("button.create-tournament")
-        createTournamentButton.addEventListener("click", () => {
-            this._gameSocket.requestJoinTournamentQueue()
-        })
+        tournamentButton.addEventListener('click', async () => this.matchmaking('tournament'))
 
-        const createGameButton = document.querySelector("button.create-game");
-        createGameButton.addEventListener("click", () => {
-            this._gameSocket.requestJoinGameQueue()
-        })
+        gameButton.addEventListener('click', async () => this.matchmaking('game'))
 
-        const createLocalButton = document.querySelector("button.create-local")
-        createLocalButton.addEventListener("click", () => {
-            this._gameSocket.requestLocalGame()
-        })
+        cancelButton.addEventListener('click', () => this.cancelMatchmaking())
     }
 
-    // async handleGameSocketMessage(response) {
-    //
-    // }
+    matchmaking(type) {
+        if (!type) return
 
-    showQueueAnimation() {
-        document.querySelector("div.game-container-header div.waiting-for-players").style.visibility = "visible";
+        this.showLoadingScreen()
+
+        const url = `wss://${location.hostname}:${location.port}/ws/matchmaking/${type}/`
+        const socket = WSManager.add('matchmaking', url)
+
+        socket.onmessage = async (e) => { await this.handleMessage(e) }
     }
 
-    hideQueueAnimation() {
-        document.querySelector("div.game-container-header div.waiting-for-players").style.visibility = "hidden";
+    cancelMatchmaking() {
+        WSManager.remove('matchmaking')
+        this.removeLoadingScreen()
+    }
+
+    async handleMessage(e) {
+        const data = JSON.parse(e.data)
+        const router = Router.get()
+        
+        if (data.type == 'game_found') {
+            const id = data.game_id
+            await router.navigate(`/game/${id}/`)
+            
+        } else if (data.type === 'tournament_found') {
+            const id = data.tournament_id
+            await router.navigate(`/tournament/${id}/`)
+        }
+    }
+
+    showLoadingScreen() {
+        const loadingScreen = document.querySelector('.loading-screen')
+        loadingScreen.classList.add('active')
+    }
+
+    removeLoadingScreen() {
+        const loadingScreen = document.querySelector('.loading-screen')
+        loadingScreen.classList.remove('active')
     }
 }

@@ -11,12 +11,13 @@
             </div>
         </div>
         
-        <label for="username" class="mb-1">Username</label>
-        <input ref="username" id="username" class="w-100 form-control mb-4" type="text" placeholder="Username" autocomplete="off" required="True" />
-        
-        <label for="email" class="mb-1">Email</label>
-        <input ref="email" id="email" class="w-100 form-control mb-4" type="email" placeholder="Email" autocomplete="off" required="True" />
+        <div class="input mb-md">
+            <input id="username" class="w-100" type="text" placeholder="Username" autocomplete="off" required="True" />
+        </div>
 
+        <div class="input mb-md">
+            <input id="email" class="w-100" type="email" placeholder="Email" autocomplete="off" required="True" />
+        </div>
         <label for="is_2fa_enabled" class="mb-1">Enable 2FA</label>
         <input type="checkbox" name="/" id="is_2fa_enabled" ref="is_2fa_enabled"/>
 

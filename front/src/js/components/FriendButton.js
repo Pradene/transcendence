@@ -1,4 +1,4 @@
-import { WebSocketManager } from '../utils/WebSocketManager.js'
+import { WSManager } from '../utils/WebSocketManager.js'
 
 class FriendButton extends HTMLElement {
     constructor() {
@@ -47,9 +47,9 @@ class FriendButton extends HTMLElement {
     connectedCallback() {
         this._button.className = 'button'
 
-        this._button.addEventListener('click', async () => {
+        this._button.addEventListener('click', () => {
             console.log(this._id)
-            await this.handleClick()
+            this.handleClick()
         })
 
         window.addEventListener('wsMessage', (e) => this.handleWebsocketMessage(e.detail))
@@ -57,26 +57,26 @@ class FriendButton extends HTMLElement {
         this.appendChild(this._button)
     }
 
-    async handleClick() {
+    handleClick() {
         switch (this.status) {
             case 'friend':
                 // Handle unfriending
-                await this.removeFriend()
+                this.removeFriend()
                 this.status = 'none'
                 break
             case 'request_received':
                 // Handle accepting the request
-                await this.acceptIncomingFriendRequest()
+                this.acceptIncomingFriendRequest()
                 this.status = 'friend'
                 break
             case 'request_sent':
                 // Handle canceling the request
-                await this.cancelFriendRequest()
+                this.cancelFriendRequest()
                 this.status = 'none'
                 break
             case 'none':
                 // Handle sending a new friend request
-                await this.sendFriendRequest()
+                this.sendFriendRequest()
                 this.status = 'request_sent'
                 break
         }
@@ -101,46 +101,36 @@ class FriendButton extends HTMLElement {
         }
     }
 
-    async sendFriendRequest() {
-        const ws = WebSocketManager.get()
-
-        await ws.sendMessage('friends', {
+    sendFriendRequest() {
+        WSManager.send('friends', {
             'type': 'friend_request_sended',
             'user_id': this._id
         })
     }
 
-    async acceptIncomingFriendRequest() {
-        const ws = WebSocketManager.get()
-
-        await ws.sendMessage('friends', {
+    acceptIncomingFriendRequest() {
+        WSManager.send('friends', {
             'type': 'friend_request_accepted',
             'user_id': this._id
         })
     }
 
-    async declineIncomingFriendRequest() {
-        const ws = WebSocketManager.get()
-
-        await ws.sendMessage('friends', {
+    declineIncomingFriendRequest() {
+        WSManager.send('friends', {
             'type': 'friend_request_declined',
             'user_id': this._id
         })
     }
 
-    async cancelFriendRequest() {
-        const ws = WebSocketManager.get()
-
-        await ws.sendMessage('friends', {
+    cancelFriendRequest() {
+        WSManager.send('friends', {
             'type': 'friend_request_cancelled',
             'user_id': this._id
         })
     }
 
-    async removeFriend() {
-        const ws = WebSocketManager.get()
-
-        await ws.sendMessage('friends', {
+    removeFriend() {
+        WSManager.send('friends', {
             'type': 'friend_removed',
             'user_id': this._id
         })

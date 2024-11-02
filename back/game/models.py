@@ -1,91 +1,35 @@
-import logging
-
 from django.conf import settings
-
 from django.db import models
-from account.models import CustomUser
-from django.utils import timezone
 
 
-# Create your models here.
-class GameModel(models.Model):
-    user1 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='user1')
-    user2 = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='user2')
+class Tournament(models.Model):
+    players = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="tournaments")
 
-    user1_score = models.IntegerField()
-    user2_score = models.IntegerField()
+class Game(models.Model):
+    status = models.CharField(choices=[
+        ('waiting', 'Waiting'),
+        ('ready', 'Ready'),
+        ('started', 'Started'),
+        ('finished', 'Finished')
+    ], default='waiting')
+    players = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='games')
+    tournament = models.ForeignKey(Tournament, related_name='games', blank=True, null=True, on_delete=models.CASCADE)
+    winner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
 
-    winner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='game_winner')
+    def set_winner(self):
+        scores = {ps.player: ps.score for ps in self.scores.all()}
+        self.winner = max(scores, key=scores.get, default=None)
+        self.status = 'finished'
+        self.save()
 
-    date = models.DateTimeField(default=timezone.now)
+    def is_finished(self):
+        return self.status == 'finished'
 
-    def toJSON(self, user: CustomUser | None = None) -> dict:
-        def get_opponent():
-            if self.user1 == user:
-                return self.user2.toJSON()
-            elif self.user2 == user:
-                return self.user1.toJSON()
-            return None
+class Score(models.Model):
+    game = models.ForeignKey(Game, related_name='scores', on_delete=models.CASCADE)
+    player = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    score = models.IntegerField(default=0)
 
-        def get_opponent_score():
-            if self.user1 == user:
-                return self.user2_score
-            elif self.user2 == user:
-                return self.user1_score
-            return None
+    class Meta:
+        unique_together = ('game', 'player')
 
-        def get_player():
-            if self.user1 == user:
-                return self.user1.toJSON()
-            elif self.user2 == user:
-                return self.user2.toJSON()
-            return None
-
-        def get_player_score():
-            if self.user1 == user:
-                return self.user1_score
-            elif self.user2 == user:
-                return self.user2_score
-            return None
-
-        if user is None:
-            logging.info("User is None, sending default data")
-            return {
-                'id':          self.id,
-                'user1':       self.user1.toJSON(),
-                'user2':       self.user2.toJSON(),
-                'user1_score': self.user1_score,
-                'user2_score': self.user2_score,
-                'winner':      self.winner.toJSON(),
-                'date':        self.date
-            }
-
-        return {
-            'id': self.id,
-            'player': get_player(),
-            'opponent': get_opponent(),
-            'player_score': get_player_score(),
-            'opponent_score': get_opponent_score(),
-            'winner': self.winner.toJSON(),
-            'isTournament': False,
-            'date': self.date
-        }
-
-
-class TournamentModel(models.Model):
-    game1 = models.ForeignKey('GameModel', on_delete=models.CASCADE, related_name='game1')
-    game2 = models.ForeignKey('GameModel', on_delete=models.CASCADE, related_name='game2')
-    game3 = models.ForeignKey('GameModel', on_delete=models.CASCADE, related_name='game3')
-
-    winner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='tournament_winner')
-    users = models.ManyToManyField('account.CustomUser', related_name='users')
-
-    date = models.DateTimeField(default=timezone.now)
-
-    def toJSON(self) -> dict:
-        return {
-            'id': self.id,
-            'winner': self.winner.toJSON(),
-            'isTournament': True,
-            'date': self.date
-        }

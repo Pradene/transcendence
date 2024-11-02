@@ -1,10 +1,8 @@
-import { getURL, apiRequest, getConnectedUserID } from "../utils/utils.js"
-import { WebSocketManager } from "../utils/WebSocketManager.js"
-import { TemplateComponent } from "../utils/TemplateComponent.js"
-import { Router } from "../utils/Router";
-
-const buttonAcceptColor = "green"
-const buttonRefuseColor = "red"
+import { getURL, apiRequest, getConnectedUserID } from '../utils/utils.js'
+import { WSManager } from '../utils/WebSocketManager.js'
+import { TemplateComponent } from '../utils/TemplateComponent.js'
+import { Router } from '../utils/Router'
+import { Session } from '../utils/Session.js'
 
 export class ChatRoom extends TemplateComponent {
     constructor() {
@@ -12,206 +10,224 @@ export class ChatRoom extends TemplateComponent {
 
         this.sendMessageListener = async (e) => this.sendMessage(e) 
         this.WebsocketMessageListener = (e) => this.WebsocketMessage(e.detail)
-        this.sendDuelInviteListener = async (e) => this.sendDuelInvite(e)
-        this.acceptDuelListener = async (e) => this.acceptDuel(e)
-        this.refuseDuelListener = async (e) => this.refuseDuel(e)
-
-        this.challengerid = 0
-        this.room_id = null
+        this.sendInvitationListener = async (e) => this.sendInvitation(e)
+        this.acceptInvitationListener = async (e) => this.acceptInvitation(e)
+        this.refuseInvitationListener = async (e) => this.refuseInvitation(e)
+		this.cancelInvitaionListener = async (e) => this.cancelInvitaion(e)
+    
+        this.roomID = null
     }
 
-    unmount() {
-        const form = this.getRef("form")
-        form.addEventListener("submit", this.sendMessageListener)
-
-        window.addEventListener("wsMessage", this.WebsocketMessageListener)
-
-        document.querySelector("button.duel-invite").removeEventListener("click", this.sendDuelInviteListener)
-        document.querySelectorAll(".message button.accept").forEach((value, key, parent) => {
-            value.removeEventListener('click', this.acceptDuelListener)
-        })
-        document.querySelectorAll(".message button.refuse").forEach((value, key, parent) => {
-            value.removeEventListener('click', this.refuseDuelListener)
-        })
-
-        WebSocketManager.get().sendMessage("chat", {
-            "type": "quit_room",
-            "room_id": this.room_id
-        })
+    async unmount() {
+        const form = this.getRef('form')
+        form.addEventListener('submit', this.sendMessageListener)
+        
+        window.addEventListener('wsMessage', this.WebsocketMessageListener)
+        
+        document.querySelector('button.duel-invite').removeEventListener('click', this.sendInvitationListener)
+        
+        await this.cancelAllInvitations()
     }
 
     async componentDidMount() {
-        this.room_id = this.getRoomID()
+        this.roomID = this.getRoomID()
+
         await this.getMessages()
         
-        const form = this.getRef("form")
-        form.addEventListener("submit", this.sendMessageListener)
+        const form = this.getRef('form')
+        form.addEventListener('submit', this.sendMessageListener)
         
-        window.addEventListener("wsMessage", this.WebsocketMessageListener)
+        window.addEventListener('wsMessage', this.WebsocketMessageListener)
 
-        document.querySelector("button.duel-invite").addEventListener("click", this.sendDuelInviteListener)
+        const invitationButton = document.querySelector('button.duel-invite')
+        invitationButton.addEventListener('click', this.sendInvitationListener)
+    
+        const messages = this.getRef('messages')
+        messages.addEventListener('click', (e) => this.handleInvitationClick(e))
     }
 
     async WebsocketMessage(event) {
-        console.log(event)
         const message = event.message
 
-        if (message.room_id != this.getRoomID()) {
+        if (message.room_id != this.roomID) {
             return
-        } else if (message.is_duel) {
-            this.processDuelRequest(message)
-        } else if (message.action == "message") {
-            const container = this.getRef("messages")
+
+        } else if (message.type === 'message') {
+			const container = this.getRef('messages')
             this.displayMessage(container, message)
-        } else if (message.action == "duel_accept") {
-            WebSocketManager.get().sendMessage("chat", {
-                "type": "duel_response",
-                "room_id": this.getRoomID()
-            })
-            const router = Router.get()
-            await router.navigate("/")
-        } else if (message.action == "duel_refuse") {
-            this.processDuelRefuse(message)
-        } else if (message.action == "duel_cancel") {
-            //TODO: Display duel cancel
+            
+		} else if (message.type === 'invitation') {
+            
+            if (message.status === 'pending') {
+                const container = this.getRef('messages')
+				this.displayMessage(container, message)
+
+			} else if (message.status === 'accepted') {
+                this.handleInvitationAccepted(message)
+
+				const router = Router.get()
+				await router.navigate(`/game/${message.game_id}/`)
+
+			} else if (message.status === 'declined') {
+				this.handleInvitationRefused(message)
+
+			} else if (message.status === 'canceled') {
+				this.handleInvitationCanceled(message)
+			}
+	
+		}
+    }
+
+    handleInvitationClick(e) {
+        const target = e.target
+
+        const message = target.closest('div.content')
+        if (!message) return
+
+        if (target.classList.contains('accept')) {
+            this.acceptInvitation(message)
+        } else if (target.classList.contains('decline')) {
+            this.refuseInvitation(message)
+        } else if (target.classList.contains('cancel')) {
+            this.cancelInvitaion(message)
         }
     }
 
-    processDuelRefuse(message) {
-        document.querySelectorAll('.duel-request-message').forEach((value, key, parent) => {
-            value.remove()
-        })
+    getInvitationByID(id) {
+        return document.querySelector(`[data-invitation-id='${id}']`)
     }
 
-    processPlayedDuel(message) {
-        message.content = ''
-        const game_data = message.game_data
-        const userid = getConnectedUserID()
+    handleInvitationRefused(message) {
+        const invitation = this.getInvitationByID(message.id)
+        if (!invitation) return
 
-        const results = document.createElement('h3')
-        results.textContent = `${game_data.user1}:${game_data.user1_score} - ${game_data.user2}:${game_data.user2_score}`
+        const buttons = invitation.querySelector('.flex')
+        if (buttons)
+            buttons.remove()
 
-        const message_element = document.createElement("h3")
-        message_element.textContent = `You ${game_data.winner_id === userid ? "won" : "lost"} the duel!`
-
-        const container = document.createElement("div")
-        container.classList.add("duel-result")
-        container.appendChild(message_element)
-        container.appendChild(results)
-
-        this.displayMessage(document.querySelector(".messages"), message, container)
+        const content = document.createElement('p')
+        content.textContent = 'Invitation refused'
+        invitation.appendChild(content)
     }
 
-    processDuelRequest(message) {
-        const challenger = message.user_id
-        const userid = getConnectedUserID()
-        const main_container = document.querySelector("div.messages")
+	handleInvitationCanceled(message) {
+        const invitation = this.getInvitationByID(message.id)
+        if (!invitation) return
 
-        if (message.is_duel_accepted && message.hasOwnProperty("game_data")) {
-            this.processPlayedDuel(message)
-        }
+        const buttons = invitation.querySelector('.flex')
+        if (buttons)
+            buttons.remove()
 
-        console.log(`${userid} ${challenger}`)
-        if (userid == challenger) {
-            message.content = "You have invited your opponent to a duel, waiting for a replie..."
-            this.displayMessage(main_container, message)
-            return
-        }
-
-        const container = document.createElement("div")
-        container.classList.add("duel-container")
-
-        const button_accept = document.createElement('button')
-        button_accept.textContent = "Accept Duel"
-        button_accept.className = "accept"
-
-        const button_refuse = document.createElement('button')
-        button_refuse.textContent = "Refuse Duel"
-        button_refuse.className = "refuse"
-
-        if (!message.is_duel_expired) {
-            button_accept.addEventListener('click', this.acceptDuelListener)
-            button_refuse.addEventListener('click', this.refuseDuelListener)
-        }
-
-        message.content = "You have been invited to a duel: "
-        container.appendChild(button_accept)
-        container.appendChild(button_refuse)
-
-        this.displayMessage(main_container, message, container)
+        const content = document.createElement('p')
+        content.textContent = 'Invitation canceled'
+        invitation.appendChild(content)
     }
 
+    handleInvitationAccepted(message) {
+        const invitation = this.getInvitationByID(message.id)
+        if (!invitation) return
+
+        const buttons = invitation.querySelector('.flex')
+        if (buttons)
+            buttons.remove()
+
+        const content = document.createElement('p')
+        content.textContent = 'Invitation accepted'
+        invitation.appendChild(content)
+    }
+
+    // Send a message
     async sendMessage(event) {
         event.preventDefault()
 
-        const input = this.getRef("input")
+        const input = this.getRef('input')
         const value = input.value
-        const roomID = this.getRoomID()
+        const roomID = this.roomID
 
-        if (input.value != "") {
-            const ws = WebSocketManager.get()
-            await ws.sendMessage("chat", {
-                type: "message",
-                room: roomID,
+        if (input.value != '') {
+            WSManager.send('chat', {
+                type: 'send_message',
+                room_id: roomID,
                 content: value
             })
 
-            input.value = ""
+            input.value = ''
         }
     }
 
-    async sendDuelInvite(event) {
+    // Send an invitation
+    async sendInvitation(event) {
         event.preventDefault()
 
-        const roomID = this.getRoomID()
-        const ws = WebSocketManager.get()
-        await ws.sendMessage("chat", {
-            type: "message",
-            room: roomID,
-            content: "",
-            is_duel: true,
-            duel_action: "duel_request"
+        const roomID = this.roomID
+
+        WSManager.send('chat', {
+            type: 'send_invitation',
+            room_id: roomID,
+			user_id: Session.getUserID(),
+            content: '',
         })
     }
 
-    async acceptDuel(event) {
-        event.preventDefault()
-
-        const roomID = this.getRoomID()
-        const ws = WebSocketManager.get()
-        await ws.sendMessage("chat", {
-            type: "duel_accept",
-            room: roomID,
-            challenger: this.challengerid
+    // Accept a specific invitation
+    async acceptInvitation(invitation) {
+        const roomID = this.roomID
+		const invitation_id = invitation.getAttribute('data-invitation-id')
+        
+        WSManager.send('chat', {
+            type: 'accept_invitation',
+            room_id: roomID,
+            invitation_id: invitation_id
         })
     }
 
-    async refuseDuel(event) {
-        event.preventDefault()
-
-        const roomID = this.getRoomID()
-        const ws = WebSocketManager.get()
-        await ws.sendMessage("chat", {
-            type: "duel_refuse",
-            room: roomID
+    // Refuse a specific invitation
+    async refuseInvitation(invitation) {
+        const roomID = this.roomID
+		const invitation_id = invitation.getAttribute('data-invitation-id')
+        
+        WSManager.send('chat', {
+			type: 'decline_invitation',
+            room_id: roomID,
+			invitation_id: invitation_id
         })
     }
 
+    // Cancel a specific invitation
+	async cancelInvitaion(invitation) {
+        const roomID = this.roomID
+		const invitation_id = invitation.getAttribute('data-invitation-id')
+        
+        WSManager.send('chat', {
+            type: 'cancel_invitation',
+            room_id: roomID,
+			invitation_id: invitation_id
+        })
+    }
+
+    // Cancel all pending invitations
+    async cancelAllInvitations() {
+        const roomID = this.roomID
+        console.log(roomID)
+
+        WSManager.send('chat', {
+            type: 'cancel_all_invitations',
+            room_id: roomID,
+        })
+    }
+
+    // Get all messages from the server 
+    // and after display them in the chat
     async getMessages() {
         try {
-            const roomID = this.getRoomID()
+            const roomID = this.roomID
             const url = getURL(`api/chat/rooms/${roomID}/`)
             const data = await apiRequest(url)
 
-            console.log(data)
-
             const messages = data.messages
+            const container = this.getRef('messages')
             messages.forEach(message => {
-                const container = this.getRef("messages")
-                if (message.is_duel)
-                    this.processDuelRequest(message)
-                else
-                    this.displayMessage(container, message)
+                this.displayMessage(container, message)
             })
 
         } catch (error) {
@@ -219,38 +235,40 @@ export class ChatRoom extends TemplateComponent {
         }
     }
 
-    
-    displayMessage(container, message, innerElement = null) {
+    // Display message
+    displayMessage(container, message) {
         if (!message)
             return
 
-        const element = document.createElement("div")
+        const element = document.createElement('div')
         element.classList.add('message')
         
-        if (message.user_id === getConnectedUserID())
-            element.classList.add("right")
+        if (message.sender.id === Session.getUserID())
+            element.classList.add('right')
 
         const imgContainer = document.createElement('a')
-        imgContainer.href = `/users/${message.user_id}/`
+        imgContainer.href = `/users/${message.sender.id}/`
         imgContainer.className = 'profile-picture'
         imgContainer.dataset.link = ''
 
         const img = document.createElement('img')
-        img.src = message.picture
+        img.src = message.sender.picture
         
         const messageContainer = document.createElement('div')
         messageContainer.className = 'content'
 
-        const messageContent = document.createElement('p')
-        messageContent.textContent = message.content
-        messageContainer.appendChild(messageContent)
+        if (message.type === 'message') {
+            const messageContent = document.createElement('p')
+            messageContent.textContent = message.content
+            messageContainer.appendChild(messageContent)
 
-        if (innerElement !== null) {
-            messageContainer.appendChild(innerElement)
+        } else if (message.type === 'invitation') {
+            messageContainer.dataset.invitationId = message.id
+            this.displayInvitation(messageContainer, message)
         }
 
         const messageTimestamp = document.createElement('span')
-        messageTimestamp.textContent = message.timestamp
+        messageTimestamp.textContent = message.elapsed_timestamp
 
         element.appendChild(imgContainer)
         imgContainer.appendChild(img)
@@ -262,8 +280,55 @@ export class ChatRoom extends TemplateComponent {
         container.scrollTop = container.scrollHeight
     }
 
+    // Display the invitation based on her status
+    displayInvitation(container, invitation) {
+        const status = invitation.status
+        
+        if (status === 'pending') {
+            const buttonContainer = document.createElement('div')
+            buttonContainer.className = 'flex'
+            
+            if (invitation.sender.id === Session.getUserID()) {
+                const cancelButton = document.createElement('button')
+                cancelButton.textContent = 'Cancel'
+                cancelButton.className = 'button cancel'
+                buttonContainer.appendChild(cancelButton)
 
+            } else {
+                const acceptButton = document.createElement('button')
+                acceptButton.textContent = 'Accept'
+                acceptButton.className = 'button accept'
+
+                const declineButton = document.createElement('button')
+                declineButton.textContent = 'Decline'
+                declineButton.className = 'button decline'
+            
+                buttonContainer.appendChild(acceptButton)
+                buttonContainer.appendChild(declineButton)
+            }
+
+            container.appendChild(buttonContainer)
+        
+        } else if (status === 'accepted') {
+            const acceptedMessage = document.createElement('p')
+            acceptedMessage.textContent = 'Invitation accepted'
+            container.appendChild(acceptedMessage)
+            
+        } else if (status === 'declined') {
+            const declinedMessage = document.createElement('p')
+            declinedMessage.textContent = 'Invitation declined'
+            container.appendChild(declinedMessage)
+            
+        } else if (status === 'canceled') {
+            const canceledMessage = document.createElement('p')
+            canceledMessage.textContent = 'Invitation canceled'
+            container.appendChild(canceledMessage)
+        }
+
+    }
+
+    // Utility function to get the room id from the url
     getRoomID() {
-        return location.pathname.split("/")[2]
+        return location.pathname.split('/')[2]
     }
 }

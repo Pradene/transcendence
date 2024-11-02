@@ -1,74 +1,39 @@
-import { checkLogin } from "./utils.js"
+export class WSManager {
+    static sockets = {}
+    static pendingMessages = {}
 
-export class WebSocketManager {
-    constructor() {
-        if (WebSocketManager.instance)
-            return WebSocketManager.instance
-
-        WebSocketManager.instance = this
-        
-        this.sockets = {}
-        this.pendingMessages = {} // Queue messages until the socket is open
-    }
-
-    static get() {
-        return WebSocketManager.instance ? WebSocketManager.instance : new WebSocketManager()
-    }
-
-    connect(url, type) {
+    static add(type, url) {
         if (this.sockets[type]) {
-            return
+            console.log(`Already connected to socket type ${type}`)
+            return this.sockets[type]
         }
-        
+
         const socket = new WebSocket(url)
-
-        socket.onopen = (event) => {
-            this.flushPendingMessages(type)
-        }
-
-        socket.onmessage = (event) => {
-            this.handleMessage(event)
-        }
-
-        socket.onclose = (event) => {
-            console.log('WebSocket connection closed')
-        }
-
-        socket.onerror = (error) => {
-            console.error('WebSocket error:', error)
-        }
-
         this.sockets[type] = socket
 
-        // Save connection info to localStorage
         this.saveConnection(type, url)
+
+        return socket
     }
 
-    disconnect(type) {
+    static remove(type) {
         const socket = this.sockets[type]
         if (!socket) return
 
-        socket.close()
         delete this.sockets[type]
+        socket.close()
 
-        // Remove connection info from localStorage
         this.removeConnection(type)
     }
 
-    handleMessage(event) {
-        const message = JSON.parse(event.data)
-
-        const e = new CustomEvent('wsMessage', {
-            detail: { message }
-        })
-
-        window.dispatchEvent(e)
+    static get(type) {
+        return this.sockets[type]
     }
 
-    sendMessage(type, message) {
+    static send(type, message) {
         try {
             const socket = this.sockets[type]
-            console.log("socket")
+            console.log("socket:", socket)
 
             if (socket && socket.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify(message))
@@ -79,10 +44,10 @@ export class WebSocketManager {
                 
                 if (!socket) {
                     // Attempt to reconnect if the socket is not present
-                    const connections = JSON.parse(localStorage.getItem('wsConnections')) || {};
-                    const url = connections[type];
+                    const connections = JSON.parse(localStorage.getItem('sockets')) || {}
+                    const url = connections[type]
                     if (url) {
-                        this.connect(url, type);
+                        this.connect(url, type)
                     }
                 }
             }
@@ -92,28 +57,42 @@ export class WebSocketManager {
         }
     }
 
-    saveConnection(type, url) {
-        const connections = JSON.parse(localStorage.getItem('wsConnections')) || {}
-        connections[type] = url
-        localStorage.setItem('wsConnections', JSON.stringify(connections))
-    }
+    static saveConnection(type, url) {
+        let sockets = {}
 
-    removeConnection(type) {
-        const connections = JSON.parse(localStorage.getItem('wsConnections')) || {}
-        delete connections[type]
-        localStorage.setItem('wsConnections', JSON.stringify(connections))
-    }
+        try {
+            const storedSockets = localStorage.getItem('sockets')
+            sockets = storedSockets ? JSON.parse(storedSockets) : {}
+        
+        } catch (error) {
+            console.error('Error parsing sockets from localStorage:', error)
+            sockets = {}
+        }
 
-    reconnectAllSockets() {
-        if (checkLogin()) {
-            const connections = JSON.parse(localStorage.getItem('wsConnections')) || {}
-            Object.keys(connections).forEach(type => {
-                this.connect(connections[type], type)
-            })
+        sockets[type] = url
+
+        try {
+            localStorage.setItem('sockets', JSON.stringify(sockets))
+        
+        } catch (error) {
+            console.error('Error saving sockets to localStorage:', error)
         }
     }
 
-    queueMessage(type, message) {
+    static removeConnection(type) {
+        const sockets = JSON.parse(localStorage.getItem('sockets')) || {}
+        delete sockets[type]
+        localStorage.setItem('sockets', '')
+    }
+
+    static reconnectAllSockets() {
+        const sockets = JSON.parse(localStorage.getItem('sockets')) || {}
+        Object.keys(sockets).forEach(type => {
+            this.connect(sockets[type], type)
+        })
+    }
+
+    static queueMessage(type, message) {
         if (!this.pendingMessages[type]) {
             this.pendingMessages[type] = []
         }
@@ -121,7 +100,7 @@ export class WebSocketManager {
         this.pendingMessages[type].push(message)
     }
 
-    flushPendingMessages(type) {
+    static flushPendingMessages(type) {
         const socket = this.sockets[type]
         if (socket && socket.readyState === WebSocket.OPEN) {
             const messages = this.pendingMessages[type] || []

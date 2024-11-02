@@ -37,6 +37,11 @@ export class Router {
         await this.handleRoute()
     }
 
+    async back() {
+        history.back()
+        await this.handleRoute()
+    }
+
     async handleRoute() {
         const location = window.location.pathname
         const matchedRoute = this.matchRoute(location)
@@ -45,7 +50,7 @@ export class Router {
             const isProtected = matchedRoute.route.protected
             
             if (this.currentView && typeof this.currentView.unmount === "function") {
-                this.currentView.unmount()
+                await this.currentView.unmount()
             }
             
             const isAuthenticated = await checkLogin()

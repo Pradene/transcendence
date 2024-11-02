@@ -9,7 +9,7 @@ export class EditProfile extends TemplateComponent {
         this.handlePictureChangeListener = (e) => this.handlePictureChange(e)
     }
 
-    unmount() {
+    async unmount() {
         const form = this.getRef("form")
         const input = this.getRef("picture-input")
         form.removeEventListener("submit", this.handleSubmitListener)

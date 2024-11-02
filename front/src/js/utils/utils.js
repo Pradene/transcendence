@@ -1,20 +1,9 @@
-import { WebSocketManager } from "./WebSocketManager.js"
+import { Session } from "./Session.js"
+import { WSManager } from "./WebSocketManager.js"
 import jwt from "jsonwebtoken"
 
 export function getURL(url) {
     return "https://" + location.hostname + ":" + location.port + "/" + url
-}
-
-export function getConnectedUserID() {
-    try {
-        const token = getCookie("access_token")
-        const decoded = jwt.decode(token)
-
-        return decoded.user
-
-    } catch (e) {
-        return null
-    }
 }
 
 // CSRF Tokens utils
@@ -30,7 +19,12 @@ export async function fetchCSRFToken() {
     }
 }
 
-function getCookie(name) {
+// CSRF Tokens utils
+export function getCSRFToken() {
+    return getCookie('csrftoken')
+}
+
+export function getCookie(name) {
     const value = `; ${document.cookie}`
     const parts = value.split(`; ${name}=`)
     if (parts.length === 2)
@@ -38,12 +32,6 @@ function getCookie(name) {
     
     return null
 }
-
-// CSRF Tokens utils
-export function getCSRFToken() {
-    return getCookie('csrftoken')
-}
-
 
 // Requests to server utils
 export async function apiRequest(url, options = {}) {
@@ -120,13 +108,11 @@ async function refreshToken() {
 }
 
 function connectToWebsockets() {
-    const ws = WebSocketManager.get()
-
     const friendsURL = "wss://" + location.hostname + ":" + location.port + "/ws/friends/";
     const chatURL = "wss://" + location.hostname + ":" + location.port + "/ws/chat/";
     
-    ws.connect(friendsURL, "friends")
-    ws.connect(chatURL, "chat")
+    WSManager.add('friends', friendsURL)
+    WSManager.add('chat', chatURL)
 }
 
 export async function checkLogin() {
@@ -135,13 +121,16 @@ export async function checkLogin() {
         if (!access) {
             const value = await refreshToken()
             if (value)
+                Session.setUserID()
                 connectToWebsockets()
 
             return value
         }
 
-        const decoded = jwt.decode(access)     
+        const decoded = jwt.decode(access)
         const current = Date.now() / 1000
+
+        Session.setUserID()
 
         if (decoded.exp > current) {
             connectToWebsockets()

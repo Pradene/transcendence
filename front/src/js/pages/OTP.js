@@ -1,7 +1,6 @@
 import { Router } from '../utils/Router.js'
 import { TemplateComponent } from '../utils/TemplateComponent.js'
 import { apiRequest, getURL } from '../utils/utils.js'
-import { WebSocketManager } from '../utils/WebSocketManager.js'
 
 export class OTP extends TemplateComponent {
 	constructor() {
@@ -13,7 +12,7 @@ export class OTP extends TemplateComponent {
 		this.sendOTPListener = async () => await this.sendOTP()
 	}
 
-	unmount() {
+	async unmount() {
 		const form = this.getRef('form')
 		form.removeEventListener('submit', this.handleSubmitListener)
 
@@ -65,7 +64,7 @@ export class OTP extends TemplateComponent {
 			})
 
 			const router = Router.get()
-			router.navigate('/')
+			await router.navigate('/')
 		
 		} catch (e) {
 			this.removeCode()
@@ -114,6 +113,7 @@ export class OTP extends TemplateComponent {
 
 		Array.from(children).forEach(child => {
 			child.textContent = ''
+			child.classList.remove('active')
 		})
 
 		label.classList.add('shake')
@@ -122,6 +122,7 @@ export class OTP extends TemplateComponent {
 			label.classList.remove('shake')
 		}, 300)
 
-		children[0].classList.toggle('active')
+		children[0].classList.add('active')
+
 	}
 }

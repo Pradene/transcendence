@@ -1,6 +1,6 @@
 import { Router } from "../utils/Router.js"
 import { getURL, apiRequest } from "../utils/utils.js"
-import { WebSocketManager } from "../utils/WebSocketManager.js"
+import { WSManager } from "../utils/WebSocketManager.js"
 
 class LogoutButton extends HTMLElement {
     constructor() {
@@ -29,12 +29,11 @@ class LogoutButton extends HTMLElement {
                 method: "POST"
             })
             
-            const ws = WebSocketManager.get()
-            ws.disconnect('chat')
-            ws.disconnect('friends')
+            WSManager.remove('chat')
+            WSManager.remove('friends')
             
             const router = Router.get()
-            router.navigate("/login/")
+            await router.navigate("/login/")
 
         } catch (error) {
             console.log(error)

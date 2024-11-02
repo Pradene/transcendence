@@ -47,36 +47,39 @@
 @import 'profile';
 @import 'editprofile';
 @import 'utils';
+@import 'game';
 @import 'gameinfo';
 @import 'registration';
 @import 'tournameview';
+@import 'loading';
+@import 'text.scss';
 
 .box-container {
-    margin: 0 auto;
+  margin: 0 auto;
 
-    background: var(--secondary-color);
-    border-radius: 18px;
-    padding: 12px;
-    overflow: hidden;
+  background: var(--secondary-color);
+  border-radius: 18px;
+  padding: 12px;
+  overflow: hidden;
 }
 
 .container-xxs {
-    width: 100%;
-    max-width: 350px;
+  width: 100%;
+  max-width: 350px;
 }
 
 .form-container {
-    display: flex;
-    align-items: center;
-    background: #1e2124;
+  display: flex;
+  align-items: center;
+  background: #1e2124;
 }
 
 .form-control {
-    border: none;
-	border-radius: 12px;
+  border: none;
+  border-radius: 12px;
 }
 
 .form-control:focus {
-    box-shadow: none;
+  box-shadow: none;
 }
 

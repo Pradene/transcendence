@@ -54,6 +54,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_online = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     api_42_id = models.CharField(max_length=255, unique=True, null=True, blank=True)
+    level = models.PositiveIntegerField(default=1)
+    xp = models.PositiveIntegerField(default=0)
 
     is_2fa_enabled = models.BooleanField(default=False)
     twofa_method = models.IntegerField(default=TWO_FA_METHOD.EMAIL)
@@ -65,6 +67,19 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
+
+    def add_xp(self, amount):
+        self.xp += amount
+        self.check_level_up()
+        self.save()
+
+    def check_level_up(self):
+        # Example criteria: level up every 100 XP
+        next_level_xp = self.level * 100
+        while self.xp >= next_level_xp:
+            self.level += 1
+            self.xp -= next_level_xp
+            next_level_xp = self.level * 100
 
     def toJSON(self, requesting_user=None):
         data = {

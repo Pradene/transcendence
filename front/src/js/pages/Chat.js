@@ -9,7 +9,7 @@ export class Chat extends TemplateComponent {
         this.receiveMessageListener = (e) => this.receiveMessage(e.detail)
     }
 
-    unmount() {
+    async unmount() {
         const input = this.getRef('input')
         input.removeEventListener('keyup', this.handleSearchListener)
         
@@ -60,7 +60,7 @@ export class Chat extends TemplateComponent {
         const message = event.message
         console.log(message)
 
-        if (message && message.action === 'message') {
+        if (message && message.type === 'message') {
             const chatRooms = this.getRef('rooms')
 
             const chatRoom = chatRooms.querySelector(`[data-room-id='${message.room_id}']`)

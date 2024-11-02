@@ -1,4 +1,4 @@
-import { getConnectedUserID } from "../utils/utils.js"
+import { Session } from "../utils/Session.js"
 
 class Nav extends HTMLElement {
     constructor() {
@@ -20,7 +20,7 @@ class Nav extends HTMLElement {
                 img: '/assets/chat.svg'
             },
             {
-                href: `/users/${getConnectedUserID()}/`,
+                href: `/users/${Session.getUserID()}/`,
                 img: '/assets/user.svg'
             }
         ]

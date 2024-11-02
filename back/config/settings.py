@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
 	'requests_oauthlib',
+    'background_task',
     'corsheaders',
     'channels',
 

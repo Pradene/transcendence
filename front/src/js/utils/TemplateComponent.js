@@ -22,20 +22,19 @@ export class TemplateComponent {
                 const doc = parser.parseFromString(html, "text/html")
                 
                 if (doc.body) {
-                    const app = document.getElementById('app')
-                    app.replaceChildren()
+                    document.body.replaceChildren()
                     // Iterate over each child node and append to the current document's body
                     Array.from(doc.body.childNodes).forEach(child => {
-                        app.appendChild(child.cloneNode(true))
+                        document.body.appendChild(child.cloneNode(true))
                     })
 
-                    return app
+                    return document.body
 
                 } else {
                     return Promise.reject("No content found")
                 }
             })
-            .then(content => {
+            .then(() => {
                 this.componentDidMount()
             })
             .catch(error => {console.log("Error:", error)})
