@@ -11,6 +11,8 @@ import { Search } from "./pages/Search.js"
 import { Profile } from "./pages/Profile.js"
 import { EditProfile } from "./pages/EditProfile.js"
 import { TournamentView } from "./pages/TournamentView";
+import { Game } from "./pages/Game";
+import { Tournament } from "./pages/Tournament";
 
 import { GameView } from "./pages/GameView.js"
 import "../js/components/Nav.js"
