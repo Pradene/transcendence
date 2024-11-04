@@ -10,8 +10,8 @@ export class EditProfile extends TemplateComponent {
     }
 
     async unmount() {
-        const form = this.getRef("form")
-        const input = this.getRef("picture-input")
+        const form = document.getElementById("form")
+        const input = document.getElementById("file-upload")
         form.removeEventListener("submit", this.handleSubmitListener)
         input.removeEventListener("change", this.handlePictureChangeListener)
     }
@@ -19,8 +19,8 @@ export class EditProfile extends TemplateComponent {
     async componentDidMount() {
         this.getUserInfo()
 
-        const form = this.getRef("form")
-        const input = this.getRef("picture-input")
+        const form = document.getElementById("form")
+        const input = document.getElementById("file-upload")
         form.addEventListener("submit", this.handleSubmitListener)
         input.addEventListener("change", this.handlePictureChangeListener)
     }
@@ -32,10 +32,10 @@ export class EditProfile extends TemplateComponent {
 
             const user = await apiRequest(url)
 
-            const picture = this.getRef("picture-preview")
-            const username = this.getRef("username")
-            const email = this.getRef("email")
-            const is_2fa_enabled = this.getRef("is_2fa_enabled")
+            const picture = document.getElementById("picture-preview")
+            const username = document.getElementById("username")
+            const email = document.getElementById("email")
+            const is_2fa_enabled = document.getElementById("is_2fa_enabled")
 
             picture.src = user.picture
             username.value = user.username
@@ -48,7 +48,7 @@ export class EditProfile extends TemplateComponent {
     }
 
     handlePictureChange(e) {
-        const picture = this.getRef("picture-preview")
+        const picture = document.getElementById("picture-preview")
         const file = e.target.files[0]
 
         if (file) {
@@ -66,10 +66,10 @@ export class EditProfile extends TemplateComponent {
     async handleSubmit(e) {
         e.preventDefault()
 
-        const input = this.getRef("picture-input")
-        const username = this.getRef("username")
-        const email = this.getRef("email")
-        const is_2fa_enable = this.getRef("is_2fa_enabled")
+        const input = document.getElementById("file-upload")
+        const username = document.getElementById("username")
+        const email = document.getElementById("email")
+        const is_2fa_enable = document.getElementById("is_2fa_enabled")
 
         try {
             const body = new FormData()

@@ -25,9 +25,11 @@ class LogoutButton extends HTMLElement {
         try {
             const url = getURL("api/auth/logout/")
 
-            await apiRequest(url, {
+            const data = await apiRequest(url, {
                 method: "POST"
             })
+
+			console.log(data)
             
             WSManager.remove('chat')
             WSManager.remove('friends')

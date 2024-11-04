@@ -82,7 +82,7 @@ export class WSManager {
     static removeConnection(type) {
         const sockets = JSON.parse(localStorage.getItem('sockets')) || {}
         delete sockets[type]
-        localStorage.setItem('sockets', '')
+        localStorage.setItem('sockets', JSON.stringify(sockets))
     }
 
     static reconnectAllSockets() {
