@@ -52,7 +52,7 @@ class FriendButton extends HTMLElement {
             this.handleClick()
         })
 
-        window.addEventListener('wsMessage', (e) => this.handleWebsocketMessage(e.detail))
+        window.addEventListener('friendsEvent', (e) => this.handleWebsocketMessage(e.detail))
 
         this.appendChild(this._button)
     }
@@ -84,7 +84,7 @@ class FriendButton extends HTMLElement {
 
     handleWebsocketMessage(e) {
         console.log(e)
-        const message = e.message
+        const message = JSON.parse(e.data)
 
         if (!message || !message.action) return 
 

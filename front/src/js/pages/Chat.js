@@ -1,5 +1,6 @@
 import { getURL, apiRequest, truncateString } from '../utils/utils.js'
 import { TemplateComponent } from '../utils/TemplateComponent.js'
+import { WSManager } from '../utils/WebSocketManager.js'
 
 export class Chat extends TemplateComponent {
     constructor() {
@@ -13,7 +14,7 @@ export class Chat extends TemplateComponent {
         const input = this.getRef('input')
         input.removeEventListener('keyup', this.handleSearchListener)
         
-        window.removeEventListener('wsMessage', this.receiveMessageListener)
+        window.removeEventListener('chatEvent', this.receiveMessageListener)
     }
 
     async componentDidMount() {
@@ -22,7 +23,7 @@ export class Chat extends TemplateComponent {
         const input = this.getRef('input')
         input.addEventListener('keyup', this.handleSearchListener)
 
-        window.addEventListener('wsMessage', this.receiveMessageListener)
+        window.addEventListener('chatEvent', this.receiveMessageListener)
     }
 
     async getRooms() {
@@ -57,6 +58,7 @@ export class Chat extends TemplateComponent {
     }
 
     receiveMessage(event) {
+		console.log(event)
         const message = event.message
         console.log(message)
 

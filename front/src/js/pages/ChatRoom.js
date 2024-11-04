@@ -22,7 +22,7 @@ export class ChatRoom extends TemplateComponent {
         const form = this.getRef('form')
         form.addEventListener('submit', this.sendMessageListener)
         
-        window.addEventListener('wsMessage', this.WebsocketMessageListener)
+        window.addEventListener('chatEvent', this.WebsocketMessageListener)
         
         document.querySelector('button.duel-invite').removeEventListener('click', this.sendInvitationListener)
         
@@ -37,7 +37,7 @@ export class ChatRoom extends TemplateComponent {
         const form = this.getRef('form')
         form.addEventListener('submit', this.sendMessageListener)
         
-        window.addEventListener('wsMessage', this.WebsocketMessageListener)
+        window.addEventListener('chatEvent', this.WebsocketMessageListener)
 
         const invitationButton = document.querySelector('button.duel-invite')
         invitationButton.addEventListener('click', this.sendInvitationListener)
@@ -47,9 +47,11 @@ export class ChatRoom extends TemplateComponent {
     }
 
     async WebsocketMessage(event) {
-        const message = event.message
+        const message = JSON.parse(event.data)
+		console.log(message.room_id)
 
         if (message.room_id != this.roomID) {
+			console.log('not inside the good room')
             return
 
         } else if (message.type === 'message') {
@@ -237,6 +239,7 @@ export class ChatRoom extends TemplateComponent {
 
     // Display message
     displayMessage(container, message) {
+		console.log('display')
         if (!message)
             return
 
