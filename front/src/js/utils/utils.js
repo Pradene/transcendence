@@ -111,8 +111,24 @@ function connectToWebsockets() {
     const friendsURL = "wss://" + location.hostname + ":" + location.port + "/ws/friends/";
     const chatURL = "wss://" + location.hostname + ":" + location.port + "/ws/chat/";
     
-    WSManager.add('friends', friendsURL)
-    WSManager.add('chat', chatURL)
+    const friendsSocket = WSManager.add('friends', friendsURL)
+	friendsSocket.onmessage = (e) => {
+		const event = new CustomEvent('friendsEvent', {
+			detail: e
+		})
+
+		window.dispatchEvent(event)
+	}
+
+    const chatSocket = WSManager.add('chat', chatURL)
+	chatSocket.onmessage = (e) => {
+		const event = new CustomEvent('chatEvent', {
+			detail: e
+		})
+		
+		window.dispatchEvent(event)
+	}
+
 }
 
 export async function checkLogin() {

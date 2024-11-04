@@ -19,7 +19,7 @@ export class Search extends TemplateComponent {
         const requests = this.getRef('requests')
         requests.removeEventListener("click", this.handleRequetsListener)
     
-        window.removeEventListener('wsMessage', this.WebsocketMessageListener)
+        window.removeEventListener('friendsEvent', this.WebsocketMessageListener)
     }
 
     async componentDidMount() {
@@ -32,7 +32,7 @@ export class Search extends TemplateComponent {
         const input = this.getRef("input")
         input.addEventListener("input", this.searchUserListener)
 
-        window.addEventListener('wsMessage', this.WebsocketMessageListener)
+        window.addEventListener('friendsEvent', this.WebsocketMessageListener)
     }
 
     // Searching users
@@ -89,7 +89,7 @@ export class Search extends TemplateComponent {
     }
 
     WebsocketMessage(e) {
-        const message = e.message
+		const message = JSON.parse(e.data)
 
         if (!message) return
 
@@ -109,7 +109,12 @@ export class Search extends TemplateComponent {
             const container = this.getRef('friends')
             const element = container.querySelector(`[data-id='${message.user.id}']`)
             element.remove()
-        }
+        
+		} else if (message.action && message.action === 'friend_request_cancelled') {
+			const container = this.getRef('requests')
+			const element = container.querySelector(`[data-id='${message.user.id}']`)
+			element.remove()
+		}
     }
 
     async getFriends() {
