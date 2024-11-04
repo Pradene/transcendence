@@ -1,8 +1,8 @@
-import {getConnectedUserID} from "../utils/utils";
+import { Session } from "../utils/Session"
 
 class GameMin extends HTMLElement {
     constructor() {
-        super();
+        super()
     }
 
     async connectedCallback() {
@@ -11,11 +11,13 @@ class GameMin extends HTMLElement {
             return
         }
 
+        const userID = Session.getUserID()
+
         const gameid = this.getAttribute('gameid')
         const data = await (await fetch(`/api/games/gameinfo/${gameid}`)).json()
 
-        const userid = data.user1.id == getConnectedUserID() ? data.user1.id : data.user2.id
-        const opponentid = data.user1.id == getConnectedUserID() ? data.user2.id : data.user1.id
+        const userid = data.user1.id == userID ? data.user1.id : data.user2.id
+        const opponentid = data.user1.id == userID ? data.user2.id : data.user1.id
         const user_score = userid == data.user1.id ? data.user1_score : data.user2_score
         const opponent_score = userid == data.user1.id ? data.user2_score : data.user1_score
 
@@ -42,13 +44,15 @@ class GameMin extends HTMLElement {
     }
 
     async tournamentCallback() {
+        const userID = Session.getUserID()
+
         const tournamentid = this.getAttribute('gameid')
         const data = await (await fetch(`/api/games/tournamentinfo/${tournamentid}`)).json()
 
         const player = document.createElement('user-profile')
-        player.setAttribute('playerid', getConnectedUserID())
+        player.setAttribute('playerid', userID)
 
-        const won = getConnectedUserID() == data.winner.id
+        const won = userID == data.winner.id
         const result = document.createElement('p')
         result.textContent = won ? 'You won' : 'You lost'
 
@@ -61,4 +65,4 @@ class GameMin extends HTMLElement {
     }
 }
 
-customElements.define('game-min', GameMin);
+customElements.define('game-min', GameMin)
