@@ -1,10 +1,22 @@
 <nav-component></nav-component>
+<div class="language-selector">
+    <button class="lang-button" data-lang="en">English</button>
+    <button class="lang-button" data-lang="de">Deutsch</button>
+    <button class="lang-button" data-lang="fr">Français</button>
+</div>
+
 <div class="chat">
     <div class="top">
-        <p>Messages</p>
+        <p data-translate-key="messages"></p>
         <label>
             <input ref="input" class="form-control" placeholder="Search..." type="text" required="True" autocomplete="off" />
         </label>
     </div>
     <ul ref="rooms" class="rooms"></ul>
 </div>
+
+
+
+
+
+

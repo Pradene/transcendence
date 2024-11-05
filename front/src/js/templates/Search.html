@@ -1,9 +1,15 @@
 <nav-component></nav-component>
+<div class="language-selector">
+    <button class="lang-button" data-lang="en">English</button>
+    <button class="lang-button" data-lang="de">Deutsch</button>
+    <button class="lang-button" data-lang="fr">Français</button>
+</div>
+
 <div class=social>
 
     <div class="search">
         <div class="top">
-            <p>Users</p>
+            <p data-translate-key="users">Users</p>
             <label>
                 <input ref="input" class="form-control" placeholder="Search..." type="text" required="True" autocomplete="off" />
             </label>
@@ -12,13 +18,13 @@
     </div>
 
     <div class="friends">
-        <div class="top">Friends</div>
+        <div class="top" data-translate-key="friends">Friends</div>
         <ul ref="friends" class="content"></ul>
     </div>
 
     <div class="requests">
-        <div class="top">Requests</div>
+        <div class="top" data-translate-key="requests"></div></div>
         <ul ref="requests" class="content"></ul>
     </div>
-    
+
 </div>

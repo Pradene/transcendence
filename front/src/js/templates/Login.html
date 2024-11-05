@@ -1,3 +1,9 @@
+<!-- <div class="language-selector">
+    <button class="lang-button" data-lang="en">English</button>
+    <button class="lang-button" data-lang="de">Deutsch</button>
+    <button class="lang-button" data-lang="fr">Francais</button>
+</div>
+
 <div class="min-vh-100 d-flex flex-column align-items-center justify-content-center">
     <div class="container-xxs box-container px-4 py-4">
         <div class="mb-4">
@@ -20,6 +26,38 @@
         <button class="button w-100 mb-3" ref="ft_auth" id="ft_auth">Login with 42</button>
         <span class="d-flex justify-content-center">
             <p>Doesn't have account yet? <a href="/signup/" data-link="">Sign up</a></p>
+        </span>
+    </div>
+</div> -->
+
+<div class="language-selector">
+    <button class="lang-button" data-lang="en">English</button>
+    <button class="lang-button" data-lang="de">Deutsch</button>
+    <button class="lang-button" data-lang="fr">Français</button>
+</div>
+
+<div class="min-vh-100 d-flex flex-column align-items-center justify-content-center">
+    <div class="container-xxs box-container px-4 py-4">
+        <div class="mb-4">
+            <h2 data-translate-key="hello">Hello,</h2>
+            <p data-translate-key="welcome_message">We are happy to see you</p>
+        </div>
+        <form ref="form" action="POST" class="mb-2">
+            <div ref="error" class="hidden registration-form-error"></div>
+            <input ref="username" class="form-control mb-3" data-translate-key="username_placeholder" placeholder="Username" type="text" autocomplete="off" required="True" />
+            <input ref="password" class="form-control mb-2" data-translate-key="password_placeholder" placeholder="Password" type="password" autocomplete="off"  />
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center">
+                    <input ref="remember-me" id="remember-me" type="checkbox" />
+                    <label for="remember-me" class="mx-1" data-translate-key="remember_me">Remember me</label>
+                </div>
+                <a href="/" data-link="" data-translate-key="forgot_password">Forgot password?</a>
+            </div>
+            <button type="submit" class="button w-100" data-translate-key="login_button">Login</button>
+        </form>
+        <button class="button w-100 mb-3" ref="ft_auth" id="ft_auth" data-translate-key="login_42">Login with 42</button>
+        <span class="d-flex justify-content-center" data-translate-key="no_account">
+            <p data-translate-key="no_account"></p>
         </span>
     </div>
 </div>

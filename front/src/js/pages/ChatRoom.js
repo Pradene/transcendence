@@ -10,7 +10,27 @@ export class ChatRoom extends TemplateComponent {
     constructor() {
         super()
 
-        this.sendMessageListener = async (e) => this.sendMessage(e) 
+        this.translations = {
+            en: {
+                send: "Send",
+                invite: "Invite",
+                writingInvite: "Write a message...",
+                invitation_sent: "You have invited your opponent to a duel, waiting for a replie..."
+            },
+            de: {
+                send: "Senden",
+                invite: "Einladen",
+                writingInvite: "Schreiben Sie eine Nachricht..."
+            },
+            fr: {
+                send: "Envoyer",
+                invite: "inviter",
+                writingInvite: "Ecrivez un message...",
+                invitation_sent: "Vous avez invitez votre ami a un duel, en attente de reponse..."
+            }
+        };
+
+        this.sendMessageListener = async (e) => this.sendMessage(e)
         this.WebsocketMessageListener = (e) => this.WebsocketMessage(e.detail)
         this.sendDuelInviteListener = async (e) => this.sendDuelInvite(e)
         this.acceptDuelListener = async (e) => this.acceptDuel(e)
@@ -43,13 +63,39 @@ export class ChatRoom extends TemplateComponent {
     async componentDidMount() {
         this.room_id = this.getRoomID()
         await this.getMessages()
-        
+
         const form = this.getRef("form")
         form.addEventListener("submit", this.sendMessageListener)
-        
+
         window.addEventListener("wsMessage", this.WebsocketMessageListener)
 
         document.querySelector("button.duel-invite").addEventListener("click", this.sendDuelInviteListener)
+        this.setupLanguageButtons();
+        this.translatePage();
+    }
+
+    setupLanguageButtons() {
+        document.querySelectorAll(".lang-button").forEach(button => {
+            button.addEventListener("click", (e) => {
+                this.currentLanguage = e.target.dataset.lang
+                localStorage.setItem('selectedLanguage', this.currentLanguage)
+                this.translatePage()
+            })
+        })
+    }
+
+    translatePage() {
+        const elements = document.querySelectorAll("[data-translate-key]");
+        elements.forEach(el => {
+            const key = el.dataset.translateKey;
+            if (this.translations[this.currentLanguage][key]) {
+                el.textContent = this.translations[this.currentLanguage][key];
+            }
+            const input = this.getRef("input");
+            if (input) {
+                input.placeholder = this.translations[this.currentLanguage].writingInvite;
+            }
+        })
     }
 
     async WebsocketMessage(event) {
@@ -113,7 +159,7 @@ export class ChatRoom extends TemplateComponent {
 
         console.log(`${userid} ${challenger}`)
         if (userid == challenger) {
-            message.content = "You have invited your opponent to a duel, waiting for a replie..."
+            message.content = this.translations[this.currentLanguage].invitation_sent
             this.displayMessage(main_container, message)
             return
         }
@@ -219,14 +265,14 @@ export class ChatRoom extends TemplateComponent {
         }
     }
 
-    
+
     displayMessage(container, message, innerElement = null) {
         if (!message)
             return
 
         const element = document.createElement("div")
         element.classList.add('message')
-        
+
         if (message.user_id === getConnectedUserID())
             element.classList.add("right")
 
@@ -237,7 +283,7 @@ export class ChatRoom extends TemplateComponent {
 
         const img = document.createElement('img')
         img.src = message.picture
-        
+
         const messageContainer = document.createElement('div')
         messageContainer.className = 'content'
 

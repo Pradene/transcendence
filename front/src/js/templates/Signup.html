@@ -1,19 +1,27 @@
+<div class="language-selector">
+    <button class="lang-button" data-lang="en">English</button>
+    <button class="lang-button" data-lang="de">Deutsch</button>
+    <button class="lang-button" data-lang="fr">Français</button>
+</div>
+
 <div class="min-vh-100 d-flex flex-column align-items-center justify-content-center">
     <div class="container-xxs box-container px-4 py-4">
         <div class="mb-4">
-            <h2>Hello,</h2>
-            <p>We are happy to see you</p>
+            <h2 data-translate-key="hello">Hello,</h2>
+            <p data-translate-key="welcome_message">We are happy to see you</p>
         </div>
         <form ref="form" class="mb-3" action="POST">
             <div ref="error" class="registration-form-error hidden"></div>
-            <input ref="username" class="form-control mb-3" placeholder="Username" type="text" autocomplete="off" required="True" />
-            <input ref="email" class="form-control mb-3" placeholder="Email" type="email" autocomplete="off" required="True" />
-            <input ref="password" class="form-control mb-3" placeholder="Password" type="password" autocomplete="off" required="True" />
-            <input ref="passwordConfirmation" class="form-control mb-4" placeholder="Password confirmation" type="password" autocomplete="off" required="True" />
-            <button type="submit" class="button w-100">Sign up</button>
+            <input ref="username" class="form-control mb-3" data-translate-key="username_placeholder" placeholder="Username" type="text" autocomplete="off" required="True" />
+            <input ref="email" class="form-control mb-3" data-translate-key="email_placeholder" placeholder="Email" type="email" autocomplete="off" required="True" />
+            <input ref="password" class="form-control mb-3" data-translate-key="password_placeholder" placeholder="Password" type="password" autocomplete="off" required="True" />
+            <input ref="passwordConfirmation" class="form-control mb-4" data-translate-key="passwordconfirmation_placeholder" placeholder="Password confirmation" type="password" autocomplete="off" required="True" />
+            <button type="submit" class="button w-100" data-translate-key="Signup_button">Sign up</button>
         </form>
         <span class="d-flex justify-content-center">
-            <p>Already have an account? <a href="/login/" data-link="">Login</a></p>
+            <p data-translate-key="already_registered"></p>
         </span>
     </div>
 </div>
+
+

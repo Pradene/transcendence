@@ -6,6 +6,24 @@ $paddle-height: 20px;
 $paddle-offset: 10px;
 $animation-duration: 10s;
 
+.language-selector {
+    display: flex;
+    justify-content: flex-end;
+    margin: 10px;
+}
+
+.lang-button {
+    background-color: #f0f0f0;
+    border: none;
+    padding: 5px 10px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+.lang-button:hover {
+    background-color: #ccc;
+}
+
 .home {
     height: 90vh;
     width: 100%;
@@ -65,7 +83,7 @@ $animation-duration: 10s;
     height: 100vh;
     width: 100vw;
     z-index: 0;
-    
+
     &.active {
         display: block;
         z-index: 1;

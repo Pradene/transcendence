@@ -1,5 +1,56 @@
 <link rel="stylesheet" href="../../css/home.scss">
 <nav-component></nav-component>
+
+<div class="language-selector">
+    <button class="lang-button" data-lang="en">English</button>
+    <button class="lang-button" data-lang="de">Deutsch</button>
+    <button class="lang-button" data-lang="fr">Francais</button>
+</div>
+
+<div class="home">
+    <div class="game-container">
+        <h4 data-translate-key="online_game_title">Online game</h4>
+        <p data-translate-key="online_game_desc">Play an online game versus another player,<br>
+        first player to 5 points will win the game.</p>
+        <button class="button create-game" data-translate-key="play_button">Play</button>
+    </div>
+
+    <div class="tournament-container">
+        <h4 data-translate-key="tournament_title">Online tournament</h4>
+        <p data-translate-key="tournament_desc">Play in an online tournament,<br>
+        versus 3 other players.</p>
+        <button class="button create-tournament" data-translate-key="play_button">Play</button>
+    </div>
+
+    <div class="local-container">
+        <h4 data-translate-key="local_game_title">Local game</h4>
+        <p data-translate-key="local_game_desc">Play a local game against a friend,<br>
+        first player use arrow key, second one use Q/D.</p>
+        <button class="button create-local" data-translate-key="play_button">Play</button>
+    </div>
+</div>
+
+<div class="game">
+    <div class="scores" id="score">
+        <h2 data-translate-key="score_title">Score:</h2>
+        <div class="container">
+            <div class="user">
+                <h3 class="username"></h3>
+                <h3 class="score"></h3>
+            </div>
+            <div class="opponent">
+                <h3 class="username"></h3>
+                <h3 class="score"></h3>
+            </div>
+        </div>
+    </div>
+
+    <canvas class="game-canvas"></canvas>
+</div>
+
+
+<!-- <link rel="stylesheet" href="../../css/home.scss">
+<nav-component></nav-component>
 <div class="home">
 	<div class="game-container">
 		<h4>Online game</h4>
@@ -39,7 +90,7 @@
 	</div>
 
 	<canvas class="game-canvas"></canvas>
-</div>
+</div> -->
 
 <!-- <nav-component></nav-component>
 <div class="container-fluid">

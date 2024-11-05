@@ -5,23 +5,59 @@ import { Router } from "../utils/Router.js"
 export class Signup extends TemplateComponent {
     constructor() {
         super()
-        
+
         this.handleSubmitListener = async (e) => await this.handleSubmit(e)
         this.ball = undefined
+
+        this.translations = {
+            en: {
+                hello: "Hello,",
+                welcome_message: "We are happy to see you",
+                username_placeholder: "Username",
+                email_placeholder: "Email",
+                password_placeholder: "Password",
+                passwordconfirmation_placeholder: "Password Confirmation",
+                Signup_button: "Sign up",
+               already_registered: "Already registered?&nbsp;<a href='/login/'>Login</a>"
+            },
+            de: {
+                hello: "Hallo,",
+                welcome_message: "Wir freuen uns, Sie zu sehen",
+                username_placeholder: "Benutzername",
+                email_placeholder: "Email",
+                password_placeholder: "Passwort",
+                passwordconfirmation_placeholder: "Passwort Bestätigung",
+                Signup_button: "Registrieren",
+               already_registered: "Schon registriert?&nbsp;<a href='/login/'>Anmelden</a>"
+            },
+            fr: {
+                hello: "Bonjour,",
+                welcome_message: "Nous sommes heureux de vous voir",
+                username_placeholder: "Nom d'utilisateur",
+                email_placeholder: "Email",
+                password_placeholder: "Mot de passe",
+                passwordconfirmation_placeholder: "Confirmez votre mot de passe",
+                Signup_button: "S'inscrire",
+               already_registered: "Deja inscrit?&nbsp;<a href='/login/'>Se connecter</a>"
+            }
+        };
+        this.currentLanguage = localStorage.getItem('selectedLanguage') || "en";
     }
-    
+
     unmount() {
         const form = this.getRef("form")
         form.removeEventListener("submit", this.handleSubmitListener)
-        
+
         this.ball.remove()
     }
 
     async componentDidMount() {
         const form = this.getRef("form")
         form.addEventListener("submit", this.handleSubmitListener)
-        
+
         this.addBouncingBall()
+        this.translatePage()
+        this.setupLanguageButtons()
     }
 
     addBouncingBall() {
@@ -95,6 +131,33 @@ export class Signup extends TemplateComponent {
         }
 
         moveBall()
+    }
+
+    setupLanguageButtons() {
+        document.querySelectorAll(".lang-button").forEach(button => {
+            button.addEventListener("click", (e) => {
+                this.currentLanguage = e.target.dataset.lang;
+
+                localStorage.setItem('selectedLanguage', this.currentLanguage);
+
+                this.translatePage();
+            });
+        });
+    }
+
+    translatePage() {
+        console.log("Page in: ", this.currentLanguage)
+        const elements = document.querySelectorAll("[data-translate-key]");
+        elements.forEach(el => {
+            const key = el.dataset.translateKey;
+            if (this.translations[this.currentLanguage][key])
+                el.innerHTML = this.translations[this.currentLanguage][key];
+        });
+
+        this.getRef("username").placeholder = this.translations[this.currentLanguage].username_placeholder
+        this.getRef("password").placeholder = this.translations[this.currentLanguage].password_placeholder
+        this.getRef("email").placeholder = this.translations[this.currentLanguage].email_placeholder
+        this.getRef("passwordConfirmation").placeholder = this.translations[this.currentLanguage].passwordconfirmation_placeholder
     }
 
     async handleSubmit(event) {

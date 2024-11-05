@@ -19,7 +19,7 @@ export class Profile extends TemplateComponent {
         try {
             const id = this.getProfileID()
             const url = getURL(`api/users/${id}/`)
-            
+
             const user = await apiRequest(url)
 
             const picture = document.getElementById("profile-picture")
@@ -86,7 +86,7 @@ export class Profile extends TemplateComponent {
                     element.classList.add("tournament")
                 container.appendChild(element)
             })
-            
+
         } catch (e) {
             return
         }
@@ -112,7 +112,7 @@ export class Profile extends TemplateComponent {
         // playerImg.src = game.player.picture
         // const playerUsername = document.createElement('p')
         // playerUsername.textContent = game.player.username
-        
+
         const opponent = document.createElement('div')
         opponent.classList.add('player', 'end')
         const opponentImgContainer = document.createElement('div')
@@ -176,7 +176,7 @@ export class Profile extends TemplateComponent {
             const data = await apiRequest(url)
 
             this.displayStats(data)
-            
+
         } catch (e) {
             console.log(e)
             return
@@ -195,16 +195,16 @@ export class Profile extends TemplateComponent {
 
         const progress = document.getElementById('winrate-wins')
         progress.style.strokeDashoffset = 198 * (1 - winrate)
-        
+
         const winrateText = document.getElementById('winrate')
         this.animateNumber(winrateText, winrate * 100, 1000)
 
         const gamesText = document.getElementById('games')
         this.animateNumber(gamesText, games, 200)
-        
+
         const winsText = document.getElementById('wins')
         this.animateNumber(winsText, wins, 200)
-        
+
         const losesText = document.getElementById('loses')
         this.animateNumber(losesText, loses, 200)
     }
@@ -220,7 +220,7 @@ export class Profile extends TemplateComponent {
 
             const currentValue = Math.floor(startValue + (value - startValue) * progress)
             element.textContent = currentValue
-        
+
             if (progress < 1) {
                 requestAnimationFrame(update)
             }

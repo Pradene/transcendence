@@ -7,30 +7,49 @@ import { Router } from "../utils/Router.js"
 export class Login extends TemplateComponent {
     constructor() {
         super()
-        
+
         this.submit42LoginRequestListener = async (e) => await this.submit42LoginRequest(e)
         this.submitLoginRequestListener = async (e) => await this.submitLoginRequest(e)
-    
         this.ball = undefined
-    }
-    
-    unmount() {
-        const form = this.getRef("form")
-        form.removeEventListener("submit", this.submitLoginRequestListener)
-        
-        const OAuthButton = this.getRef("ft_auth")
-        OAuthButton.removeEventListener("click", this.submit42LoginRequestListener)
-        
-        this.ball.remove()
-    }
 
-    async componentDidMount() {
-        const form = this.getRef("form")
-        form.addEventListener("submit", this.submitLoginRequestListener)
+        this.translations = {
+            en: {
+                hello: "Hello,",
+                welcome_message: "We are happy to see you",
+                username_placeholder: "Username",
+                password_placeholder: "Password",
+                remember_me: "Remember me",
+                forgot_password: "Forgot password?",
+                login_button: "Login",
+                login_42: "Login with 42",
+                no_account: "Doesn't have account yet?&nbsp;<a href='/signup/'>Sign up</a>"
 
-        const OAuthButton = this.getRef("ft_auth")
-        OAuthButton.addEventListener("click", this.submit42LoginRequestListener)
-        this.addBouncingBall()
+            },
+            de: {
+                hello: "Hallo,",
+                welcome_message: "Wir freuen uns, Sie zu sehen",
+                username_placeholder: "Benutzername",
+                password_placeholder: "Passwort",
+                remember_me: "Angemeldet bleiben",
+                forgot_password: "Passwort vergessen?",
+                login_button: "Anmelden",
+                login_42: "Mit 42 Anmelden",
+                no_account: "Hat noch kein Konto?&nbsp;<a href='/signup/'> Benutzerkonto erstellen</a>"
+            },
+            fr: {
+                hello: "Bonjour,",
+                welcome_message: "Nous sommes heureux de vous voir",
+                username_placeholder: "Nom d'utilisateur",
+                password_placeholder: "Mot de passe",
+                remember_me: "Se souvenir de moi",
+                forgot_password: "Mot de passe oublié?",
+                login_button: "Se connecter",
+                login_42: "Se connecter avec 42",
+                no_account: "Pas encore de compte?&nbsp;<a href='/signup/'>S'inscrire</a>"
+            }
+        };
+
+        this.currentLanguage = localStorage.getItem('selectedLanguage') || "en";
     }
 
     addBouncingBall() {
@@ -105,6 +124,51 @@ export class Login extends TemplateComponent {
         moveBall()
     }
 
+    unmount() {
+        const form = this.getRef("form")
+        form.removeEventListener("submit", this.submitLoginRequestListener)
+
+        const OAuthButton = this.getRef("ft_auth")
+        OAuthButton.removeEventListener("click", this.submit42LoginRequestListener)
+
+        this.ball.remove()
+    }
+
+    async componentDidMount() {
+        const form = this.getRef("form")
+        form.addEventListener("submit", this.submitLoginRequestListener)
+
+        const OAuthButton = this.getRef("ft_auth")
+        OAuthButton.addEventListener("click", this.submit42LoginRequestListener)
+
+        this.setupLanguageButtons();
+        this.translatePage();
+        this.addBouncingBall()
+    }
+
+    setupLanguageButtons() {
+        document.querySelectorAll(".lang-button").forEach(button => {
+            button.addEventListener("click", (e) => {
+                this.currentLanguage = e.target.dataset.lang;
+
+                localStorage.setItem('selectedLanguage', this.currentLanguage);
+
+                this.translatePage();
+            });
+        });
+    }
+
+    translatePage() {
+        const elements = document.querySelectorAll("[data-translate-key]");
+        elements.forEach(el => {
+            const key = el.dataset.translateKey;
+            el.innerHTML = this.translations[this.currentLanguage][key];
+        });
+
+        this.getRef("username").placeholder = this.translations[this.currentLanguage].username_placeholder;
+        this.getRef("password").placeholder = this.translations[this.currentLanguage].password_placeholder;
+    }
+
     async submitLoginRequest(event) {
         event.preventDefault()
 
@@ -146,11 +210,9 @@ export class Login extends TemplateComponent {
 
             if (data.url) {
                 window.location.href = data.url
-
             } else {
                 throw new Error("Couldn't redirect to external API")
             }
-
         } catch (e) {
             console.log(e)
         }
