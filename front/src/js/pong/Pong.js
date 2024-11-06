@@ -11,7 +11,6 @@ import { Timer } from './Timer.js'
 import { Platform } from './Platform.js'
 import { Stadium } from './Stadium.js'
 import { WSManager } from '../utils/WebSocketManager.js'
-import { Session } from '../utils/Session.js'
 
 export class Pong {
     constructor(id) {
@@ -70,23 +69,18 @@ export class Pong {
             case 'a':
                 WSManager.send('game', { movement: 'UP' })
                 break
-                
             case 'd':                    
                 WSManager.send('game', { movement: 'DOWN' })
                 break
-
             case 'p':
                 this.camera.setPosition(new THREE.Vector3(0, 4, 10))
                 break
-
             case 'o':
                 this.camera.setPosition(new THREE.Vector3(0, 4, -10))
                 break
-
             case 'u':
                 this.camera.setPosition(new THREE.Vector3(0, 10, 0))
                 break
-
             default:
                 break
         }
@@ -95,8 +89,6 @@ export class Pong {
     keyUpHandler(e) {
         switch (e.key) {
             case 'a':
-                WSManager.send('game', { movement: 'NONE'})
-                break
             case 'd':
                 WSManager.send('game', { movement: 'NONE'})
                 break

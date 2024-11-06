@@ -80,7 +80,9 @@ export class Profile extends TemplateComponent {
             const games = await apiRequest(url)
 
             const container = document.getElementById("games-history")
-            games.forEach(game => {
+            console.log(games)
+            
+            games.forEach((game) => {
                 const element = document.createElement('game-min')
                 element.setAttribute('gameid', game.id)
                 if (game.isTournament)
@@ -142,7 +144,6 @@ export class Profile extends TemplateComponent {
     }
 
     displayTournament(game) {
-        console.log("test")
         const element = document.createElement('div')
         element.classList.add('game', 'tournament')
         element.addEventListener('click', (event) => {

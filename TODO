@@ -5,3 +5,8 @@
     - remove check is in game when connecting
     - add connected check if the user is part of players
     - when receiving message check user is inside the game (maybe done ?)
+
+- game historic in front end
+- disconnect game / tournament
+- game pause (maybe)
+- block users
