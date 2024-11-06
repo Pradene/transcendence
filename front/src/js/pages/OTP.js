@@ -1,6 +1,8 @@
 import { Router } from '../utils/Router.js'
 import { TemplateComponent } from '../utils/TemplateComponent.js'
 import { apiRequest, getURL } from '../utils/utils.js'
+import { connectChatSocket } from '../websockets/Chat.js'
+import { connectFriendsSocket } from '../websockets/Friends.js'
 
 export class OTP extends TemplateComponent {
 	constructor() {
@@ -62,6 +64,9 @@ export class OTP extends TemplateComponent {
 					code: input.value
 				}
 			})
+
+			connectChatSocket()
+			connectFriendsSocket()
 
 			const router = Router.get()
 			await router.navigate('/')

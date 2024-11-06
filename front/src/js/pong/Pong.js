@@ -11,9 +11,10 @@ import { Timer } from './Timer.js'
 import { Platform } from './Platform.js'
 import { Stadium } from './Stadium.js'
 import { WSManager } from '../utils/WebSocketManager.js'
+import { Session } from '../utils/Session.js'
 
 export class Pong {
-    constructor(canvas) {
+    constructor(id) {
 
         if (Pong.instance) {
             return Pong.instance
@@ -21,7 +22,11 @@ export class Pong {
 
         Pong.instance = this
 
+        this.gameID = id
+
+        const canvas = document.getElementById('canvas')
         canvas.getContext('webgl2')
+
         this.canvas = canvas
         this.sizes = new Sizes()
         this.scene = new THREE.Scene()
@@ -42,35 +47,97 @@ export class Pong {
         this.endGame = () => this.end()
         window.addEventListener('beforeunload', this.endGame)
     
-        this.inputHandler = (e) => this.changeCameraPosition(e)
-        window.addEventListener('keydown', this.inputHandler)
+        this.keyDown = (e) => this.keyDownHandler(e)
+        window.addEventListener('keydown', this.keyDown)
+
+        this.keyUp = (e) => this.keyUpHandler(e)
+        window.addEventListener('keyup', this.keyUp)
 
         this.requestId = null
         this.display()
+
+        sessionStorage.setItem('game', this.gameID)
+        this.connectGameWebSocket()
     }
 
     static get() {
         return Pong.instance || new Pong()
     }
 
-    changeCameraPosition(e) {
+    keyDownHandler(e) {
         switch (e.key) {
+
+            case 'a':
+                WSManager.send('game', { movement: 'UP' })
+                break
+                
+            case 'd':                    
+                WSManager.send('game', { movement: 'DOWN' })
+                break
+
             case 'p':
                 this.camera.setPosition(new THREE.Vector3(0, 4, 10))
                 break
+
             case 'o':
                 this.camera.setPosition(new THREE.Vector3(0, 4, -10))
                 break
+
             case 'u':
                 this.camera.setPosition(new THREE.Vector3(0, 10, 0))
+                break
+
+            default:
+                break
+        }
+    }
+
+    keyUpHandler(e) {
+        switch (e.key) {
+            case 'a':
+                WSManager.send('game', { movement: 'NONE'})
+                break
+            case 'd':
+                WSManager.send('game', { movement: 'NONE'})
                 break
             default:
                 break
         }
     }
 
+    connectGameWebSocket() {
+        if (!this.gameID) return
+
+        const url = `wss://${location.hostname}:${location.port}/ws/game/${this.gameID}/`
+        const socket = new WebSocket(url)
+        if (!socket) return
+
+        WSManager.add('game', socket)
+
+        socket.onopen = () => {
+            console.log('Connected to game WebSocket')
+        }
+        
+        socket.onmessage = (e) => {
+            const data = JSON.parse(e.data)
+            this.update(data)
+        }
+
+        socket.onerror = async (e) => {
+            console.log('WebSocket error: ', e)
+        }
+
+        socket.onclose = () => {
+            console.log('Game WebSocket closed')
+        }
+    }
+
     end() {
         Pong.instance = null
+        sessionStorage.removeItem('game')
+
+        window.removeEventListener('keydown', this.keyDown)
+        window.removeEventListener('keydown', this.keyUp)
 
         if (this.requestId) {
             window.cancelAnimationFrame(this.requestId)
@@ -162,12 +229,11 @@ export class Pong {
 		}
 		
         const button = document.getElementById('leave-game')
-		button.addEventListener('click', () => this.leaveGame())
+		button.addEventListener('click', async () => await this.leaveGame())
 		result.removeAttribute('hidden')
 	}
 
 	async leaveGame() {
-        console.log('going back')
 		const router = Router.get()
         await router.back()
 	}

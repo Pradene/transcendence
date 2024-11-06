@@ -1,5 +1,5 @@
 import { Router } from './utils/Router.js'
-import { fetchCSRFToken } from './utils/utils.js'
+import { checkLogin, fetchCSRFToken } from './utils/utils.js'
 
 import { Home } from "./pages/Home.js"
 import { Login } from "./pages/Login.js"
@@ -21,10 +21,32 @@ import "../js/components/UserProfile.js"
 import "../js/components/FriendButton.js"
 import "../js/components/GameMin.js"
 import "../css/style.scss"
+import { WSManager } from './utils/WebSocketManager.js'
+import { connectChatSocket } from './websockets/Chat.js'
+import { connectFriendsSocket } from './websockets/Friends.js'
 
 document.addEventListener('DOMContentLoaded', async () => {
 
     await fetchCSRFToken()
+
+    if (checkLogin()) {
+        console.log('Already connected')
+        connectChatSocket()
+        connectFriendsSocket()
+
+        const gameID = sessionStorage.getItem('game')
+        console.log(`game id: ${gameID}`)
+        if (gameID) {
+            new Pong(gameID)
+        }
+        
+        const tournamentID = sessionStorage.getItem('tournament')
+        console.log(`tournament id: ${tournamentID}`)
+        if (tournamentID) {
+            
+        }
+
+    }
 
     const router = new Router([
         {path: '/', view: new Home(), protected: true},

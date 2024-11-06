@@ -29,9 +29,13 @@ export class Home extends TemplateComponent {
         this.showLoadingScreen()
 
         const url = `wss://${location.hostname}:${location.port}/ws/matchmaking/${type}/`
-        const socket = WSManager.add('matchmaking', url)
+        const socket = new WebSocket(url)
+        
+        socket.onmessage = async (e) => {
+            await this.handleMessage(e)
+        }
 
-        socket.onmessage = async (e) => { await this.handleMessage(e) }
+        WSManager.add('matchmaking', socket)
     }
 
     cancelMatchmaking() {

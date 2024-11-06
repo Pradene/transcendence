@@ -29,10 +29,7 @@ class LogoutButton extends HTMLElement {
                 method: "POST"
             })
 
-			console.log(data)
-            
-            WSManager.remove('chat')
-            WSManager.remove('friends')
+            WSManager.removeAll()
             
             const router = Router.get()
             await router.navigate("/login/")

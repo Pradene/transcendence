@@ -1,6 +1,6 @@
-import { Session } from "./Session.js"
-import { WSManager } from "./WebSocketManager.js"
 import jwt from "jsonwebtoken"
+
+import { Session } from "./Session.js"
 
 export function getURL(url) {
     return "https://" + location.hostname + ":" + location.port + "/" + url
@@ -100,6 +100,7 @@ async function refreshToken() {
             method: "POST"
         })
 
+        Session.setUserID()
         return true
 
     } catch (e) {
@@ -107,38 +108,11 @@ async function refreshToken() {
     }
 }
 
-function connectToWebsockets() {
-    const friendsURL = "wss://" + location.hostname + ":" + location.port + "/ws/friends/";
-    const chatURL = "wss://" + location.hostname + ":" + location.port + "/ws/chat/";
-    
-    const friendsSocket = WSManager.add('friends', friendsURL)
-	friendsSocket.onmessage = (e) => {
-		const event = new CustomEvent('friendsEvent', {
-			detail: e
-		})
-
-		window.dispatchEvent(event)
-	}
-
-    const chatSocket = WSManager.add('chat', chatURL)
-	chatSocket.onmessage = (e) => {
-		const event = new CustomEvent('chatEvent', {
-			detail: e
-		})
-		
-		window.dispatchEvent(event)
-	}
-
-}
-
 export async function checkLogin() {
     try {
         const access = getCookie("access_token")
         if (!access) {
             const value = await refreshToken()
-            if (value)
-                Session.setUserID()
-                connectToWebsockets()
 
             return value
         }
@@ -146,10 +120,9 @@ export async function checkLogin() {
         const decoded = jwt.decode(access)
         const current = Date.now() / 1000
 
-        Session.setUserID()
-
+        
         if (decoded.exp > current) {
-            connectToWebsockets()
+            Session.setUserID()
             return true
 
         } else {

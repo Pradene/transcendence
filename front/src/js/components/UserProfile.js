@@ -1,8 +1,9 @@
-import {Router} from "../utils/Router";
+import {Router} from "../utils/Router"
 
 class UserProfile extends HTMLElement {
     constructor() {
-        super();
+        super()
+        
         this.userid = 0
     }
 

@@ -25,6 +25,23 @@ class Game(models.Model):
     def is_finished(self):
         return self.status == 'finished'
 
+    def toJSON(self):
+        players = [{
+            'id': score.player.id,
+            'name': score.player.username,
+            'score': score.score
+        } for score in self.scores.all()]
+
+        data = {
+            'id': self.id,
+            'status': self.status,
+            'tournament': self.tournament if self.tournament else None,
+            # 'winner': self.winner if self.winner else None,
+            'players': players
+        }
+
+        return data
+
 class Score(models.Model):
     game = models.ForeignKey(Game, related_name='scores', on_delete=models.CASCADE)
     player = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
