@@ -2,11 +2,6 @@ FROM python:3.11.9-alpine
 
 WORKDIR /app
 
-COPY requirements.txt .
-COPY ./tools/script.sh /usr/sbin/entrypoint.sh
-COPY ./insults.txt .
-RUN chmod +x /usr/sbin/entrypoint.sh
-
 RUN apk update && \
     apk add --no-cache \
     postgresql-dev \
@@ -14,7 +9,13 @@ RUN apk update && \
     musl-dev \
     bash
 
+COPY requirements.txt .
 RUN pip install -r requirements.txt
+
+COPY . /app
+COPY ./tools/script.sh /usr/sbin/entrypoint.sh
+COPY ./insults.txt .
+RUN chmod +x /usr/sbin/entrypoint.sh
 
 EXPOSE 8000
 

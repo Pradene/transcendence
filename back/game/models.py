@@ -50,3 +50,8 @@ class Score(models.Model):
     class Meta:
         unique_together = ('game', 'player')
 
+    def toJSON(self):
+        return {
+            'player': self.player.toJSON(),
+            'score': self.score
+        }
