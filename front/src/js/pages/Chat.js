@@ -8,12 +8,32 @@ export class Chat extends TemplateComponent {
 
         this.handleSearchListener = () => this.handleSearch()
         this.receiveMessageListener = (e) => this.receiveMessage(e.detail)
+        this.translations = {
+            en: {
+                messages: "Messages",
+                search_placeholder: "Search...",
+                default_message: "Send a message..."
+            },
+            de: {
+                messages: "Nachrichten",
+                search_placeholder: "Suchen...",
+                default_message: "Ein Nachricht senden..."
+            },
+            fr: {
+                messages: "Messages",
+                search_placeholder: "Rechercher...",
+                default_message: "Envoyer un message..."
+            }
+        };
+
+        this.currentLanguage = localStorage.getItem('selectedLanguage') || 'de';
+
     }
 
     async unmount() {
         const input = this.getRef('input')
         input.removeEventListener('keyup', this.handleSearchListener)
-        
+
         window.removeEventListener('chatEvent', this.receiveMessageListener)
     }
 
@@ -24,6 +44,45 @@ export class Chat extends TemplateComponent {
         input.addEventListener('keyup', this.handleSearchListener)
 
         window.addEventListener('chatEvent', this.receiveMessageListener)
+        this.setupLanguageButtons();
+        this.translatePage();
+    }
+
+    setupLanguageButtons() {
+        document.querySelectorAll(".lang-button").forEach(button => {
+            button.addEventListener("click", (e) => {
+                this.currentLanguage = e.target.dataset.lang
+                localStorage.setItem('selectedLanguage', this.currentLanguage)
+                this.translatePage()
+            })
+        })
+    }
+
+    translatePage() {
+        const elements = document.querySelectorAll("[data-translate-key]");
+        elements.forEach(el => {
+            const key = el.dataset.translateKey;
+            if (this.translations[this.currentLanguage][key]) {
+                el.textContent = this.translations[this.currentLanguage][key];
+            }
+        });
+
+        const input = this.getRef("input");
+        input.placeholder = this.translations[this.currentLanguage].search_placeholder;
+
+        const roomElements = this.getRef('rooms').children;
+        Array.from(roomElements).forEach(room => {
+            const messageEl = room.querySelector('.message');
+            const currentMessage = messageEl.textContent.trim();
+
+            if ([
+                this.translations['en'].default_message,
+                this.translations['de'].default_message,
+                this.translations['fr'].default_message
+            ].includes(currentMessage)) {
+                messageEl.textContent = this.translations[this.currentLanguage].default_message;
+            }
+        });
     }
 
     async getRooms() {
@@ -36,7 +95,7 @@ export class Chat extends TemplateComponent {
                 const element = this.displayRoom(room)
                 container.appendChild(element)
             })
-            
+
         } catch (error) {
             console.log(error)
         }
@@ -105,7 +164,7 @@ export class Chat extends TemplateComponent {
         if (room.last_message) {
             message.textContent = room.last_message.content
         } else {
-            message.textContent = "Send a message..."
+            message.textContent = this.translations[this.currentLanguage].default_message
         }
 
         element.appendChild(link)

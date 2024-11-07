@@ -1,38 +1,43 @@
+<div class="language-selector">
+    <button class="lang-button" data-lang="en">English</button>
+    <button class="lang-button" data-lang="de">Deutsch</button>
+    <button class="lang-button" data-lang="fr">Français</button>
+</div>
+
 <div class="min-vh-100 d-flex flex-column align-items-center justify-content-center">
     <div class="container py-2xl px-xl">
         <div>
-            <p class="text-xl mb-2xs">Hello,</p>
-            <p class="text-md mb-xl">We are happy to see you</p>
+            <p class="text-xl mb-2xs" data-translate-key="hello">Hello,</p>
+            <p class="text-md mb-xl" data-translate-key="welcome_message">We are happy to see you</p>
         </div>
         <form ref="form" action="POST">
             <div class="input mb-md">
-                <input id="username" placeholder="Username" type="text" autocomplete="off" required="True" />
+                <input ref="username" placeholder="Username" data-translate-key="username_placeholder" type="text" autocomplete="off" required="True" />
                 <label for="username" class="hidden">X</label>
             </div>
 
             <div class="input mb-md">
-                <input id="password" placeholder="Password" type="password" autocomplete="off" required="True" />
+                <input ref="password" placeholder="Password" type="password" autocomplete="off" required="True" />
                 <label for="password" class="hidden">X</label>
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-xl">
                 <div class="d-flex align-items-baseline">
                     <input id="remember-me" type="checkbox" />
-                    <label for="remember-me" class="px-2xs">Remember me</label>
+                    <label for="remember-me" class="px-2xs" data-translate-key="remember_me">Remember me</label>
                 </div>
-                <a href="/" data-link="">Forgot password?</a>
+                <a href="/" data-link="" data-translate-key="forgot_password">Forgot password?</a>
             </div>
 
-            <button type="submit" class="button w-100 mb-xs">Login</button>
+            <button type="submit" class="button w-100 mb-xs" data-translate-key="login_button">Login</button>
         </form>
 
         <span>
-            <button class="button w-100 mb-xl" ref="ft_auth" id="ft_auth">Login with 42</button>
+            <button class="button w-100 mb-xl" ref="ft_auth" id="ft_auth" data-translate-key="login_42">Login with 42</button>
         </span>
-        
+
         <span class="d-flex justify-content-center">
-            <p>Doesn't have account yet?</p>
-            <a href="/signup/" data-link="" class="px-2xs">Sign up</a>
+            <p data-translate-key="no_account"></p>
         </span>
     </div>
 </div>

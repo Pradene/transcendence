@@ -8,24 +8,69 @@ export class ChatRoom extends TemplateComponent {
     constructor() {
         super()
 
-        this.sendMessageListener = async (e) => this.sendMessage(e) 
+        this.invitations = []
+        this.translations = {
+            en: {
+                send: "Send",
+                invite: "Invite",
+                writingInvite: "Write a message...",
+                invitation_sent: "You have invited your opponent to a duel, waiting for a replie...",
+                btn_accept: "Accept",
+                btn_cancel: "Cancel",
+                btn_decline: "Decline",
+                invitation_accepted: "Invitation accepted",
+                invitation_canceled: "Invitation canceled",
+                invitation_declined: "Invitation declined",
+                invitation_refused: "Invitation refused"
+            },
+            de: {
+                send: "Senden",
+                invite: "Einladen",
+                writingInvite: "Schreiben Sie eine Nachricht...",
+                invitation_sent: "Sie haben Ihren Gegner zum Duell eingeladen, auf eine Antwort wartend...",
+                btn_accept: "Annehmen",
+                btn_cancel: "Stornieren",
+                btn_decline: "Ablehnen",
+                invitation_accepted: "Einladung angenommen",
+                invitation_canceled: "Einladung storniert",
+                invitation_declined: "Einladung abgelehnt",
+                invitation_refused: "Einladung abgelehnt"
+            },
+            fr: {
+                send: "Envoyer",
+                invite: "Inviter",
+                writingInvite: "Ecrivez un message...",
+                invitation_sent: "Vous avez invitez votre ami a un duel, en attente de reponse...",
+                btn_accept: "Accepter",
+                btn_cancel: "Annuler",
+                btn_decline: "Refuser",
+                invitation_accepted: "Invitation acceptee",
+                invitation_canceled: "Invitation annulee",
+                invitation_declined: "Invitation refusee",
+                invitation_refused: "Invitation refusee"
+            }
+        };
+
+        this.currentLanguage = localStorage.getItem('selectedLanguage') || 'en';
+
+        this.sendMessageListener = async (e) => this.sendMessage(e)
         this.WebsocketMessageListener = (e) => this.WebsocketMessage(e.detail)
         this.sendInvitationListener = async (e) => this.sendInvitation(e)
         this.acceptInvitationListener = async (e) => this.acceptInvitation(e)
         this.refuseInvitationListener = async (e) => this.refuseInvitation(e)
 		this.cancelInvitaionListener = async (e) => this.cancelInvitaion(e)
-    
+
         this.roomID = null
     }
 
     async unmount() {
         const form = this.getRef('form')
         form.addEventListener('submit', this.sendMessageListener)
-        
+
         window.addEventListener('chatEvent', this.WebsocketMessageListener)
-        
+
         document.querySelector('button.duel-invite').removeEventListener('click', this.sendInvitationListener)
-        
+
         await this.cancelAllInvitations()
     }
 
@@ -33,17 +78,47 @@ export class ChatRoom extends TemplateComponent {
         this.roomID = this.getRoomID()
 
         await this.getMessages()
-        
+
         const form = this.getRef('form')
         form.addEventListener('submit', this.sendMessageListener)
-        
+
         window.addEventListener('chatEvent', this.WebsocketMessageListener)
 
         const invitationButton = document.querySelector('button.duel-invite')
         invitationButton.addEventListener('click', this.sendInvitationListener)
-    
+
         const messages = this.getRef('messages')
         messages.addEventListener('click', (e) => this.handleInvitationClick(e))
+        this.setupLanguageButtons();
+        this.translatePage();
+    }
+
+    setupLanguageButtons() {
+        document.querySelectorAll(".lang-button").forEach(button => {
+            button.addEventListener("click", (e) => {
+                this.currentLanguage = e.target.dataset.lang
+                localStorage.setItem('selectedLanguage', this.currentLanguage)
+                this.translatePage()
+            })
+        })
+    }
+
+    translatePage() {
+        const elements = document.querySelectorAll("[data-translate-key]");
+        elements.forEach(el => {
+            const key = el.dataset.translateKey;
+            if (this.translations[this.currentLanguage][key]) {
+                el.textContent = this.translations[this.currentLanguage][key];
+            }
+            const input = this.getRef("input");
+            if (input) {
+                input.placeholder = this.translations[this.currentLanguage].writingInvite;
+            }
+        })
+        this.invitations.forEach(({ container, invitation }) => {
+            container.innerHTML = '';
+            this.displayInvitation(container, invitation);
+        });
     }
 
     async WebsocketMessage(event) {
@@ -57,9 +132,9 @@ export class ChatRoom extends TemplateComponent {
         } else if (message.type === 'message') {
 			const container = this.getRef('messages')
             this.displayMessage(container, message)
-            
+
 		} else if (message.type === 'invitation') {
-            
+
             if (message.status === 'pending') {
                 const container = this.getRef('messages')
 				this.displayMessage(container, message)
@@ -76,7 +151,7 @@ export class ChatRoom extends TemplateComponent {
 			} else if (message.status === 'canceled') {
 				this.handleInvitationCanceled(message)
 			}
-	
+
 		}
     }
 
@@ -108,7 +183,7 @@ export class ChatRoom extends TemplateComponent {
             buttons.remove()
 
         const content = document.createElement('p')
-        content.textContent = 'Invitation refused'
+        content.textContent =  this.translations[this.currentLanguage].invitation_refused
         invitation.appendChild(content)
     }
 
@@ -121,7 +196,7 @@ export class ChatRoom extends TemplateComponent {
             buttons.remove()
 
         const content = document.createElement('p')
-        content.textContent = 'Invitation canceled'
+        content.textContent =  this.translations[this.currentLanguage].invitation_declined
         invitation.appendChild(content)
     }
 
@@ -175,7 +250,7 @@ export class ChatRoom extends TemplateComponent {
     async acceptInvitation(invitation) {
         const roomID = this.roomID
 		const invitation_id = invitation.getAttribute('data-invitation-id')
-        
+
         WSManager.send('chat', {
             type: 'accept_invitation',
             room_id: roomID,
@@ -187,7 +262,7 @@ export class ChatRoom extends TemplateComponent {
     async refuseInvitation(invitation) {
         const roomID = this.roomID
 		const invitation_id = invitation.getAttribute('data-invitation-id')
-        
+
         WSManager.send('chat', {
 			type: 'decline_invitation',
             room_id: roomID,
@@ -199,7 +274,7 @@ export class ChatRoom extends TemplateComponent {
 	async cancelInvitaion(invitation) {
         const roomID = this.roomID
 		const invitation_id = invitation.getAttribute('data-invitation-id')
-        
+
         WSManager.send('chat', {
             type: 'cancel_invitation',
             room_id: roomID,
@@ -218,7 +293,7 @@ export class ChatRoom extends TemplateComponent {
         })
     }
 
-    // Get all messages from the server 
+    // Get all messages from the server
     // and after display them in the chat
     async getMessages() {
         try {
@@ -239,12 +314,13 @@ export class ChatRoom extends TemplateComponent {
 
     // Display message
     displayMessage(container, message) {
+		console.log('display')
         if (!message)
             return
 
         const element = document.createElement('div')
         element.classList.add('message')
-        
+
         if (message.sender.id === Session.getUserID())
             element.classList.add('right')
 
@@ -255,7 +331,7 @@ export class ChatRoom extends TemplateComponent {
 
         const img = document.createElement('img')
         img.src = message.sender.picture
-        
+
         const messageContainer = document.createElement('div')
         messageContainer.className = 'content'
 
@@ -285,45 +361,52 @@ export class ChatRoom extends TemplateComponent {
     // Display the invitation based on her status
     displayInvitation(container, invitation) {
         const status = invitation.status
-        
+
+        const existingInvitation = this.invitations.find(
+            item => item.invitation.id === invitation.id
+        );
+        if (!existingInvitation) {
+            this.invitations.push({ container, invitation });
+        }
+
         if (status === 'pending') {
             const buttonContainer = document.createElement('div')
             buttonContainer.className = 'flex'
-            
+
             if (invitation.sender.id === Session.getUserID()) {
                 const cancelButton = document.createElement('button')
-                cancelButton.textContent = 'Cancel'
+                cancelButton.textContent = this.translations[this.currentLanguage].btn_cancel
                 cancelButton.className = 'button cancel'
                 buttonContainer.appendChild(cancelButton)
 
             } else {
                 const acceptButton = document.createElement('button')
-                acceptButton.textContent = 'Accept'
+                acceptButton.textContent = this.translations[this.currentLanguage].btn_accept
                 acceptButton.className = 'button accept'
 
                 const declineButton = document.createElement('button')
-                declineButton.textContent = 'Decline'
+                declineButton.textContent = this.translations[this.currentLanguage].btn_decline
                 declineButton.className = 'button decline'
-            
+
                 buttonContainer.appendChild(acceptButton)
                 buttonContainer.appendChild(declineButton)
             }
 
             container.appendChild(buttonContainer)
-        
+
         } else if (status === 'accepted') {
             const acceptedMessage = document.createElement('p')
-            acceptedMessage.textContent = 'Invitation accepted'
+            acceptedMessage.textContent = this.translations[this.currentLanguage].invitation_accepted
             container.appendChild(acceptedMessage)
-            
+
         } else if (status === 'declined') {
             const declinedMessage = document.createElement('p')
-            declinedMessage.textContent = 'Invitation declined'
+            declinedMessage.textContent = this.translations[this.currentLanguage].invitation_declined
             container.appendChild(declinedMessage)
-            
+
         } else if (status === 'canceled') {
             const canceledMessage = document.createElement('p')
-            canceledMessage.textContent = 'Invitation canceled'
+            canceledMessage.textContent =  this.translations[this.currentLanguage].invitation_canceled
             container.appendChild(canceledMessage)
         }
 

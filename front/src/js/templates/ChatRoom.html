@@ -1,4 +1,11 @@
 <nav-component></nav-component>
+
+<div class="language-selector">
+    <button class="lang-button" data-lang="en">English</button>
+    <button class="lang-button" data-lang="de">Deutsch</button>
+    <button class="lang-button" data-lang="fr">Français</button>
+</div>
+
 <div class="chatroom">
     <div ref="messages" class="messages"></div>
     <div class="form-container">
@@ -7,9 +14,9 @@
                 <div class="input">
                     <input ref="input" type="text" placeholder="Write a message..." autocomplete=off></input>
                 </div>
-                <button type="submit" class="button ml__12">Send</button>
+                <button type="submit" class="button ml__12" data-translate-key="send">Send</button>
             </form>
-            <button class="button duel-invite">Invite</button>
+            <button class="button duel-invite" data-translate-key="invite">Invite</button>
         </div>
     </div>
 </div>

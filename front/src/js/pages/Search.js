@@ -10,6 +10,33 @@ export class Search extends TemplateComponent {
         this.searchUserListener = (e) => this.searchUser(e.target.value)
         this.WebsocketMessageListener = (e) => this.WebsocketMessage(e.detail)
         this.handleRequetsListener = (e) => this.handleRequests(e)
+        this.translations = {
+            en: {
+                users: "Users",
+                friends: "Friends",
+                requests: "Requests",
+                accept: "Accept",
+                decline: "Decline",
+                search_placeholder: "Search..."
+            },
+            fr: {
+                users: "Utilisateurs",
+                friends: "Amis",
+                requests: "Requêtes",
+                accept: "Accepter",
+                decline: "Refuser",
+                search_placeholder: "Rechercher..."
+            },
+            de: {
+                users: "Benutzern",
+                friends: "Freunde",
+                requests: "Anfragen",
+                accept: "Anzunehmen",
+                decline: "Abzulehnen",
+                search_placeholder: "Suchen..."
+            }
+        };
+        this.currentLanguage = localStorage.getItem('selectedLanguage') || "en";
     }
 
     async unmount() {
@@ -18,7 +45,7 @@ export class Search extends TemplateComponent {
 
         const requests = this.getRef('requests')
         requests.removeEventListener("click", this.handleRequetsListener)
-    
+
         window.removeEventListener('friendsEvent', this.WebsocketMessageListener)
     }
 
@@ -33,6 +60,30 @@ export class Search extends TemplateComponent {
         input.addEventListener("input", this.searchUserListener)
 
         window.addEventListener('friendsEvent', this.WebsocketMessageListener)
+        this.setupLanguageButtons()
+        this.translatePage()
+    }
+
+    setupLanguageButtons() {
+        document.querySelectorAll(".lang-button").forEach(button => {
+            button.addEventListener("click", (e) => {
+                this.currentLanguage = e.target.dataset.lang;
+
+                localStorage.setItem('selectedLanguage', this.currentLanguage);
+
+                this.translatePage();
+            });
+        });
+    }
+
+    translatePage() {
+        const lang = this.currentLanguage;
+
+        this.getRef("input").placeholder = this.translations[lang].search_placeholder;
+
+        document.querySelector("[data-translate-key='users']").textContent = this.translations[lang].users;
+        document.querySelector("[data-translate-key='friends']").textContent = this.translations[lang].friends;
+        document.querySelector("[data-translate-key='requests']").textContent = this.translations[lang].requests;
     }
 
     // Searching users
@@ -40,7 +91,7 @@ export class Search extends TemplateComponent {
         try {
             const container = this.getRef("users")
             container.replaceChildren()
-            
+
             if (!query) return
 
             const url = getURL(`api/users/search/?q=${query}`)
@@ -104,12 +155,12 @@ export class Search extends TemplateComponent {
             const container = this.getRef('requests')
             const element = this.displayRequest(message)
             container.appendChild(element)
-        
+
         } else if (message.action && message.action === 'friend_removed') {
             const container = this.getRef('friends')
             const element = container.querySelector(`[data-id='${message.user.id}']`)
             element.remove()
-        
+
 		} else if (message.action && message.action === 'friend_request_cancelled') {
 			const container = this.getRef('requests')
 			const element = container.querySelector(`[data-id='${message.user.id}']`)
@@ -178,11 +229,11 @@ export class Search extends TemplateComponent {
 
         const accept = document.createElement('button')
         accept.className = 'button accept'
-        accept.textContent = 'Accept'
-        
+        accept.textContent = this.translations[this.currentLanguage].accept
+
         const decline = document.createElement('button')
         decline.className = 'button decline'
-        decline.textContent = 'Decline'
+        decline.textContent = this.translations[this.currentLanguage].decline
 
         imgContainer.appendChild(img)
         imgContainer.appendChild(status)
@@ -202,11 +253,11 @@ export class Search extends TemplateComponent {
 
         const request = e.target.closest('li')
         const id = request.getAttribute('data-id')
-        
+
         if (e.target.classList.contains('accept')) {
             this.sendAcceptRequest(id)
             request.remove()
-            
+
         } else if (e.target.classList.contains('decline')) {
             this.sendDeclineRequest(id)
             request.remove()
