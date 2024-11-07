@@ -24,6 +24,7 @@ export class Pong {
         this.gameID = id
 
         const canvas = document.getElementById('canvas')
+        if (!canvas) return
         canvas.getContext('webgl2')
 
         this.canvas = canvas
@@ -36,8 +37,8 @@ export class Pong {
         this.platform = new Platform()
         this.stadium = new Stadium()
 
-        this.player = new Player()
-        this.opponent = new Player()
+        this.player = new Player({x: -400 + 20, y: 0})
+        this.opponent = new Player({x: 400 - 20, y: 0})
 
         this.ball = new Ball()
 
@@ -55,7 +56,6 @@ export class Pong {
         this.requestId = null
         this.display()
 
-        sessionStorage.setItem('game', this.gameID)
         this.connectGameWebSocket()
     }
 
@@ -100,14 +100,17 @@ export class Pong {
     connectGameWebSocket() {
         if (!this.gameID) return
 
+        
         const url = `wss://${location.hostname}:${location.port}/ws/game/${this.gameID}/`
         const socket = new WebSocket(url)
         if (!socket) return
-
+            
         WSManager.add('game', socket)
 
         socket.onopen = () => {
             console.log('Connected to game WebSocket')
+        
+            sessionStorage.setItem('game', this.gameID)
         }
         
         socket.onmessage = (e) => {
@@ -117,6 +120,12 @@ export class Pong {
 
         socket.onerror = async (e) => {
             console.log('WebSocket error: ', e)
+
+            sessionStorage.removeItem('game')
+            socket.close()
+            
+            const router = Router.get()
+            router.back()            
         }
 
         socket.onclose = () => {
@@ -126,7 +135,6 @@ export class Pong {
 
     end() {
         Pong.instance = null
-        sessionStorage.removeItem('game')
 
         window.removeEventListener('keydown', this.keyDown)
         window.removeEventListener('keydown', this.keyUp)
@@ -156,14 +164,17 @@ export class Pong {
             this.displayScore(data)
             
         } else if (data && data.status === 'finished') {
+            sessionStorage.removeItem('game')
+            WSManager.remove('game')
+            
             this.displayScore(data)
+			this.displayResult(data)
+
             this.ball.remove()
             this.player.remove()
             this.opponent.remove()
             this.platform.remove()
-			this.displayResult(data)
-
-            WSManager.remove('game')
+            this.stadium.remove()
         }
     }
     

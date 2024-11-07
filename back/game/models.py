@@ -10,6 +10,7 @@ class Game(models.Model):
         ('waiting', 'Waiting'),
         ('ready', 'Ready'),
         ('started', 'Started'),
+        ('paused', 'Paused'),
         ('finished', 'Finished')
     ], default='waiting')
     players = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='games')

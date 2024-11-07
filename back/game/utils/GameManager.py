@@ -177,12 +177,22 @@ class GameManager:
         for player in self.players.values():
             if player.position.x == x_position:
                 return player
-        return None 
+        return None
 
 
     def update_player(self, user_id, movement):
         player = self.players.get(user_id)
         player.setMovement(movement)
+
+
+    async def quit(self, user_id):
+        player = self.players.get(user_id)
+
+        self.game.status = 'finished'
+        await database_sync_to_async(
+            self.game.save
+        )()
+
 
 
     def get_player_info(self, user_id):

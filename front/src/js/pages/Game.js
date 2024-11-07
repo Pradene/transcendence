@@ -7,9 +7,6 @@ export class Game extends TemplateComponent {
         super()
 
         this.game = undefined
-        this.socket = undefined
-
-        this.removeGame = () => this.game?.end()
     }
 
     async unmount() {
@@ -17,15 +14,11 @@ export class Game extends TemplateComponent {
 
         if (this.game)
             this.game.end()
-
-        window.removeEventListener('beforeunload', this.removeGame)
     }
 
     async componentDidMount() {
         const id = this.getGameID()
         this.game = new Pong(id)
-
-        window.addEventListener('beforeunload', this.removeGame)
     }
 
     getGameID() {

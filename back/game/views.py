@@ -24,7 +24,7 @@ def gameHistory(request):
 def gameStats(request):
     try:
         user = request.user
-        games = Game.objects.filter(players=user)
+        games = Game.objects.filter(players=user, status='finished')
 
         wins = games.filter(winner=user).count()
         loses = games.exclude(winner=user).count()

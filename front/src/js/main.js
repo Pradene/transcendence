@@ -24,7 +24,29 @@ import "../js/components/FriendButton.js"
 import "../js/components/GameMin.js"
 import "../css/style.scss"
 
+const router = new Router([
+    {path: '/', view: new Home(), protected: true},
+    {path: '/chat/', view: new Chat(), protected: true},
+    {path: '/chat/:id/', view: new ChatRoom(), protected: true},
+    {path: '/users/', view: new Search(), protected: true},
+    {path: '/users/:id/', view: new Profile(), protected: true},
+    {path: '/users/:id/edit/', view: new EditProfile(), protected: true},
+    {path: '/login/', view: new Login(), protected: false},
+    {path: '/signup/', view: new Signup(), protected: false},
+    {path: '/verify-otp/', view: new OTP(), protected: false},
+    {path: '/game/:id/', view: new Game(), protected: true},
+    {path: '/tournament/:id/', view: new Tournament(), protected: true},
+])
+
 document.addEventListener('DOMContentLoaded', async () => {
+
+    document.body.addEventListener('click', async (event) => {
+        const target = event.target
+        if (isDataLink(target)) {
+            event.preventDefault()
+            await router.navigate(target.href)
+        }
+    })
 
     await fetchCSRFToken()
 
@@ -34,37 +56,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const gameID = sessionStorage.getItem('game')
         if (gameID) {
-            new Pong(gameID)
+            const router = Router.get()
+            router.navigate(`/game/${gameID}/`)
         }
         
         const tournamentID = sessionStorage.getItem('tournament')
         if (tournamentID) {
             connectTournamentSocket(tournamentID)
         }
-
     }
-
-    const router = new Router([
-        {path: '/', view: new Home(), protected: true},
-        {path: '/chat/', view: new Chat(), protected: true},
-        {path: '/chat/:id/', view: new ChatRoom(), protected: true},
-        {path: '/users/', view: new Search(), protected: true},
-        {path: '/users/:id/', view: new Profile(), protected: true},
-        {path: '/users/:id/edit/', view: new EditProfile(), protected: true},
-        {path: '/login/', view: new Login(), protected: false},
-        {path: '/signup/', view: new Signup(), protected: false},
-        {path: '/verify-otp/', view: new OTP(), protected: false},
-        {path: '/game/:id/', view: new Game(), protected: true},
-        {path: '/tournament/:id/', view: new Tournament(), protected: true},
-    ])
-
-    document.body.addEventListener('click', async (event) => {
-        const target = event.target
-        if (isDataLink(target)) {
-            event.preventDefault()
-            await router.navigate(target.href)
-        }
-    })
 })
 
 const isDataLink = (elem) => {
