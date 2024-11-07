@@ -1,3 +1,4 @@
+import { disconnect } from "process"
 import { Router } from "../utils/Router.js"
 import { getURL, apiRequest } from "../utils/utils.js"
 import { WSManager } from "../utils/WebSocketManager.js"
@@ -6,12 +7,25 @@ class LogoutButton extends HTMLElement {
     constructor() {
         super()
 
+        this.translations = {
+            en: {
+                disconnect: "Disconnect"
+            },
+            de: {
+                disconnect: "Abziehen"
+            },
+            fr: {
+                disconnect: "Se deconnecter"
+            }
+
+        }
+        this.currentLanguage = localStorage.getItem('selectedLanguage') || 'en';
         this._button = null
     }
 
     connectedCallback() {
         this._button = document.createElement("button")
-        this._button.textContent = "Disconnect"
+        this._button.textContent = this.translations[this.currentLanguage].disconnect
         this._button.className = "button"
 
         this._button.addEventListener("click", async () => {
@@ -30,7 +44,7 @@ class LogoutButton extends HTMLElement {
             })
 
             WSManager.removeAll()
-            
+
             const router = Router.get()
             await router.navigate("/login/")
 
