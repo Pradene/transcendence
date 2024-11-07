@@ -1,10 +1,48 @@
 import { TemplateComponent } from "../utils/TemplateComponent.js"
 import { getURL, apiRequest, getConnectedUserID } from "../utils/utils.js"
 import { Session } from "../utils/Session.js"
+import { disconnect } from "process"
 
 export class Profile extends TemplateComponent {
     constructor() {
         super()
+
+        this.translations = {
+            en: {
+                editProfile: "Edit profile",
+                disconnect: "Disconnect",
+                won: "Won",
+                lost: "Lost",
+                games: "games",
+                wins: "wins",
+                loses: "loses",
+                winrate: "winrate",
+                level: "Level"
+            },
+            fr: {
+                editProfile: "Modifier le profil",
+                disconnect: "Se deconnecter",
+                won: "Gagné",
+                lost: "Perdu",
+                games: "parties",
+                wins: "victoires",
+                loses: "défaites",
+                winrate: "Taux de victoire",
+                level: "Niveau"
+            },
+            de: {
+                editProfile: "Profil bearbeiten",
+                disconnect: "Abziehen",
+                won: "Gewonnen",
+                lost: "Verloren",
+                games: "Spiele",
+                wins: "Siege",
+                loses: "Niederlagen",
+                winrate: "Gewinnrate",
+                level: "Stufe"
+            }
+        }
+        this.currentLanguage = localStorage.getItem('selectedLanguage') || 'en';
     }
 
     async unmount() {}
@@ -14,13 +52,56 @@ export class Profile extends TemplateComponent {
         await this.getLevel()
         await this.getGames()
         await this.getStats()
+        this.setupLanguageButtons()
+        this.translatePage()
+    }
+
+    setupLanguageButtons() {
+        document.querySelectorAll(".lang-button").forEach(button => {
+            button.addEventListener("click", (e) => {
+                this.currentLanguage = e.target.dataset.lang
+                localStorage.setItem('selectedLanguage', this.currentLanguage)
+                this.translatePage()
+            })
+        })
+    }
+
+    translatePage() {
+
+        const elements = document.querySelectorAll('[data-translation-key]');
+
+        elements.forEach(element => {
+            const translationKey = element.getAttribute('data-translation-key');
+
+            if (this.translations[this.currentLanguage] && this.translations[this.currentLanguage][translationKey]) {
+                element.textContent = this.translations[this.currentLanguage][translationKey];
+            }
+        });
+        const levelText = document.querySelector('.level > div:first-child')
+        if (levelText) levelText.firstChild.nodeValue = this.translations[this.currentLanguage].level + ' '
+
+        const gamesLabel = document.querySelector('#games + p')
+        if (gamesLabel) gamesLabel.textContent = this.translations[this.currentLanguage].games
+
+        const winsLabel = document.querySelector('#wins + p')
+        if (winsLabel) winsLabel.textContent = this.translations[this.currentLanguage].wins
+
+        const losesLabel = document.querySelector('#loses + p')
+        if (losesLabel) losesLabel.textContent = this.translations[this.currentLanguage].loses
+
+        const editButton = document.querySelector("a.button")
+        if (editButton) editButton.textContent = this.translations[this.currentLanguage].editProfile
+        const logoutButton = document.querySelector("logout-button button");
+        if (logoutButton) {
+            logoutButton.textContent = this.translations[this.currentLanguage].disconnect;
+        }
     }
 
     async getUser() {
         try {
             const id = this.getProfileID()
             const url = getURL(`api/users/${id}/`)
-            
+
             const user = await apiRequest(url)
 
             const picture = document.getElementById("profile-picture")
@@ -81,14 +162,14 @@ export class Profile extends TemplateComponent {
 
             const container = document.getElementById("games-history")
             console.log(games)
-            
+
             games.forEach((game) => {
 				console.log('hello')
 				const element = this.displayGame(game)
 				console.log(element)
 				container.appendChild(element)
             })
-            
+
         } catch (e) {
 			console.log(e)
             return
@@ -123,7 +204,7 @@ export class Profile extends TemplateComponent {
         playerImg.src = player.picture
         const playerUsername = document.createElement('p')
         playerUsername.textContent = player.username
-        
+
         const opponentContainer = document.createElement('div')
         opponentContainer.classList.add('player', 'end')
         const opponentImgContainer = document.createElement('div')
@@ -186,7 +267,7 @@ export class Profile extends TemplateComponent {
             const data = await apiRequest(url)
 
             this.displayStats(data)
-            
+
         } catch (e) {
             console.log(e)
             return
@@ -205,16 +286,16 @@ export class Profile extends TemplateComponent {
 
         const progress = document.getElementById('winrate-wins')
         progress.style.strokeDashoffset = 198 * (1 - winrate)
-        
+
         const winrateText = document.getElementById('winrate')
         this.animateNumber(winrateText, winrate * 100, 1000)
 
         const gamesText = document.getElementById('games')
         this.animateNumber(gamesText, games, 200)
-        
+
         const winsText = document.getElementById('wins')
         this.animateNumber(winsText, wins, 200)
-        
+
         const losesText = document.getElementById('loses')
         this.animateNumber(losesText, loses, 200)
     }
@@ -230,7 +311,7 @@ export class Profile extends TemplateComponent {
 
             const currentValue = Math.floor(startValue + (value - startValue) * progress)
             element.textContent = currentValue
-        
+
             if (progress < 1) {
                 requestAnimationFrame(update)
             }
