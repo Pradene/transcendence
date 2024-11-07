@@ -30,6 +30,8 @@ export class ChatRoom extends TemplateComponent {
             }
         };
 
+        this.currentLanguage = localStorage.getItem('selectedLanguage') || 'en';
+
         this.sendMessageListener = async (e) => this.sendMessage(e)
         this.WebsocketMessageListener = (e) => this.WebsocketMessage(e.detail)
         this.sendDuelInviteListener = async (e) => this.sendDuelInvite(e)
