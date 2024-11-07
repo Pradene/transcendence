@@ -38,8 +38,11 @@ export class Router {
     }
 
     async back() {
+		if (this.currentView && typeof this.currentView.unmount === "function") {
+			await this.currentView.unmount()
+		}
+		
         history.back()
-        await this.handleRoute()
     }
 
     async handleRoute() {
