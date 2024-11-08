@@ -76,27 +76,24 @@ export class Signup extends TemplateComponent {
                 el.innerHTML = this.translations[this.currentLanguage][key];
         });
 
-        this.getRef("username").placeholder = this.translations[this.currentLanguage].username_placeholder
-        this.getRef("password").placeholder = this.translations[this.currentLanguage].password_placeholder
-        this.getRef("email").placeholder = this.translations[this.currentLanguage].email_placeholder
-        this.getRef("passwordConfirmation").placeholder = this.translations[this.currentLanguage].passwordconfirmation_placeholder
+        document.getElementById("username").placeholder = this.translations[this.currentLanguage].username_placeholder
+        document.getElementById("password").placeholder = this.translations[this.currentLanguage].password_placeholder
+        document.getElementById("email").placeholder = this.translations[this.currentLanguage].email_placeholder
+        document.getElementById("passwordConfirmation").placeholder = this.translations[this.currentLanguage].passwordconfirmation_placeholder
     }
 
     async handleSubmit(event) {
-        event.preventDefault();
+        event.preventDefault()
 
-        const email = this.getRef('email');
-        const username = this.getRef('username');
-        const password = this.getRef('password');
-        const passwordConfirmation = this.getRef('passwordConfirmation');
+		const email = document.getElementById('email')
+		const username = document.getElementById('username')
+		const password = document.getElementById('password')
+		const passwordConfirmation = document.getElementById('passwordConfirmation')
 
-        if (!email || !username || !password || !passwordConfirmation) {
-            console.error("Une référence à un champ du formulaire est manquante.");
-            return;
-        }
 
         try {
-            const url = getURL('api/auth/signup/');
+            const url = getURL('api/auth/signup/')
+
             const data = await apiRequest(url, {
                 method: 'POST',
                 body: {
@@ -105,17 +102,18 @@ export class Signup extends TemplateComponent {
                     password: password.value,
                     password_confirmation: passwordConfirmation.value
                 }
-            });
+            })
 
-            const router = Router.get();
-            await router.navigate('/login/');
+            const router = Router.get()
+            await router.navigate('/login/')
 
         } catch (e) {
-            email.value = '';
-            username.value = '';
-            password.value = '';
-            passwordConfirmation.value = '';
-            this.displayErrors(e.message);
+            email.value = ''
+            username.value = ''
+            password.value = ''
+            passwordConfirmation.value = ''
+
+            this.displayErrors(e.message)
         }
     }
 

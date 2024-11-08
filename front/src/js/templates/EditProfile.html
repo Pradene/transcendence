@@ -1,4 +1,9 @@
 <nav-component></nav-component>
+<div class="language-selector">
+    <button class="lang-button" data-lang="en">English</button>
+    <button class="lang-button" data-lang="de">Deutsch</button>
+    <button class="lang-button" data-lang="fr">Français</button>
+</div>
 <div class="edit">
     <form id="form" action="PUT">
         <div class="d-flex flex-column align-items-center mb-4">
@@ -6,11 +11,11 @@
                 <img id="picture-preview" alt="Profile picture" />
             </div>
             <div class="button">
-                <label for="file-upload"  class="form-label text-white m-1">Change picture</label>
+                <label for="file-upload"  class="form-label text-white m-1" data-translate-key="pic_btn">Change picture</label>
                 <input id="file-upload" class="form-control d-none" type="file" />
             </div>
         </div>
-        
+
         <div class="input mb-md">
             <input id="username" class="w-100" type="text" placeholder="Username" autocomplete="off" required="True" />
         </div>
@@ -18,9 +23,9 @@
         <div class="input mb-md">
             <input id="email" class="w-100" type="email" placeholder="Email" autocomplete="off" required="True" />
         </div>
-        <label for="is_2fa_enabled" class="mb-1">Enable 2FA</label>
+        <label for="is_2fa_enabled" class="mb-1 "data-translate-key="e2FA">Enable 2FA</label>
         <input id="is_2fa_enabled" type="checkbox" name="/" />
 
-        <button type="submit" class="w-100 button">Edit profile</button>
+        <button type="submit" class="w-100 button" data-translate-key="edit_btn">Edit profile</button>
     </form>
 </div>

@@ -6,6 +6,30 @@ export class EditProfile extends TemplateComponent {
     constructor() {
         super()
 
+        this.translations = {
+            en: {
+                pic_btn: "Change picture",
+                username: "Username",
+                email: "Email",
+                e2FA: "Enable 2FA",
+                edit_btn: "Edit profile"
+            },
+            de: {
+                pic_btn: "Bild ändern",
+                username: "Benutzername",
+                email: "Email",
+                e2FA: "Aktivieren 2FA",
+                edit_btn: "Profil bearbeiten"
+            },
+            fr: {
+                pic_btn: "Modifier l'image de profil",
+                username: "Nom d'utilisateur",
+                email: "Email",
+                e2FA: "Activer le 2FA",
+                edit_btn: "Modifier le profil"
+            }
+        }
+
         this.handleSubmitListener = async (e) => await this.handleSubmit(e)
         this.handlePictureChangeListener = (e) => this.handlePictureChange(e)
     }
@@ -24,6 +48,39 @@ export class EditProfile extends TemplateComponent {
         const input = document.getElementById("file-upload")
         form.addEventListener("submit", this.handleSubmitListener)
         input.addEventListener("change", this.handlePictureChangeListener)
+        this.setupLanguageButtons()
+        this.translatePage()
+    }
+
+    setupLanguageButtons() {
+        document.querySelectorAll(".lang-button").forEach(button => {
+            button.addEventListener("click", (e) => {
+                this.currentLanguage = e.target.dataset.lang;
+
+                localStorage.setItem('selectedLanguage', this.currentLanguage);
+
+                this.translatePage();
+            });
+        });
+    }
+
+    translatePage() {
+        const elements = document.querySelectorAll("[data-translate-key]");
+        elements.forEach(el => {
+            const key = el.dataset.translateKey;
+            if (this.translations[this.currentLanguage][key])
+                el.innerHTML = this.translations[this.currentLanguage][key];
+        });
+
+        const usernameInput = document.getElementById("username");
+        if (usernameInput) {
+            usernameInput.placeholder = this.translations[this.currentLanguage].username;
+        }
+
+        const emailInput = document.getElementById("email");
+        if (emailInput) {
+            emailInput.placeholder = this.translations[this.currentLanguage].email;
+        }
     }
 
     async getUserInfo() {
@@ -58,7 +115,7 @@ export class EditProfile extends TemplateComponent {
                 picture.src = e.target.result
             }
             reader.readAsDataURL(file)
-        
+
         } else {
             picture.src = ''
         }
@@ -82,10 +139,10 @@ export class EditProfile extends TemplateComponent {
             const file = input.files[0]
             if (file)
                 body.append("picture", file)
-            
+
             const id = this.getProfileID()
             const url = getURL(`api/users/${id}/`)
-            
+
             const data = await apiRequest(url, {
                 method: "POST",
                 body: body
