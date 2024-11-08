@@ -32,7 +32,7 @@ export class Home extends TemplateComponent {
             fr: {
                 online_game_title: "Jeu en ligne",
                 online_game_desc: "Jouez une partie en ligne contre un autre joueur, le premier a 5 points remporte la partie.",
-                tournament_title: "Tournois en ligne",
+                tournament_title: "Tournoi en ligne",
                 tournament_desc: "Jouez dans un tournoi en ligne, contre 3 autre joueurs.",
                 local_game_title: "Jeu local",
                 local_game_desc: "Jouez une partie locale contre un ami, le premier utilise les fleches, le second Q/D.",

@@ -4,6 +4,29 @@ class FriendButton extends HTMLElement {
     constructor() {
         super()
 
+        this.translations = {
+            en: {
+                remove: "Remove friend",
+                cancel: "Cancel",
+                accept: "Accept",
+                add: "Add friend"
+            },
+            de: {
+                remove: "Freund entfernen",
+                cancel: "Stornieren",
+                accept: "Annehmen",
+                add: "Freund hinzufügen"
+            },
+            fr: {
+                remove: "Supprimer un ami",
+                cancel: "Annuler",
+                accept: "Accepter",
+                add: "Ajouter un ami"
+            }
+        }
+
+        this.currentLanguage = localStorage.getItem('selectedLanguage') || "en";
+
         this._button = document.createElement('button')
         this._status = null
         this._id = null
@@ -21,7 +44,7 @@ class FriendButton extends HTMLElement {
     get id() {
         return this._id
     }
-    
+
     set id(newId) {
         this._id = newId
     }
@@ -29,17 +52,17 @@ class FriendButton extends HTMLElement {
     updateButtonLabel() {
         switch (this._status) {
             case 'friend':
-                this._button.textContent = 'Remove friend'
+                this._button.textContent = this.translations[this.currentLanguage].remove
                 break
             case 'request_sent':
-                this._button.textContent = 'Cancel'
+                this._button.textContent = this._button.textContent = this.translations[this.currentLanguage].cancel
                 break
             case 'request_received':
-                this._button.textContent = 'Accept'
+                this._button.textContent = this._button.textContent = this.translations[this.currentLanguage].accept
                 break
             case 'none':
             default:
-                this._button.textContent = 'Add friend'
+                this._button.textContent = this._button.textContent = this.translations[this.currentLanguage].add
                 break
         }
     }
@@ -85,7 +108,7 @@ class FriendButton extends HTMLElement {
         console.log(e)
         const message = JSON.parse(e.data)
 
-        if (!message || !message.action) return 
+        if (!message || !message.action) return
 
         if (message.action === 'friend_request_received') {
             this.status = 'request_received'

@@ -3,7 +3,7 @@ import {Router} from "../utils/Router"
 class UserProfile extends HTMLElement {
     constructor() {
         super()
-        
+
         this.userid = 0
     }
 
