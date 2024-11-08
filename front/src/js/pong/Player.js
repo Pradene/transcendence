@@ -4,11 +4,12 @@ import { Pong } from './Pong.js'
 
 
 export class Player {
-    constructor() {
+    constructor(position) {
 
         this.game = Pong.get()
 
         this.scene = this.game.scene
+        this.position = position
 
         this.setInstance()
     }
@@ -22,6 +23,8 @@ export class Player {
         const geometry = new THREE.BoxGeometry(paddleWidth, paddleHeight, paddleDepth)
 
         this.instance = new THREE.Mesh(geometry, material)
+
+        this.setPosition(this.position.x, this.position.y)
 
         this.scene.add(this.instance)
     }

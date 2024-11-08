@@ -1,4 +1,4 @@
-import { checkLogin } from "./utils.js"
+import { checkLogin, getURL } from "./utils.js"
 
 export class Router {
     constructor(routes = []) {
@@ -17,7 +17,7 @@ export class Router {
         window.addEventListener('popstate', () => this.handleRoute())
         
         if (!window.location.pathname.endsWith("/")) {
-            location += "/"
+            const location = window.location.pathname + '/'
             history.pushState(null, null, location)
         }
 
@@ -25,7 +25,7 @@ export class Router {
     }
 
     async navigate(path) {
-        if (!path) {
+        if (!path || path === window.location.pathname) {
             return
         }
 

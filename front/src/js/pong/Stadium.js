@@ -19,4 +19,10 @@ export class Stadium {
 
         this.scene.add(this.instance)
     }
+
+    remove() {
+        this.scene.remove(this.instance)
+        this.instance.material.dispose()
+        this.instance.geometry.dispose()
+    }
 }
