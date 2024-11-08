@@ -1,6 +1,7 @@
 import { TemplateComponent } from '../utils/TemplateComponent.js'
 import { getURL, apiRequest } from '../utils/utils.js'
 import { Router } from '../utils/Router.js'
+import { LangSelector } from '../components/LangSelector.js';
 
 export class Signup extends TemplateComponent {
     constructor() {
@@ -40,6 +41,7 @@ export class Signup extends TemplateComponent {
             }
         };
         this.currentLanguage = localStorage.getItem('selectedLanguage') || "en";
+        this.langSelector = new LangSelector()
     }
 
     async unmount() {
@@ -50,8 +52,10 @@ export class Signup extends TemplateComponent {
     async componentDidMount() {
         const form = this.getRef('form')
         form.addEventListener('submit', this.handleSubmitListener)
+        const langSelectorElement = this.langSelector.render();
+        const container = document.querySelector('.container');
+        container.insertAdjacentElement('beforebegin', langSelectorElement);
         this.translatePage()
-        this.setupLanguageButtons()
     }
 
     translatePage() {

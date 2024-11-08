@@ -3,6 +3,7 @@ import { getURL, apiRequest } from '../utils/utils.js'
 import { Router } from '../utils/Router.js'
 import { connectChatSocket } from '../websockets/Chat.js'
 import { connectFriendsSocket } from '../websockets/Friends.js'
+import { LangSelector } from '../components/LangSelector.js';
 
 export class Login extends TemplateComponent {
     constructor() {
@@ -48,6 +49,7 @@ export class Login extends TemplateComponent {
 
         this.submit42LoginRequestListener = async (e) => await this.submit42LoginRequest(e)
         this.submitLoginRequestListener = async (e) => await this.submitLoginRequest(e)
+        this.langSelector = new LangSelector()
     }
 
     async unmount() {
@@ -64,7 +66,9 @@ export class Login extends TemplateComponent {
 
         const OAuthButton = this.getRef('ft_auth')
         OAuthButton.addEventListener('click', this.submit42LoginRequestListener)
-        this.setupLanguageButtons();
+        const langSelectorElement = this.langSelector.render();
+        const container = document.querySelector('.container');
+        container.insertAdjacentElement('beforebegin', langSelectorElement);
         this.translatePage();
     }
 
