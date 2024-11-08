@@ -29,14 +29,15 @@ class Game(models.Model):
     def toJSON(self):
         players = [{
             'id': score.player.id,
-            'name': score.player.username,
+            'picture': score.player.picture.url if score.player.picture else None,
+            'username': score.player.username,
             'score': score.score
         } for score in self.scores.all()]
 
         data = {
             'id': self.id,
             'status': self.status,
-            'tournament': self.tournament if self.tournament else None,
+            'tournament': self.tournament.id if self.tournament else None,
             # 'winner': self.winner if self.winner else None,
             'players': players
         }
