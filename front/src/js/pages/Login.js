@@ -68,18 +68,6 @@ export class Login extends TemplateComponent {
         this.translatePage();
     }
 
-    setupLanguageButtons() {
-        document.querySelectorAll(".lang-button").forEach(button => {
-            button.addEventListener("click", (e) => {
-                this.currentLanguage = e.target.dataset.lang;
-
-                localStorage.setItem('selectedLanguage', this.currentLanguage);
-
-                this.translatePage();
-            });
-        });
-    }
-
     translatePage() {
         const elements = document.querySelectorAll("[data-translate-key]");
         elements.forEach(el => {

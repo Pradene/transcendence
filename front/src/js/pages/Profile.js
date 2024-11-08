@@ -52,18 +52,7 @@ export class Profile extends TemplateComponent {
         await this.getLevel()
         await this.getGames()
         await this.getStats()
-        this.setupLanguageButtons()
         this.translatePage()
-    }
-
-    setupLanguageButtons() {
-        document.querySelectorAll(".lang-button").forEach(button => {
-            button.addEventListener("click", (e) => {
-                this.currentLanguage = e.target.dataset.lang
-                localStorage.setItem('selectedLanguage', this.currentLanguage)
-                this.translatePage()
-            })
-        })
     }
 
     translatePage() {

@@ -10,11 +10,11 @@ nav {
 
     padding: 12px;
     margin: 12px 0px;
-    
+
     div {
         display: flex;
         align-items: center;
-        
+
         a {
             text-decoration: none;
             margin-left: 18px;
@@ -25,7 +25,7 @@ nav {
             font-size: 16px;
             font-family: "Metal Mania", system-ui;
             font-style: normal;
-            
+
             img {
                 width: 16px;
                 height: 16px;
@@ -33,4 +33,36 @@ nav {
             }
         }
     }
+}
+
+.lang-menu-container {
+    position: relative;
+    display: inline-block;
+}
+
+.language-icon {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+}
+
+.lang-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: var(--secondary-color);
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-width: 120px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.lang-dropdown div {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.lang-dropdown div:hover {
+    background-color: #3f74f2;
 }
