@@ -58,18 +58,7 @@ export class Home extends TemplateComponent {
         gameButton.addEventListener('click', async () => this.matchmaking('game'))
 
         cancelButton.addEventListener('click', () => this.cancelMatchmaking())
-        this.setupLanguageButtons()
         this.translatePage()
-    }
-
-    setupLanguageButtons() {
-        document.querySelectorAll(".lang-button").forEach(button => {
-            button.addEventListener("click", (e) => {
-                this.currentLanguage = e.target.dataset.lang;
-                localStorage.setItem('selectedLanguage', this.currentLanguage);
-                this.translatePage();
-            });
-        });
     }
 
     translatePage() {

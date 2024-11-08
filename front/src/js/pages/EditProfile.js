@@ -29,6 +29,7 @@ export class EditProfile extends TemplateComponent {
                 edit_btn: "Modifier le profil"
             }
         }
+        this.currentLanguage = localStorage.getItem('selectedLanguage') || 'en';
 
         this.handleSubmitListener = async (e) => await this.handleSubmit(e)
         this.handlePictureChangeListener = (e) => this.handlePictureChange(e)
@@ -48,20 +49,7 @@ export class EditProfile extends TemplateComponent {
         const input = document.getElementById("file-upload")
         form.addEventListener("submit", this.handleSubmitListener)
         input.addEventListener("change", this.handlePictureChangeListener)
-        this.setupLanguageButtons()
         this.translatePage()
-    }
-
-    setupLanguageButtons() {
-        document.querySelectorAll(".lang-button").forEach(button => {
-            button.addEventListener("click", (e) => {
-                this.currentLanguage = e.target.dataset.lang;
-
-                localStorage.setItem('selectedLanguage', this.currentLanguage);
-
-                this.translatePage();
-            });
-        });
     }
 
     translatePage() {

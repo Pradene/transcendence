@@ -85,57 +85,73 @@ class Nav extends HTMLElement {
         ]
 
         const langIcons = [
-            { lang: 'en', emoji: '🇺🇸', alt: 'English' },
-            { lang: 'fr', emoji: '🇫🇷', alt: 'Français' },
-            { lang: 'de', emoji: '🇩🇪', alt: 'Deutsch' }
+            { lang: 'en', label: 'English' },
+            { lang: 'fr', label: 'Français' },
+            { lang: 'de', label: 'Deutsch' }
         ];
 
-        const nav = document.createElement("nav")
+        const nav = document.createElement("nav");
 
-        const homeLink = document.createElement("a")
-        homeLink.href = '/'
-        homeLink.dataset.link = ""
-        homeLink.textContent = "pong."
+        const homeLink = document.createElement("a");
+        homeLink.href = '/';
+        homeLink.dataset.link = "";
+        homeLink.textContent = "pong.";
 
-        const navLinks = document.createElement("div")
+        const navLinks = document.createElement("div");
 
-        links.forEach(link  => {
-            const element = document.createElement("a")
-            element.href = link.href
-            element.style = "margin-left: 8px;"
-            element.dataset.link = ""
+        links.forEach(link => {
+            const element = document.createElement("a");
+            element.href = link.href;
+            element.style = "margin-left: 8px;";
+            element.dataset.link = "";
 
-            const img = document.createElement("img")
-            img.src = link.img
-            img.width = 16
-            img.height = 16
+            const img = document.createElement("img");
+            img.src = link.img;
+            img.width = 16;
+            img.height = 16;
 
-            element.appendChild(img)
-            navLinks.appendChild(element)
-        })
+            element.appendChild(img);
+            navLinks.appendChild(element);
+        });
 
-        const langLinks = document.createElement("div")
-        langLinks.classList.add("lang-links")
+        const langMenuContainer = document.createElement("div");
+        langMenuContainer.classList.add("lang-menu-container");
 
+        const langIcon = document.createElement("img");
+        langIcon.src = "/assets/lang-selec.svg";
+        langIcon.style = "cursor: pointer; width: 30px; height: 30px;";
+        langIcon.style.width = "24px";
+        langIcon.style.height = "24px";
+        langIcon.classList.add("nav-item", "nav-link", "language-icon")
+
+        const langMenu = document.createElement("div");
+        langMenu.classList.add("lang-dropdown");
+        langMenu.style.display = "none";
         langIcons.forEach(icon => {
-            const langIcon = document.createElement("i")
-            langIcon.className = icon.flagClass
-            langIcon.title = icon.alt
-            langIcon.style = "margin-left: 12px; cursor: pointer; font-size: 24px;"
+            const langOption = document.createElement("div");
+            langOption.textContent = icon.label;
+            langOption.style = "padding: 8px; cursor: pointer;";
 
-            langIcon.addEventListener("click", () => {
-                localStorage.setItem('selectedLanguage', icon.lang)
-                location.reload()
-            })
+            langOption.addEventListener("click", () => {
+                localStorage.setItem('selectedLanguage', icon.lang);
+                location.reload();
+            });
 
-            langLinks.appendChild(langIcon)
-        })
+            langMenu.appendChild(langOption);
+        });
 
-        nav.appendChild(homeLink)
-        nav.appendChild(navLinks)
-        nav.appendChild(langLinks)
-        this.appendChild(nav)
+        langIcon.addEventListener("click", () => {
+            langMenu.style.display = langMenu.style.display === "none" ? "block" : "none";
+        });
+
+        langMenuContainer.appendChild(langIcon);
+        langMenuContainer.appendChild(langMenu);
+
+        nav.appendChild(homeLink);
+        nav.appendChild(langMenuContainer);
+        nav.appendChild(navLinks);
+        this.appendChild(nav);
     }
 }
 
-customElements.define("nav-component", Nav)
+customElements.define("nav-component", Nav);

@@ -54,19 +54,6 @@ export class Signup extends TemplateComponent {
         this.setupLanguageButtons()
     }
 
-
-    setupLanguageButtons() {
-        document.querySelectorAll(".lang-button").forEach(button => {
-            button.addEventListener("click", (e) => {
-                this.currentLanguage = e.target.dataset.lang;
-
-                localStorage.setItem('selectedLanguage', this.currentLanguage);
-
-                this.translatePage();
-            });
-        });
-    }
-
     translatePage() {
         console.log("Page in: ", this.currentLanguage)
         const elements = document.querySelectorAll("[data-translate-key]");

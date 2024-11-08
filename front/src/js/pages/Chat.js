@@ -44,18 +44,7 @@ export class Chat extends TemplateComponent {
         input.addEventListener('keyup', this.handleSearchListener)
 
         window.addEventListener('chatEvent', this.receiveMessageListener)
-        this.setupLanguageButtons();
-        this.translatePage();
-    }
-
-    setupLanguageButtons() {
-        document.querySelectorAll(".lang-button").forEach(button => {
-            button.addEventListener("click", (e) => {
-                this.currentLanguage = e.target.dataset.lang
-                localStorage.setItem('selectedLanguage', this.currentLanguage)
-                this.translatePage()
-            })
-        })
+        this.translatePage()
     }
 
     translatePage() {
