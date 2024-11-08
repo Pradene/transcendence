@@ -13,7 +13,7 @@ def gameHistory(request):
     try:
         user = request.user
         games = Game.objects.filter(players=user)
-        data = [game.toJSON(user) for game in games]
+        data = [game.toJSON() for game in games]
         return JsonResponse(data, safe=False, status=200)
 
     except Exception as e:

@@ -1,8 +1,8 @@
-import {TemplateComponent} from "../utils/TemplateComponent";
+import {TemplateComponent} from "../utils/TemplateComponent"
 
 export class TournamentView extends TemplateComponent {
     constructor() {
-        super();
+        super()
     }
 
     async componentDidMount() {

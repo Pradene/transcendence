@@ -1,6 +1,5 @@
 import { TemplateComponent } from '../utils/TemplateComponent.js'
-import { WSManager } from '../utils/WebSocketManager.js'
-import { Router } from '../utils/Router.js'
+import { connectTournamentSocket } from '../websockets/Tournament.js'
 
 export class Tournament extends TemplateComponent {
     constructor() {
@@ -13,24 +12,7 @@ export class Tournament extends TemplateComponent {
 
     async componentDidMount() {
         const id = this.getTournamentID()
-        const url = `wss://${location.hostname}:${location.port}/ws/tournament/${id}/`
-    
-        const socket = WSManager.add('tournament', url)
-
-        socket.onmessage = (e) => {
-            const data = JSON.parse(e.data)
-            this.handleMessage(data)
-        }
-    }
-
-    handleMessage(data) {
-        if (data.type === 'game_found') {
-            const id = data.game_id
-            const url = `/game/${id}/`
-
-            const router = Router.get()
-            router.navigate(url)
-        }
+        const socket = connectTournamentSocket(id)
     }
 
     getTournamentID() {

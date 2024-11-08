@@ -48,7 +48,6 @@ class FriendButton extends HTMLElement {
         this._button.className = 'button'
 
         this._button.addEventListener('click', () => {
-            console.log(this._id)
             this.handleClick()
         })
 

@@ -1,7 +1,8 @@
 import { TemplateComponent } from '../utils/TemplateComponent.js'
-import { getURL, apiRequest, getCSRFToken } from '../utils/utils.js'
+import { getURL, apiRequest } from '../utils/utils.js'
 import { Router } from '../utils/Router.js'
-
+import { connectChatSocket } from '../websockets/Chat.js'
+import { connectFriendsSocket } from '../websockets/Friends.js'
 
 export class Login extends TemplateComponent {
     constructor() {
@@ -46,10 +47,16 @@ export class Login extends TemplateComponent {
             })
 
             const router = Router.get()
-            if (data['2fa_enabled'])
+            if (data['2fa_enabled']) {
                 await router.navigate("/verify-otp/")
-            else
+
+            } else {
+                connectChatSocket()
+                connectFriendsSocket()
+
                 await router.navigate("/")
+            }
+
         } catch (e) {
             username.value = ''
             password.value = ''

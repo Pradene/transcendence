@@ -239,7 +239,6 @@ export class ChatRoom extends TemplateComponent {
 
     // Display message
     displayMessage(container, message) {
-		console.log('display')
         if (!message)
             return
 

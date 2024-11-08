@@ -1,5 +1,5 @@
 import { Router } from './utils/Router.js'
-import { fetchCSRFToken } from './utils/utils.js'
+import { checkLogin, fetchCSRFToken } from './utils/utils.js'
 
 import { Home } from "./pages/Home.js"
 import { Login } from "./pages/Login.js"
@@ -10,11 +10,13 @@ import { ChatRoom } from "./pages/ChatRoom.js"
 import { Search } from "./pages/Search.js"
 import { Profile } from "./pages/Profile.js"
 import { EditProfile } from "./pages/EditProfile.js"
-import { TournamentView } from "./pages/TournamentView";
-import { Game } from "./pages/Game";
-import { Tournament } from "./pages/Tournament";
+import { Game } from "./pages/Game.js"
+import { Tournament } from "./pages/Tournament.js"
 
-import { GameView } from "./pages/GameView.js"
+import { connectChatSocket } from './websockets/Chat.js'
+import { connectFriendsSocket } from './websockets/Friends.js'
+import { connectTournamentSocket } from './websockets/Tournament.js'
+
 import "../js/components/Nav.js"
 import "../js/components/LogoutButton.js"
 import "../js/components/UserProfile.js"
@@ -25,6 +27,22 @@ import "../css/style.scss"
 document.addEventListener('DOMContentLoaded', async () => {
 
     await fetchCSRFToken()
+
+    if (await checkLogin()) {
+        connectChatSocket()
+        connectFriendsSocket()
+
+        const gameID = sessionStorage.getItem('game')
+        if (gameID) {
+            new Pong(gameID)
+        }
+        
+        const tournamentID = sessionStorage.getItem('tournament')
+        if (tournamentID) {
+            connectTournamentSocket(tournamentID)
+        }
+
+    }
 
     const router = new Router([
         {path: '/', view: new Home(), protected: true},

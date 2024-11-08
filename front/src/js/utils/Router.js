@@ -38,10 +38,10 @@ export class Router {
     }
 
     async back() {
-		if (this.currentView && typeof this.currentView.unmount === "function") {
-			await this.currentView.unmount()
-		}
-		
+        if (this.currentView && typeof this.currentView.unmount === "function") {
+            await this.currentView.unmount()
+        }
+
         history.back()
     }
 
@@ -68,7 +68,6 @@ export class Router {
             }
 
         } else {
-            console.log(location, " doesn't match any route")
             this.navigate('/')
         }
     }

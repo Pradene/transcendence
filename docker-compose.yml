@@ -11,6 +11,11 @@ services:
       - transcendence
     volumes:
       - ./front:/app
+    develop:
+      watch:
+        - action: sync
+          target: /app
+          path: ./front
 
   back:
     container_name: back
@@ -18,14 +23,19 @@ services:
     build:
       context: ./back
       dockerfile: Dockerfile
+    develop:
+      watch:
+        - path: ./back
+          action: sync+restart
+          target: /app
     env_file:
       - .env
     ports:
       - "8000:8000"
     networks:
       - transcendence
-    volumes:
-      - ./back:/app
+      #    volumes:
+      #- ./back:/app
     depends_on:
       db:
         condition: service_healthy

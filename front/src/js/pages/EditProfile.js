@@ -1,6 +1,6 @@
 import { TemplateComponent } from "../utils/TemplateComponent.js"
-import { getURL, apiRequest, getCSRFToken } from "../utils/utils.js"
-import { Router } from "../utils/Router.js"
+import { getURL, apiRequest } from "../utils/utils.js"
+import { Router } from '../utils/Router.js'
 
 export class EditProfile extends TemplateComponent {
     constructor() {
@@ -91,8 +91,8 @@ export class EditProfile extends TemplateComponent {
                 body: body
             })
 
-			const router = Router.get()
-			await router.back()
+            const router = Router.get()
+            router.back()
 
         } catch (e) {
             console.log(e)
