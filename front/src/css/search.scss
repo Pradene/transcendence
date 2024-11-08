@@ -91,3 +91,26 @@
         }
     }
 }
+
+@media (max-width: 768px) {
+    .social {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+    }
+
+
+    .friends {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
+    .requests {
+        grid-column: 1;
+        grid-row: auto;
+    }
+    
+    .search {
+        grid-column: 1;
+        grid-row: auto;
+    }
+}

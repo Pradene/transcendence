@@ -53,6 +53,12 @@ export class Pong {
         this.keyUp = (e) => this.keyUpHandler(e)
         window.addEventListener('keyup', this.keyUp)
 
+        this.touchStart = (e) => this.touchStartHandler(e)
+        window.addEventListener('touchstart', this.touchStart)
+
+        this.touchEnd = (e) => this.touchEndHandler(e)
+        window.addEventListener('touchend', this.touchEnd)
+
         this.requestId = null
         this.display()
 
@@ -97,6 +103,23 @@ export class Pong {
         }
     }
 
+    touchStartHandler(e) {
+        console.log(e)
+        const position = e.touches[0].clientX
+
+        if (position < window.innerWidth / 2) {
+            WSManager.send('game', { movement: 'UP' })
+        } else {
+            WSManager.send('game', { movement: 'DOWN' })
+        }
+    }
+
+    touchEndHandler(e) {
+        console.log(e)
+
+        WSManager.send('game', { movement: 'NONE'})
+    }
+
     connectGameWebSocket() {
         if (!this.gameID) return
 
@@ -137,7 +160,8 @@ export class Pong {
         Pong.instance = null
 
         window.removeEventListener('keydown', this.keyDown)
-        window.removeEventListener('keydown', this.keyUp)
+        window.removeEventListener('keyup', this.keyUp)
+        window.removeEventListener('touchstart', this.touchStart)
 
         if (this.requestId) {
             window.cancelAnimationFrame(this.requestId)
