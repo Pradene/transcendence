@@ -5,6 +5,18 @@ from django.db import models
 class Tournament(models.Model):
     players = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="tournaments")
 
+    def toJSON(self):
+
+        games = Game.objects.all().filter(tournament=self)
+        finished_games = games.filter(status='finished', tournament=self)
+
+        return {
+            'id': self.id,
+            'players': [player.toJSON() for player in self.players.all()],
+            'games': [game.toJSON() for game in games],
+            'status': 'finished' if finished_games.count() == games.count() else 'started'
+        }
+
 class Game(models.Model):
     status = models.CharField(choices=[
         ('waiting', 'Waiting'),
@@ -35,7 +47,7 @@ class Game(models.Model):
         data = {
             'id': self.id,
             'status': self.status,
-            'tournament': self.tournament if self.tournament else None,
+            'tournament': self.tournament.id if self.tournament else None,
             # 'winner': self.winner if self.winner else None,
             'players': players
         }

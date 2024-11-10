@@ -8,14 +8,20 @@ class UserProfile extends HTMLElement {
     }
 
     async connectedCallback() {
-        const userid = this.hasAttribute('userid') ? this.getAttribute('userid') : this.getAttribute('playerid')
-        const data = await (await fetch(`/api/users/${userid}/`)).json()
+        const userid = this.getAttribute('userid')
+        const response = await fetch(`/api/users/${userid}/`)
+        const exists = response.status !== 404
+        const data = exists ? await response.json() : {
+            username: "?",
+            picture: "/assets/unknown.png"
+        }
 
         const playerImgContainer = document.createElement('div')
-        playerImgContainer.classList.add('profile-picture')
         const playerImg = document.createElement('img')
-        playerImg.src = data.picture
         const playerUsername = document.createElement('p')
+
+        playerImgContainer.classList.add('profile-picture')
+        playerImg.src = data.picture
         playerUsername.textContent = data.username
 
         playerImgContainer.appendChild(playerImg)

@@ -142,3 +142,7 @@ export function truncateString(string, maxLength) {
 
     return string
 }
+
+export async function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+}

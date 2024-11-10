@@ -21,9 +21,9 @@ from game.models import Game, Tournament
 
 class TournamentConsumer(AsyncJsonWebsocketConsumer):
     
-    channels = {}
-    managers = {}
-    managers_lock = asyncio.Lock()
+    channels: dict[int, str] = {}
+    managers: dict[int, 'TournamentManager'] = {}
+    managers_lock: asyncio.Lock = asyncio.Lock()
     
     async def connect(self):
         self.user = self.scope['user']

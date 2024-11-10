@@ -1,37 +1,49 @@
 import logging
 import asyncio
+import typing
 
 from channels.db import database_sync_to_async
-
 from math import ceil, log2
-
 from game.models import Game
+from utils.logger import Logger
+
+if typing.TYPE_CHECKING:
+    from game.consumers import TournamentConsumer
 
 
-class TournamentManager:
+class TournamentManager(Logger):
     def __init__(self, tournament, players):
         self.tournament = tournament
         self.players = list(players)
         self.game_tree = {}
         self.started = False
-        self.observers = []
+        self.observers: ['TournamentConsumer'] = []
 
-    def add_observer(self, observer):
+        super().__init__()
+        # self.set_log_identifier(self.players)
+
+
+    def add_observer(self, observer: 'TournamentConsumer'):
         self.observers.append(observer)
+        self.info(f'Observer added: {observer}')
 
 
-    def remove_observer(self, observer):
+    def remove_observer(self, observer: 'TournamentConsumer'):
         self.observers.remove(observer)
+        self.info(f'Observer removed: {observer}')
 
 
     async def notify_observers(self, game_id):
         for observer in self.observers:
             await observer.send_game(game_id)
+        self.info(f'Notified observers about game {game_id}')
+
 
     async def start_tournament(self):
         if self.started:
             return
 
+        self.info('Tournament started')
         self.started = True
 
         players_number = len(self.players)
@@ -76,6 +88,7 @@ class TournamentManager:
 
         return games
 
+
     async def wait(self, games):
         while True:
             # Check if all matches are finished
@@ -96,6 +109,7 @@ class TournamentManager:
             await asyncio.sleep(1)
         
         return None
+
 
     async def check_game_finished(self, game):
         # Assume there's a method or a property in the Game model that checks if it's finished

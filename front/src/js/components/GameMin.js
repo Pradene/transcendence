@@ -1,4 +1,4 @@
-import { Session } from "../utils/Session"
+import {Session} from "../utils/Session"
 
 class GameMin extends HTMLElement {
     constructor() {
@@ -11,15 +11,46 @@ class GameMin extends HTMLElement {
             return
         }
 
-        const userID = Session.getUserID()
+        const userID       = Session.getUserID()
+        const gameid       = this.getAttribute('gameid')
+        const istournament = this.getAttribute('istournament')
+        const response     = await fetch(`/api/games/gameinfo/${gameid}`)
+        const exists       = response.status !== 404
+        let data           = exists ? await response.json() : {
+            players: [
+                {
+                    id: null,
+                    score: 0
+                },
+                {
+                    id: null,
+                    score: 0
+                }
+            ]
+        }
 
-        const gameid = this.getAttribute('gameid')
-        const data = await (await fetch(`/api/games/gameinfo/${gameid}`)).json()
+        if (data.players.length < 2) {
+            data = {
+                players: [
+                    {
+                        id: null,
+                        score: 0
+                    },
+                    {
+                        id: null,
+                        score: 0
+                    }
+                ]
+            }
+        }
 
-        const userid = data.user1.id == userID ? data.user1.id : data.user2.id
-        const opponentid = data.user1.id == userID ? data.user2.id : data.user1.id
-        const user_score = userid == data.user1.id ? data.user1_score : data.user2_score
-        const opponent_score = userid == data.user1.id ? data.user2_score : data.user1_score
+        const user1 = data.players[0]
+        const user2 = data.players[1]
+
+        const userid         = user1.id === userID ? user1.id : user2.id
+        const opponentid     = user1.id === userID ? user2.id : user1.id
+        const user_score     = userid === user1.id ? user1.score : user2.score
+        const opponent_score = userid === user1.id ? user2.score : user1.score
 
         this.addEventListener('click', (event) => {
             document.location = "/game/" + data.id
@@ -32,7 +63,7 @@ class GameMin extends HTMLElement {
         opponent.setAttribute('playerid', opponentid)
         opponent.classList.add('end')
 
-        const score = document.createElement('div')
+        const score       = document.createElement('div')
         score.textContent = `${user_score} vs ${opponent_score}`
         // playerImgContainer.appendChild(playerImg)
         // player.appendChild(playerImgContainer)
@@ -47,13 +78,13 @@ class GameMin extends HTMLElement {
         const userID = Session.getUserID()
 
         const tournamentid = this.getAttribute('gameid')
-        const data = await (await fetch(`/api/games/tournamentinfo/${tournamentid}`)).json()
+        const data         = await (await fetch(`/api/games/tournamentinfo/${tournamentid}`)).json()
 
         const player = document.createElement('user-profile')
         player.setAttribute('playerid', userID)
 
-        const won = userID == data.winner.id
-        const result = document.createElement('p')
+        const won          = userID == data.winner.id
+        const result       = document.createElement('p')
         result.textContent = won ? 'You won' : 'You lost'
 
         this.appendChild(player)
