@@ -7,14 +7,21 @@ class Tournament(models.Model):
 
     def toJSON(self):
 
-        games = Game.objects.all().filter(tournament=self)
+        games = Game.objects.all().filter(tournament=self).order_by('id')
         finished_games = games.filter(status='finished', tournament=self)
+
+        winner = None
+        try:
+            winner = games[3].winner.toJSON()
+        except Exception as e:
+            pass
 
         return {
             'id': self.id,
             'players': [player.toJSON() for player in self.players.all()],
             'games': [game.toJSON() for game in games],
-            'status': 'finished' if finished_games.count() == games.count() else 'started'
+            'status': 'finished' if finished_games.count() == games.count() else 'started',
+            'winner': winner
         }
 
 class Game(models.Model):

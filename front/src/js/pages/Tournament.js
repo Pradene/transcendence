@@ -7,49 +7,46 @@ export class Tournament extends TemplateComponent {
     }
 
     unmount() {
-
+        removeEventListener("queryTournament", this.displayTournament)
     }
 
     async componentDidMount() {
         const id = this.getTournamentID()
 
-        // Check if the tournament running or finished
-        const response = await fetch(`/api/games/tournamentinfo/${id}`)
+        // register listener
+        addEventListener("queryTournament", this.displayTournament)
 
         // tournament not found, connect to socket
-        if (response.status === 404) {
-            const socket = connectTournamentSocket(id)
-        } else {
-            const data = await response.json()
-            await this.displayTournament(data)
-        }
+        const socket = connectTournamentSocket(id)
+        dispatchEvent(new CustomEvent("queryTournament", {detail: id}))
     }
 
     getTournamentID() {
         return location.pathname.split('/')[2]
     }
 
-    async displayTournament(data) {
+    async displayTournament(event) {
+        const id = event.detail
+        const response = await fetch(`/api/games/tournamentinfo/${id}/`)
+        if (response.status !== 200)
+            return
+
+        // get data and container
+        const data      = await response.json()
         const container = document.querySelector('.stat.tournament')
 
-        const winner = document.createElement('user-profile')
-        const g1 = document.createElement('game-min')
-        const g2 = document.createElement('game-min')
-        const g3 = document.createElement('game-min')
-
+        // create winner element if exists
+        const winner    = document.createElement('user-profile')
         winner.style.gridArea = 'winner'
-
-        g1.style.gridArea = 'g1'
-        g2.style.gridArea = 'g2'
-        g3.style.gridArea = 'g3'
-
-        g1.setAttribute('gameid', data.games[0].id)
-        g2.setAttribute('gameid', data.games[1].id)
-        g3.setAttribute('gameid', data.games[2].id)
-
         container.appendChild(winner)
-        container.appendChild(g1)
-        container.appendChild(g2)
-        container.appendChild(g3)
+
+        // create game element if exists
+        data.games.forEach((game, i) => {
+            const element = document.createElement('game-min')
+            element.setAttribute('gameid', game.id)
+            element.style.gridArea = `g${i+1}`
+            container.appendChild(element)
+
+        })
     }
 }

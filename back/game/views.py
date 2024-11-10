@@ -62,7 +62,7 @@ def tournamentInfo(request, tournamentid):
         return JsonResponse(data, safe=False, status=200)
 
     except Tournament.DoesNotExist as e:
-        return JsonResponse({'error': "Tournament does not exist"}, status=400)
+        return JsonResponse({'error': "Tournament does not exist"}, status=404)
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

@@ -57,10 +57,10 @@ class GameMin extends HTMLElement {
         })
 
         const player = document.createElement('user-profile')
-        player.setAttribute('playerid', userid)
+        player.setAttribute('userid', userid)
 
         const opponent = document.createElement('user-profile')
-        opponent.setAttribute('playerid', opponentid)
+        opponent.setAttribute('userid', opponentid)
         opponent.classList.add('end')
 
         const score       = document.createElement('div')

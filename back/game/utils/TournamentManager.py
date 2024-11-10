@@ -33,9 +33,9 @@ class TournamentManager(Logger):
         self.info(f'Observer removed: {observer}')
 
 
-    async def notify_observers(self, game_id):
+    async def notify_observers(self, game_id, action='action'):
         for observer in self.observers:
-            await observer.send_game(game_id)
+            await observer.send_game(game_id, action=action)
         self.info(f'Notified observers about game {game_id}')
 
 
@@ -54,8 +54,16 @@ class TournamentManager(Logger):
         round_number = 1
         while len(current_players) > 1:
             logging.info(f'start')
+
+            # create the games for the current round
             games = await self.create_round(current_players)
             self.game_tree[round_number] = games
+            await self.notify_observers(games[0], action='query_tournament')
+
+            # wait 5 sec and notify observers
+            await asyncio.sleep(5)
+            for gameid in games:
+                await self.notify_observers(gameid)
 
             logging.info(f'round created, waiting for winner')
             
@@ -80,11 +88,10 @@ class TournamentManager(Logger):
                 await database_sync_to_async(
                     game.players.add
                 )(players[i], players[i + 1])
+                await database_sync_to_async(game.save)()
 
                 # Placeholder for winner
                 games.append(game.id)
-
-                await self.notify_observers(game.id)
 
         return games
 

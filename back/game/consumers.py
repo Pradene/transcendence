@@ -74,7 +74,7 @@ class TournamentConsumer(AsyncJsonWebsocketConsumer):
         data = json.loads(text_data)
 
 
-    async def send_game(self, game_id):
+    async def send_game(self, game_id, action='action'):
         logging.info(f'game id: {game_id}')
         
         game = await database_sync_to_async(
@@ -86,10 +86,10 @@ class TournamentConsumer(AsyncJsonWebsocketConsumer):
         )(game.players.all())
 
         for player in players:
-            await self.send_game_to_user(player.id, game_id)
+            await self.send_game_to_user(player.id, game_id, action)
 
 
-    async def send_game_to_user(self, user_id, game_id):
+    async def send_game_to_user(self, user_id, game_id, action='action'):
         channel_name = self.channels.get(user_id)
         if not channel_name:
             return
@@ -98,12 +98,13 @@ class TournamentConsumer(AsyncJsonWebsocketConsumer):
             channel_name,
             {
                 'type': 'game_found',
-                'game_id': game_id
+                'game_id': game_id,
+                'action': action,
+                'tournament_id': self.tournament.id
             }
         )
 
-
-    async def game_found(self, data):        
+    async def game_found(self, data):
         await self.send_json(data)
 
 
