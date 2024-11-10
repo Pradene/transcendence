@@ -12,8 +12,7 @@ export class WSManager {
         
         this.sockets[type] = socket
 
-        console.log(`connected to ${type}`)
-        console.log(socket)
+        return socket
     }
 
     static remove(type) {

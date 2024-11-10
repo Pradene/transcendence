@@ -1,27 +1,29 @@
 <nav-component></nav-component>
 <div class="profile">
-    <div class="picture">
-        <img src="/assets/default.png" id="profile-picture" alt="Profile picture" />
-    </div>
-    <div class="information">
-        <div class="d-flex align-items-center justify-content-between mb-md">
-            <h2 id="username" class="text-xl" class="m-0">-</h2>
-            <div id="profile-button"></div>
+    <div class="user">
+
+        <div class="picture">
+            <img src="/assets/default.png" id="profile-picture" alt="Profile picture" />
         </div>
-        <div>
-            <div class="level">
-                <div>Level <span id="level">0</span></div>
-                <div>
-                    <span id="exp">0</span>
-                    <span>/</span>
-                    <span id="expMax">0</span>
-                </div>
+        <div class="information">
+            <div class="d-flex align-items-center justify-content-between mb-md">
+                <h2 id="username" class="text-xl" class="m-0">-</h2>
+                <div id="profile-button"></div>
             </div>
-            <progress max="100" value="0" class="progress-bar"></progress>
+            <div>
+                <div class="level">
+                    <div>Level <span id="level">0</span></div>
+                    <div>
+                        <span id="exp">0</span>
+                        <span>/</span>
+                        <span id="expMax">0</span>
+                    </div>
+                </div>
+                <progress max="100" value="0" class="progress-bar"></progress>
+            </div>
         </div>
     </div>
-</div>
-<div class="games">
+        
     <div class="stats">
         <div class="winrate" class="d-flex align-items-center">
             <svg viewbox="0 0 110 110">
@@ -46,8 +48,8 @@
             </span>
         </div>
     </div>
+
     <div class="history" class="grid-item">
         <ul id="games-history"></ul>
     </div>
 </div>
-    

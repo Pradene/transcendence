@@ -83,62 +83,70 @@ export class Profile extends TemplateComponent {
             console.log(games)
             
             games.forEach((game) => {
-                const element = document.createElement('game-min')
-                element.setAttribute('gameid', game.id)
-                if (game.isTournament)
-                    element.classList.add("tournament")
-                container.appendChild(element)
+				console.log('hello')
+				const element = this.displayGame(game)
+				console.log(element)
+				container.appendChild(element)
             })
             
         } catch (e) {
+			console.log(e)
             return
         }
     }
 
     displayGame(game) {
-        if (game.isTournament) {
-            return this.displayTournament(game)
-        }
+        // if (game.isTournament) {
+            // return this.displayTournament(game)
+        // }
+
+		let opponent = undefined
+		let player = undefined
+		game.players.forEach(p => {
+			console.log(p)
+			if (Session.getUserID() === p.id) {
+				player = p
+			} else {
+				opponent = p
+			}
+		})
 
         const element = document.createElement('div')
         element.classList.add('game')
-        element.addEventListener('click', (event) => {
-            document.location = "/game/" + game.id
-        })
 
-        const player = document.createElement('user-profile')
-        player.setAttribute('playerid', game.player.id)
-        // player.classList.add('player')
-        // const playerImgContainer = document.createElement('div')
-        // playerImgContainer.classList.add('profile-picture')
-        // const playerImg = document.createElement('img')
-        // playerImg.src = game.player.picture
-        // const playerUsername = document.createElement('p')
-        // playerUsername.textContent = game.player.username
+        const playerContainer = document.createElement('div')
+        playerContainer.setAttribute('playerid', player.id)
+        playerContainer.classList.add('player')
+        const playerImgContainer = document.createElement('div')
+        playerImgContainer.classList.add('profile-picture')
+        const playerImg = document.createElement('img')
+        playerImg.src = player.picture
+        const playerUsername = document.createElement('p')
+        playerUsername.textContent = player.username
         
-        const opponent = document.createElement('div')
-        opponent.classList.add('player', 'end')
+        const opponentContainer = document.createElement('div')
+        opponentContainer.classList.add('player', 'end')
         const opponentImgContainer = document.createElement('div')
         opponentImgContainer.classList.add('profile-picture')
         const opponentImg = document.createElement('img')
-        opponentImg.src = game.opponent.picture
+        opponentImg.src = opponent.picture
         const opponentUsername = document.createElement('p')
-        opponentUsername.textContent = game.opponent.username
+        opponentUsername.textContent = opponent.username
 
         const score = document.createElement('div')
-        score.textContent = `${game.player_score} vs ${game.opponent_score}`
+        score.textContent = `${player.score} vs ${opponent.score}`
 
-        // playerImgContainer.appendChild(playerImg)
-        // player.appendChild(playerImgContainer)
-        // player.appendChild(playerUsername)
+        playerImgContainer.appendChild(playerImg)
+        playerContainer.appendChild(playerImgContainer)
+        playerContainer.appendChild(playerUsername)
 
-        opponent.appendChild(opponentUsername)
+        opponentContainer.appendChild(opponentUsername)
         opponentImgContainer.appendChild(opponentImg)
-        opponent.appendChild(opponentImgContainer)
+        opponentContainer.appendChild(opponentImgContainer)
 
-        element.appendChild(player)
+        element.appendChild(playerContainer)
         element.appendChild(score)
-        element.appendChild(opponent)
+        element.appendChild(opponentContainer)
 
         return element
     }

@@ -170,6 +170,8 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
             if data['movement']:
                 self.game_manager.update_player(self.user.id, data['movement'])
+            elif data['quit']:
+                self.game_manager.quit(self.user.id)
 
         except Exception as e:
             logging.error(f'error: {e}')
