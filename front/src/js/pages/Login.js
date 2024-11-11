@@ -3,7 +3,7 @@ import { getURL, apiRequest } from '../utils/utils.js'
 import { Router } from '../utils/Router.js'
 import { connectChatSocket } from '../websockets/Chat.js'
 import { connectFriendsSocket } from '../websockets/Friends.js'
-import { LangSelector } from '../components/LangSelector.js';
+import { LangSelector } from '../components/LangSelector.js'
 
 export class Login extends TemplateComponent {
     constructor() {

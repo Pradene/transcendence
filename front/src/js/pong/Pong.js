@@ -79,7 +79,7 @@ export class Pong {
                 WSManager.send('game', {movement: 'UP'})
                 break
             case 'd':
-                WSManager.send('game', {movement: 'DOWN'})
+                WSManager.send('game', { movement: 'DOWN' })
                 break
             case 'p':
                 this.camera.setPosition(new THREE.Vector3(0, 4, 10))
@@ -144,8 +144,7 @@ export class Pong {
         console.log('Connecting to game WebSocket')
 
 
-        const url    = !isLocal ? `wss://${location.hostname}:${location.port}/ws/game/${this.gameID}/` :
-                       `wss://${location.hostname}:${location.port}/ws/localgame/`
+        const url = `wss://${location.hostname}:${location.port}/ws/game/${this.gameID}/`
         const socket = new WebSocket(url)
         if (!socket) return
 
@@ -235,7 +234,7 @@ export class Pong {
         const playerScoreElement       = document.querySelector('.scores .player .score')
         playerScoreElement.textContent = playerScore
 
-        const opponentScoreElement       = document.querySelector('.scores .opponent .score')
+        const opponentScoreElement = document.querySelector('.scores .opponent .score')
         opponentScoreElement.textContent = opponentScore
     }
 
@@ -250,31 +249,31 @@ export class Pong {
         opponentName.textContent = opponent
     }
 
-    displayResult(data) {
-        const result = document.getElementById('result')
+	displayResult(data) {
+		const result = document.getElementById('result')
 
-        const player   = data.player
-        const opponent = data.opponent
+        const player = data.player
+		const opponent = data.opponent
 
         const playerName = document.querySelector('.scores .player .username').textContent
 
-        const wol    = document.getElementById('wol')
-        const resmsg = document.getElementById('resmsg')
+		const wol = document.getElementById('wol')
+		const resmsg = document.getElementById('resmsg')
 
         if (player.score > opponent.score) {
-            wol.textContent    = 'You Won !'
-            resmsg.textContent = `Congratulation ${playerName}`
-            const firework1    = document.getElementById('firework1')
-            const firework2    = document.getElementById('firework2')
-            const firework3    = document.getElementById('firework3')
-            firework1.removeAttribute('hidden')
-            firework2.removeAttribute('hidden')
-            firework3.removeAttribute('hidden')
+			wol.textContent = 'You Won !'
+			resmsg.textContent = `Congratulation ${playerName}`
+			const firework1 = document.getElementById('firework1')
+			const firework2 = document.getElementById('firework2')
+			const firework3 = document.getElementById('firework3')
+			firework1.removeAttribute('hidden')
+			firework2.removeAttribute('hidden')
+			firework3.removeAttribute('hidden')
 
         } else {
-            wol.textContent    = 'You Lose ...'
-            resmsg.textContent = `Don't give up ${playerName}, you'll do better next time, maybe...`
-        }
+			wol.textContent = 'You Lose ...'
+			resmsg.textContent = `Don't give up ${playerName}, you'll do better next time, maybe...`
+		}
 
         const button = document.getElementById('leave-game')
         button.addEventListener('click', async () => await this.leaveGame())
