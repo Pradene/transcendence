@@ -23,7 +23,7 @@ if typing.TYPE_CHECKING:
 
 TIME_TO_SLEEP: float = (1 / FPS)
 
-class GameManager:
+class LocalGameManager:
     def __init__(self, game: 'Game', users: List['CustomUser']):
         self.game = game
         self.users = users
@@ -60,18 +60,20 @@ class GameManager:
     async def notify_observers(self):
         game_state = self.get_game_state()
         for observer in self.observers:
+            # logging.info(f'Sending game state to observer {game_state}')
             await observer.send_game_state(game_state)
 
 
     async def start_game(self):
         try:
+            logging.info("Starting local game")
+
             while self.countdown >= 0:
                 await self.notify_observers()
                 await asyncio.sleep(1)
                 self.countdown -= 1
 
             self.game.status = 'started'
-            await database_sync_to_async(self.game.save)()
             await self.notify_observers()
 
             last_frame = time.time()

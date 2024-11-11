@@ -1,21 +1,22 @@
 import * as THREE from 'three'
-import { Router } from "../utils/Router.js"
+import {Router} from "../utils/Router.js"
 
-import { Player } from "./Player.js"
-import { Ball } from "./Ball.js"
-import { ThreeCamera } from './Camera.js'
-import { ThreeRenderer } from './Renderer.js'
-import { Sizes } from './Sizes.js'
-import { Environment } from './Environment.js'
-import { Timer } from './Timer.js'
-import { Platform } from './Platform.js'
-import { Stadium } from './Stadium.js'
-import { WSManager } from '../utils/WebSocketManager.js'
+import {Player} from "./Player.js"
+import {Ball} from "./Ball.js"
+import {ThreeCamera} from './Camera.js'
+import {ThreeRenderer} from './Renderer.js'
+import {Sizes} from './Sizes.js'
+import {Environment} from './Environment.js'
+import {Timer} from './Timer.js'
+import {Platform} from './Platform.js'
+import {Stadium} from './Stadium.js'
+import {WSManager} from '../utils/WebSocketManager.js'
 
 export class Pong {
-    constructor(id) {
-
+    constructor(id, isLocal = false) {
+        console.log('Pong constructor')
         if (Pong.instance) {
+            console.log('Pong instance already exists')
             return Pong.instance
         }
 
@@ -27,17 +28,17 @@ export class Pong {
         if (!canvas) return
         canvas.getContext('webgl2')
 
-        this.canvas = canvas
-        this.sizes = new Sizes()
-        this.scene = new THREE.Scene()
-        this.camera = new ThreeCamera()
-        this.renderer = new ThreeRenderer()
+        this.canvas      = canvas
+        this.sizes       = new Sizes()
+        this.scene       = new THREE.Scene()
+        this.camera      = new ThreeCamera()
+        this.renderer    = new ThreeRenderer()
         this.environment = new Environment()
-        this.timer = new Timer()
-        this.platform = new Platform()
-        this.stadium = new Stadium()
+        this.timer       = new Timer()
+        this.platform    = new Platform()
+        this.stadium     = new Stadium()
 
-        this.player = new Player({x: -400 + 20, y: 0})
+        this.player   = new Player({x: -400 + 20, y: 0})
         this.opponent = new Player({x: 400 - 20, y: 0})
 
         this.ball = new Ball()
@@ -46,7 +47,7 @@ export class Pong {
 
         this.endGame = () => this.end()
         window.addEventListener('beforeunload', this.endGame)
-    
+
         this.keyDown = (e) => this.keyDownHandler(e)
         window.addEventListener('keydown', this.keyDown)
 
@@ -62,7 +63,8 @@ export class Pong {
         this.requestId = null
         this.display()
 
-        this.connectGameWebSocket()
+        console.log('Pong instance created')
+        this.connectGameWebSocket(isLocal)
     }
 
     static get() {
@@ -73,10 +75,10 @@ export class Pong {
         switch (e.key) {
 
             case 'a':
-                WSManager.send('game', { movement: 'UP' })
+                WSManager.send('game', {movement: 'UP'})
                 break
-            case 'd':                    
-                WSManager.send('game', { movement: 'DOWN' })
+            case 'd':
+                WSManager.send('game', {movement: 'DOWN'})
                 break
             case 'p':
                 this.camera.setPosition(new THREE.Vector3(0, 4, 10))
@@ -96,7 +98,7 @@ export class Pong {
         switch (e.key) {
             case 'a':
             case 'd':
-                WSManager.send('game', { movement: 'NONE'})
+                WSManager.send('game', {movement: 'NONE'})
                 break
             default:
                 break
@@ -108,34 +110,36 @@ export class Pong {
         const position = e.touches[0].clientX
 
         if (position < window.innerWidth / 2) {
-            WSManager.send('game', { movement: 'UP' })
+            WSManager.send('game', {movement: 'UP'})
         } else {
-            WSManager.send('game', { movement: 'DOWN' })
+            WSManager.send('game', {movement: 'DOWN'})
         }
     }
 
     touchEndHandler(e) {
         console.log(e)
 
-        WSManager.send('game', { movement: 'NONE'})
+        WSManager.send('game', {movement: 'NONE'})
     }
 
-    connectGameWebSocket() {
-        if (!this.gameID) return
+    connectGameWebSocket(isLocal = false) {
+        if (!isLocal && !this.gameID) return
+        console.log('Connecting to game WebSocket')
 
-        
-        const url = `wss://${location.hostname}:${location.port}/ws/game/${this.gameID}/`
+
+        const url    = !isLocal ? `wss://${location.hostname}:${location.port}/ws/game/${this.gameID}/` :
+                       `wss://${location.hostname}:${location.port}/ws/localgame/`
         const socket = new WebSocket(url)
         if (!socket) return
-            
+
         WSManager.add('game', socket)
 
         socket.onopen = () => {
             console.log('Connected to game WebSocket')
-        
+
             sessionStorage.setItem('game', this.gameID)
         }
-        
+
         socket.onmessage = (e) => {
             const data = JSON.parse(e.data)
             this.update(data)
@@ -146,9 +150,9 @@ export class Pong {
 
             sessionStorage.removeItem('game')
             socket.close()
-            
+
             const router = Router.get()
-            router.back()            
+            router.back()
         }
 
         socket.onclose = () => {
@@ -180,19 +184,19 @@ export class Pong {
 
         } else if (data && data.status === 'waiting') {
             this.timer.create(data.timer)
-            
+
         } else if (data && data.status === 'started') {
             this.player.setPosition(data.player.position.x, data.player.position.y)
             this.opponent.setPosition(data.opponent.position.x, data.opponent.position.y)
             this.ball.setPosition(data.ball.position.x, data.ball.position.y)
             this.displayScore(data)
-            
+
         } else if (data && data.status === 'finished') {
             sessionStorage.removeItem('game')
             WSManager.remove('game')
-            
+
             this.displayScore(data)
-			this.displayResult(data)
+            this.displayResult(data)
 
             this.ball.remove()
             this.player.remove()
@@ -201,67 +205,67 @@ export class Pong {
             this.stadium.remove()
         }
     }
-    
+
     display() {
         this.renderer.update()
         this.requestId = window.requestAnimationFrame(this.display.bind(this))
     }
 
     displayScore(data) {
-        const playerScore = data.player.score
+        const playerScore   = data.player.score
         const opponentScore = data.opponent.score
 
-        const playerScoreElement = document.querySelector('.scores .player .score')
+        const playerScoreElement       = document.querySelector('.scores .player .score')
         playerScoreElement.textContent = playerScore
-        
-        const opponentScoreElement = document.querySelector('.scores .opponent .score')
+
+        const opponentScoreElement       = document.querySelector('.scores .opponent .score')
         opponentScoreElement.textContent = opponentScore
     }
 
     displayPlayersName(data) {
-        const player = data.player
+        const player   = data.player
         const opponent = data.opponent
 
-        const playerName = document.querySelector('.scores .player .username')
+        const playerName       = document.querySelector('.scores .player .username')
         playerName.textContent = player
 
-        const opponentName = document.querySelector('.scores .opponent .username')
+        const opponentName       = document.querySelector('.scores .opponent .username')
         opponentName.textContent = opponent
     }
 
-	displayResult(data) {
-		const result = document.getElementById('result')
-		
-        const player = data.player
-		const opponent = data.opponent
-		
+    displayResult(data) {
+        const result = document.getElementById('result')
+
+        const player   = data.player
+        const opponent = data.opponent
+
         const playerName = document.querySelector('.scores .player .username').textContent
 
-		const wol = document.getElementById('wol')
-		const resmsg = document.getElementById('resmsg')
-		
-        if (player.score > opponent.score) {
-			wol.textContent = 'You Won !'
-			resmsg.textContent = `Congratulation ${playerName}`
-			const firework1 = document.getElementById('firework1')
-			const firework2 = document.getElementById('firework2')
-			const firework3 = document.getElementById('firework3')
-			firework1.removeAttribute('hidden')
-			firework2.removeAttribute('hidden')
-			firework3.removeAttribute('hidden')
-		
-        } else {
-			wol.textContent = 'You Lose ...'
-			resmsg.textContent = `Don't give up ${playerName}, you'll do better next time, maybe...`
-		}
-		
-        const button = document.getElementById('leave-game')
-		button.addEventListener('click', async () => await this.leaveGame())
-		result.removeAttribute('hidden')
-	}
+        const wol    = document.getElementById('wol')
+        const resmsg = document.getElementById('resmsg')
 
-	async leaveGame() {
-		const router = Router.get()
+        if (player.score > opponent.score) {
+            wol.textContent    = 'You Won !'
+            resmsg.textContent = `Congratulation ${playerName}`
+            const firework1    = document.getElementById('firework1')
+            const firework2    = document.getElementById('firework2')
+            const firework3    = document.getElementById('firework3')
+            firework1.removeAttribute('hidden')
+            firework2.removeAttribute('hidden')
+            firework3.removeAttribute('hidden')
+
+        } else {
+            wol.textContent    = 'You Lose ...'
+            resmsg.textContent = `Don't give up ${playerName}, you'll do better next time, maybe...`
+        }
+
+        const button = document.getElementById('leave-game')
+        button.addEventListener('click', async () => await this.leaveGame())
+        result.removeAttribute('hidden')
+    }
+
+    async leaveGame() {
+        const router = Router.get()
         await router.back()
-	}
+    }
 }

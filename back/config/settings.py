@@ -31,11 +31,10 @@ INSTALLED_APPS = [
     'background_task',
     'corsheaders',
     'channels',
-
-    'account',
     'authentication',
     'chat',
     'game',
+    'account'
 ]
 
 MIDDLEWARE = [

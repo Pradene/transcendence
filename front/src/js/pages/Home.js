@@ -12,6 +12,7 @@ export class Home extends TemplateComponent {
     }
 
     async componentDidMount() {
+        const localGameButton = document.querySelector('button.create-local')
         const gameButton = document.querySelector('button.create-game')
         const tournamentButton = document.querySelector('button.create-tournament')
         const cancelButton = document.querySelector('#cancel-matchmaking')
@@ -19,6 +20,8 @@ export class Home extends TemplateComponent {
         tournamentButton.addEventListener('click', async () => this.matchmaking('tournament'))
 
         gameButton.addEventListener('click', async () => this.matchmaking('game'))
+
+        localGameButton.addEventListener('click', async () => await this.localGame())
 
         cancelButton.addEventListener('click', () => this.cancelMatchmaking())
     }
@@ -36,6 +39,12 @@ export class Home extends TemplateComponent {
         }
 
         WSManager.add('matchmaking', socket)
+    }
+
+    async localGame() {
+        console.log('local game')
+        const router = Router.get()
+        await router.navigate('/local/')
     }
 
     cancelMatchmaking() {

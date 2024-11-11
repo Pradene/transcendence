@@ -11,6 +11,7 @@ import { Search } from "./pages/Search.js"
 import { Profile } from "./pages/Profile.js"
 import { EditProfile } from "./pages/EditProfile.js"
 import { Game } from "./pages/Game.js"
+import { LocalGame } from "./pages/LocalGame.js"
 import { Tournament } from "./pages/Tournament.js"
 
 import { connectChatSocket } from './websockets/Chat.js'
@@ -35,6 +36,7 @@ const router = new Router([
     {path: '/signup/', view: new Signup(), protected: false},
     {path: '/verify-otp/', view: new OTP(), protected: false},
     {path: '/game/:id/', view: new Game(), protected: true},
+    {path: '/local/', view: new LocalGame(), protected: true},
     {path: '/tournament/:id/', view: new Tournament(), protected: true},
 ])
 
