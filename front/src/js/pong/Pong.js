@@ -72,6 +72,7 @@ export class Pong {
     }
 
     keyDownHandler(e) {
+        console.log(e.key)
         switch (e.key) {
 
             case 'a':
@@ -92,6 +93,15 @@ export class Pong {
             default:
                 break
         }
+
+        switch (e.key) {
+            case 'ArrowLeft':
+                WSManager.send('game', {p2movement: 'UP'})
+                break
+            case 'ArrowRight':
+                WSManager.send('game', {p2movement: 'DOWN'})
+                break
+        }
     }
 
     keyUpHandler(e) {
@@ -101,6 +111,13 @@ export class Pong {
                 WSManager.send('game', {movement: 'NONE'})
                 break
             default:
+                break
+        }
+
+        switch (e.key) {
+            case 'ArrowLeft':
+            case 'ArrowRight':
+                WSManager.send('game', {p2movement: 'NONE'})
                 break
         }
     }

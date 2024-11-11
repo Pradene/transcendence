@@ -15,7 +15,7 @@ class Player:
 
     def setMovement(self, movement):
         if movement != "UP" and movement != "DOWN" and movement != "NONE":
-            raise ValueError("Invalid movement")
+            raise ValueError(f"Invalid movement: {movement}")
         
         self.movement = movement
 

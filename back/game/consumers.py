@@ -476,8 +476,11 @@ class LocalGameConsumer(AsyncJsonWebsocketConsumer):
             if not self.game_manager:
                 return
 
-            if data['movement']:
+            # logging.info(f'data: {data}')
+            if 'movement' in data:
                 self.game_manager.update_player(self.user.id, data['movement'])
+            elif 'p2movement' in data:
+                self.game_manager.update_player(self.local_user.id, data['p2movement'])
             elif data['quit']:
                 await self.game_manager.quit(self.user.id)
 
