@@ -257,12 +257,35 @@ export class Pong {
 
         const playerName = document.querySelector('.scores .player .username').textContent
 
+        const currentLanguage = localStorage.getItem('selectedLanguage') || "de"
+        console.log(currentLanguage)
+        const translations = {
+            en: {
+            won: 'You Won !',
+            congrats: `Congratulation ${playerName}`,
+            lose: 'You Lose ...',
+            encouraging: `Don't give up ${playerName}, you'll do better next time, maybe...`
+        },
+        de: {
+            won: ' Du hast Gewonnen !',
+            congrats: `Gratulation ${playerName}`,
+            lose: 'Du verliesst ...',
+            encouraging: `Gib nicht auf ${playerName}, Nächstes Mal machst du es besser, vielleicht...`
+        },
+        fr: {
+            won: 'Tu as gagne !',
+            congrats: `Felicitation ${playerName}`,
+            lose: 'Tu as perdu ...',
+            encouraging: `N'abandonne pas ${playerName}, tu feras mieux la prochaine fois, peut-etre...`
+        }
+    }
+
 		const wol = document.getElementById('wol')
 		const resmsg = document.getElementById('resmsg')
 
         if (player.score > opponent.score) {
-			wol.textContent = 'You Won !'
-			resmsg.textContent = `Congratulation ${playerName}`
+			wol.textContent = translations[currentLanguage].won
+			resmsg.textContent = translations[currentLanguage].congrats
 			const firework1 = document.getElementById('firework1')
 			const firework2 = document.getElementById('firework2')
 			const firework3 = document.getElementById('firework3')
@@ -271,8 +294,8 @@ export class Pong {
 			firework3.removeAttribute('hidden')
 
         } else {
-			wol.textContent = 'You Lose ...'
-			resmsg.textContent = `Don't give up ${playerName}, you'll do better next time, maybe...`
+			wol.textContent = translations[currentLanguage].lose
+			resmsg.textContent = translations[currentLanguage].encouraging
 		}
 
         const button = document.getElementById('leave-game')
