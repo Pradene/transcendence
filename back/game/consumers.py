@@ -29,40 +29,47 @@ class TournamentConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         self.user = self.scope['user']
 
-        if self.user.is_authenticated:
-            self.tournament_id = self.scope['url_route']['kwargs']['tournament_id']
-            self.group_name = f'tournament_{self.tournament_id}'
-    
-            self.tournament = await database_sync_to_async(
-                Tournament.objects.get
-            )(id=self.tournament_id)
+        try:
+            if self.user.is_authenticated:
+                self.tournament_id = self.scope['url_route']['kwargs']['tournament_id']
+                self.group_name = f'tournament_{self.tournament_id}'
+        
+                self.tournament = await database_sync_to_async(
+                    Tournament.objects.get
+                )(id=self.tournament_id)
 
-            await self.channel_layer.group_add(
-                self.group_name,
-                self.channel_name
-            )
+                await self.channel_layer.group_add(
+                    self.group_name,
+                    self.channel_name
+                )
 
-            self.channels[self.user.id] = self.channel_name
+                self.channels[self.user.id] = self.channel_name
 
-            await self.accept()
+                await self.accept()
 
-            async with TournamentConsumer.managers_lock:
-                if self.tournament_id not in TournamentConsumer.managers:
+                async with TournamentConsumer.managers_lock:
+                    if self.tournament_id not in TournamentConsumer.managers:
+                        
+                        users = await database_sync_to_async(list)(self.tournament.players.all())
+                        self.manager = TournamentManager(self.tournament, users)
+                        self.manager.add_observer(self)
+                        
+                        TournamentConsumer.managers[self.tournament_id] = self.manager
                     
-                    users = await database_sync_to_async(list)(self.tournament.players.all())
-                    self.manager = TournamentManager(self.tournament, users)
-                    self.manager.add_observer(self)
-                    
-                    TournamentConsumer.managers[self.tournament_id] = self.manager
-                
-                else:
-                    self.manager = TournamentConsumer.managers[self.tournament_id]
+                    else:
+                        self.manager = TournamentConsumer.managers[self.tournament_id]
 
-            asyncio.create_task(self.manager.start_tournament())
+                asyncio.create_task(self.manager.start_tournament())
 
 
-        else:
-            await self.close()
+            else:
+                await self.close()
+
+        except Tournament.DoesNotExist as e:
+            await self.close(code=1011, reason="Tournament does not exists")
+            
+        except Exception as e:
+            await self.close(code=1011)
 
     async def disconnect(self, close_code):
         if self.user.is_authenticated:

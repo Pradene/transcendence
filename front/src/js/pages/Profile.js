@@ -154,9 +154,10 @@ export class Profile extends TemplateComponent {
 
             games.forEach((game) => {
 				console.log('hello')
-				const element = this.displayGame(game)
-				console.log(element)
-				container.appendChild(element)
+                if (game.status === "finished" && game.tournament === null) {
+                    const element = this.displayGame(game)
+                    container.appendChild(element)
+                }
             })
 
         } catch (e) {
@@ -166,57 +167,8 @@ export class Profile extends TemplateComponent {
     }
 
     displayGame(game) {
-        // if (game.isTournament) {
-            // return this.displayTournament(game)
-        // }
-
-		let opponent = undefined
-		let player = undefined
-		game.players.forEach(p => {
-			console.log(p)
-			if (Session.getUserID() === p.id) {
-				player = p
-			} else {
-				opponent = p
-			}
-		})
-
-        const element = document.createElement('div')
-        element.classList.add('game')
-
-        const playerContainer = document.createElement('div')
-        playerContainer.setAttribute('playerid', player.id)
-        playerContainer.classList.add('player')
-        const playerImgContainer = document.createElement('div')
-        playerImgContainer.classList.add('profile-picture')
-        const playerImg = document.createElement('img')
-        playerImg.src = player.picture
-        const playerUsername = document.createElement('p')
-        playerUsername.textContent = player.username
-
-        const opponentContainer = document.createElement('div')
-        opponentContainer.classList.add('player', 'end')
-        const opponentImgContainer = document.createElement('div')
-        opponentImgContainer.classList.add('profile-picture')
-        const opponentImg = document.createElement('img')
-        opponentImg.src = opponent.picture
-        const opponentUsername = document.createElement('p')
-        opponentUsername.textContent = opponent.username
-
-        const score = document.createElement('div')
-        score.textContent = `${player.score} vs ${opponent.score}`
-
-        playerImgContainer.appendChild(playerImg)
-        playerContainer.appendChild(playerImgContainer)
-        playerContainer.appendChild(playerUsername)
-
-        opponentContainer.appendChild(opponentUsername)
-        opponentImgContainer.appendChild(opponentImg)
-        opponentContainer.appendChild(opponentImgContainer)
-
-        element.appendChild(playerContainer)
-        element.appendChild(score)
-        element.appendChild(opponentContainer)
+        const element = document.createElement('game-min')
+        element.setAttribute('gameid', game.id)
 
         return element
     }

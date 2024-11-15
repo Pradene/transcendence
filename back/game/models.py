@@ -57,7 +57,7 @@ class Game(models.Model):
             'id': self.id,
             'status': self.status,
             'tournament': self.tournament.id if self.tournament else None,
-            # 'winner': self.winner if self.winner else None,
+            'winner': self.winner.toJSON() if self.winner else None,
             'players': players
         }
 
