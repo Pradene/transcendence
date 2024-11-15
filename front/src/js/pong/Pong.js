@@ -144,7 +144,7 @@ export class Pong {
         console.log('Connecting to game WebSocket')
 
 
-        const url = `wss://${location.hostname}:${location.port}/ws/game/${this.gameID}/`
+        const url = isLocal ? `wss://${location.hostname}:${location.port}/ws/localgame/` : `wss://$\{location.hostname}:$\{location.port}/ws/game/$\{this.gameID}/\``
         const socket = new WebSocket(url)
         if (!socket) return
 
