@@ -38,7 +38,7 @@ export class Router {
             this.history.push(location.pathname)
         }
         history.pushState(null, null, path)
-        
+
         console.log(this.history)
         await this.handleRoute()
     }
