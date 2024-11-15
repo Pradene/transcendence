@@ -68,7 +68,7 @@ export class Home extends TemplateComponent {
         const elements = document.querySelectorAll("[data-translate-key]");
         elements.forEach(el => {
             const key = el.dataset.translateKey;
-            el.innerHTML = this.translations[this.currentLanguage][key];
+            el.textContent = this.translations[this.currentLanguage][key];
         });
     }
 

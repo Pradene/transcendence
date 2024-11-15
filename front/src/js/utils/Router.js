@@ -9,6 +9,7 @@ export class Router {
         
         this.currentView = null
         this.routes = routes
+        this.history = ["/"]
 
         this.init()
     }
@@ -24,7 +25,7 @@ export class Router {
         this.handleRoute()
     }
 
-    async navigate(path) {
+    async navigate(path, isBackward = false) {
         if (!path || path === window.location.pathname) {
             return
         }
@@ -33,7 +34,12 @@ export class Router {
             path += "/"
         }
 
+        if (!isBackward) {
+            this.history.push(location.pathname)
+        }
         history.pushState(null, null, path)
+        
+        console.log(this.history)
         await this.handleRoute()
     }
 
@@ -42,7 +48,9 @@ export class Router {
             await this.currentView.unmount()
         }
 
-        history.back()
+        const url = this.history.length > 0 ? this.history.pop() : "/"
+        console.log(this.history)
+        await this.navigate(url, true)
     }
 
     async handleRoute() {

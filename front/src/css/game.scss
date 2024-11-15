@@ -55,6 +55,7 @@
 	z-index: 1;
 	width: 100%;
 	top: 25%;
+	left: 0;
 	display: flex;
 	text-align: center;
 	flex-direction: column;
@@ -63,12 +64,12 @@
 
 #resmsg {
 	size: 5%;
-	font-size: 2vw;
+	//font-size: 2rem;
 }
 
 #wol {
 	size: 25%;
-	font-size: 13vw;
+	//font-size: 13rem;
 }
 
 @keyframes firework {
