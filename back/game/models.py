@@ -5,6 +5,12 @@ from django.db import models
 class Tournament(models.Model):
     players = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="tournaments")
 
+    def getGames(self):
+        return Game.objects.all().filter(tournament=self).order_by('id')
+
+    def getFinishedGames(self):
+        return self.getGames().filter(status='finished')
+
     def toJSON(self):
 
         games = Game.objects.all().filter(tournament=self).order_by('id')

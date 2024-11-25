@@ -38,6 +38,10 @@ class TournamentManager(Logger):
             await observer.send_game(game_id, action=action)
         self.info(f'Notified observers about game {game_id}')
 
+    async def isFinished(self):
+        finished_games = await database_sync_to_async(self.tournament.getFinishedGames)()
+        count = await database_sync_to_async(finished_games.count)()
+        return count == 3
 
     async def start_tournament(self):
         if self.started:
@@ -52,7 +56,7 @@ class TournamentManager(Logger):
         current_players = self.players
 
         round_number = 1
-        while len(current_players) > 1:
+        while len(current_players) > 1 and not await self.isFinished():
             logging.info(f'start')
 
             # create the games for the current round
