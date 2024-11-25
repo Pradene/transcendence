@@ -61,6 +61,7 @@ def signupView(request):
 @require_http_methods(['POST'])
 def loginView(request):
 	try:
+		logging.info("Login request")
 		data = json.loads(request.body)
 
 		username = data.get('username')
@@ -80,6 +81,7 @@ def loginView(request):
 				return response
 
 		except Exception as e:
+			logging.error(f'authentification error: {e.with_traceback()}')
 			return JsonResponse({'error': str(e)}, status=400)
 
 		# ask for 2fa
@@ -89,7 +91,7 @@ def loginView(request):
 			code = OTP.generate(user)
 			logging.info(f'OTP code: {code}')
 			send_login_email(user.email, user.username, code)
-
+			logging.info("2fa email sent")
 			return JsonResponse({'2fa_enabled': True}, status=200)
 		
 		except Exception as token_error:
@@ -100,6 +102,7 @@ def loginView(request):
 		return JsonResponse({'error': 'Invalid JSON'}, status=400)
 	
 	except Exception as e:
+		logging.error(f'error: {e.with_traceback()}')
 		return JsonResponse({'error': str(e)}, status=400)
 
 

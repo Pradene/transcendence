@@ -98,6 +98,7 @@ export class Login extends TemplateComponent {
         const url = getURL('api/auth/login/');
 
         try {
+            console.log("logging in...")
             const data = await apiRequest(url, {
                 method: 'POST',
                 body: {
@@ -107,6 +108,7 @@ export class Login extends TemplateComponent {
                 }
             });
 
+            console.log("redirecting...")
             const router = Router.get();
             if (data['2fa_enabled']) {
                 await router.navigate("/verify-otp/");
@@ -117,6 +119,7 @@ export class Login extends TemplateComponent {
             }
 
         } catch (e) {
+            console.log("logging error: ", e)
             username.value = '';
             password.value = '';
             this.displayErrors(e.message);

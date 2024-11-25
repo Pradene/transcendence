@@ -16,7 +16,7 @@ def send_login_email(email, username, code):
 		message,
 		from_email,
 		to_email,
-		fail_silently=False
+		fail_silently=True
 	)
 
 
@@ -30,5 +30,5 @@ def send_signup_email(email, username):
 		message,
 		from_email,
 		recipient_list,
-		fail_silently=False
+		fail_silently=True
 	)
