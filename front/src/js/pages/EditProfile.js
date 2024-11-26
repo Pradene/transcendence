@@ -1,5 +1,5 @@
 import { TemplateComponent } from "../utils/TemplateComponent.js"
-import { getURL, apiRequest } from "../utils/utils.js"
+import {getURL, apiRequest, updateLanguage} from "../utils/utils.js"
 import { Router } from '../utils/Router.js'
 
 export class EditProfile extends TemplateComponent {
@@ -116,6 +116,7 @@ export class EditProfile extends TemplateComponent {
         const username = document.getElementById("username")
         const email = document.getElementById("email")
         const is_2fa_enable = document.getElementById("is_2fa_enabled")
+        const language = document.getElementById("language")
 
         try {
             const body = new FormData()
@@ -123,6 +124,7 @@ export class EditProfile extends TemplateComponent {
             body.append("username", username.value)
             body.append("email", email.value)
             body.append("is_2fa_enabled", is_2fa_enable.checked)
+            body.append("language", language.value)
 
             const file = input.files[0]
             if (file)
@@ -135,9 +137,10 @@ export class EditProfile extends TemplateComponent {
                 method: "POST",
                 body: body
             })
+            await updateLanguage();
 
             const router = Router.get()
-            router.back()
+            await router.navigate('/')
 
         } catch (e) {
             console.log(e)

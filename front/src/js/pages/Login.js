@@ -1,5 +1,5 @@
 import { TemplateComponent } from '../utils/TemplateComponent.js'
-import { getURL, apiRequest } from '../utils/utils.js'
+import {getURL, apiRequest, updateLanguage} from '../utils/utils.js'
 import { Router } from '../utils/Router.js'
 import { connectChatSocket } from '../websockets/Chat.js'
 import { connectFriendsSocket } from '../websockets/Friends.js'
@@ -69,6 +69,9 @@ export class Login extends TemplateComponent {
         const langSelectorElement = this.langSelector.render();
         const container = document.querySelector('.container');
         container.insertAdjacentElement('beforebegin', langSelectorElement);
+
+        await updateLanguage();
+        this.currentLanguage = localStorage.getItem('selectedLanguage') || "en";
         this.translatePage();
     }
 

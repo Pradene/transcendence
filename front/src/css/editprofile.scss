@@ -10,5 +10,9 @@
     form {
         width: 100%;
         max-width: 600px;
+
+        input::-webkit-calendar-picker-indicator {
+            opacity: 100;
+        }
     }
 }

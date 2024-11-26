@@ -18,6 +18,16 @@
         <div class="input mb-md">
             <input id="email" class="w-100" type="email" placeholder="Email" autocomplete="off" required="True" />
         </div>
+
+        <div class="input mb-md">
+            <input list="languages" id="language">
+            <datalist id="languages">
+                <option value="fr"></option>
+                <option value="en"></option>
+                <option value="de"></option>
+            </datalist>
+        </div>
+
         <label for="is_2fa_enabled" class="mb-1 "data-translate-key="e2FA">Enable 2FA</label>
         <input id="is_2fa_enabled" type="checkbox" name="/" />
 

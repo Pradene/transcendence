@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken"
 
 import { Session } from "./Session.js"
+import {Router} from "./Router";
 
 export function getURL(url) {
     return "https://" + location.hostname + ":" + location.port + "/" + url
@@ -145,4 +146,22 @@ export function truncateString(string, maxLength) {
 
 export async function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+export async function updateLanguage() {
+    try {
+        const data = await apiRequest('api/users/language/', {
+            method: 'GET'
+        })
+
+        localStorage.setItem('selectedLanguage', data.language)
+
+        const router = Router.get()
+        router.routes.forEach(route => {
+            if (route.view && route.view.currentLanguage)
+                route.view.currentLanguage = localStorage.getItem('selectedLanguage') || 'en'
+        })
+    } catch (e) {
+        return
+    }
 }

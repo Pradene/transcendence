@@ -60,6 +60,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_2fa_enabled = models.BooleanField(default=False)
     twofa_method = models.IntegerField(default=TWO_FA_METHOD.EMAIL)
 
+    language = models.CharField(max_length=2, choices=[
+        'en',
+        'fr',
+        'de',
+    ], default='en')
+
     objects = CustomUserManager()
 
     USERNAME_FIELD = "username"

@@ -40,6 +40,7 @@ def userView(request, user_id=None):
 			bio = request.POST.get('bio', user.bio)
 			email = request.POST.get('email', user.email)
 			is_2fa_enabled = request.POST.get('is_2fa_enabled', user.is_2fa_enabled)
+			language = request.POST.get('language', user.language)
 
 			if 'picture' in request.FILES:
 				picture = request.FILES['picture']
@@ -61,6 +62,7 @@ def userView(request, user_id=None):
 			user.bio = bio
 			user.picture = picture
 			user.is_2fa_enabled = True if is_2fa_enabled == u'true' else False
+			user.language = language
 
 			logging.info(f"2FA test: {user.is_2fa_enabled}")
 			
@@ -154,3 +156,15 @@ def userLevel(request, user_id):
 		logging.error(f'[userLevel]: {e.__str__()}')
 		return JsonResponse({}, status=400)
 
+@require_http_methods(["GET"])
+def getLanguage(request):
+	try:
+		# if user logged in
+		if request.user.is_authenticated:
+			return JsonResponse({'language': request.user.language}, status=200)
+		else:
+			return JsonResponse({'language': 'en'}, status=200)
+
+	# do not bother about exceptions
+	except Exception as e:
+		return JsonResponse({'language': 'en'}, status=200)

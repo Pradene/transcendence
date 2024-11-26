@@ -1,6 +1,7 @@
 import { TemplateComponent } from '../utils/TemplateComponent.js'
 import {Router} from '../utils/Router.js'
 import { WSManager } from '../utils/WebSocketManager.js'
+import {updateLanguage} from "../utils/utils";
 
 export class Home extends TemplateComponent {
     constructor() {
@@ -61,6 +62,7 @@ export class Home extends TemplateComponent {
         localGameButton.addEventListener('click', async () => await this.localGame())
 
         cancelButton.addEventListener('click', () => this.cancelMatchmaking())
+        await updateLanguage();
         this.translatePage()
     }
 
