@@ -135,6 +135,12 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
                 Game.objects.get
             )(id=self.game_id)
 
+            # user not in game, close connection
+            if not await database_sync_to_async(self.game.players.filter)(id=self.user.id).exists():
+                await self.close(1000)
+                return
+
+            # game finished, close connection
             if self.game.status == 'finished':
                 await self.close(1000)
                 return
