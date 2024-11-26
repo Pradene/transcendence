@@ -12,21 +12,24 @@ export class EditProfile extends TemplateComponent {
                 username: "Username",
                 email: "Email",
                 e2FA: "Enable 2FA",
-                edit_btn: "Edit profile"
+                edit_btn: "Edit profile",
+                language: "Default language"
             },
             de: {
                 pic_btn: "Bild ändern",
                 username: "Benutzername",
                 email: "Email",
                 e2FA: "Aktivieren 2FA",
-                edit_btn: "Profil bearbeiten"
+                edit_btn: "Profil bearbeiten",
+                language: "Standardsprache"
             },
             fr: {
                 pic_btn: "Modifier l'image de profil",
                 username: "Nom d'utilisateur",
                 email: "Email",
                 e2FA: "Activer le 2FA",
-                edit_btn: "Modifier le profil"
+                edit_btn: "Modifier le profil",
+                language: "Langue par defaut"
             }
         }
         this.currentLanguage = localStorage.getItem('selectedLanguage') || 'en';
@@ -116,7 +119,6 @@ export class EditProfile extends TemplateComponent {
         const username = document.getElementById("username")
         const email = document.getElementById("email")
         const is_2fa_enable = document.getElementById("is_2fa_enabled")
-        const language = document.getElementById("language")
 
         try {
             const body = new FormData()
@@ -124,7 +126,8 @@ export class EditProfile extends TemplateComponent {
             body.append("username", username.value)
             body.append("email", email.value)
             body.append("is_2fa_enabled", is_2fa_enable.checked)
-            body.append("language", language.value)
+            const languageSelect = document.getElementById("language-select");
+            body.append("language", languageSelect.value)
 
             const file = input.files[0]
             if (file)
@@ -137,7 +140,7 @@ export class EditProfile extends TemplateComponent {
                 method: "POST",
                 body: body
             })
-            await updateLanguage();
+            await updateLanguage(languageSelect.value);
 
             const router = Router.get()
             await router.navigate('/')

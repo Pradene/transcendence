@@ -1,9 +1,10 @@
 import { TemplateComponent } from '../utils/TemplateComponent.js'
-import {getURL, apiRequest, updateLanguage} from '../utils/utils.js'
+import {getURL, apiRequest, updateLanguage, setLanguage} from '../utils/utils.js'
 import { Router } from '../utils/Router.js'
 import { connectChatSocket } from '../websockets/Chat.js'
 import { connectFriendsSocket } from '../websockets/Friends.js'
 import { LangSelector } from '../components/LangSelector.js'
+//import {getURL, apiRequest, setLanguage} from "../utils/utils.js"
 
 export class Login extends TemplateComponent {
     constructor() {
@@ -120,6 +121,7 @@ export class Login extends TemplateComponent {
                 connectFriendsSocket();
                 await router.navigate("/");
             }
+            await setLanguage();
 
         } catch (e) {
             console.log("logging error: ", e)

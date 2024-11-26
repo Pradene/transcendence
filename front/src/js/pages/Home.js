@@ -1,7 +1,6 @@
 import { TemplateComponent } from '../utils/TemplateComponent.js'
 import {Router} from '../utils/Router.js'
 import { WSManager } from '../utils/WebSocketManager.js'
-import {updateLanguage} from "../utils/utils";
 
 export class Home extends TemplateComponent {
     constructor() {
@@ -43,6 +42,7 @@ export class Home extends TemplateComponent {
             }
         }
         this.currentLanguage = localStorage.getItem('selectedLanguage') || "en";
+        console.log(this.currentLanguage);
     }
 
     async unmount() {
@@ -62,11 +62,12 @@ export class Home extends TemplateComponent {
         localGameButton.addEventListener('click', async () => await this.localGame())
 
         cancelButton.addEventListener('click', () => this.cancelMatchmaking())
-        await updateLanguage();
         this.translatePage()
     }
 
     translatePage() {
+        console.log(this.currentLanguage);
+
         const elements = document.querySelectorAll("[data-translate-key]");
         elements.forEach(el => {
             const key = el.dataset.translateKey;

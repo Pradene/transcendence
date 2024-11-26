@@ -30,7 +30,7 @@ export function getCookie(name) {
     const parts = value.split(`; ${name}=`)
     if (parts.length === 2)
         return parts.pop().split(';').shift()
-    
+
     return null
 }
 
@@ -40,7 +40,7 @@ export async function apiRequest(url, options = {}) {
         let headers = new Headers()
 
         const method = options.method ? options.method.toUpperCase() : 'GET'
-        
+
         const csrfToken = getCSRFToken()
         if (csrfToken)
             headers.append("X-CSRFToken", csrfToken)
@@ -95,7 +95,7 @@ export async function apiRequest(url, options = {}) {
 
 async function refreshToken() {
     const url = getURL("api/auth/refresh-token/")
-    
+
     try {
         const data = await apiRequest(url, {
             method: "POST"
@@ -121,7 +121,7 @@ export async function checkLogin() {
         const decoded = jwt.decode(access)
         const current = Date.now() / 1000
 
-        
+
         if (decoded.exp > current) {
             Session.setUserID()
             return true
@@ -148,20 +148,38 @@ export async function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-export async function updateLanguage() {
+export async function updateLanguage(selectedLanguage) {
     try {
         const data = await apiRequest('api/users/language/', {
             method: 'GET'
         })
+        if (data.language !== selectedLanguage)
+            data.language == selectedLanguage
+        console.log(data.language);
 
-        localStorage.setItem('selectedLanguage', data.language)
+/*         localStorage.setItem('selectedLanguage', data.language)
 
         const router = Router.get()
         router.routes.forEach(route => {
             if (route.view && route.view.currentLanguage)
                 route.view.currentLanguage = localStorage.getItem('selectedLanguage') || 'en'
-        })
+        }) */
     } catch (e) {
         return
     }
+}
+
+export async function setLanguage() {
+    try {
+        const data = await apiRequest('api/users/language/', {
+            method: 'GET'
+        })
+        localStorage.setItem('selectedLanguage', data.language)
+        console.log("in setLang()", localStorage.getItem('selectedLanguage'))
+        } catch (e) {
+            console.log("failed");
+
+    return
+    }
+
 }
