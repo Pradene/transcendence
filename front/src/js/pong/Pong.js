@@ -249,6 +249,16 @@ export class Pong {
         opponentName.textContent = opponent
     }
 
+
+    translateLeaveBtn() {
+        const currentLanguage = localStorage.getItem('selectedLanguage') || "en";
+        const translations = { de: "Spiel Verlassen", en: "Leave Game", fr: "Quitter le jeu" }
+        console.log(translations[currentLanguage])
+        const leaveBtn = document.getElementById('leave-game')
+        leaveBtn.innerHTML = translations[currentLanguage]
+        console.log(leaveBtn.innerHTML)
+    }
+
 	displayResult(data) {
 		const result = document.getElementById('result')
 
@@ -257,8 +267,7 @@ export class Pong {
 
         const playerName = document.querySelector('.scores .player .username').textContent
 
-        const currentLanguage = localStorage.getItem('selectedLanguage') || "de"
-        console.log(currentLanguage)
+        const currentLanguage = localStorage.getItem('selectedLanguage') || "en"
         const translations = {
             en: {
             won: 'You Won !',
@@ -301,6 +310,7 @@ export class Pong {
         const button = document.getElementById('leave-game')
         button.addEventListener('click', async () => await this.leaveGame())
         result.removeAttribute('hidden')
+        this.translateLeaveBtn()
     }
 
     async leaveGame() {

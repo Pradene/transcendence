@@ -19,15 +19,17 @@ export class Game extends TemplateComponent {
     async componentDidMount() {
         const id = this.getGameID()
         this.game = new Pong(id)
-        this.translateLeaveBtn()
+        //this.translateLeaveBtn()
     }
 
-    translateLeaveBtn() {
-        const currentLanguage = localStorage.getItem('selectedLanguage') || "en";
-        const translations = { de: "Spiel Verlassen", en: "Leave Game", fr: "Quitter le jeu" }
-        const leaveBtn = document.getElementById('leave-game')
-        leaveBtn.innerHTML = translations[currentLanguage]
-    }
+    // translateLeaveBtn() {
+    //     const currentLanguage = localStorage.getItem('selectedLanguage') || "en";
+    //     const translations = { de: "Spiel Verlassen", en: "Leave Game", fr: "Quitter le jeu" }
+    //     console.log(translations[currentLanguage])
+    //     const leaveBtn = document.getElementById('leave-game')
+    //     leaveBtn.innerHTML = translations[currentLanguage]
+    //     console.log(leaveBtn.innerHTML)
+    // }
 
     getGameID() {
         return location.pathname.split("/")[2]
