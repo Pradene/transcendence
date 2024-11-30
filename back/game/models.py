@@ -4,12 +4,19 @@ from django.db import models
 
 class Tournament(models.Model):
     players = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="tournaments")
+    started = models.BooleanField(default=False)
 
     def getGames(self):
         return Game.objects.all().filter(tournament=self).order_by('id')
 
     def getFinishedGames(self):
         return self.getGames().filter(status='finished')
+
+    def isFinished(self):
+        return self.getFinishedGames().count() == 3
+
+    def isInTournament(self, player):
+        return player in self.players.all()
 
     def toJSON(self):
 
@@ -18,7 +25,7 @@ class Tournament(models.Model):
 
         winner = None
         try:
-            winner = games[3].winner.toJSON()
+            winner = games[2].winner.toJSON()
         except Exception as e:
             pass
 

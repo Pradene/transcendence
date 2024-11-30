@@ -26,6 +26,8 @@ export class Tournament extends TemplateComponent {
     }
 
     async displayTournament(event) {
+        console.log("Querying tournament")
+
         const id = event.detail
         const response = await fetch(`/api/games/tournamentinfo/${id}/`)
         if (response.status !== 200)
@@ -33,6 +35,7 @@ export class Tournament extends TemplateComponent {
 
         // get data and container
         const data      = await response.json()
+        console.log("tournament data", data)
         const container = document.querySelector('.stat.tournament')
 
         // create winner element if exists

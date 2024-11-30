@@ -16,7 +16,6 @@ class TournamentManager(Logger):
         self.tournament = tournament
         self.players = list(players)
         self.game_tree = {}
-        self.started = False
         self.observers: ['TournamentConsumer'] = []
 
         super().__init__()
@@ -44,40 +43,36 @@ class TournamentManager(Logger):
         return count == 3
 
     async def start_tournament(self):
-        if self.started:
+        if not self.tournament.started:
             return
 
         self.info('Tournament started')
-        self.started = True
-
-        players_number = len(self.players)
-        rounds_number = ceil(log2(players_number))
-
+        self.tournament.started = True
+        await database_sync_to_async(self.tournament.save)()
         current_players = self.players
 
-        round_number = 1
-        while len(current_players) > 1 and not await self.isFinished():
-            logging.info(f'start')
+        # create first round
+        games = await self.create_round(current_players)
 
-            # create the games for the current round
-            games = await self.create_round(current_players)
-            self.game_tree[round_number] = games
-            await self.notify_observers(games[0], action='query_tournament')
+        # notify observers about the first round, update tournament page
+        await self.notify_observers(games[0], action='query_tournament')
+        await self.notify_observers(games[1], action='query_tournament')
+        await asyncio.sleep(5)
 
-            # wait 5 sec and notify observers
-            await asyncio.sleep(5)
-            for gameid in games:
-                await self.notify_observers(gameid)
+        # start first round
+        for gameid in games:
+            await self.notify_observers(gameid)
 
-            logging.info(f'round created, waiting for winner')
-            
-            current_players = await self.wait(games)
-            round_number += 1
+        # game finished, get winners and create last round
+        current_players = await self.wait(games)
+        games = await self.create_round(current_players)
+        await self.notify_observers(games[0], action='query_tournament')
+        await asyncio.sleep(5)
+        for gameid in games:
+            await self.notify_observers(gameid)
+        await self.wait(games)
 
-            logging.info(f'some winners')
-
-        logging.info(f'winner')
-
+        return
 
     async def create_round(self, players):
         games = []

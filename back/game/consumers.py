@@ -33,20 +33,23 @@ class TournamentConsumer(AsyncJsonWebsocketConsumer):
             if self.user.is_authenticated:
                 self.tournament_id = self.scope['url_route']['kwargs']['tournament_id']
                 self.group_name = f'tournament_{self.tournament_id}'
-        
+
+                # Get tournament and check user can join
                 self.tournament = await database_sync_to_async(
                     Tournament.objects.get
                 )(id=self.tournament_id)
+                if not await database_sync_to_async(self.tournament.isInTournament(self.user))():
+                    raise Exception('User is not in tournament')
 
                 await self.channel_layer.group_add(
                     self.group_name,
                     self.channel_name
                 )
-
                 self.channels[self.user.id] = self.channel_name
 
                 await self.accept()
 
+                # Join tournament if tournament is not finished
                 async with TournamentConsumer.managers_lock:
                     if self.tournament_id not in TournamentConsumer.managers:
                         
@@ -59,6 +62,7 @@ class TournamentConsumer(AsyncJsonWebsocketConsumer):
                     else:
                         self.manager = TournamentConsumer.managers[self.tournament_id]
 
+                # Start tournament if not allready started
                 asyncio.create_task(self.manager.start_tournament())
 
 
@@ -136,7 +140,8 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             )(id=self.game_id)
 
             # user not in game, close connection
-            if not await database_sync_to_async(self.game.players.filter)(id=self.user.id).exists():
+            game_user = await database_sync_to_async(self.game.players.filter)(id=self.user.id)
+            if not await database_sync_to_async(game_user.exists)():
                 await self.close(1000)
                 return
 
