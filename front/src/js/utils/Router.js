@@ -50,7 +50,7 @@ export class Router {
 
         const url = this.history.length > 0 ? this.history.pop() : "/"
         console.log(this.history)
-        await this.navigate(url, true)
+        this.navigate(url, true)
     }
 
     async handleRoute() {
@@ -76,7 +76,7 @@ export class Router {
             }
 
         } else {
-            this.navigate('/')
+            this.navigate('/404')
         }
     }
 

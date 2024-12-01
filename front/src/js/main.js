@@ -13,6 +13,7 @@ import { EditProfile } from "./pages/EditProfile.js"
 import { Game } from "./pages/Game.js"
 import { LocalGame } from "./pages/LocalGame.js"
 import { Tournament } from "./pages/Tournament.js"
+import { Page404 } from "./pages/404.js"
 
 import { connectChatSocket } from './websockets/Chat.js'
 import { connectFriendsSocket } from './websockets/Friends.js'
@@ -38,6 +39,7 @@ const router = new Router([
     {path: '/game/:id/', view: new Game(), protected: true},
     {path: '/local/', view: new LocalGame(), protected: true},
     {path: '/tournament/:id/', view: new Tournament(), protected: true},
+    {path: '/404/', view: new Page404(), protected: true}
 ])
 
 document.addEventListener('DOMContentLoaded', async () => {

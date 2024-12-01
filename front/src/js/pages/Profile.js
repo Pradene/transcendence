@@ -2,6 +2,7 @@ import { TemplateComponent } from "../utils/TemplateComponent.js"
 import { getURL, apiRequest, getConnectedUserID } from "../utils/utils.js"
 import { Session } from "../utils/Session.js"
 import { disconnect } from "process"
+import {Router} from "../utils/Router";
 
 export class Profile extends TemplateComponent {
     constructor() {
@@ -119,7 +120,8 @@ export class Profile extends TemplateComponent {
             }
 
         } catch (error) {
-            console.log(error)
+            const router = Router.get()
+            await router.navigate('/404')
         }
     }
 

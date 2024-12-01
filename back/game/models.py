@@ -18,6 +18,11 @@ class Tournament(models.Model):
     def isInTournament(self, player):
         return player in self.players.all()
 
+    def saveAll(self):
+        for game in self.getGames():
+            game.save()
+        self.save()
+
     def toJSON(self):
 
         games = Game.objects.all().filter(tournament=self).order_by('id')
@@ -71,7 +76,10 @@ class Game(models.Model):
             'status': self.status,
             'tournament': self.tournament.id if self.tournament else None,
             'winner': self.winner.toJSON() if self.winner else None,
-            'players': players
+            'players': players,
+            'participants': [
+                p.toJSON() for p in self.players.all()
+            ]
         }
 
         return data

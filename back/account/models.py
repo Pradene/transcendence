@@ -14,6 +14,8 @@ class CustomUserManager(BaseUserManager):
         """
         if not username:
             raise ValueError("Users must have an username")
+        elif CustomUser.objects.all().filter(username=username).exists():
+            raise ValueError("A user with that username already exists.")
 
         user = self.model(
             username=username,

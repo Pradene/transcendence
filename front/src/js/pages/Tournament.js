@@ -1,5 +1,6 @@
 import {TemplateComponent} from '../utils/TemplateComponent.js'
 import {connectTournamentSocket} from '../websockets/Tournament.js'
+import {Router} from "../utils/Router";
 
 export class Tournament extends TemplateComponent {
     constructor() {
@@ -30,8 +31,10 @@ export class Tournament extends TemplateComponent {
 
         const id = event.detail
         const response = await fetch(`/api/games/tournamentinfo/${id}/`)
-        if (response.status !== 200)
-            return
+        if (response.status !== 200) {
+            const router = Router.get()
+            await router.navigate('/404')
+        }
 
         // get data and container
         const data      = await response.json()
@@ -40,16 +43,18 @@ export class Tournament extends TemplateComponent {
 
         // create winner element if exists
         const winner    = document.createElement('user-profile')
+        winner.setAttribute('userid', data.winner.id)
         winner.style.gridArea = 'winner'
         container.appendChild(winner)
 
-        // create game element if exists
-        data.games.forEach((game, i) => {
+        for (let i = 0; i < 3; ++i) {
+
             const element = document.createElement('game-min')
+            const game = data.games.length > i ? data.games[i] : {id: 'null'}
             element.setAttribute('gameid', game.id)
             element.style.gridArea = `g${i+1}`
-            container.appendChild(element)
 
-        })
+            container.appendChild(element)
+        }
     }
 }

@@ -33,11 +33,11 @@ class GameMin extends HTMLElement {
             data = {
                 players: [
                     {
-                        id: null,
+                        id: data.participants[0].id,
                         score: 0
                     },
                     {
-                        id: null,
+                        id: data.participants[1].id,
                         score: 0
                     }
                 ]

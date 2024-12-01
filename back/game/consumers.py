@@ -19,18 +19,26 @@ from account.models import CustomUser
 from chat.models import ChatRoom
 from game.models import Game, Tournament
 
+from utils.logger import Logger
 
-class TournamentConsumer(AsyncJsonWebsocketConsumer):
+
+class TournamentConsumer(AsyncJsonWebsocketConsumer, Logger):
     
     channels: dict[int, str] = {}
     managers: dict[int, 'TournamentManager'] = {}
     managers_lock: asyncio.Lock = asyncio.Lock()
-    
+
+    def __init__(self, *args, **kwargs):
+        AsyncJsonWebsocketConsumer.__init__(self, *args, **kwargs)
+        Logger.__init__(self)
+
     async def connect(self):
         self.user = self.scope['user']
+        self.set_log_identifier(self.user.username)
 
         try:
             if self.user.is_authenticated:
+                self.info(f"connected for tournament")
                 self.tournament_id = self.scope['url_route']['kwargs']['tournament_id']
                 self.group_name = f'tournament_{self.tournament_id}'
 
@@ -38,7 +46,7 @@ class TournamentConsumer(AsyncJsonWebsocketConsumer):
                 self.tournament = await database_sync_to_async(
                     Tournament.objects.get
                 )(id=self.tournament_id)
-                if not await database_sync_to_async(self.tournament.isInTournament(self.user))():
+                if not await database_sync_to_async(self.tournament.isInTournament)(self.user):
                     raise Exception('User is not in tournament')
 
                 await self.channel_layer.group_add(
@@ -48,11 +56,13 @@ class TournamentConsumer(AsyncJsonWebsocketConsumer):
                 self.channels[self.user.id] = self.channel_name
 
                 await self.accept()
+                self.info(f"connected to tournament {self.tournament_id}")
 
                 # Join tournament if tournament is not finished
                 async with TournamentConsumer.managers_lock:
                     if self.tournament_id not in TournamentConsumer.managers:
-                        
+
+                        self.info(f'Tournament {self.tournament_id} not in managers, adding it')
                         users = await database_sync_to_async(list)(self.tournament.players.all())
                         self.manager = TournamentManager(self.tournament, users)
                         self.manager.add_observer(self)
@@ -60,9 +70,11 @@ class TournamentConsumer(AsyncJsonWebsocketConsumer):
                         TournamentConsumer.managers[self.tournament_id] = self.manager
                     
                     else:
+                        self.info(f'Tournament {self.tournament_id} already in managers, getting it')
                         self.manager = TournamentConsumer.managers[self.tournament_id]
 
-                # Start tournament if not allready started
+                # Start tournament if not already started
+                self.info(f'Starting tournament {self.tournament_id}')
                 asyncio.create_task(self.manager.start_tournament())
 
 
@@ -73,6 +85,7 @@ class TournamentConsumer(AsyncJsonWebsocketConsumer):
             await self.close(code=1011, reason="Tournament does not exists")
             
         except Exception as e:
+            logging.error(f'Error: {e}')
             await self.close(code=1011)
 
     async def disconnect(self, close_code):
@@ -355,9 +368,12 @@ class MatchmakingConsumer(AsyncJsonWebsocketConsumer):
             player3 = self.tournament_queue.popleft()
             player4 = self.tournament_queue.popleft()
 
+            # create tournament and save
             await database_sync_to_async(
                 tournament.players.add
             )(player1, player2, player3, player4)
+            await database_sync_to_async(tournament.saveAll)()
+            logging.info(f'tournament: {tournament.id} created, redirecting players')
 
             await self.tournament_found(player1.id, tournament.id)
             await self.tournament_found(player2.id, tournament.id)

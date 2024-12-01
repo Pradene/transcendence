@@ -43,20 +43,24 @@ class TournamentManager(Logger):
         return count == 3
 
     async def start_tournament(self):
-        if not self.tournament.started:
+        if self.tournament.started:
+            self.error('Tournament already started')
             return
 
         self.info('Tournament started')
         self.tournament.started = True
-        await database_sync_to_async(self.tournament.save)()
+        await database_sync_to_async(self.tournament.saveAll)()
         current_players = self.players
 
         # create first round
+        self.info('Creating first round')
         games = await self.create_round(current_players)
 
         # notify observers about the first round, update tournament page
+        await database_sync_to_async(self.tournament.saveAll)()
         await self.notify_observers(games[0], action='query_tournament')
         await self.notify_observers(games[1], action='query_tournament')
+        self.info('Waiting for 5 seconds before starting the first round')
         await asyncio.sleep(5)
 
         # start first round
@@ -65,8 +69,10 @@ class TournamentManager(Logger):
 
         # game finished, get winners and create last round
         current_players = await self.wait(games)
+        old_games = games
         games = await self.create_round(current_players)
-        await self.notify_observers(games[0], action='query_tournament')
+        await self.notify_observers(old_games[0], action='query_tournament')
+        await self.notify_observers(old_games[1], action='query_tournament')
         await asyncio.sleep(5)
         for gameid in games:
             await self.notify_observers(gameid)
