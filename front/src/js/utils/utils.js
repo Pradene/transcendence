@@ -157,25 +157,18 @@ export async function updateLanguage(selectedLanguage) {
             data.language == selectedLanguage
         console.log(data.language);
 
-/*         localStorage.setItem('selectedLanguage', data.language)
-
-        const router = Router.get()
-        router.routes.forEach(route => {
-            if (route.view && route.view.currentLanguage)
-                route.view.currentLanguage = localStorage.getItem('selectedLanguage') || 'en'
-        }) */
     } catch (e) {
         return
     }
 }
 
-export function setLanguage() {
+export async function setLanguage() {
     try {
-        const data = apiRequest('api/users/language/', {
+        const data = await apiRequest('api/users/language/', {
             method: 'GET'
         })
-        localStorage.setItem('selectedLanguage', data.language)
-        console.log("in setLang()", localStorage.getItem('selectedLanguage'))
+        if (data && data.language)
+            localStorage.setItem('selectedLanguage', data.language)
         } catch (e) {
             console.log("failed");
 

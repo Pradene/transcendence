@@ -32,7 +32,6 @@ export class EditProfile extends TemplateComponent {
                 language: "Langue par defaut"
             }
         }
-        this.currentLanguage = localStorage.getItem('selectedLanguage') || 'en';
 
         this.handleSubmitListener = async (e) => await this.handleSubmit(e)
         this.handlePictureChangeListener = (e) => this.handlePictureChange(e)
@@ -46,6 +45,7 @@ export class EditProfile extends TemplateComponent {
     }
 
     async componentDidMount() {
+        this.currentLanguage = localStorage.getItem('selectedLanguage') || 'en';
         this.getUserInfo()
 
         const form = document.getElementById("form")

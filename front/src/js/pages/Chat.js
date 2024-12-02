@@ -26,7 +26,6 @@ export class Chat extends TemplateComponent {
             }
         };
 
-        this.currentLanguage = localStorage.getItem('selectedLanguage') || 'de';
 
     }
 
@@ -38,6 +37,7 @@ export class Chat extends TemplateComponent {
     }
 
     async componentDidMount() {
+        this.currentLanguage = localStorage.getItem('selectedLanguage') || 'en';
         await this.getRooms()
 
         const input = this.getRef('input')

@@ -1,6 +1,8 @@
 import { TemplateComponent } from '../utils/TemplateComponent.js'
 import {Router} from '../utils/Router.js'
 import { WSManager } from '../utils/WebSocketManager.js'
+import { setLanguage } from '../utils/utils.js'
+
 
 export class Home extends TemplateComponent {
     constructor() {
@@ -41,7 +43,6 @@ export class Home extends TemplateComponent {
                 cancel_btn: "Annuler"
             }
         }
-        this.currentLanguage = localStorage.getItem('selectedLanguage') || "en";
         console.log(this.currentLanguage);
     }
 
@@ -50,6 +51,7 @@ export class Home extends TemplateComponent {
     }
 
     async componentDidMount() {
+        this.currentLanguage = await this.setCurLang()
         const localGameButton = document.querySelector('button.create-local')
         const gameButton = document.querySelector('button.create-game')
         const tournamentButton = document.querySelector('button.create-tournament')
@@ -63,6 +65,15 @@ export class Home extends TemplateComponent {
 
         cancelButton.addEventListener('click', () => this.cancelMatchmaking())
         this.translatePage()
+    }
+
+    async setCurLang() {
+        const logIn = sessionStorage.getItem('justLogIn')
+        if (logIn === 'true') {
+            sessionStorage.setItem('justLogIn', 'false')
+            await setLanguage()
+        }
+        return localStorage.getItem('selectedLanguage')
     }
 
     translatePage() {

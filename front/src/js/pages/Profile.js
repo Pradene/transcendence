@@ -43,12 +43,12 @@ export class Profile extends TemplateComponent {
                 level: "Stufe"
             }
         }
-        this.currentLanguage = localStorage.getItem('selectedLanguage') || 'en';
     }
 
     async unmount() {}
 
     async componentDidMount() {
+        this.currentLanguage = localStorage.getItem('selectedLanguage') || 'en';
         await this.getUser()
         await this.getLevel()
         await this.getGames()

@@ -36,7 +36,6 @@ export class Search extends TemplateComponent {
                 search_placeholder: "Suchen..."
             }
         };
-        this.currentLanguage = localStorage.getItem('selectedLanguage') || "en";
     }
 
     async unmount() {
@@ -50,6 +49,7 @@ export class Search extends TemplateComponent {
     }
 
     async componentDidMount() {
+        this.currentLanguage = localStorage.getItem('selectedLanguage') || "en";
         this.getFriends()
         this.getRequests()
 
