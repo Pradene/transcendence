@@ -121,7 +121,7 @@ export class Login extends TemplateComponent {
                 connectFriendsSocket();
                 await router.navigate("/");
             }
-            await setLanguage();
+            setLanguage();
 
         } catch (e) {
             console.log("logging error: ", e)

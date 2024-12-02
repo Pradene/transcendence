@@ -169,9 +169,9 @@ export async function updateLanguage(selectedLanguage) {
     }
 }
 
-export async function setLanguage() {
+export function setLanguage() {
     try {
-        const data = await apiRequest('api/users/language/', {
+        const data = apiRequest('api/users/language/', {
             method: 'GET'
         })
         localStorage.setItem('selectedLanguage', data.language)

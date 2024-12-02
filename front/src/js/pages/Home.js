@@ -20,11 +20,11 @@ export class Home extends TemplateComponent {
             },
             de: {
                 online_game_title: "Online-Spiel",
-                online_game_desc: "Spielen Sie ein Online-Spiel gegen einen anderen Spieler,<br>der erste Spieler mit 5 Punkten gewinnt das Spiel.",
+                online_game_desc: "Spielen Sie ein Online-Spiel gegen einen anderen Spieler, der erste Spieler mit 5 Punkten gewinnt das Spiel.",
                 tournament_title: "Online-Turnier",
                 tournament_desc: "Spielen Sie in einem Online-Turnier gegen 3 andere Spieler.",
                 local_game_title: "Lokales Spiel",
-                local_game_desc: "Spielen Sie ein lokales Spiel gegen einen Freund, der erste Spieler benutzt<br>die Pfeiltasten, der zweite A/D.",
+                local_game_desc: "Spielen Sie ein lokales Spiel gegen einen Freund, der erste Spieler benutzt die Pfeiltasten, der zweite A/D.",
                 play_button: "Spielen",
                 waitmessage: "Warten auf andere Spieler",
                 cancel_btn: "Stornieren"
