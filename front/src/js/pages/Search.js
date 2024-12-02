@@ -28,7 +28,7 @@ export class Search extends TemplateComponent {
                 search_placeholder: "Rechercher..."
             },
             de: {
-                users: "Benutzern",
+                users: "Benutzer",
                 friends: "Freunde",
                 requests: "Anfragen",
                 accept: "Anzunehmen",
