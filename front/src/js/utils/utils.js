@@ -167,11 +167,10 @@ export async function setLanguage() {
         const data = await apiRequest('api/users/language/', {
             method: 'GET'
         })
-        if (data && data.language)
+        if (data && data.language && data.language !== 'none')
             localStorage.setItem('selectedLanguage', data.language)
         } catch (e) {
-            console.log("failed");
-
+            console.log("failed")
     return
     }
 

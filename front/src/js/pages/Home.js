@@ -69,16 +69,17 @@ export class Home extends TemplateComponent {
 
     async setCurLang() {
         const logIn = sessionStorage.getItem('justLogIn')
+        console.log(localStorage.getItem('selectedLanguage'))
         if (logIn === 'true') {
             sessionStorage.setItem('justLogIn', 'false')
             await setLanguage()
         }
-        return localStorage.getItem('selectedLanguage')
+        console.log(localStorage.getItem('selectedLanguage'))
+        return localStorage.getItem('selectedLanguage') || 'en'
     }
 
     translatePage() {
         console.log(this.currentLanguage);
-
         const elements = document.querySelectorAll("[data-translate-key]");
         elements.forEach(el => {
             const key = el.dataset.translateKey;

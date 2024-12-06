@@ -272,19 +272,19 @@ export class Pong {
             en: {
             won: 'You Won !',
             congrats: `Congratulation ${playerName}`,
-            lose: 'You Lose ...',
+            lose: 'You Lose...',
             encouraging: `Don't give up ${playerName}, you'll do better next time, maybe...`
         },
         de: {
             won: ' Du hast Gewonnen !',
             congrats: `Gratulation ${playerName}`,
-            lose: 'Du verliesst ...',
-            encouraging: `Gib nicht auf ${playerName}, Nächstes Mal machst du es besser, vielleicht...`
+            lose: 'Du verliesst...',
+            encouraging: `Gib nicht auf ${playerName}, nächstes Mal machst du es besser, vielleicht...`
         },
         fr: {
             won: 'Tu as gagne !',
             congrats: `Felicitation ${playerName}`,
-            lose: 'Tu as perdu ...',
+            lose: 'Tu as perdu...',
             encouraging: `N'abandonne pas ${playerName}, tu feras mieux la prochaine fois, peut-etre...`
         }
     }

@@ -24,7 +24,7 @@ class CustomUserManager(BaseUserManager):
 
         if password is not None:
             user.set_password(password)
-        
+
         user.save(using=self._db)
         return user
 
@@ -62,11 +62,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_2fa_enabled = models.BooleanField(default=False)
     twofa_method = models.IntegerField(default=TWO_FA_METHOD.EMAIL)
 
-    language = models.CharField(max_length=2, choices=[
+    language = models.CharField(max_length=4, choices=[
         ('en', 'en'),
         ('fr', 'fr'),
         ('de', 'de'),
-    ], default='en')
+        ('none', 'none'),
+    ], default='none')
 
     objects = CustomUserManager()
 
@@ -143,7 +144,7 @@ class FriendList(models.Model):
             return 'request_received'
         else:
             return 'none'
-        
+
 
 class FriendRequest(models.Model):
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sender")

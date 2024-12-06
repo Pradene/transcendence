@@ -65,13 +65,13 @@ def userView(request, user_id=None):
 			user.language = language
 
 			logging.info(f"2FA test: {user.is_2fa_enabled}")
-			
+
 			user.save()
 
 			logging.info(f'user : {user}')
-			
+
 			return JsonResponse({'message': 'Profile updated successfully'}, status=200)
-	
+
 		except CustomUser.DoesNotExist:
 			return JsonResponse({'error': 'Profile does not exist'}, status=404)
 
@@ -91,7 +91,7 @@ def searchUsersView(request):
 			return JsonResponse(data, safe=False, status=200)
 
 		return JsonResponse({"error": "User not found"}, status=400)
-	
+
 	except Exception as e:
 		return JsonResponse({}, status=400)
 
@@ -114,7 +114,7 @@ def getFriendsView(request, user_id=None):
 		friends = friend_list.friends.all()
 		data = [friend.toJSON() for friend in friends]
 		return JsonResponse(data, safe=False, status=200)
-	
+
 	except Exception as e:
 		return JsonResponse({}, status=400)
 
@@ -163,8 +163,8 @@ def getLanguage(request):
 		if request.user.is_authenticated:
 			return JsonResponse({'language': request.user.language}, status=200)
 		else:
-			return JsonResponse({'language': 'en'}, status=200)
+			return JsonResponse({'language': 'none'}, status=200)
 
 	# do not bother about exceptions
 	except Exception as e:
-		return JsonResponse({'language': 'en'}, status=200)
+		return JsonResponse({'language': 'none'}, status=200)
